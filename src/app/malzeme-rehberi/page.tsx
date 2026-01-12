@@ -1,12 +1,32 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
+import { ingredientService } from '@/services/ingredient-service';
+import { Ingredient } from '@/lib/types';
 
 export default function IngredientsGuidePage() {
   const [activeCategory, setActiveCategory] = useState("Tümü");
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const categories = ["Tümü", "Sebzeler", "Meyveler", "Tahıllar", "Protein"];
+
+  useEffect(() => {
+    async function fetchIngredients() {
+      try {
+        setLoading(true);
+        const data = await ingredientService.getAll();
+        setIngredients(data || []);
+      } catch (error) {
+        console.error("Malzemeler yüklenirken hata:", error);
+        setIngredients([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchIngredients();
+  }, []);
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -123,6 +143,35 @@ export default function IngredientsGuidePage() {
           {/* Ingredient Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
+              {loading ? (
+                <div className="col-span-full flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+                </div>
+              ) : ingredients.length > 0 ? (
+                ingredients.map((ingredient) => (
+                  <Link key={ingredient.id} href={`/malzeme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
+                      <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
+                          <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${ingredient.name}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={ingredient.name} />
+                          <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
+                              <i className="fa-solid fa-baby text-green-500 mr-1"></i> {ingredient.start_age}
+                          </div>
+                      </div>
+                      <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">{ingredient.name}</h3>
+                      <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ingredient.description}</p>
+                      <div className="mt-auto flex items-center gap-2">
+                          <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
+                            ingredient.allergy_risk === 'Düşük' ? 'bg-green-100 text-green-700 border-green-200' :
+                            ingredient.allergy_risk === 'Orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                            'bg-red-100 text-red-700 border-red-200'
+                          }`}>
+                            {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
+                            {ingredient.allergy_risk} Alerjen
+                          </span>
+                      </div>
+                  </Link>
+                ))
+              ) : (
+                <>
               {/* Card 1: Avokado (Ideal) */}
               {/* Localde Link kullanın */}
               <Link href="/malzeme-rehberi/avokado" className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
@@ -224,6 +273,8 @@ export default function IngredientsGuidePage() {
                       <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded border border-green-200">Süper Besin</span>
                   </div>
               </Link>
+            </>
+              )}
 
           </div>
 

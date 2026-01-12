@@ -16,12 +16,23 @@ export default function RecipesPage() {
     async function fetchRecipes() {
       try {
         setLoading(true);
-        // Servisten verileri çek
         const data = await recipeService.getAll();
-        setRecipes(data);
+        // API response kontrolü - array olduğundan emin ol
+        if (Array.isArray(data)) {
+          setRecipes(data);
+        } else if (data && Array.isArray((data as any).data)) {
+          // Eğer response {data: [...]} şeklindeyse
+          setRecipes((data as any).data);
+        } else if (data && Array.isArray((data as any).recipes)) {
+          // Eğer response {recipes: [...]} şeklindeyse
+          setRecipes((data as any).recipes);
+        } else {
+          console.error("Beklenmeyen API response formatı:", data);
+          setRecipes([]);
+        }
       } catch (error) {
         console.error("Tarifler yüklenirken hata oluştu:", error);
-        // Hata durumunda boş dizi veya hata mesajı yönetimi yapılabilir
+        setRecipes([]); // Hata durumunda boş array
       } finally {
         setLoading(false);
       }
@@ -157,7 +168,7 @@ export default function RecipesPage() {
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {recipes.map((recipe) => (
+                        {Array.isArray(recipes) && recipes.length > 0 && recipes.map((recipe) => (
                             <div key={recipe.id} className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
                                 {/* Image Container */}
                                 <div className="h-56 relative overflow-hidden bg-gray-100">

@@ -1,24 +1,46 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
+import { notFound } from 'next/navigation';
+import { ingredientService } from '@/services/ingredient-service';
+import { Ingredient } from '@/lib/types';
 
 export default function IngredientDetailPage({ params }: { params: { slug: string } }) {
-  // Mockup verisi: Gerçek projede bu veriyi 'slug' parametresine göre API'den çekeceksiniz.
-  const ingredient = {
-    name: "Avokado",
-    slug: "avokado",
-    image: "https://placehold.co/400x400/AED581/ffffff?text=Avokado",
-    description: "Bebekler için mükemmel bir ilk gıda! Sağlıklı yağlar, lif ve vitaminlerle dolu bu kremsi meyve, minik gurmenizin favorisi olmaya aday.",
-    startAge: "+6 Ay",
-    allergyRisk: "Düşük",
-    season: "Tüm Yıl",
-    pairings: ["🍌 Muz", "🥚 Yumurta", "🍠 Tatlı Patates", "🍗 Tavuk"],
-    expert: {
-      name: "Dyt. Ayşe Yılmaz",
-      image: "https://placehold.co/80x80/AED581/ffffff?text=Uzman"
+  const [ingredient, setIngredient] = useState<Ingredient | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchIngredient() {
+      try {
+        setLoading(true);
+        const data = await ingredientService.getBySlug(params.slug);
+        if (!data) {
+          setIngredient(null);
+        } else {
+          setIngredient(data);
+        }
+      } catch (error) {
+        console.error("Malzeme yüklenirken hata:", error);
+        setIngredient(null);
+      } finally {
+        setLoading(false);
+      }
     }
-  };
+    fetchIngredient();
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
+      </div>
+    );
+  }
+
+  if (!ingredient) {
+    return notFound();
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -72,7 +94,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                         </div>
 
                         <div className="relative z-10 w-full md:w-1/3 flex justify-center">
-                            <img src={ingredient.image} className="w-64 h-64 md:w-full md:h-auto rounded-[2rem] shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-500 border-4 border-white object-cover" alt={ingredient.name} />
+                            <img src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${ingredient.name}`} className="w-64 h-64 md:w-full md:h-auto rounded-[2rem] shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-500 border-4 border-white object-cover" alt={ingredient.name} />
                         </div>
                     </div>
 
@@ -86,7 +108,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                             </h2>
                             <div className="prose prose-slate max-w-none text-gray-600 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                                 <p className="mb-4">
-                                    {ingredient.name}, bebeklerin beyin gelişimi için kritik olan sağlıklı doymamış yağlar açısından zengindir. Yumuşak dokusu ve nötr tadı sayesinde ilk katı gıda (ek gıda) denemeleri için idealdir.
+                                    {ingredient.benefits}
                                 </p>
                                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 list-none pl-0">
                                     <li className="flex items-center"><i className="fa-solid fa-check text-green-500 mr-2"></i> Beyin gelişimi için Omega-3 yağ asitleri</li>
@@ -142,6 +164,22 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                     <div id="recipes" className="mt-8 pt-10 border-t border-gray-100">
                         <h2 className="font-display font-bold text-3xl text-slate-800 mb-8 font-sans">{ingredient.name}lu Tarifler</h2>
                         
+                        {ingredient.related_recipes && ingredient.related_recipes.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                              {ingredient.related_recipes.map((recipe) => (
+                                <Link key={recipe.id} href={`/tarifler/${recipe.slug}`} className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex gap-4 p-4 items-center group">
+                                    <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
+                                        <img src={recipe.image || 'https://placehold.co/200x200/FFF3E0/FF8A65?text=Tarif'} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt={recipe.title} />
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">{recipe.age_group}</div>
+                                        <h3 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors">{recipe.title}</h3>
+                                        <div className="text-xs text-gray-400 mt-2"><i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}</div>
+                                    </div>
+                                </Link>
+                              ))}
+                          </div>
+                        ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Recipe Card 1 */}
                             {/* Localde Link kullanın */}
@@ -192,6 +230,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                                 </div>
                             </Link>
                         </div>
+                        )}
                         
                         <div className="mt-8 text-center">
                             <button className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
@@ -217,7 +256,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                                         <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mr-3 text-blue-500"><i className="fa-regular fa-calendar"></i></div>
                                         <span className="font-medium text-sm">Başlangıç</span>
                                     </div>
-                                    <span className="font-bold text-slate-800">{ingredient.startAge}</span>
+                                    <span className="font-bold text-slate-800">{ingredient.start_age}</span>
                                 </div>
 
                                 <div className="flex items-center justify-between">
@@ -225,7 +264,11 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                                         <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center mr-3 text-red-500"><i className="fa-solid fa-triangle-exclamation"></i></div>
                                         <span className="font-medium text-sm">Alerji Riski</span>
                                     </div>
-                                    <span className="font-bold text-green-500">{ingredient.allergyRisk}</span>
+                                    <span className={`font-bold ${
+                                      ingredient.allergy_risk === 'Düşük' ? 'text-green-500' :
+                                      ingredient.allergy_risk === 'Orta' ? 'text-yellow-500' :
+                                      'text-red-500'
+                                    }`}>{ingredient.allergy_risk}</span>
                                 </div>
 
                                  <div className="flex items-center justify-between">
@@ -238,28 +281,29 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                             </div>
                         </div>
 
-                        {/* PAIRINGS CARD */}
+                        {/* PAIRINGS CARD - Commented out until API provides this data
                         <div className="bg-orange-50 rounded-3xl p-6 border border-orange-100">
                             <h3 className="font-bold text-slate-800 mb-4 flex items-center">
                                 <i className="fa-solid fa-link text-orange-500 mr-2"></i> Uyumlu İkililer
                             </h3>
                             <p className="text-xs text-gray-500 mb-4">{ingredient.name} ile harika giden diğer lezzetler:</p>
                             <div className="flex flex-wrap gap-2">
-                                {ingredient.pairings.map((pairing) => (
+                                {ingredient.pairings && ingredient.pairings.map((pairing) => (
                                     <span key={pairing} className="bg-white px-3 py-1.5 rounded-lg text-sm font-bold text-gray-600 shadow-sm border border-gray-100">
                                         {pairing}
                                     </span>
                                 ))}
                             </div>
                         </div>
+                        */}
 
-                        {/* EXPERT WIDGET */}
+                        {/* EXPERT WIDGET - Commented out until API provides this data
                         <div className="bg-white rounded-3xl p-6 border border-gray-200 text-center">
-                            <img src={ingredient.expert.image} className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-white shadow-md" alt="Uzman" />
-                            <p className="text-sm text-gray-600 mb-3">Bu içerik <strong className="text-slate-800">{ingredient.expert.name}</strong> tarafından kontrol edildi.</p>
-                            {/* Localde Link kullanın */}
+                            <img src={ingredient.expert?.image || ''} className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-white shadow-md" alt="Uzman" />
+                            <p className="text-sm text-gray-600 mb-3">Bu içerik <strong className="text-slate-800">{ingredient.expert?.name}</strong> tarafından kontrol edildi.</p>
                             <Link href="#" className="text-green-600 text-xs font-bold hover:underline">Rejimde.com Profilini Gör</Link>
                         </div>
+                        */}
 
                     </div>
                 </div>
@@ -272,11 +316,15 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <div className="text-xs text-gray-500 mb-1">Başlangıç</div>
-                                <div className="font-bold text-slate-800">{ingredient.startAge}</div>
+                                <div className="font-bold text-slate-800">{ingredient.start_age}</div>
                             </div>
                             <div className="border-l border-gray-100">
                                 <div className="text-xs text-gray-500 mb-1">Alerji</div>
-                                <div className="font-bold text-green-500">{ingredient.allergyRisk}</div>
+                                <div className={`font-bold ${
+                                  ingredient.allergy_risk === 'Düşük' ? 'text-green-500' :
+                                  ingredient.allergy_risk === 'Orta' ? 'text-yellow-500' :
+                                  'text-red-500'
+                                }`}>{ingredient.allergy_risk}</div>
                             </div>
                             <div className="border-l border-gray-100">
                                 <div className="text-xs text-gray-500 mb-1">Mevsim</div>
