@@ -1,9 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { use } from 'react';
 import Link from "next/link";
 
-export default function TagPage({ params }: { params: { slug: string } }) {
+export default function TagPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  
   // Mockup verisi: Gerçek projede slug'a göre (örn: 'blw') API'den etiket bilgileri çekilecek.
   const tag = {
     title: "#BLW",

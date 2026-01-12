@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { ingredientService } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 
-export default function IngredientDetailPage({ params }: { params: { slug: string } }) {
+export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const [ingredient, setIngredient] = useState<Ingredient | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +15,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
     async function fetchIngredient() {
       try {
         setLoading(true);
-        const data = await ingredientService.getBySlug(params.slug);
+        const data = await ingredientService.getBySlug(slug);
         if (!data) {
           setIngredient(null);
         } else {
@@ -28,7 +29,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
       }
     }
     fetchIngredient();
-  }, [params.slug]);
+  }, [slug]);
 
   if (loading) {
     return (

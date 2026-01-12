@@ -1,5 +1,5 @@
 import { fetchAPI } from '@/lib/api';
-import { API_ENDPOINTS } from '@/lib/constants';
+import { API_ENDPOINTS, WP_API_NAMESPACE } from '@/lib/constants';
 import { Ingredient } from '@/lib/types';
 
 export interface IngredientFilters {
@@ -9,6 +9,25 @@ export interface IngredientFilters {
   allergyRisk?: string;
   season?: string;
 }
+
+// Transform function for WordPress REST API format to Ingredient
+const transformWPIngredient = (wp: any): Ingredient => ({
+  id: wp.id,
+  name: typeof wp.name === 'object' ? wp.name.rendered : (wp.name || wp.title?.rendered || ''),
+  slug: wp.slug || '',
+  description: typeof wp.description === 'object' ? wp.description.rendered : (wp.description || wp.excerpt?.rendered || ''),
+  image: wp._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
+         wp.featured_media_url || 
+         'https://placehold.co/400x400/AED581/ffffff?text=Malzeme',
+  start_age: wp.meta?._kg_start_age || wp.acf?.start_age || '+6 Ay',
+  benefits: wp.meta?._kg_benefits || wp.acf?.benefits || '',
+  prep_methods: wp.meta?._kg_prep_methods || wp.acf?.prep_methods || [],
+  allergy_risk: wp.meta?._kg_allergy_risk || wp.acf?.allergy_risk || 'Düşük',
+  season: wp.meta?._kg_season || wp.acf?.season || 'Tüm Yıl',
+  storage_tips: wp.meta?._kg_storage_tips || wp.acf?.storage_tips,
+  related_recipes: wp.meta?._kg_related_recipes || wp.acf?.related_recipes || [],
+  faq: wp.meta?._kg_faq || wp.acf?.faq || [],
+});
 
 // Transform function for API response format
 const transformIngredient = (apiIngredient: any): Ingredient => ({
@@ -44,6 +63,7 @@ export const ingredientService = {
     if (season) params.append('season', season);
     
     try {
+      // Önce özel kg/v1 endpoint'ini dene
       const response = await fetchAPI<any>(`${API_ENDPOINTS.INGREDIENTS}?${params.toString()}`);
       
       // Response format kontrolü
@@ -58,8 +78,17 @@ export const ingredientService = {
       console.warn('Unexpected API response format:', response);
       return [];
     } catch (error) {
-      console.error('Ingredient fetch error:', error);
-      return [];
+      console.log('Falling back to WP REST API for ingredients');
+      try {
+        // Fallback: Standart WP REST API
+        const response = await fetchAPI<any[]>(
+          `${WP_API_NAMESPACE}/ingredient?page=${page}&per_page=${perPage}&_embed`
+        );
+        return (response || []).map(transformWPIngredient);
+      } catch (fallbackError) {
+        console.error('Both API calls failed for ingredients:', fallbackError);
+        return [];
+      }
     }
   },
 
@@ -67,11 +96,30 @@ export const ingredientService = {
    * Tekil malzeme detayı (slug ile)
    */
   getBySlug: async (slug: string): Promise<Ingredient | null> => {
+    // Undefined/null kontrolü
+    if (!slug || slug === 'undefined' || slug === 'null') {
+      console.error('getBySlug called with invalid slug:', slug);
+      return null;
+    }
+    
     try {
+      // Önce özel kg/v1 endpoint'ini dene
       return await fetchAPI<Ingredient>(API_ENDPOINTS.INGREDIENT_BY_SLUG(slug));
     } catch (error) {
-      console.error('Ingredient fetch error:', error);
-      return null;
+      console.log('Falling back to WP REST API for ingredient slug:', slug);
+      try {
+        // Fallback: Standart WP REST API
+        const ingredients = await fetchAPI<any[]>(
+          `${WP_API_NAMESPACE}/ingredient?slug=${slug}&_embed`
+        );
+        if (ingredients && ingredients.length > 0) {
+          return transformWPIngredient(ingredients[0]);
+        }
+        return null;
+      } catch (fallbackError) {
+        console.error('Both API calls failed for ingredient slug:', slug, fallbackError);
+        return null;
+      }
     }
   },
 

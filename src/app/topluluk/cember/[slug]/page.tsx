@@ -1,9 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { use } from 'react';
 import Link from "next/link";
 
-export default function CircleDetailPage({ params }: { params: { slug: string } }) {
+export default function CircleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   
   // Mockup verisi (Slug'a göre değişecek)
   const circle = {

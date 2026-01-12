@@ -1,9 +1,11 @@
 "use client";
 
-import React from 'react';
+import React, { use } from 'react';
 import Link from "next/link";
 
-export default function CommunityDetailPage({ params }: { params: { slug: string } }) {
+export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  
   // Mockup verisi
   const discussion = {
     title: "Yumurta beyazı alerjisi ne zaman geçer? Tecrübesi olan var mı?",

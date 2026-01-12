@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { Recipe } from '@/lib/types';
 
-export default function RecipeDetailPage({ params }: { params: { slug: string } }) {
+export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [ingredients, setIngredients] = useState<any[]>([]);
@@ -17,7 +18,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
     async function fetchRecipe() {
       try {
         setLoading(true);
-        const data = await recipeService.getBySlug(params.slug);
+        const data = await recipeService.getBySlug(slug);
         if (!data) {
           // Recipe not found - will show loading state
           setRecipe(null);
@@ -34,7 +35,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
       }
     }
     fetchRecipe();
-  }, [params.slug]);
+  }, [slug]);
 
   // Malzeme tikleme fonksiyonu
   const toggleIngredient = (id: number) => {
