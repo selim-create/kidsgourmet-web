@@ -1,0 +1,93 @@
+import Link from "next/link";
+
+export default function LoginPage() {
+  return (
+    <div className="flex min-h-[calc(100vh-180px)] bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mx-auto max-w-6xl">
+        
+        {/* LEFT SIDE: IMAGE (Desktop) */}
+        <div className="hidden lg:flex lg:w-1/2 bg-brand-light relative items-center justify-center p-12 overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-secondary/20 rounded-full blur-3xl -ml-10 -mb-10"></div>
+            
+            <div className="relative z-10 text-center max-w-lg">
+                <div className="mb-8 relative inline-block">
+                    <img src="https://placehold.co/500x500/FF8A65/ffffff?text=Mutlu+Bebek" className="rounded-[3rem] shadow-2xl transform -rotate-3 border-8 border-white" alt="Mutlu Bebek" />
+                    <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg flex items-center gap-3 animate-bounce">
+                        <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                            <i className="fa-solid fa-check"></i>
+                        </div>
+                        <div className="text-left">
+                            <p className="text-xs text-gray-400 font-bold uppercase">Bugünün Menüsü</p>
+                            <p className="font-bold text-slate-800">Hazır!</p>
+                        </div>
+                    </div>
+                </div>
+                <h2 className="font-display font-bold text-4xl text-slate-800 mb-4">Mutfakta Yalnız Değilsiniz.</h2>
+                <p className="text-gray-600 text-lg">KidsGourmet'e giriş yapın, bebeğinize özel haftalık planlara ve uzman onaylı tariflere ulaşın.</p>
+            </div>
+        </div>
+
+        {/* RIGHT SIDE: FORM */}
+        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-white overflow-y-auto">
+            <div className="w-full max-w-md space-y-8">
+                <div>
+                    <h2 className="mt-6 text-3xl font-display font-bold text-slate-800">Tekrar Hoş Geldiniz! 👋</h2>
+                    <p className="mt-2 text-sm text-gray-500">
+                        Hesabınız yok mu? <Link href="/register" className="font-bold text-brand-primary hover:text-orange-600 transition-colors">Hemen ücretsiz kayıt olun</Link>
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <i className="fa-brands fa-google text-lg text-red-500"></i> Google
+                    </button>
+                    <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <i className="fa-brands fa-facebook text-lg text-blue-600"></i> Facebook
+                    </button>
+                </div>
+
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-2 bg-white text-gray-400 font-medium">veya e-posta ile</span>
+                    </div>
+                </div>
+
+                <form className="mt-8 space-y-6">
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-1">E-Posta Adresi</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <i className="fa-regular fa-envelope"></i>
+                                </div>
+                                <input id="email" name="email" type="email" required className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm transition-colors" placeholder="ornek@email.com" />
+                            </div>
+                        </div>
+                        <div>
+                            <div className="flex items-center justify-between mb-1">
+                                <label htmlFor="password" className="block text-sm font-bold text-gray-700">Şifre</label>
+                                <a href="#" className="text-xs font-bold text-brand-primary hover:text-orange-600">Şifremi Unuttum?</a>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <i className="fa-solid fa-lock"></i>
+                                </div>
+                                <input id="password" name="password" type="password" required className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm transition-colors" placeholder="••••••••" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button type="submit" className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-brand-primary hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-primary shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                            Giriş Yap
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+  );
+}

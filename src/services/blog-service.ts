@@ -1,0 +1,68 @@
+import { fetchAPI } from '@/lib/api';
+import { WP_API_NAMESPACE } from '@/lib/constants';
+
+// Blog Yazısı Tip Tanımı (Basitleştirilmiş)
+export interface BlogPost {
+  id: number;
+  date: string;
+  slug: string;
+  title: {
+    rendered: string;
+  };
+  excerpt: {
+    rendered: string;
+  };
+  content: {
+    rendered: string;
+  };
+  featured_media: number;
+  _embedded?: {
+    'wp:featuredmedia'?: Array<{
+      source_url: string;
+      alt_text: string;
+    }>;
+    author?: Array<{
+      name: string;
+      avatar_urls?: {
+        [key: string]: string;
+      };
+    }>;
+    'wp:term'?: Array<Array<{
+      id: number;
+      name: string;
+      slug: string;
+    }>>;
+  };
+}
+
+export const blogService = {
+  
+  // Tüm blog yazılarını getir (Sayfalama ve Embed destekli)
+  getAll: async (page = 1, perPage = 10, category?: number) => {
+    let endpoint = `${WP_API_NAMESPACE}/posts?page=${page}&per_page=${perPage}&_embed`;
+    
+    if (category) {
+      endpoint += `&categories=${category}`;
+    }
+
+    return await fetchAPI<BlogPost[]>(endpoint);
+  },
+
+  // Tekil blog yazısı detayı (Slug ile)
+  getBySlug: async (slug: string) => {
+    const posts = await fetchAPI<BlogPost[]>(`${WP_API_NAMESPACE}/posts?slug=${slug}&_embed`);
+    return posts.length > 0 ? posts[0] : null;
+  },
+
+  // Öne çıkan yazıları getir (Örn: 'sticky' olanlar veya belirli bir kategori)
+  getFeatured: async (perPage = 3) => {
+    // Sticky postları çekmek için 'sticky=true' parametresi kullanılabilir
+    // Veya sadece son eklenenleri 'featured' olarak kabul edebiliriz
+    return await fetchAPI<BlogPost[]>(`${WP_API_NAMESPACE}/posts?per_page=${perPage}&_embed`);
+  },
+
+  // Kategorileri getir
+  getCategories: async () => {
+    return await fetchAPI<any[]>(`${WP_API_NAMESPACE}/categories?per_page=100&hide_empty=true`);
+  }
+};
