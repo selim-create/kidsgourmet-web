@@ -1,6 +1,5 @@
 import { TariftenRecipe } from '@/lib/types';
-
-const TARIFTEN_API = 'https://api.tariften.com/wp-json/tariften/v1';
+import { TARIFTEN_API_URL } from '@/lib/constants';
 
 export const tariftenService = {
   /**
@@ -9,7 +8,7 @@ export const tariftenService = {
   getByIngredient: async (ingredient: string, limit: number = 3): Promise<TariftenRecipe[]> => {
     try {
       const response = await fetch(
-        `${TARIFTEN_API}/recipes/by-ingredient?ingredient=${encodeURIComponent(ingredient)}&limit=${limit}`,
+        `${TARIFTEN_API_URL}/recipes/by-ingredient?ingredient=${encodeURIComponent(ingredient)}&limit=${limit}`,
         { 
           next: { revalidate: 3600 }, // 1 saat cache
           headers: { 'Content-Type': 'application/json' }

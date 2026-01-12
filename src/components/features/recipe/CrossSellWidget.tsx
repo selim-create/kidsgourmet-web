@@ -80,9 +80,15 @@ export default function CrossSellWidget({ crossSell, ingredients, recipeTitle }:
           )}
           
           <p className="text-slate-300 text-sm mb-6 leading-relaxed">
-            {crossSell.description || `Artan malzemelerle kendinize harika bir `}
-            <span className="text-purple-400 font-bold">{crossSell.title}</span>
-            {!crossSell.description && ` yapabilirsiniz.`}
+            {crossSell.description ? (
+              crossSell.description
+            ) : (
+              <>
+                Artan malzemelerle kendinize harika bir{' '}
+                <span className="text-purple-400 font-bold">{crossSell.title}</span>
+                {' '}yapabilirsiniz.
+              </>
+            )}
           </p>
 
           <Link 
