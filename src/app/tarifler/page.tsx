@@ -1,13 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from "next/link";
 import { recipeService } from '@/services/recipe-service';
 import { RecipeCard } from '@/lib/types';
+import { useChildProfile } from '@/contexts/ChildProfileContext';
+import { useAgeGroups } from '@/hooks/useAgeGroups';
+import MealTypeFilter from '@/components/features/age/MealTypeFilter';
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
+  
+  const { profile } = useChildProfile();
+  const { ageGroups } = useAgeGroups();
   
   // Filtre State'leri (İleride API'ye bağlanabilir)
   const [selectedAges, setSelectedAges] = useState<string[]>([]);
@@ -55,6 +62,32 @@ export default function RecipesPage() {
   const getPrepTime = (recipe: RecipeCard) => {
     return recipe.prep_time || '15 dk'; // Varsayılan
   };
+
+  // Check if a recipe is suitable for the child's age
+  const isRecipeSuitableForAge = (recipe: RecipeCard): boolean => {
+    if (!profile.currentAgeGroup) return true; // No profile, all recipes shown
+    
+    // Check if recipe's age group matches the child's age group
+    return recipe.age_group === profile.currentAgeGroup.name;
+  };
+
+  // Get color code for age group
+  const getAgeGroupColor = (ageGroupName: string): string => {
+    const ageGroup = ageGroups.find(ag => ag.name === ageGroupName);
+    return ageGroup?.age_group_meta?.color_code || '#87CEEB';
+  };
+
+  // Separate recipes into suitable and unsuitable
+  const { suitableRecipes, otherRecipes } = useMemo(() => {
+    if (!profile.birthDate) {
+      return { suitableRecipes: recipes, otherRecipes: [] };
+    }
+
+    const suitable = recipes.filter(isRecipeSuitableForAge);
+    const other = recipes.filter(r => !isRecipeSuitableForAge(r));
+
+    return { suitableRecipes: suitable, otherRecipes: other };
+  }, [recipes, profile.currentAgeGroup]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -145,6 +178,12 @@ export default function RecipesPage() {
                       </div>
                   </div>
 
+                  {/* Meal Type Filter */}
+                  <div className="mb-6">
+                      <h3 className="text-sm font-bold text-gray-700 mb-3">Öğün Tipi</h3>
+                      <MealTypeFilter onFilterChange={setSelectedMealType} />
+                  </div>
+
                   {/* Top Bar */}
                   <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                       <h2 className="font-bold text-gray-800 font-sans">
@@ -167,52 +206,66 @@ export default function RecipesPage() {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {Array.isArray(recipes) && recipes.length > 0 && recipes.map((recipe) => (
-                            <div key={recipe.id} className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
-                                {/* Image Container */}
-                                <div className="h-56 relative overflow-hidden bg-gray-100">
-                                    <img 
-                                        src={getImageUrl(recipe)} 
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                                        alt={recipe.title} 
-                                    />
-                                    <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                                        <i className="fa-regular fa-heart"></i>
-                                    </button>
-                                    <div className="absolute bottom-3 left-3">
-                                        <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                            {getAgeGroup(recipe)}
-                                        </span>
-                                    </div>
-                                </div>
+                    <>
+                      {/* Suitable Recipes Section */}
+                      {profile.birthDate && suitableRecipes.length > 0 && (
+                        <section className="mb-12">
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                            <span className="text-green-500">✓</span> Çocuğunuz için Önerilen Tarifler
+                          </h2>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {suitableRecipes.map((recipe) => (
+                                  <RecipeCardComponent 
+                                    key={recipe.id} 
+                                    recipe={recipe} 
+                                    getImageUrl={getImageUrl}
+                                    getAgeGroup={getAgeGroup}
+                                    getPrepTime={getPrepTime}
+                                    getAgeGroupColor={getAgeGroupColor}
+                                    showWarning={false}
+                                  />
+                              ))}
+                          </div>
+                        </section>
+                      )}
 
-                                {/* Content */}
-                                <div className="p-5 flex-grow flex flex-col">
-                                    <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">
-                                        {recipe.title}
-                                    </h3>
-                                    
-                                    <div className="flex items-center text-xs text-gray-400 mb-4 space-x-3 mt-1">
-                                        <span><i className="fa-regular fa-clock mr-1"></i> {getPrepTime(recipe)}</span>
-                                        {/* Eğer vegan gibi özel meta data varsa buraya eklenebilir */}
-                                        {/* <span><i className="fa-solid fa-leaf mr-1"></i> Vegan</span> */}
-                                    </div>
+                      {/* Other Recipes Section */}
+                      {profile.birthDate && otherRecipes.length > 0 && (
+                        <section>
+                          <h2 className="text-2xl font-bold text-gray-800 mb-4">Diğer Tarifler</h2>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {otherRecipes.map((recipe) => (
+                                  <RecipeCardComponent 
+                                    key={recipe.id} 
+                                    recipe={recipe} 
+                                    getImageUrl={getImageUrl}
+                                    getAgeGroup={getAgeGroup}
+                                    getPrepTime={getPrepTime}
+                                    getAgeGroupColor={getAgeGroupColor}
+                                    showWarning={true}
+                                  />
+                              ))}
+                          </div>
+                        </section>
+                      )}
 
-                                    <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
-                                        <div className="flex items-center">
-                                            <i className="fa-solid fa-user-doctor text-green-600 mr-1.5 text-xs"></i>
-                                            <span className="text-xs text-gray-500 font-medium">Uzman Onaylı</span>
-                                        </div>
-                                        {/* Localde Link kullanın */}
-                                        <Link href={`/tarifler/${recipe.slug}`} className="text-xs font-bold text-orange-500 hover:underline">
-                                            Tarife Git
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                      {/* All Recipes (when no profile) */}
+                      {!profile.birthDate && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {recipes.map((recipe) => (
+                                <RecipeCardComponent 
+                                  key={recipe.id} 
+                                  recipe={recipe} 
+                                  getImageUrl={getImageUrl}
+                                  getAgeGroup={getAgeGroup}
+                                  getPrepTime={getPrepTime}
+                                  getAgeGroupColor={getAgeGroupColor}
+                                  showWarning={false}
+                                />
+                            ))}
+                        </div>
+                      )}
+                    </>
                   )}
 
                   {/* Empty State */}
@@ -236,6 +289,78 @@ export default function RecipesPage() {
                   )}
               </div>
           </div>
+      </div>
+    </div>
+  );
+}
+
+// Recipe Card Component
+interface RecipeCardComponentProps {
+  recipe: RecipeCard;
+  getImageUrl: (recipe: RecipeCard) => string;
+  getAgeGroup: (recipe: RecipeCard) => string;
+  getPrepTime: (recipe: RecipeCard) => string;
+  getAgeGroupColor: (ageGroupName: string) => string;
+  showWarning: boolean;
+}
+
+function RecipeCardComponent({ 
+  recipe, 
+  getImageUrl, 
+  getAgeGroup, 
+  getPrepTime,
+  getAgeGroupColor,
+  showWarning 
+}: RecipeCardComponentProps) {
+  const ageGroup = getAgeGroup(recipe);
+  const colorCode = getAgeGroupColor(ageGroup);
+  
+  return (
+    <div className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col">
+      {/* Image Container */}
+      <div className="h-56 relative overflow-hidden bg-gray-100">
+        <img 
+          src={getImageUrl(recipe)} 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+          alt={recipe.title} 
+        />
+        <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+          <i className="fa-regular fa-heart"></i>
+        </button>
+        <div className="absolute bottom-3 left-3 flex gap-2">
+          <span 
+            className="text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm"
+            style={{ backgroundColor: colorCode }}
+          >
+            {ageGroup}
+          </span>
+          {showWarning && (
+            <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+              ⚠️
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-5 flex-grow flex flex-col">
+        <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">
+          {recipe.title}
+        </h3>
+        
+        <div className="flex items-center text-xs text-gray-400 mb-4 space-x-3 mt-1">
+          <span><i className="fa-regular fa-clock mr-1"></i> {getPrepTime(recipe)}</span>
+        </div>
+
+        <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
+          <div className="flex items-center">
+            <i className="fa-solid fa-user-doctor text-green-600 mr-1.5 text-xs"></i>
+            <span className="text-xs text-gray-500 font-medium">Uzman Onaylı</span>
+          </div>
+          <Link href={`/tarifler/${recipe.slug}`} className="text-xs font-bold text-orange-500 hover:underline">
+            Tarife Git
+          </Link>
+        </div>
       </div>
     </div>
   );
