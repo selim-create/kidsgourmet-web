@@ -6,18 +6,13 @@ import { recipeService } from '@/services/recipe-service';
 import { RecipeCard } from '@/lib/types';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
-import MealTypeFilter from '@/components/features/age/MealTypeFilter';
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMealType, setSelectedMealType] = useState<string | null>(null);
   
   const { profile } = useChildProfile();
   const { ageGroups } = useAgeGroups();
-  
-  // Filtre State'leri (İleride API'ye bağlanabilir)
-  const [selectedAges, setSelectedAges] = useState<string[]>([]);
   
   useEffect(() => {
     async function fetchRecipes() {
@@ -87,7 +82,7 @@ export default function RecipesPage() {
     const other = recipes.filter(r => !isRecipeSuitableForAge(r));
 
     return { suitableRecipes: suitable, otherRecipes: other };
-  }, [recipes, profile.currentAgeGroup]);
+  }, [recipes, profile.birthDate, profile.currentAgeGroup, isRecipeSuitableForAge]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -176,12 +171,6 @@ export default function RecipesPage() {
                               Kabızlık
                           </button>
                       </div>
-                  </div>
-
-                  {/* Meal Type Filter */}
-                  <div className="mb-6">
-                      <h3 className="text-sm font-bold text-gray-700 mb-3">Öğün Tipi</h3>
-                      <MealTypeFilter onFilterChange={setSelectedMealType} />
                   </div>
 
                   {/* Top Bar */}

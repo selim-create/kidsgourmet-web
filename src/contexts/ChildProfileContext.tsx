@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { AgeGroup } from '@/types/taxonomy';
-import { calculateAgeInMonths, findAgeGroup, checkForbiddenIngredients } from '@/utils/ageCalculator';
+import { calculateAgeInMonths, findAgeGroup } from '@/utils/ageCalculator';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 
 interface ChildProfile {
@@ -31,6 +31,17 @@ export function ChildProfileProvider({ children }: { children: ReactNode }) {
     currentAgeGroup: null,
   });
 
+  const updateProfile = useCallback((date: Date) => {
+    const ageInMonths = calculateAgeInMonths(date);
+    const currentAgeGroup = findAgeGroup(ageInMonths, ageGroups);
+    
+    setProfile({
+      birthDate: date,
+      ageInMonths,
+      currentAgeGroup,
+    });
+  }, [ageGroups]);
+
   // Load birth date from localStorage on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -40,7 +51,7 @@ export function ChildProfileProvider({ children }: { children: ReactNode }) {
         updateProfile(birthDate);
       }
     }
-  }, []);
+  }, [updateProfile]);
 
   // Update profile when age groups are loaded or birth date changes
   useEffect(() => {
@@ -55,17 +66,6 @@ export function ChildProfileProvider({ children }: { children: ReactNode }) {
       }));
     }
   }, [profile.birthDate, ageGroups]);
-
-  const updateProfile = (date: Date) => {
-    const ageInMonths = calculateAgeInMonths(date);
-    const currentAgeGroup = findAgeGroup(ageInMonths, ageGroups);
-    
-    setProfile({
-      birthDate: date,
-      ageInMonths,
-      currentAgeGroup,
-    });
-  };
 
   const setChildBirthDate = (date: Date) => {
     if (typeof window !== 'undefined') {

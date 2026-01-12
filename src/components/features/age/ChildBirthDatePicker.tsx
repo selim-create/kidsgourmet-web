@@ -1,19 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
 
 export default function ChildBirthDatePicker() {
   const { profile, setChildBirthDate } = useChildProfile();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(!profile.birthDate);
   const [selectedDate, setSelectedDate] = useState('');
-
-  // Show modal on first visit if no birth date is set
-  useEffect(() => {
-    if (!profile.birthDate) {
-      setShowModal(true);
-    }
-  }, [profile.birthDate]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
