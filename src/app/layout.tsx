@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/layout/Header"; 
 import Footer from "@/components/layout/Footer";
 import { UserProvider } from "@/hooks/use-user";
+import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
 
 // const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 // const quicksand = Quicksand({ subsets: ["latin"], variable: "--font-quicksand" });
@@ -26,11 +27,13 @@ export default function RootLayout({
       {/* Localde className'i güncelleyin: className={`${inter.variable} ${quicksand.variable} ...`} */}
       <body className="bg-gray-50 text-brand-dark font-sans antialiased flex flex-col min-h-screen">
         <UserProvider>
-          <Header />
-          <main className="flex-grow pt-24 w-full">
-            {children}
-          </main>
-          <Footer />
+          <ChildProfileProvider>
+            <Header />
+            <main className="flex-grow pt-24 w-full">
+              {children}
+            </main>
+            <Footer />
+          </ChildProfileProvider>
         </UserProvider>
       </body>
     </html>

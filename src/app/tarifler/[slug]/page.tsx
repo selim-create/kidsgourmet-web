@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { Recipe } from '@/lib/types';
 import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
+import AgeWarningBanner from '@/components/features/age/AgeWarningBanner';
+import { useAgeGroups } from '@/hooks/useAgeGroups';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -14,6 +16,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [instructions, setInstructions] = useState<any[]>([]);
   const [activePortion, setActivePortion] = useState("1 Öğün");
+  const { ageGroups } = useAgeGroups();
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -117,6 +120,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
         {/* MAIN CONTENT */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            {/* Age Warning Banner */}
+            <AgeWarningBanner 
+              recipeAgeGroups={ageGroups.filter(ag => (recipe.age_groups || []).includes(ag.name))}
+              recipeIngredients={(recipe.ingredients || []).map(ing => ing.name || ing.text || '')}
+            />
             
             {/* HEADER SECTION */}
             <div className="flex flex-col lg:flex-row gap-8 mb-10">
