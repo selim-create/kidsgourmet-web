@@ -1,6 +1,34 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/hooks/use-user";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { register } = useUser();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      await register(email, password, name);
+      router.push("/dashboard");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Kayıt başarısız oldu");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-[calc(100vh-180px)] bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mx-auto max-w-6xl">
         
@@ -55,14 +83,29 @@ export default function RegisterPage() {
                     </div>
                 </div>
 
-                <form className="mt-8 space-y-5">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="mt-8 space-y-5">
                     <div>
                         <label htmlFor="fullname" className="block text-sm font-bold text-gray-700 mb-1">Ad Soyad</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i className="fa-regular fa-user"></i>
                             </div>
-                            <input id="fullname" name="fullname" type="text" required className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" placeholder="Adınız Soyadınız" />
+                            <input 
+                              id="fullname" 
+                              name="fullname" 
+                              type="text" 
+                              required 
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
+                              placeholder="Adınız Soyadınız" 
+                            />
                         </div>
                     </div>
 
@@ -72,7 +115,16 @@ export default function RegisterPage() {
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i className="fa-regular fa-envelope"></i>
                             </div>
-                            <input id="email" name="email" type="email" required className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" placeholder="ornek@email.com" />
+                            <input 
+                              id="email" 
+                              name="email" 
+                              type="email" 
+                              required 
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
+                              placeholder="ornek@email.com" 
+                            />
                         </div>
                     </div>
 
@@ -82,13 +134,26 @@ export default function RegisterPage() {
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i className="fa-solid fa-lock"></i>
                             </div>
-                            <input id="password" name="password" type="password" required className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" placeholder="En az 6 karakter" />
+                            <input 
+                              id="password" 
+                              name="password" 
+                              type="password" 
+                              required 
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
+                              placeholder="En az 6 karakter" 
+                            />
                         </div>
                     </div>
 
                     <div>
-                        <button type="submit" className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-brand-secondary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-secondary shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
-                            Ücretsiz Kayıt Ol
+                        <button 
+                          type="submit" 
+                          disabled={isLoading}
+                          className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-brand-secondary hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-secondary shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading ? "Kayıt yapılıyor..." : "Ücretsiz Kayıt Ol"}
                         </button>
                     </div>
                 </form>

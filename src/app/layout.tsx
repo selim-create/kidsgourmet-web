@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Inter, Quicksand } from "next/font/google";
+// import { Inter, Quicksand } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header"; 
 import Footer from "@/components/layout/Footer";
+import { UserProvider } from "@/hooks/use-user";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const quicksand = Quicksand({ subsets: ["latin"], variable: "--font-quicksand" });
+// const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+// const quicksand = Quicksand({ subsets: ["latin"], variable: "--font-quicksand" });
 
 export const metadata: Metadata = {
   title: "KidsGourmet - Mutlu Bebekler, Bilinçli Ebeveynler",
@@ -24,11 +25,13 @@ export default function RootLayout({
       </head>
       {/* Localde className'i güncelleyin: className={`${inter.variable} ${quicksand.variable} ...`} */}
       <body className="bg-gray-50 text-brand-dark font-sans antialiased flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow pt-24 w-full">
-          {children}
-        </main>
-        <Footer />
+        <UserProvider>
+          <Header />
+          <main className="flex-grow pt-24 w-full">
+            {children}
+          </main>
+          <Footer />
+        </UserProvider>
       </body>
     </html>
   );

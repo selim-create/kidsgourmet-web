@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from 'next/link'; 
+import { useUser } from '@/hooks/use-user';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useUser();
 
   return (
     <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-white" id="main-header">
@@ -71,12 +73,25 @@ export default function Header() {
                             <i className="fa-solid fa-magnifying-glass"></i>
                         </button>
 
-                        {/* User State: Login Button */}
-                        {/* Localde Link kullanın */}
-                        <Link href="/login" className="hidden md:inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-bold rounded-full text-white bg-orange-500 hover:bg-orange-600 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                            <i className="fa-solid fa-child mr-2"></i>
-                            Giriş Yap
-                        </Link>
+                        {/* User State: Login Button or User Menu */}
+                        {isAuthenticated && user ? (
+                          <div className="hidden md:flex items-center gap-3">
+                            <Link href="/favoriler" className="relative w-10 h-10 rounded-full bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all flex items-center justify-center">
+                              <i className="fa-regular fa-heart"></i>
+                            </Link>
+                            <Link href="/dashboard" className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all">
+                              <div className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold">
+                                {user.name.charAt(0).toUpperCase()}
+                              </div>
+                              <span className="font-bold text-sm">{user.display_name || user.name}</span>
+                            </Link>
+                          </div>
+                        ) : (
+                          <Link href="/login" className="hidden md:inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-bold rounded-full text-white bg-orange-500 hover:bg-orange-600 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                              <i className="fa-solid fa-child mr-2"></i>
+                              Giriş Yap
+                          </Link>
+                        )}
                         
                         {/* Mobile Menu Button */}
                         <button 
@@ -120,9 +135,20 @@ export default function Header() {
                         <div className="border-t border-gray-100 my-4"></div>
 
                         <div className="space-y-3">
-                            <Link href="/login" className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-colors">
-                                <i className="fa-solid fa-user mr-2"></i> Giriş Yap / Kayıt Ol
-                            </Link>
+                            {isAuthenticated && user ? (
+                              <>
+                                <Link href="/dashboard" className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
+                                    <i className="fa-solid fa-user mr-2"></i> {user.display_name || user.name}
+                                </Link>
+                                <button onClick={logout} className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition-colors">
+                                    <i className="fa-solid fa-right-from-bracket mr-2"></i> Çıkış Yap
+                                </button>
+                              </>
+                            ) : (
+                              <Link href="/login" className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-colors">
+                                  <i className="fa-solid fa-user mr-2"></i> Giriş Yap / Kayıt Ol
+                              </Link>
+                            )}
                         </div>
                     </div>
                 </div>

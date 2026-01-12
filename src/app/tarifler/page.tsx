@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
-import { recipeService, Recipe } from '@/services/recipe-service';
+import { recipeService } from '@/services/recipe-service';
+import { RecipeCard } from '@/lib/types';
 
 export default function RecipesPage() {
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Filtre State'leri (İleride API'ye bağlanabilir)
@@ -30,21 +31,18 @@ export default function RecipesPage() {
   }, []);
 
   // Yardımcı Fonksiyon: Görsel URL'ini güvenli şekilde al
-  const getImageUrl = (recipe: Recipe) => {
-    return recipe._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif';
+  const getImageUrl = (recipe: RecipeCard) => {
+    return recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif';
   };
 
   // Yardımcı Fonksiyon: Kategori/Yaş bilgisini al
-  const getAgeGroup = (recipe: Recipe) => {
-    // Taxonomy 'age-group' verisi _embedded içinde gelir
-    const terms = recipe._embedded?.['wp:term']?.flat();
-    const ageTerm = terms?.find(term => term.taxonomy === 'age-group');
-    return ageTerm ? ageTerm.name : '+6 Ay'; // Varsayılan
+  const getAgeGroup = (recipe: RecipeCard) => {
+    return recipe.age_group || '+6 Ay'; // Varsayılan
   };
 
   // Yardımcı Fonksiyon: Hazırlama Süresi (ACF veya Meta'dan)
-  const getPrepTime = (recipe: Recipe) => {
-    return recipe.acf?.prep_time || '15 dk'; // Varsayılan
+  const getPrepTime = (recipe: RecipeCard) => {
+    return recipe.prep_time || '15 dk'; // Varsayılan
   };
 
   return (
@@ -166,7 +164,7 @@ export default function RecipesPage() {
                                     <img 
                                         src={getImageUrl(recipe)} 
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                                        alt={recipe.title.rendered} 
+                                        alt={recipe.title} 
                                     />
                                     <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
                                         <i className="fa-regular fa-heart"></i>
@@ -180,10 +178,9 @@ export default function RecipesPage() {
 
                                 {/* Content */}
                                 <div className="p-5 flex-grow flex flex-col">
-                                    <h3 
-                                        className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors"
-                                        dangerouslySetInnerHTML={{ __html: recipe.title.rendered }}
-                                    />
+                                    <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">
+                                        {recipe.title}
+                                    </h3>
                                     
                                     <div className="flex items-center text-xs text-gray-400 mb-4 space-x-3 mt-1">
                                         <span><i className="fa-regular fa-clock mr-1"></i> {getPrepTime(recipe)}</span>

@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link'; 
 
-export default function SearchResultsPage() {
+function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || "Avokado"; // Varsayılan veya URL'den gelen sorgu
   const [activeTab, setActiveTab] = useState("Tümü");
@@ -245,5 +245,13 @@ export default function SearchResultsPage() {
         </div>
 
     </div>
+  );
+}
+
+export default function SearchResultsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Yükleniyor...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
