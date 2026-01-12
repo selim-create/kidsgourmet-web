@@ -1,39 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { notFound } from 'next/navigation';
+import { recipeService } from '@/services/recipe-service';
+import { Recipe } from '@/lib/types';
 
 export default function RecipeDetailPage({ params }: { params: { slug: string } }) {
-  // Mockup verisi: Gerçek projede bu veriyi 'slug' parametresine göre API'den çekeceksiniz.
-  const recipe = {
-    title: "Kış Güneşi: Bal Kabaklı Bebek Çorbası",
-    description: "Bal kabağının tatlı lezzeti ve vitamin deposu yapısı, ek gıdaya yeni başlayan bebekler için harika bir başlangıç. Sindirimi kolay, hazırlaması pratik.",
-    image: "https://placehold.co/800x600/FF8A65/ffffff?text=Bal+Kabakli+Corba",
-    prepTime: "25 dk",
-    age: "+6 Ay",
-    features: ["Bağışıklık Dostu", "Vegan"],
-    expert: {
-      name: "Dyt. Zeynep Sağlam",
-      title: "Beslenme Uzmanı",
-      image: "https://placehold.co/100x100/E8F5E9/455A64?text=Dyt"
-    },
-    ingredients: [
-      { id: 1, text: "1 dilim Bal Kabağı (yaklaşık 100g)", checked: false },
-      { id: 2, text: "1/2 adet Küçük Patates", checked: false },
-      { id: 3, text: "1 tatlı kaşığı Zeytinyağı", checked: false, note: "Tereyağı ile değişebilir" },
-      { id: 4, text: "1/2 çay bardağı Su veya İlikli Kemik Suyu", checked: false }
-    ],
-    instructions: [
-      { id: 1, title: "Sebzeleri Hazırlayın", text: "Bal kabağını ve patatesi yıkayıp kabuklarını soyun. Bebeğinizin yutabileceği yumuşaklığa gelmesi için küp küp doğrayın.", completed: false },
-      { id: 2, title: "Pişirme", text: "Doğradığınız sebzeleri küçük bir tencereye alın. Üzerine su veya kemik suyunu ekleyin. Kısık ateşte sebzeler çatal batacak kadar yumuşayana kadar (yaklaşık 15 dk) pişirin.", tip: "Püf Noktası: Vitamin kaybını önlemek için çok az suda, ağzı kapalı pişirin veya buharda pişirmeyi tercih edin.", completed: false },
-      { id: 3, title: "Ezme ve Servis", text: "Pişen sebzeleri ocaktan alın. İçine zeytinyağını ekleyin. Bebeğinizin yeme becerisine göre çatalla ezin veya pürüzsüz olması için blenderdan geçirin.", completed: false }
-    ]
-  };
-
-  // State yönetimi
-  const [ingredients, setIngredients] = useState(recipe.ingredients);
-  const [instructions, setInstructions] = useState(recipe.instructions);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [ingredients, setIngredients] = useState<any[]>([]);
+  const [instructions, setInstructions] = useState<any[]>([]);
   const [activePortion, setActivePortion] = useState("1 Öğün");
+
+  useEffect(() => {
+    async function fetchRecipe() {
+      try {
+        setLoading(true);
+        const data = await recipeService.getBySlug(params.slug);
+        if (!data) {
+          // Recipe not found - will show loading state
+          setRecipe(null);
+        } else {
+          setRecipe(data);
+          setIngredients(data.ingredients || []);
+          setInstructions(data.instructions || []);
+        }
+      } catch (error) {
+        console.error("Tarif yüklenirken hata:", error);
+        setRecipe(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchRecipe();
+  }, [params.slug]);
 
   // Malzeme tikleme fonksiyonu
   const toggleIngredient = (id: number) => {
@@ -58,9 +59,24 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
 
   // WhatsApp paylaşım fonksiyonu
   const shareWhatsapp = () => {
-    const text = `Bu tarife bayıldım: ${recipe.title} - KidsGourmet`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    if (recipe) {
+      const text = `Bu tarife bayıldım: ${recipe.title} - KidsGourmet`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    notFound();
+    return null;
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
@@ -77,7 +93,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li><Link href="/tarifler?kategori=corbalar" className="hover:text-orange-500">Çorbalar</Link></li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                        <li className="font-semibold text-orange-500 truncate max-w-[150px] sm:max-w-none">{recipe.title}</li>
+                        <li className="font-semibold text-orange-500 capitalize">{recipe.title}</li>
                     </ol>
                 </nav>
             </div>
@@ -90,28 +106,32 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
             <div className="flex flex-col lg:flex-row gap-8 mb-10">
                 {/* Left: Image */}
                 <div className="w-full lg:w-1/2 relative rounded-[2rem] overflow-hidden shadow-lg group h-[300px] lg:h-[400px]">
-                    <img src={recipe.image} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src={recipe.image || 'https://placehold.co/800x600/FF8A65/ffffff?text=Tarif'} alt={recipe.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     
                     {/* Badges */}
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
                         <span className="bg-white/90 backdrop-blur text-slate-800 px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center">
-                            <i className="fa-regular fa-clock text-orange-500 mr-2"></i> {recipe.prepTime}
+                            <i className="fa-regular fa-clock text-orange-500 mr-2"></i> {recipe.prep_time}
                         </span>
-                        <span className="bg-green-500 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center">
-                            <i className="fa-solid fa-baby mr-2"></i> {recipe.age}
-                        </span>
+                        {recipe.age_groups && recipe.age_groups.length > 0 && (
+                          <span className="bg-green-500 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center">
+                              <i className="fa-solid fa-baby mr-2"></i> {recipe.age_groups[0]}
+                          </span>
+                        )}
                     </div>
 
                     {/* Video Button */}
-                    <button className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-red-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all animate-pulse">
-                        <i className="fa-solid fa-play text-xl ml-1"></i>
-                    </button>
+                    {recipe.video_url && (
+                      <button className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-red-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all animate-pulse">
+                          <i className="fa-solid fa-play text-xl ml-1"></i>
+                      </button>
+                    )}
                 </div>
 
                 {/* Right: Meta Info */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-3">
-                        {recipe.features.map((feature, index) => (
+                        {recipe.diet_types && recipe.diet_types.map((feature, index) => (
                             <span key={index} className={`text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ${index === 0 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
                                 {feature}
                             </span>
@@ -123,23 +143,24 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
                     </h1>
                     
                     <p className="text-gray-600 mb-6 text-lg">
-                        {recipe.description}
+                        {recipe.excerpt || recipe.content}
                     </p>
 
                     {/* Expert Approval Box */}
-                    <div className="bg-green-50 border border-green-100 rounded-2xl p-4 flex items-center gap-4 mb-6">
-                        <div className="relative">
-                            <img src={recipe.expert.image} className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="Uzman" />
-                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
-                                <i className="fa-solid fa-check"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <p className="text-xs text-green-600 font-bold uppercase mb-0.5">Beslenme Uzmanı Onaylı</p>
-                            {/* Localde Link kullanın */}
-                            <p className="text-sm text-slate-700 font-medium">Bu tarif <Link href="#" className="text-green-600 underline decoration-dotted font-bold">{recipe.expert.name} (Rejimde.com)</Link> tarafından onaylanmıştır.</p>
-                        </div>
-                    </div>
+                    {recipe.expert && recipe.expert.approved && (
+                      <div className="bg-green-50 border border-green-100 rounded-2xl p-4 flex items-center gap-4 mb-6">
+                          <div className="relative">
+                              <img src={recipe.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="Uzman" />
+                              <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
+                                  <i className="fa-solid fa-check"></i>
+                              </div>
+                          </div>
+                          <div>
+                              <p className="text-xs text-green-600 font-bold uppercase mb-0.5">Beslenme Uzmanı Onaylı</p>
+                              <p className="text-sm text-slate-700 font-medium">Bu tarif <Link href="#" className="text-green-600 underline decoration-dotted font-bold">{recipe.expert.name} (Rejimde.com)</Link> tarafından onaylanmıştır.</p>
+                          </div>
+                      </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="flex gap-3">
