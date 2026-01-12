@@ -4,13 +4,14 @@ import { AuthResponse, LoginCredentials, RegisterData, User } from '@/lib/types'
 
 export const authService = {
   /**
-   * Kullanıcı girişi
+   * User login
+   * Backend accepts both email and username in the username field
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await fetchAPI<AuthResponse>(API_ENDPOINTS.AUTH_LOGIN, {
       method: 'POST',
       body: JSON.stringify({
-        username: credentials.username, // Backend hem email hem username kabul etmeli
+        username: credentials.username,
         password: credentials.password,
       }),
     });

@@ -39,8 +39,7 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
   }
 
   if (!ingredient) {
-    notFound();
-    return null;
+    return notFound();
   }
 
   return (

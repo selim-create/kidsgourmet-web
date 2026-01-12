@@ -73,7 +73,24 @@ export const recipeService = {
    * Öne çıkan tarifler
    */
   getFeatured: async (limit: number = 5): Promise<RecipeCard[]> => {
-    return await fetchAPI<RecipeCard[]>(`${API_ENDPOINTS.RECIPES_FEATURED}?limit=${limit}`);
+    try {
+      const response = await fetchAPI<any>(`${API_ENDPOINTS.RECIPES_FEATURED}?limit=${limit}`);
+      
+      // Response format kontrolü
+      if (Array.isArray(response)) {
+        return response.map(transformRecipe);
+      } else if (response && Array.isArray(response.data)) {
+        return response.data.map(transformRecipe);
+      } else if (response && Array.isArray(response.recipes)) {
+        return response.recipes.map(transformRecipe);
+      }
+      
+      console.warn('Unexpected API response format:', response);
+      return [];
+    } catch (error) {
+      console.error('Featured recipes fetch error:', error);
+      return [];
+    }
   },
 
   /**

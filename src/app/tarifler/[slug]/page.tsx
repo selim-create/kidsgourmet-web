@@ -74,8 +74,7 @@ export default function RecipeDetailPage({ params }: { params: { slug: string } 
   }
 
   if (!recipe) {
-    notFound();
-    return null;
+    return notFound();
   }
 
   return (

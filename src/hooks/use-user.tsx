@@ -46,7 +46,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     const response = await authService.login({ username, password });
     setUser(response.user);
-    // children undefined olabilir, kontrol et
+    // Check if children array exists before accessing it
     if (response.user?.children && response.user.children.length > 0) {
       setActiveChild(response.user.children[0]);
     }
