@@ -45,7 +45,7 @@ export const authService = {
    */
   getCurrentUser: async (): Promise<User | null> => {
     try {
-      return await fetchAPI<User>(API_ENDPOINTS.AUTH_ME);
+      return await fetchAPI<User>(API_ENDPOINTS.AUTH_ME, {}, true);
     } catch (error) {
       return null;
     }
