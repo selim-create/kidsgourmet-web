@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from 'next/link'; 
 import { useUser } from '@/hooks/use-user';
+import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -67,6 +68,9 @@ export default function Header() {
 
                     {/* Right Actions */}
                     <div className="flex items-center gap-3">
+                        
+                        {/* Child Age Picker */}
+                        <ChildBirthDatePicker />
                         
                         {/* Search Trigger (Desktop) */}
                         <button className="w-10 h-10 rounded-full bg-gray-50 text-gray-500 hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center">

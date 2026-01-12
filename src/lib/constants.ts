@@ -39,4 +39,8 @@ export const API_ENDPOINTS = {
   // Tariften.com Cross-Sell
   TARIFTEN_BY_INGREDIENT: (ingredient: string) => 
     `${TARIFTEN_API_URL}/recipes/by-ingredient?ingredient=${encodeURIComponent(ingredient)}&limit=3`,
+  
+  // Taxonomies
+  AGE_GROUPS: `${WP_API_NAMESPACE}/age-group`,
+  MEAL_TYPES: `${WP_API_NAMESPACE}/meal-type`,
 } as const;
