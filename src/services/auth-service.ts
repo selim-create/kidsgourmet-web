@@ -9,11 +9,15 @@ export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await fetchAPI<AuthResponse>(API_ENDPOINTS.AUTH_LOGIN, {
       method: 'POST',
-      body: JSON.stringify(credentials),
+      body: JSON.stringify({
+        username: credentials.username, // Backend hem email hem username kabul etmeli
+        password: credentials.password,
+      }),
     });
     
-    // Token'ı kaydet
-    setToken(response.token);
+    if (response.token) {
+      setToken(response.token);
+    }
     
     return response;
   },

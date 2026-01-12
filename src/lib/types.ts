@@ -120,7 +120,7 @@ export interface AuthResponse {
 }
 
 export interface LoginCredentials {
-  email: string;
+  username: string; // email VEYA kullanıcı adı olabilir
   password: string;
 }
 

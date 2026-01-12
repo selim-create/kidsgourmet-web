@@ -43,10 +43,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   };
 
-  const login = async (email: string, password: string) => {
-    const response = await authService.login({ email, password });
+  const login = async (username: string, password: string) => {
+    const response = await authService.login({ username, password });
     setUser(response.user);
-    if (response.user.children?.length) {
+    // children undefined olabilir, kontrol et
+    if (response.user?.children && response.user.children.length > 0) {
       setActiveChild(response.user.children[0]);
     }
   };
