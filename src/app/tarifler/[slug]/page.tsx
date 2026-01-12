@@ -24,8 +24,16 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
           setRecipe(null);
         } else {
           setRecipe(data);
-          setIngredients(data.ingredients || []);
-          setInstructions(data.instructions || []);
+          setIngredients((data.ingredients || []).map((ing: any, index: number) => ({
+            ...ing,
+            id: ing.id ?? index,
+            checked: false
+          })));
+          setInstructions((data.instructions || []).map((inst: any, index: number) => ({
+            ...inst,
+            id: inst.id ?? index,
+            completed: false
+          })));
         }
       } catch (error) {
         console.error("Tarif yüklenirken hata:", error);
@@ -38,17 +46,19 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   }, [slug]);
 
   // Malzeme tikleme fonksiyonu
-  const toggleIngredient = (id: number) => {
-    setIngredients(ingredients.map(ing => 
-      ing.id === id ? { ...ing, checked: !ing.checked } : ing
-    ));
+  const toggleIngredient = (id: number | string) => {
+    setIngredients(ingredients.map((ing, index) => {
+      const itemId = ing.id ?? index;
+      return itemId === id ? { ...ing, checked: !ing.checked } : ing;
+    }));
   };
 
   // Adım tamamlama fonksiyonu
-  const toggleInstruction = (id: number) => {
-    setInstructions(instructions.map(inst => 
-      inst.id === id ? { ...inst, completed: !inst.completed } : inst
-    ));
+  const toggleInstruction = (id: number | string) => {
+    setInstructions(instructions.map((inst, index) => {
+      const itemId = inst.id ?? index;
+      return itemId === id ? { ...inst, completed: !inst.completed } : inst;
+    }));
   };
 
   // Kopyalama fonksiyonu
@@ -221,11 +231,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </div>
 
                         <ul className="space-y-4">
-                            {ingredients.map((ing) => (
+                            {ingredients.map((ing, index) => (
                                 <li 
-                                    key={ing.id} 
+                                    key={ing.id ?? `ingredient-${index}`} 
                                     className={`flex items-start group cursor-pointer select-none transition-all ${ing.checked ? 'opacity-50' : ''}`}
-                                    onClick={() => toggleIngredient(ing.id)}
+                                    onClick={() => toggleIngredient(ing.id ?? index)}
                                 >
                                     <div className={`mt-1 mr-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                                         ing.checked ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'
@@ -262,11 +272,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </h2>
                         
                         <div className="space-y-8 relative before:absolute before:left-3.5 before:top-2 before:h-full before:w-0.5 before:bg-gray-100 before:content-['']">
-                            {instructions.map((step) => (
+                            {instructions.map((step, index) => (
                                 <div 
-                                    key={step.id} 
+                                    key={step.id ?? `step-${index}`} 
                                     className={`relative pl-10 cursor-pointer group transition-all ${step.completed ? 'opacity-50' : ''}`}
-                                    onClick={() => toggleInstruction(step.id)}
+                                    onClick={() => toggleInstruction(step.id ?? index)}
                                 >
                                     <div className={`absolute left-0 top-0 w-8 h-8 rounded-full flex items-center justify-center border-2 z-10 transition-colors font-bold ${
                                         step.completed 
