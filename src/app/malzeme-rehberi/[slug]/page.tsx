@@ -4,7 +4,7 @@ import React, { useState, useEffect, use } from 'react';
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { ingredientService } from '@/services/ingredient-service';
-import { Ingredient } from '@/lib/types';
+import { Ingredient, PrepByAge, IngredientPairing } from '@/lib/types';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -43,6 +43,20 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
     return notFound();
   }
 
+  // Besin değerleri listesi oluştur
+  const nutritionItems = [];
+  if (ingredient.nutrition?.vitamins) {
+    ingredient.nutrition.vitamins.split(',').forEach(v => {
+      nutritionItems.push({ icon: 'fa-check', text: `${v.trim()} Vitamini` });
+    });
+  }
+  if (ingredient.nutrition?.fiber) {
+    nutritionItems.push({ icon: 'fa-check', text: `${ingredient.nutrition.fiber} lif` });
+  }
+  if (ingredient.nutrition?.protein) {
+    nutritionItems.push({ icon: 'fa-check', text: `${ingredient.nutrition.protein} protein` });
+  }
+
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
 
@@ -51,12 +65,15 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
-                        {/* Localde Link kullanın */}
                         <li><Link href="/" className="hover:text-green-500"><i className="fa-solid fa-house"></i></Link></li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li><Link href="/malzeme-rehberi" className="hover:text-green-500">Malzeme Rehberi</Link></li>
-                        <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                        <li><Link href="#" className="hover:text-green-500">Meyveler</Link></li>
+                        {ingredient.category && (
+                          <>
+                            <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
+                            <li><Link href={`/malzeme-rehberi?kategori=${ingredient.category}`} className="hover:text-green-500">{ingredient.category}</Link></li>
+                          </>
+                        )}
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li className="font-semibold text-green-500 capitalize">{ingredient.name}</li>
                     </ol>
@@ -74,12 +91,15 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                     
                     {/* HERO CARD */}
                     <div className="bg-green-50 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-sm border border-green-100">
-                        {/* Decor Blobs */}
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-green-200 rounded-full blur-3xl opacity-50"></div>
                         <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-100 rounded-full blur-3xl opacity-50"></div>
                         
                         <div className="relative z-10 flex-1 text-center md:text-left">
-                            <span className="bg-white text-green-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wide shadow-sm mb-4 inline-block">Süper Besin</span>
+                            {ingredient.category && (
+                              <span className="bg-white text-green-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wide shadow-sm mb-4 inline-block">
+                                {ingredient.category}
+                              </span>
+                            )}
                             <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">{ingredient.name}</h1>
                             <p className="text-slate-600 text-lg leading-relaxed mb-6">
                                 {ingredient.description}
@@ -95,75 +115,126 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         </div>
 
                         <div className="relative z-10 w-full md:w-1/3 flex justify-center">
-                            <img src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${ingredient.name}`} className="w-64 h-64 md:w-full md:h-auto rounded-[2rem] shadow-xl transform rotate-3 hover:rotate-0 transition-transform duration-500 border-4 border-white object-cover" alt={ingredient.name} />
+                            <img 
+                              src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} 
+                              alt={ingredient.name}
+                              className="w-64 h-64 md:w-full md:h-auto rounded-[2rem] shadow-xl transform hover:scale-105 transition-transform object-cover"
+                            />
+                            {ingredient.ai_generated && (
+                              <span className="absolute bottom-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                                🤖 AI
+                              </span>
+                            )}
                         </div>
                     </div>
 
                     {/* INFO SECTIONS */}
                     <div className="space-y-8">
                         
-                        {/* Section 1: Intro & Benefits */}
-                        <div>
-                            <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 flex items-center font-sans">
-                                <i className="fa-solid fa-star text-yellow-400 mr-3 text-xl"></i> Neden {ingredient.name}?
-                            </h2>
-                            <div className="prose prose-slate max-w-none text-gray-600 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                                <p className="mb-4">
-                                    {ingredient.benefits}
-                                </p>
-                                <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 list-none pl-0">
-                                    <li className="flex items-center"><i className="fa-solid fa-check text-green-500 mr-2"></i> Beyin gelişimi için Omega-3 yağ asitleri</li>
-                                    <li className="flex items-center"><i className="fa-solid fa-check text-green-500 mr-2"></i> Sindirimi kolay lif kaynağı</li>
-                                    <li className="flex items-center"><i className="fa-solid fa-check text-green-500 mr-2"></i> Göz sağlığı için Lutein</li>
-                                    <li className="flex items-center"><i className="fa-solid fa-check text-green-500 mr-2"></i> Bağışıklık için C Vitamini</li>
-                                </ul>
-                            </div>
-                        </div>
+                        {/* Section 1: Benefits */}
+                        {ingredient.benefits && (
+                          <div>
+                              <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 flex items-center font-sans">
+                                  <i className="fa-solid fa-star text-yellow-400 mr-3 text-xl"></i> Neden {ingredient.name}?
+                              </h2>
+                              <div className="prose prose-slate max-w-none text-gray-600 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                  <p className="mb-4">{ingredient.benefits}</p>
+                                  {nutritionItems.length > 0 && (
+                                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 list-none pl-0">
+                                      {nutritionItems.map((item, index) => (
+                                        <li key={index} className="flex items-center">
+                                          <i className={`fa-solid ${item.icon} text-green-500 mr-2`}></i> {item.text}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                              </div>
+                          </div>
+                        )}
 
-                        {/* Section 2: How to Serve */}
-                        <div>
-                            <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 flex items-center font-sans">
-                                <i className="fa-solid fa-spoon text-orange-500 mr-3 text-xl"></i> Nasıl Hazırlanır?
-                            </h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Card 6-9 */}
-                                <div className="bg-orange-50 p-6 rounded-3xl border border-orange-100">
-                                    <div className="font-bold text-orange-500 mb-2 text-lg">6-9 Ay</div>
-                                    <p className="text-sm text-gray-600">
-                                        Olgun bir avokadoyu çatalla pürüzsüz olana kadar ezin. Anne sütü veya formül mama ile kıvamını açabilirsiniz. Kaşıkla püre olarak sunun.
-                                    </p>
-                                </div>
-                                {/* Card 9+ */}
-                                <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100">
-                                    <div className="font-bold text-blue-500 mb-2 text-lg">9+ Ay (BLW)</div>
-                                    <p className="text-sm text-gray-600">
-                                        Avokadoyu serçe parmağı kalınlığında dilimler halinde kesin. Kayganlığını azaltmak için dilimleri ince çekilmiş ceviz, rüşeym veya ezilmiş yulafa bulayarak eline verin.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        {/* Section 2: How to Prepare by Age - DİNAMİK */}
+                        {ingredient.prep_by_age && ingredient.prep_by_age.length > 0 && (
+                          <div>
+                              <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 flex items-center font-sans">
+                                  <i className="fa-solid fa-spoon text-orange-500 mr-3 text-xl"></i> Nasıl Hazırlanır?
+                              </h2>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {ingredient.prep_by_age.map((prep: PrepByAge, index: number) => {
+                                    // Yaş grubuna göre renk belirle
+                                    const isBlw = prep.age.toLowerCase().includes('blw') || prep.age.includes('9+');
+                                    const bgColor = isBlw ? 'bg-blue-50' : 'bg-orange-50';
+                                    const borderColor = isBlw ? 'border-blue-100' : 'border-orange-100';
+                                    const textColor = isBlw ? 'text-blue-500' : 'text-orange-500';
+                                    
+                                    return (
+                                      <div key={index} className={`${bgColor} p-6 rounded-3xl border ${borderColor}`}>
+                                        <div className={`font-bold ${textColor} mb-2 text-lg`}>
+                                          {prep.age}
+                                          {prep.method && <span className="text-sm font-normal ml-2">({prep.method})</span>}
+                                        </div>
+                                        <p className="text-sm text-gray-600">{prep.text}</p>
+                                      </div>
+                                    );
+                                  })}
+                              </div>
+                          </div>
+                        )}
 
-                        {/* Section 3: How to Pick */}
-                        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex gap-6 items-start">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 text-2xl text-slate-500">
-                                <i className="fa-solid fa-cart-shopping"></i>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-slate-800 text-lg mb-2">Nasıl Seçilir ve Saklanır?</h3>
-                                <p className="text-gray-600 text-sm mb-2">
-                                    Parmağınızla hafifçe bastırdığınızda içine hafif göçen, koyu renkli kabuklu avokadolar yemeğe hazırdır. 
-                                </p>
-                                <p className="text-gray-600 text-sm">
-                                    <span className="font-bold text-slate-800">Püf Noktası:</span> Sert avokadoları kese kağıdında elma veya muz ile bekletmek olgunlaşmayı hızlandırır. Kesilmiş avokadoyu kararmaması için limonlayıp streçleyin.
-                                </p>
-                            </div>
-                        </div>
+                        {/* Section 3: Selection & Storage Tips - DİNAMİK */}
+                        {(ingredient.selection_tips || ingredient.storage_tips || ingredient.pro_tips) && (
+                          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex gap-6 items-start">
+                              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 text-2xl text-slate-500">
+                                  <i className="fa-solid fa-cart-shopping"></i>
+                              </div>
+                              <div>
+                                  <h3 className="font-bold text-slate-800 text-lg mb-2">Nasıl Seçilir ve Saklanır?</h3>
+                                  
+                                  {ingredient.selection_tips && (
+                                    <p className="text-gray-600 text-sm mb-2">{ingredient.selection_tips}</p>
+                                  )}
+                                  
+                                  {ingredient.storage_tips && (
+                                    <p className="text-gray-600 text-sm mb-2">
+                                      <span className="font-bold text-slate-800">Saklama:</span> {ingredient.storage_tips}
+                                    </p>
+                                  )}
+                                  
+                                  {ingredient.pro_tips && (
+                                    <p className="text-gray-600 text-sm">
+                                      <span className="font-bold text-slate-800">💡 Püf Noktası:</span> {ingredient.pro_tips}
+                                    </p>
+                                  )}
+                              </div>
+                          </div>
+                        )}
+
+                        {/* Section 4: FAQ - DİNAMİK */}
+                        {ingredient.faq && ingredient.faq.length > 0 && (
+                          <div>
+                              <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 flex items-center font-sans">
+                                  <i className="fa-solid fa-circle-question text-purple-500 mr-3 text-xl"></i> Sıkça Sorulan Sorular
+                              </h2>
+                              <div className="space-y-3">
+                                  {ingredient.faq.map((item, index) => (
+                                    <details key={index} className="bg-white rounded-2xl border border-gray-100 overflow-hidden group">
+                                      <summary className="p-4 cursor-pointer font-medium text-slate-800 hover:bg-gray-50 flex items-center justify-between">
+                                        {item.question}
+                                        <i className="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
+                                      </summary>
+                                      <div className="px-4 pb-4 text-gray-600 text-sm">
+                                        {item.answer}
+                                      </div>
+                                    </details>
+                                  ))}
+                              </div>
+                          </div>
+                        )}
 
                     </div>
 
                     {/* RELATED RECIPES GRID */}
                     <div id="recipes" className="mt-8 pt-10 border-t border-gray-100">
-                        <h2 className="font-display font-bold text-3xl text-slate-800 mb-8 font-sans">{ingredient.name}lu Tarifler</h2>
+                        <h2 className="font-display font-bold text-3xl text-slate-800 mb-8 font-sans">{ingredient.name} ile Tarifler</h2>
                         
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 ? (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -181,63 +252,22 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                               ))}
                           </div>
                         ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Recipe Card 1 */}
-                            {/* Localde Link kullanın */}
-                            <Link href="/tarifler/muzlu-avokado-puresi" className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex gap-4 p-4 items-center group">
-                                <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
-                                    <img src="https://placehold.co/200x200/FFF3E0/FF8A65?text=Avokado+Puresi" className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Püre" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">6-9 Ay • Kahvaltı</div>
-                                    <h3 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors">Muzlu Avokado Püresi</h3>
-                                    <div className="text-xs text-gray-400 mt-2"><i className="fa-regular fa-clock mr-1"></i> 5 dk</div>
-                                </div>
+                          <div className="text-center py-8 text-gray-500">
+                            <i className="fa-solid fa-utensils text-4xl mb-4 text-gray-300"></i>
+                            <p>Henüz bu malzeme ile tarif eklenmemiş.</p>
+                            <Link href="/tarifler" className="text-green-500 hover:underline mt-2 inline-block">
+                              Tüm tariflere göz atın →
                             </Link>
-
-                            {/* Recipe Card 2 */}
-                            <Link href="#" className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex gap-4 p-4 items-center group">
-                                <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
-                                    <img src="https://placehold.co/200x200/E3F2FD/81D4FA?text=Avokado+Sandvic" className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Sandviç" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">12+ Ay • Atıştırmalık</div>
-                                    <h3 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors">Ayıcıklı Avokado Tost</h3>
-                                    <div className="text-xs text-gray-400 mt-2"><i className="fa-regular fa-clock mr-1"></i> 10 dk</div>
-                                </div>
-                            </Link>
-                            
-                            {/* Recipe Card 3 */}
-                            <Link href="#" className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex gap-4 p-4 items-center group">
-                                <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
-                                    <img src="https://placehold.co/200x200/F3E5F5/AB47BC?text=Makarna" className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Makarna" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">9+ Ay • Ana Öğün</div>
-                                    <h3 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors">Kremalı Avokado Soslu Makarna</h3>
-                                    <div className="text-xs text-gray-400 mt-2"><i className="fa-regular fa-clock mr-1"></i> 15 dk</div>
-                                </div>
-                            </Link>
-
-                            {/* Recipe Card 4 */}
-                            <Link href="#" className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex gap-4 p-4 items-center group">
-                                <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
-                                    <img src="https://placehold.co/200x200/E8F5E9/66BB6A?text=Omlet" className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Omlet" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-bold text-green-500 uppercase tracking-wider mb-1">8+ Ay • Kahvaltı</div>
-                                    <h3 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors">Avokadolu Bebek Omleti</h3>
-                                    <div className="text-xs text-gray-400 mt-2"><i className="fa-regular fa-clock mr-1"></i> 10 dk</div>
-                                </div>
-                            </Link>
-                        </div>
+                          </div>
                         )}
                         
-                        <div className="mt-8 text-center">
-                            <button className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
-                                Tüm {ingredient.name}lu Tarifler <i className="fa-solid fa-arrow-right"></i>
-                            </button>
-                        </div>
+                        {ingredient.related_recipes && ingredient.related_recipes.length > 0 && (
+                          <div className="mt-8 text-center">
+                            <Link href={`/tarifler?malzeme=${ingredient.slug}`} className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
+                              Tüm {ingredient.name} Tarifleri <i className="fa-solid fa-arrow-right"></i>
+                            </Link>
+                          </div>
+                        )}
                     </div>
 
                 </div>
@@ -272,47 +302,51 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                     }`}>{ingredient.allergy_risk}</span>
                                 </div>
 
-                                 <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between">
                                     <div className="flex items-center text-gray-600">
                                         <div className="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center mr-3 text-yellow-600"><i className="fa-solid fa-sun"></i></div>
                                         <span className="font-medium text-sm">Mevsimi</span>
                                     </div>
                                     <span className="font-bold text-slate-800">{ingredient.season}</span>
                                 </div>
+                                
+                                {/* Besin Değerleri */}
+                                {ingredient.nutrition?.calories && (
+                                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                    <div className="flex items-center text-gray-600">
+                                      <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mr-3 text-green-500"><i className="fa-solid fa-fire"></i></div>
+                                      <span className="font-medium text-sm">Kalori</span>
+                                    </div>
+                                    <span className="font-bold text-slate-800">{ingredient.nutrition.calories}</span>
+                                  </div>
+                                )}
                             </div>
                         </div>
 
-                        {/* PAIRINGS CARD - Commented out until API provides this data
-                        <div className="bg-orange-50 rounded-3xl p-6 border border-orange-100">
+                        {/* PAIRINGS CARD - DİNAMİK */}
+                        {ingredient.pairings && ingredient.pairings.length > 0 && (
+                          <div className="bg-orange-50 rounded-3xl p-6 border border-orange-100">
                             <h3 className="font-bold text-slate-800 mb-4 flex items-center">
-                                <i className="fa-solid fa-link text-orange-500 mr-2"></i> Uyumlu İkililer
+                              <i className="fa-solid fa-link text-orange-500 mr-2"></i> Uyumlu İkililer
                             </h3>
                             <p className="text-xs text-gray-500 mb-4">{ingredient.name} ile harika giden diğer lezzetler:</p>
                             <div className="flex flex-wrap gap-2">
-                                {ingredient.pairings && ingredient.pairings.map((pairing) => (
-                                    <span key={pairing} className="bg-white px-3 py-1.5 rounded-lg text-sm font-bold text-gray-600 shadow-sm border border-gray-100">
-                                        {pairing}
-                                    </span>
-                                ))}
+                              {ingredient.pairings.map((pairing: IngredientPairing, index: number) => (
+                                <span key={index} className="bg-white px-3 py-1.5 rounded-lg text-sm font-bold text-gray-600 shadow-sm border border-gray-100 flex items-center gap-1">
+                                  <span>{pairing.emoji}</span> {pairing.name}
+                                </span>
+                              ))}
                             </div>
-                        </div>
-                        */}
-
-                        {/* EXPERT WIDGET - Commented out until API provides this data
-                        <div className="bg-white rounded-3xl p-6 border border-gray-200 text-center">
-                            <img src={ingredient.expert?.image || ''} className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-white shadow-md" alt="Uzman" />
-                            <p className="text-sm text-gray-600 mb-3">Bu içerik <strong className="text-slate-800">{ingredient.expert?.name}</strong> tarafından kontrol edildi.</p>
-                            <Link href="#" className="text-green-600 text-xs font-bold hover:underline">Rejimde.com Profilini Gör</Link>
-                        </div>
-                        */}
+                          </div>
+                        )}
 
                     </div>
                 </div>
 
-                {/* Mobile Sidebar Content (Visible on Mobile Only, at bottom) */}
-                 <div className="lg:hidden space-y-6">
+                {/* Mobile Sidebar Content */}
+                <div className="lg:hidden space-y-6">
                     {/* Mobile At a Glance */}
-                     <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
+                    <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
                         <h3 className="font-bold text-slate-800 text-lg mb-4">Bir Bakışta</h3>
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
@@ -333,7 +367,21 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                             </div>
                         </div>
                     </div>
-                 </div>
+                    
+                    {/* Mobile Pairings */}
+                    {ingredient.pairings && ingredient.pairings.length > 0 && (
+                      <div className="bg-orange-50 rounded-3xl p-6 border border-orange-100">
+                        <h3 className="font-bold text-slate-800 mb-3 text-sm">🔗 Uyumlu İkililer</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {ingredient.pairings.map((pairing: IngredientPairing, index: number) => (
+                            <span key={index} className="bg-white px-2 py-1 rounded-lg text-xs font-medium text-gray-600">
+                              {pairing.emoji} {pairing.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
 
             </div>
         </div>

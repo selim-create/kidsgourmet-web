@@ -10,7 +10,7 @@ export interface IngredientFilters {
   season?: string;
 }
 
-// Transform function for WordPress REST API format to Ingredient
+// Transform function for WordPress REST API format to Ingredient - GÜNCELLENMİŞ
 const transformWPIngredient = (wp: any): Ingredient => ({
   id: wp.id,
   name: typeof wp.name === 'object' ? wp.name.rendered : (wp.name || wp.title?.rendered || ''),
@@ -19,31 +19,55 @@ const transformWPIngredient = (wp: any): Ingredient => ({
   image: wp._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
          wp.featured_media_url || 
          'https://placehold.co/400x400/AED581/ffffff?text=Malzeme',
+  category: wp.meta?._kg_category || wp.acf?.category || '',
   start_age: wp.meta?._kg_start_age || wp.acf?.start_age || '+6 Ay',
   benefits: wp.meta?._kg_benefits || wp.acf?.benefits || '',
   prep_methods: wp.meta?._kg_prep_methods || wp.acf?.prep_methods || [],
   allergy_risk: wp.meta?._kg_allergy_risk || wp.acf?.allergy_risk || 'Düşük',
   season: wp.meta?._kg_season || wp.acf?.season || 'Tüm Yıl',
   storage_tips: wp.meta?._kg_storage_tips || wp.acf?.storage_tips,
+  
+  // 🆕 Yeni alanlar
+  prep_by_age: wp.meta?._kg_prep_by_age || wp.acf?.prep_by_age || [],
+  selection_tips: wp.meta?._kg_selection_tips || wp.acf?.selection_tips || '',
+  pro_tips: wp.meta?._kg_pro_tips || wp.acf?.pro_tips || '',
+  pairings: wp.meta?._kg_pairings || wp.acf?.pairings || [],
+  nutrition: wp.meta?._kg_nutrition || wp.acf?.nutrition || {},
+  
   related_recipes: wp.meta?._kg_related_recipes || wp.acf?.related_recipes || [],
   faq: wp.meta?._kg_faq || wp.acf?.faq || [],
+  
+  ai_generated: wp.meta?._kg_ai_generated || wp.acf?.ai_generated || false,
+  image_source: wp.meta?._kg_image_source || wp.acf?.image_source || '',
 });
 
-// Transform function for API response format
+// Transform function for API response format - GÜNCELLENMİŞ
 const transformIngredient = (apiIngredient: any): Ingredient => ({
   id: apiIngredient.id,
   name: typeof apiIngredient.name === 'object' ? apiIngredient.name.rendered : apiIngredient.name,
   slug: apiIngredient.slug,
   description: typeof apiIngredient.description === 'object' ? apiIngredient.description.rendered : apiIngredient.description,
   image: apiIngredient.image || apiIngredient._embedded?.['wp:featuredmedia']?.[0]?.source_url || '',
+  category: apiIngredient.category || '',
   start_age: apiIngredient.start_age || '+6 Ay',
   benefits: apiIngredient.benefits || '',
   prep_methods: apiIngredient.prep_methods || [],
   allergy_risk: apiIngredient.allergy_risk || 'Düşük',
   season: apiIngredient.season || 'Tüm Yıl',
   storage_tips: apiIngredient.storage_tips,
+  
+  // 🆕 Yeni alanlar
+  prep_by_age: apiIngredient.prep_by_age || [],
+  selection_tips: apiIngredient.selection_tips || '',
+  pro_tips: apiIngredient.pro_tips || '',
+  pairings: apiIngredient.pairings || [],
+  nutrition: apiIngredient.nutrition || {},
+  
   related_recipes: apiIngredient.related_recipes || [],
   faq: apiIngredient.faq || [],
+  
+  ai_generated: apiIngredient.ai_generated || false,
+  image_source: apiIngredient.image_source || '',
 });
 
 export const ingredientService = {
