@@ -22,19 +22,23 @@ export interface Recipe {
 }
 
 export interface RecipeIngredient {
-  id: number;
-  text: string;
-  amount?: string;
-  unit?: string;
+  id?: number;
+  name: string;
+  amount: string;
+  unit: string;
+  ingredient_id?: number | null; // Ingredient CPT ile ilişki
+  checked?: boolean; // Frontend state
+  // Backward compatibility
+  text?: string;
   note?: string;
 }
 
 export interface RecipeInstruction {
-  id: number;
+  id?: number;
   title: string;
   text: string;
   tip?: string;
-  completed?: boolean; // Frontend state için
+  completed?: boolean; // Frontend state
 }
 
 export interface NutritionInfo {
@@ -53,14 +57,20 @@ export interface ExpertInfo {
 
 export interface Substitute {
   original: string;
-  replacement: string;
+  substitute: string; // 'replacement' yerine 'substitute'
   note?: string;
+  // Backward compatibility
+  replacement?: string;
 }
 
 export interface CrossSellInfo {
-  title: string;
+  mode: 'manual' | 'auto';
   url: string;
+  title: string;
   description?: string;
+  image?: string;
+  ingredient?: string; // Otomatik mod için kullanılan malzeme
+  tariften_id?: number;
 }
 
 export interface RecipeCard {
@@ -70,6 +80,19 @@ export interface RecipeCard {
   image: string;
   age_group: string;
   prep_time: string;
+}
+
+// Yeni: Tariften Recipe (cross-sell önerileri için)
+export interface TariftenRecipe {
+  id: number;
+  title: string;
+  slug: string;
+  url: string;
+  image: string;
+  prep_time: string;
+  cook_time: string;
+  difficulty: string;
+  servings: string;
 }
 
 // Ingredient (Malzeme) tip tanımı

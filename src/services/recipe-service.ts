@@ -1,6 +1,6 @@
 import { fetchAPI } from '@/lib/api';
 import { API_ENDPOINTS, WP_API_NAMESPACE } from '@/lib/constants';
-import { Recipe, RecipeCard } from '@/lib/types';
+import { Recipe, RecipeCard, CrossSellInfo } from '@/lib/types';
 
 export interface RecipeFilters {
   page?: number;
@@ -25,45 +25,93 @@ const transformWPRecipeToCard = (wp: any): RecipeCard => ({
 });
 
 // Transform function for WordPress REST API format to full Recipe
-const transformWPRecipeToFull = (wp: any): Recipe => ({
-  id: wp.id,
-  title: typeof wp.title === 'object' ? wp.title.rendered : (wp.title || ''),
-  slug: wp.slug || '',
-  content: typeof wp.content === 'object' ? wp.content.rendered : (wp.content || ''),
-  excerpt: typeof wp.excerpt === 'object' ? wp.excerpt.rendered : (wp.excerpt || ''),
-  image: wp._embedded?.['wp:featuredmedia']?.[0]?.source_url || '',
-  prep_time: wp.meta?._kg_prep_time || '15 dk',
-  ingredients: wp.meta?._kg_ingredients || [],
-  instructions: wp.meta?._kg_instructions || [],
-  nutrition: {
-    calories: wp.meta?._kg_calories || '',
-    protein: wp.meta?._kg_protein || '',
-    fiber: wp.meta?._kg_fiber || '',
-    vitamins: wp.meta?._kg_vitamins || '',
-  },
-  allergens: wp._embedded?.['wp:term']?.flat()
-    ?.filter((t: any) => t.taxonomy === 'allergen')
-    ?.map((t: any) => t.name) || [],
-  age_groups: wp._embedded?.['wp:term']?.flat()
-    ?.filter((t: any) => t.taxonomy === 'age-group')
-    ?.map((t: any) => t.name) || [],
-  diet_types: wp._embedded?.['wp:term']?.flat()
-    ?.filter((t: any) => t.taxonomy === 'diet-type')
-    ?.map((t: any) => t.name) || [],
-  video_url: wp.meta?._kg_video_url || '',
-  substitutes: wp.meta?._kg_substitutes || [],
-  is_featured: wp.meta?._kg_is_featured === '1',
-  expert: {
-    name: wp.meta?._kg_expert_name || 'Dyt. Uzman',
-    title: wp.meta?._kg_expert_title || 'Beslenme Uzmanı',
-    approved: wp.meta?._kg_expert_approved === '1',
-  },
-  related_recipes: [],
-  cross_sell: wp.meta?._kg_cross_sell_url ? {
-    title: wp.meta?._kg_cross_sell_title || 'Tariften.com',
-    url: wp.meta?._kg_cross_sell_url,
-  } : undefined,
-});
+const transformWPRecipeToFull = (wp: any): Recipe => {
+  // Ingredients transform - yeni format desteği
+  const rawIngredients = wp.ingredients || wp.meta?._kg_ingredients || [];
+  const ingredients = Array.isArray(rawIngredients) 
+    ? rawIngredients.map((ing: any, index: number) => ({
+        id: ing.id ?? index,
+        name: ing.name || ing.text || ing,
+        amount: ing.amount || '',
+        unit: ing.unit || '',
+        ingredient_id: ing.ingredient_id || null,
+        text: ing.text || ing.name || ing, // Backward compatibility
+      }))
+    : [];
+
+  // Instructions transform - yeni format desteği
+  const rawInstructions = wp.instructions || wp.meta?._kg_instructions || [];
+  const instructions = Array.isArray(rawInstructions)
+    ? rawInstructions.map((inst: any, index: number) => ({
+        id: inst.id ?? index + 1,
+        title: inst.title || `Adım ${index + 1}`,
+        text: inst.text || inst,
+        tip: inst.tip || '',
+      }))
+    : [];
+
+  // Cross-sell transform - hibrit sistem desteği
+  let cross_sell: CrossSellInfo | undefined;
+  const crossSellData = wp.cross_sell || wp.meta?._kg_cross_sell;
+  
+  if (crossSellData) {
+    if (typeof crossSellData === 'object') {
+      cross_sell = {
+        mode: crossSellData.mode || 'manual',
+        url: crossSellData.url || '',
+        title: crossSellData.title || 'Tariften.com\'da keşfet',
+        description: crossSellData.description,
+        image: crossSellData.image,
+        ingredient: crossSellData.ingredient,
+        tariften_id: crossSellData.tariften_id,
+      };
+    } else if (wp.meta?._kg_cross_sell_url) {
+      // Eski format desteği (backward compatibility)
+      cross_sell = {
+        mode: 'manual',
+        url: wp.meta._kg_cross_sell_url,
+        title: wp.meta._kg_cross_sell_title || 'Tariften.com',
+      };
+    }
+  }
+
+  return {
+    id: wp.id,
+    title: typeof wp.title === 'object' ? wp.title.rendered : (wp.title || ''),
+    slug: wp.slug || '',
+    content: typeof wp.content === 'object' ? wp.content.rendered : (wp.content || ''),
+    excerpt: typeof wp.excerpt === 'object' ? wp.excerpt.rendered : (wp.excerpt || ''),
+    image: wp._embedded?.['wp:featuredmedia']?.[0]?.source_url || '',
+    prep_time: wp.prep_time || wp.meta?._kg_prep_time || '15 dk',
+    ingredients,
+    instructions,
+    nutrition: {
+      calories: wp.nutrition?.calories || wp.meta?._kg_calories || '',
+      protein: wp.nutrition?.protein || wp.meta?._kg_protein || '',
+      fiber: wp.nutrition?.fiber || wp.meta?._kg_fiber || '',
+      vitamins: wp.nutrition?.vitamins || wp.meta?._kg_vitamins || '',
+    },
+    allergens: wp.allergens || wp._embedded?.['wp:term']?.flat()
+      ?.filter((t: any) => t.taxonomy === 'allergen')
+      ?.map((t: any) => t.name) || [],
+    age_groups: wp.age_groups || wp._embedded?.['wp:term']?.flat()
+      ?.filter((t: any) => t.taxonomy === 'age-group')
+      ?.map((t: any) => t.name) || [],
+    diet_types: wp.diet_types || wp._embedded?.['wp:term']?.flat()
+      ?.filter((t: any) => t.taxonomy === 'diet-type')
+      ?.map((t: any) => t.name) || [],
+    video_url: wp.video_url || wp.meta?._kg_video_url || '',
+    substitutes: wp.substitutes || wp.meta?._kg_substitutes || [],
+    is_featured: wp.is_featured || wp.meta?._kg_is_featured === '1',
+    expert: {
+      name: wp.expert?.name || wp.meta?._kg_expert_name || '',
+      title: wp.expert?.title || wp.meta?._kg_expert_title || '',
+      approved: wp.expert?.approved || wp.meta?._kg_expert_approved === '1',
+    },
+    related_recipes: wp.related_recipes || [],
+    cross_sell,
+  };
+};
 
 // Transform function for custom API format
 const transformRecipe = (wpRecipe: any): RecipeCard => ({
