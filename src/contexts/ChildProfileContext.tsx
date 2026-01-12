@@ -53,9 +53,9 @@ export function ChildProfileProvider({ children }: { children: ReactNode }) {
     }
   }, [updateProfile]);
 
-  // Update profile when age groups are loaded or birth date changes
+  // Update profile when age groups are loaded
   useEffect(() => {
-    if (profile.birthDate && ageGroups.length > 0) {
+    if (profile.birthDate && ageGroups.length > 0 && !profile.currentAgeGroup) {
       const ageInMonths = calculateAgeInMonths(profile.birthDate);
       const currentAgeGroup = findAgeGroup(ageInMonths, ageGroups);
       
@@ -65,7 +65,7 @@ export function ChildProfileProvider({ children }: { children: ReactNode }) {
         currentAgeGroup,
       }));
     }
-  }, [profile.birthDate, ageGroups]);
+  }, [ageGroups, profile.birthDate, profile.currentAgeGroup]);
 
   const setChildBirthDate = (date: Date) => {
     if (typeof window !== 'undefined') {

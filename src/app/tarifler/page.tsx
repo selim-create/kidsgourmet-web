@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from "next/link";
 import { recipeService } from '@/services/recipe-service';
 import { RecipeCard } from '@/lib/types';
@@ -59,18 +59,18 @@ export default function RecipesPage() {
   };
 
   // Check if a recipe is suitable for the child's age
-  const isRecipeSuitableForAge = (recipe: RecipeCard): boolean => {
+  const isRecipeSuitableForAge = useCallback((recipe: RecipeCard): boolean => {
     if (!profile.currentAgeGroup) return true; // No profile, all recipes shown
     
     // Check if recipe's age group matches the child's age group
     return recipe.age_group === profile.currentAgeGroup.name;
-  };
+  }, [profile.currentAgeGroup]);
 
   // Get color code for age group
-  const getAgeGroupColor = (ageGroupName: string): string => {
+  const getAgeGroupColor = useCallback((ageGroupName: string): string => {
     const ageGroup = ageGroups.find(ag => ag.name === ageGroupName);
     return ageGroup?.age_group_meta?.color_code || '#87CEEB';
-  };
+  }, [ageGroups]);
 
   // Separate recipes into suitable and unsuitable
   const { suitableRecipes, otherRecipes } = useMemo(() => {
@@ -82,7 +82,7 @@ export default function RecipesPage() {
     const other = recipes.filter(r => !isRecipeSuitableForAge(r));
 
     return { suitableRecipes: suitable, otherRecipes: other };
-  }, [recipes, profile.birthDate, profile.currentAgeGroup, isRecipeSuitableForAge]);
+  }, [recipes, profile.birthDate, isRecipeSuitableForAge]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">

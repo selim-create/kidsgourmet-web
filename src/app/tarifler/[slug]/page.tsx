@@ -123,8 +123,8 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
             
             {/* Age Warning Banner */}
             <AgeWarningBanner 
-              recipeAgeGroups={ageGroups.filter(ag => recipe.age_groups.includes(ag.name))}
-              recipeIngredients={recipe.ingredients.map(ing => ing.name || ing.text || '')}
+              recipeAgeGroups={ageGroups.filter(ag => (recipe.age_groups || []).includes(ag.name))}
+              recipeIngredients={(recipe.ingredients || []).map(ing => ing.name || ing.text || '')}
             />
             
             {/* HEADER SECTION */}
