@@ -282,28 +282,29 @@ export default function IngredientDetailPage({ params }: { params: { slug: strin
                             </div>
                         </div>
 
-                        {/* PAIRINGS CARD */}
+                        {/* PAIRINGS CARD - Commented out until API provides this data
                         <div className="bg-orange-50 rounded-3xl p-6 border border-orange-100">
                             <h3 className="font-bold text-slate-800 mb-4 flex items-center">
                                 <i className="fa-solid fa-link text-orange-500 mr-2"></i> Uyumlu İkililer
                             </h3>
                             <p className="text-xs text-gray-500 mb-4">{ingredient.name} ile harika giden diğer lezzetler:</p>
                             <div className="flex flex-wrap gap-2">
-                                {ingredient.pairings.map((pairing) => (
+                                {ingredient.pairings && ingredient.pairings.map((pairing) => (
                                     <span key={pairing} className="bg-white px-3 py-1.5 rounded-lg text-sm font-bold text-gray-600 shadow-sm border border-gray-100">
                                         {pairing}
                                     </span>
                                 ))}
                             </div>
                         </div>
+                        */}
 
-                        {/* EXPERT WIDGET */}
+                        {/* EXPERT WIDGET - Commented out until API provides this data
                         <div className="bg-white rounded-3xl p-6 border border-gray-200 text-center">
-                            <img src={ingredient.expert.image} className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-white shadow-md" alt="Uzman" />
-                            <p className="text-sm text-gray-600 mb-3">Bu içerik <strong className="text-slate-800">{ingredient.expert.name}</strong> tarafından kontrol edildi.</p>
-                            {/* Localde Link kullanın */}
+                            <img src={ingredient.expert?.image || ''} className="w-16 h-16 rounded-full mx-auto mb-3 border-2 border-white shadow-md" alt="Uzman" />
+                            <p className="text-sm text-gray-600 mb-3">Bu içerik <strong className="text-slate-800">{ingredient.expert?.name}</strong> tarafından kontrol edildi.</p>
                             <Link href="#" className="text-green-600 text-xs font-bold hover:underline">Rejimde.com Profilini Gör</Link>
                         </div>
+                        */}
 
                     </div>
                 </div>
