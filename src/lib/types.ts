@@ -95,21 +95,57 @@ export interface TariftenRecipe {
   servings: string;
 }
 
-// Ingredient (Malzeme) tip tanımı
+// Ingredient (Malzeme) tip tanımı - GÜNCELLENMİŞ
 export interface Ingredient {
   id: number;
   name: string;
   slug: string;
   description: string;
   image: string;
+  category?: string; // 🆕 "Meyveler", "Sebzeler", "Proteinler", "Tahıllar", "Süt Ürünleri"
   start_age: string;
   benefits: string;
   prep_methods: string[];
   allergy_risk: 'Düşük' | 'Orta' | 'Yüksek';
   season: string;
   storage_tips?: string;
+  
+  // 🆕 YENİ ALANLAR
+  prep_by_age?: PrepByAge[];        // Yaşa göre hazırlama
+  selection_tips?: string;           // Nasıl seçilir?
+  pro_tips?: string;                 // Püf noktaları
+  pairings?: IngredientPairing[];   // Uyumlu ikililer
+  nutrition?: IngredientNutrition;  // Besin değerleri (genişletilmiş)
+  
   related_recipes: RecipeCard[];
   faq?: FAQ[];
+  
+  // 🆕 AI Meta
+  ai_generated?: boolean;
+  image_source?: string;
+}
+
+// 🆕 Yaşa göre hazırlama
+export interface PrepByAge {
+  age: string;      // "6-9 Ay", "9+ Ay (BLW)"
+  method: string;   // "Püre", "Parmak Yiyecek"
+  text: string;     // Detaylı açıklama
+}
+
+// 🆕 Uyumlu ikili
+export interface IngredientPairing {
+  emoji: string;   // "🍌"
+  name: string;    // "Muz"
+}
+
+// 🆕 Besin değerleri (genişletilmiş)
+export interface IngredientNutrition {
+  calories?: string;
+  protein?: string;
+  carbs?: string;
+  fat?: string;
+  fiber?: string;
+  vitamins?: string;
 }
 
 export interface FAQ {
