@@ -6,6 +6,9 @@ export const API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://api
 export const KG_API_NAMESPACE = '/kg/v1';
 export const WP_API_NAMESPACE = '/wp/v2';
 
+// Tariften.com API
+export const TARIFTEN_API_URL = 'https://api.tariften.com/wp-json/tariften/v1';
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Recipes
@@ -32,4 +35,8 @@ export const API_ENDPOINTS = {
   
   // Search
   SEARCH: `${KG_API_NAMESPACE}/search`,
+  
+  // Tariften.com Cross-Sell
+  TARIFTEN_BY_INGREDIENT: (ingredient: string) => 
+    `${TARIFTEN_API_URL}/recipes/by-ingredient?ingredient=${encodeURIComponent(ingredient)}&limit=3`,
 } as const;

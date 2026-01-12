@@ -5,6 +5,7 @@ import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { Recipe } from '@/lib/types';
+import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -63,7 +64,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
   // Kopyalama fonksiyonu
   const copyIngredients = () => {
-    const text = ingredients.map(i => `- ${i.text}`).join("\n");
+    const text = ingredients.map(i => {
+      const amount = i.amount ? `${i.amount} ` : '';
+      const unit = i.unit ? `${i.unit} ` : '';
+      const name = i.name || i.text || '';
+      return `- ${amount}${unit}${name}`;
+    }).join("\n");
     navigator.clipboard.writeText(text);
     alert("Malzemeler kopyalandı!");
   };
@@ -244,7 +250,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                     </div>
                                     <div className="flex-grow border-b border-gray-50 pb-3 group-hover:border-gray-100 transition-colors">
                                         <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${ing.checked ? 'line-through text-gray-400' : 'text-slate-700'}`}>
-                                            <span className="font-bold">{ing.text}</span>
+                                            <span className="font-bold">
+                                                {ing.amount && `${ing.amount} `}
+                                                {ing.unit && `${ing.unit} `}
+                                                {ing.name || ing.text}
+                                            </span>
                                             
                                             {ing.note && !ing.checked && (
                                                 <div className="bg-blue-50 text-blue-600 text-xs px-3 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-blue-100 transition-colors w-fit" onClick={(e) => { e.stopPropagation(); alert(ing.note); }}>
@@ -283,7 +293,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                         ? 'bg-green-500 border-green-500 text-white' 
                                         : 'bg-orange-50 text-orange-500 border-white shadow-sm group-hover:border-orange-500'
                                     }`}>
-                                        {step.completed ? <i className="fa-solid fa-check"></i> : step.id}
+                                        {step.completed ? <i className="fa-solid fa-check"></i> : (step.id || index + 1)}
                                     </div>
                                     <h3 className={`font-bold mb-2 transition-colors ${step.completed ? 'line-through text-gray-400' : 'text-slate-800 group-hover:text-orange-500'}`}>
                                         {step.title}
@@ -340,25 +350,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 <div className="lg:col-span-1 space-y-8">
                     
                     {/* ECOSYSTEM CROSS-SELL */}
-                    <div className="bg-slate-800 rounded-[2rem] p-6 text-white relative overflow-hidden shadow-xl sticky top-24">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full blur-2xl opacity-30 -mr-10 -mt-10"></div>
-                        
-                        <div className="relative z-10">
-                            <div className="flex items-center gap-2 mb-4 opacity-80">
-                                <i className="fa-solid fa-utensils"></i>
-                                <span className="text-xs font-bold uppercase tracking-wider">Ebeveynlere Özel</span>
-                            </div>
-                            
-                            <h3 className="font-sans font-bold text-2xl mb-3">Bizimkiler Ne Yiyecek?</h3>
-                            <p className="text-slate-300 text-sm mb-6 leading-relaxed">
-                                Artan bal kabağı ile kendinize harika bir <span className="text-purple-400 font-bold">Sinkonta (Fırın Kabak)</span> yapabilirsiniz.
-                            </p>
-
-                            <Link href="https://tariften.com" target="_blank" className="block w-full bg-purple-600 hover:bg-purple-500 text-white text-center font-bold py-3 rounded-xl transition-all shadow-lg border border-purple-400">
-                                Tarifi Gör (Tariften.com) <i className="fa-solid fa-arrow-up-right-from-square ml-1 text-xs"></i>
-                            </Link>
-                        </div>
-                    </div>
+                    <CrossSellWidget 
+                      crossSell={recipe.cross_sell}
+                      ingredients={recipe.ingredients}
+                      recipeTitle={recipe.title}
+                    />
 
                     {/* RELATED RECIPES */}
                     <div>
