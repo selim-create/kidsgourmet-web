@@ -1,11 +1,37 @@
 "use client";
 
-import React, { useRef } from 'react';
-import Link from 'next/link'; 
+import React, { useRef, useState, useEffect } from 'react';
+import Link from 'next/link';
+import { recipeService } from '@/services/recipe-service';
+import { RecipeCard } from '@/lib/types';
 
 // --- HOME PAGE ---
 export default function Home() {
   const sliderRef = useRef<HTMLDivElement>(null);
+  const [featuredRecipes, setFeaturedRecipes] = useState<RecipeCard[]>([]);
+  const [latestRecipes, setLatestRecipes] = useState<RecipeCard[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [featured, latest] = await Promise.all([
+          recipeService.getFeatured(5),
+          recipeService.getAll({ perPage: 8 })
+        ]);
+        setFeaturedRecipes(featured || []);
+        setLatestRecipes(latest || []);
+      } catch (error) {
+        console.error("Ana sayfa verileri yüklenirken hata:", error);
+        setFeaturedRecipes([]);
+        setLatestRecipes([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
 
   const scrollSlider = (direction: 'left' | 'right') => {
     if (sliderRef.current) {
@@ -49,29 +75,60 @@ export default function Home() {
               {/* Scroll Container */}
               <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 scroll-smooth px-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                   
-                  {/* SLIDE 1: Hero Recipe (Wide) */}
-                  <div className="flex-shrink-0 w-full md:w-[650px] lg:w-[800px] snap-center bg-white rounded-[2rem] shadow-lg overflow-hidden relative flex flex-col md:flex-row group cursor-pointer border border-gray-100">
-                      <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden bg-gray-100">
-                          <img src="https://placehold.co/800x800/FF8A65/ffffff?text=Sebze+Corbasi" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Sebze Çorbası" />
-                          <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-orange-500 shadow-sm">
-                              <i className="fa-solid fa-fire mr-1"></i> Haftanın Tarifi
-                          </div>
-                      </div>
-                      <div className="p-8 md:p-10 flex flex-col justify-center w-full md:w-1/2 bg-white">
-                          <span className="text-green-500 font-bold text-sm mb-2 uppercase tracking-wider">6-9 Ay • Bağışıklık</span>
-                          <h3 className="font-sans font-bold text-3xl text-slate-800 mb-4 leading-tight">Kış Güneşi: Bal Kabaklı Bebek Çorbası</h3>
-                          <p className="text-gray-500 mb-6 line-clamp-2">Bebeğinizin bağışıklığını güçlendirecek, vitamin deposu ve sindirimi kolay harika bir kış çorbası tarifi.</p>
-                          <div className="flex items-center gap-4">
-                              <button className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-md hover:bg-orange-600 transition-colors">
-                                  Tarife Git
-                              </button>
-                              <span className="text-xs text-gray-400">
-                                  <i className="fa-solid fa-clock mr-1"></i> 20 dk
-                              </span>
-                          </div>
-                      </div>
-                  </div>
-
+                  {loading ? (
+                    <div className="flex justify-center items-center w-full h-64">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                    </div>
+                  ) : featuredRecipes.length > 0 ? (
+                    <>
+                      {/* SLIDE 1: Hero Recipe (Wide) - Featured Recipe */}
+                      {featuredRecipes[0] && (
+                        <Link href={`/tarifler/${featuredRecipes[0].slug}`} className="flex-shrink-0 w-full md:w-[650px] lg:w-[800px] snap-center bg-white rounded-[2rem] shadow-lg overflow-hidden relative flex flex-col md:flex-row group cursor-pointer border border-gray-100">
+                            <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden bg-gray-100">
+                                <img src={featuredRecipes[0].image || 'https://placehold.co/800x800/FF8A65/ffffff?text=Tarif'} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={featuredRecipes[0].title} />
+                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-orange-500 shadow-sm">
+                                    <i className="fa-solid fa-fire mr-1"></i> Haftanın Tarifi
+                                </div>
+                            </div>
+                            <div className="p-8 md:p-10 flex flex-col justify-center w-full md:w-1/2 bg-white">
+                                <span className="text-green-500 font-bold text-sm mb-2 uppercase tracking-wider">{featuredRecipes[0].age_group}</span>
+                                <h3 className="font-sans font-bold text-3xl text-slate-800 mb-4 leading-tight">{featuredRecipes[0].title}</h3>
+                                <div className="flex items-center gap-4">
+                                    <span className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-md group-hover:bg-orange-600 transition-colors">
+                                        Tarife Git
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        <i className="fa-solid fa-clock mr-1"></i> {featuredRecipes[0].prep_time}
+                                    </span>
+                                </div>
+                            </div>
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex-shrink-0 w-full md:w-[650px] lg:w-[800px] snap-center bg-white rounded-[2rem] shadow-lg overflow-hidden relative flex flex-col md:flex-row group cursor-pointer border border-gray-100">
+                        <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden bg-gray-100">
+                            <img src="https://placehold.co/800x800/FF8A65/ffffff?text=Sebze+Corbasi" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Sebze Çorbası" />
+                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-orange-500 shadow-sm">
+                                <i className="fa-solid fa-fire mr-1"></i> Haftanın Tarifi
+                            </div>
+                        </div>
+                        <div className="p-8 md:p-10 flex flex-col justify-center w-full md:w-1/2 bg-white">
+                            <span className="text-green-500 font-bold text-sm mb-2 uppercase tracking-wider">6-9 Ay • Bağışıklık</span>
+                            <h3 className="font-sans font-bold text-3xl text-slate-800 mb-4 leading-tight">Kış Güneşi: Bal Kabaklı Bebek Çorbası</h3>
+                            <p className="text-gray-500 mb-6 line-clamp-2">Bebeğinizin bağışıklığını güçlendirecek, vitamin deposu ve sindirimi kolay harika bir kış çorbası tarifi.</p>
+                            <div className="flex items-center gap-4">
+                                <button className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-md hover:bg-orange-600 transition-colors">
+                                    Tarife Git
+                                </button>
+                                <span className="text-xs text-gray-400">
+                                    <i className="fa-solid fa-clock mr-1"></i> 20 dk
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                  )}
+                  
                   {/* SLIDE 2: Native AD (Sponsored) */}
                   <div className="flex-shrink-0 w-full md:w-[400px] lg:w-[450px] snap-center bg-blue-50 rounded-[2rem] shadow-md overflow-hidden relative flex flex-col border border-blue-100">
                       <div className="h-48 relative overflow-hidden bg-blue-100">
@@ -173,10 +230,45 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-8">
                   <h2 className="font-sans font-bold text-3xl text-slate-800">Minik Gurmelere Özel</h2>
-                  <Link href="#" className="text-orange-500 font-bold hover:underline">Tümünü Gör</Link>
+                  <Link href="/tarifler" className="text-orange-500 font-bold hover:underline">Tümünü Gör</Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+                </div>
+              ) : latestRecipes.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {latestRecipes.map((recipe) => (
+                      <Link href={`/tarifler/${recipe.slug}`} key={recipe.id} className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
+                          <div className="h-56 relative overflow-hidden bg-gray-50">
+                              <img src={recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={recipe.title} />
+                              <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
+                                  <i className="fa-regular fa-heart"></i>
+                              </button>
+                              <div className="absolute bottom-3 left-3 flex gap-2">
+                                   <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
+                                      {recipe.age_group}
+                                  </span>
+                              </div>
+                          </div>
+                          <div className="p-5">
+                              <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">{recipe.title}</h3>
+                              <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3">
+                                  <span><i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}</span>
+                              </div>
+                              <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                                   <div className="flex items-center">
+                                      <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
+                                      <span className="text-xs text-gray-500 font-medium">Uzman Onaylı</span>
+                                   </div>
+                              </div>
+                          </div>
+                      </Link>
+                    ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                   {/* Card 1 */}
                   <div className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
                       <div className="h-56 relative overflow-hidden bg-orange-50">
