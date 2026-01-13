@@ -10,6 +10,7 @@ import AgeWarningBanner from '@/components/features/age/AgeWarningBanner';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import { toast } from 'sonner';
 import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
+import ClientHead from '@/components/seo/ClientHead';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -131,6 +132,14 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
+        {/* SEO Meta Tags */}
+        <ClientHead
+          title={recipe.seo?.title || `${decodeHTMLEntities(recipe.title)} - KidsGourmet`}
+          description={recipe.seo?.description || decodeHTMLEntities(recipe.excerpt || recipe.content).substring(0, 160)}
+          keywords={recipe.seo?.focus_keywords || recipe.diet_types}
+          ogImage={recipe.seo?.og_image || recipe.image}
+          url={typeof window !== 'undefined' ? window.location.href : undefined}
+        />
         
         {/* BREADCRUMB */}
         <div className="bg-white border-b border-gray-100">

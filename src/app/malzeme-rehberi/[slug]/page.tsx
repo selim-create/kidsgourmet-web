@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { ingredientService } from '@/services/ingredient-service';
 import { Ingredient, PrepByAge, IngredientPairing } from '@/lib/types';
 import { sanitizeHTML, decodeHTMLEntities } from '@/utils/helpers';
+import ClientHead from '@/components/seo/ClientHead';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -60,6 +61,14 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
+        {/* SEO Meta Tags */}
+        <ClientHead
+          title={`${decodeHTMLEntities(ingredient.name)} - Malzeme Rehberi - KidsGourmet`}
+          description={decodeHTMLEntities(ingredient.description).substring(0, 160)}
+          keywords={[ingredient.name, ingredient.category || '', 'bebek beslenmesi', 'ek gıda']}
+          ogImage={ingredient.image}
+          url={typeof window !== 'undefined' ? window.location.href : undefined}
+        />
 
         {/* BREADCRUMB */}
         <div className="bg-white border-b border-gray-100">
