@@ -29,7 +29,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-180px)] bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mx-auto max-w-6xl">
+    <div className="flex min-h-screen bg-white overflow-hidden mx-auto max-w-6xl">
         
         {/* LEFT SIDE: IMAGE (Desktop) */}
         <div className="hidden lg:flex lg:w-1/2 bg-brand-light relative items-center justify-center p-12 overflow-hidden">
@@ -50,7 +50,7 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <h2 className="font-display font-bold text-4xl text-slate-800 mb-4">Mutfakta Yalnız Değilsiniz.</h2>
-                <p className="text-gray-600 text-lg">KidsGourmet'e giriş yapın, bebeğinize özel haftalık planlara ve uzman onaylı tariflere ulaşın.</p>
+                <p className="text-gray-600 text-lg">KidsGourmet&apos;e giriş yapın, bebeğinize özel haftalık planlara ve uzman onaylı tariflere ulaşın.</p>
             </div>
         </div>
 
@@ -64,12 +64,9 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        <i className="fa-brands fa-google text-lg text-red-500"></i> Google
-                    </button>
-                    <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        <i className="fa-brands fa-facebook text-lg text-blue-600"></i> Facebook
+                <div>
+                    <button className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <i className="fa-brands fa-google text-lg text-red-500"></i> Google ile Giriş Yap
                     </button>
                 </div>
 

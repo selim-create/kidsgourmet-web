@@ -30,7 +30,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-180px)] bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mx-auto max-w-6xl">
+    <div className="flex min-h-screen bg-white overflow-hidden mx-auto max-w-6xl">
         
         {/* LEFT SIDE: IMAGE (Desktop) */}
         <div className="hidden lg:flex lg:w-1/2 bg-green-50 relative items-center justify-center p-12 overflow-hidden">
@@ -65,12 +65,9 @@ export default function RegisterPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                    <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        <i className="fa-brands fa-google text-lg text-red-500"></i> Google
-                    </button>
-                    <button className="flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        <i className="fa-brands fa-facebook text-lg text-blue-600"></i> Facebook
+                <div>
+                    <button className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                        <i className="fa-brands fa-google text-lg text-red-500"></i> Google ile Kayıt Ol
                     </button>
                 </div>
 
