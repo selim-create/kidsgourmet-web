@@ -5,6 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { UserProvider } from "@/hooks/use-user";
 import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
+import { Toaster } from "sonner";
 
 // const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 // const quicksand = Quicksand({ subsets: ["latin"], variable: "--font-quicksand" });
@@ -33,6 +34,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
+            <Toaster position="top-center" richColors />
           </ChildProfileProvider>
         </UserProvider>
       </body>

@@ -2,18 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
+import { usePathname } from 'next/navigation';
+import { toast } from 'sonner';
+import { hasShownBirthDateToast, markBirthDateToastShown, shouldShowBirthDateToast } from '@/utils/helpers';
 
 export default function ChildBirthDatePicker() {
   const { profile, setChildBirthDate } = useChildProfile();
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
+  const pathname = usePathname();
 
-  // Show modal on first visit if no birth date is set (client-side only)
+  // Show toast notification instead of modal (only once per session on specific pages)
   useEffect(() => {
-    if (!profile.birthDate) {
-      setShowModal(true);
+    if (!profile.birthDate && shouldShowBirthDateToast(pathname) && !hasShownBirthDateToast()) {
+      // Delay toast slightly to avoid showing immediately on page load
+      const timer = setTimeout(() => {
+        toast.info('Kişiselleştirilmiş tarif önerileri için çocuğunuzun doğum tarihini ekleyebilirsiniz', {
+          duration: 5000,
+          action: {
+            label: 'Ekle',
+            onClick: () => setShowModal(true),
+          },
+        });
+        markBirthDateToastShown();
+      }, 1500);
+      
+      return () => clearTimeout(timer);
     }
-  }, [profile.birthDate]);
+  }, [profile.birthDate, pathname]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
