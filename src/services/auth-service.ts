@@ -5,13 +5,18 @@ import { AuthResponse, LoginCredentials, RegisterData, User } from '@/lib/types'
 export const authService = {
   /**
    * User login
-   * Backend accepts both email and username in the username field
+   * Backend accepts both email and username in the email field
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await fetchAPI<AuthResponse>(API_ENDPOINTS.AUTH_LOGIN, {
+    const response = await fetchAPI<{
+      token: string;
+      user_id: number;
+      email: string;
+      name: string;
+    }>(API_ENDPOINTS.AUTH_LOGIN, {
       method: 'POST',
       body: JSON.stringify({
-        username: credentials.username,
+        email: credentials.username,  // Backend expects 'email' parameter
         password: credentials.password,
       }),
     });
@@ -20,22 +25,74 @@ export const authService = {
       setToken(response.token);
     }
     
-    return response;
+    // Transform response to AuthResponse format
+    return {
+      token: response.token,
+      user: {
+        id: response.user_id,
+        email: response.email,
+        name: response.name,
+        display_name: response.name,
+        children: [],
+        created_at: new Date().toISOString(),
+      },
+    };
   },
 
   /**
    * Kullanıcı kaydı
    */
   register: async (data: RegisterData): Promise<AuthResponse> => {
-    const response = await fetchAPI<AuthResponse>(API_ENDPOINTS.AUTH_REGISTER, {
+    const response = await fetchAPI<{
+      token: string;
+      user_id: number;
+      email: string;
+      name: string;
+    }>(API_ENDPOINTS.AUTH_REGISTER, {
       method: 'POST',
       body: JSON.stringify(data),
     });
     
-    // Token'ı kaydet
-    setToken(response.token);
+    if (response.token) {
+      setToken(response.token);
+    }
     
-    return response;
+    // Transform response to AuthResponse format
+    return {
+      token: response.token,
+      user: {
+        id: response.user_id,
+        email: response.email,
+        name: response.name,
+        display_name: response.name,
+        children: [],
+        created_at: new Date().toISOString(),
+      },
+    };
+  },
+
+  /**
+   * Google ile giriş
+   */
+  googleLogin: async (idToken: string): Promise<AuthResponse> => {
+    const response = await fetchAPI<{
+      success: boolean;
+      token: string;
+      user: User;
+      message: string;
+    }>(API_ENDPOINTS.AUTH_GOOGLE, {
+      method: 'POST',
+      body: JSON.stringify({ id_token: idToken }),
+    });
+    
+    if (response.token) {
+      setToken(response.token);
+    }
+    
+    return {
+      token: response.token,
+      user: response.user,
+    };
   },
 
   /**
@@ -50,7 +107,21 @@ export const authService = {
    */
   getCurrentUser: async (): Promise<User | null> => {
     try {
-      return await fetchAPI<User>(API_ENDPOINTS.AUTH_ME, {}, true);
+      const response = await fetchAPI<{
+        user_id: number;
+        email: string;
+        name: string;
+      }>(API_ENDPOINTS.AUTH_ME, {}, true);
+      
+      // Transform response to User format
+      return {
+        id: response.user_id,
+        email: response.email,
+        name: response.name,
+        display_name: response.name,
+        children: [],
+        created_at: new Date().toISOString(),
+      };
     } catch (error) {
       return null;
     }
