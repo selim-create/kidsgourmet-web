@@ -2,6 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```bash
+# WordPress API URL
+NEXT_PUBLIC_WORDPRESS_API_URL=https://api.kidsgourmet.com.tr/wp-json
+
+# Google OAuth Client ID (required for Google Sign-In)
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+```
+
+**Note:** The Google Client ID should match the one configured in the WordPress backend admin panel.
+
+### Development Server
+
 First, run the development server:
 
 ```bash

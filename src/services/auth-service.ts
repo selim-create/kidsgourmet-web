@@ -26,6 +26,8 @@ export const authService = {
     }
     
     // Transform response to AuthResponse format
+    // Note: Backend doesn't return children or created_at in login response
+    // These fields will be populated when user data is fetched via getCurrentUser()
     return {
       token: response.token,
       user: {
@@ -58,6 +60,8 @@ export const authService = {
     }
     
     // Transform response to AuthResponse format
+    // Note: Backend doesn't return children or created_at in register response
+    // These fields will be populated when user data is fetched via getCurrentUser()
     return {
       token: response.token,
       user: {
@@ -114,6 +118,8 @@ export const authService = {
       }>(API_ENDPOINTS.AUTH_ME, {}, true);
       
       // Transform response to User format
+      // Note: Backend doesn't return children or created_at in /me response
+      // These fields will be fetched separately via user endpoints if needed
       return {
         id: response.user_id,
         email: response.email,

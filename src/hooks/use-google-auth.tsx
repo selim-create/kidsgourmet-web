@@ -44,6 +44,16 @@ export function useGoogleAuth() {
   // Google Client ID - environment variable'dan al
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
+  // Warn if Google Client ID is not configured
+  useEffect(() => {
+    if (!clientId && typeof window !== 'undefined') {
+      console.warn(
+        'NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable is not set. ' +
+        'Google Sign-In will not work. Please add it to your .env.local file.'
+      );
+    }
+  }, [clientId]);
+
   useEffect(() => {
     // Google Sign-In script'ini yükle
     if (typeof window !== 'undefined' && !window.google) {
