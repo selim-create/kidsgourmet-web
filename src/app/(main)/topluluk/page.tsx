@@ -224,7 +224,7 @@ export default function CommunityPage() {
                 {!loading && discussions.map((discussion) => (
                   <div 
                     key={discussion.id}
-                    className={`bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow ${
+                    className={`bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative ${
                       discussion.expert_answered
                         ? 'border-l-4 border-green-400'
                         : 'border border-gray-100'

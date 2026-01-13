@@ -5,7 +5,7 @@ import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
 import { getDiscussionBySlug, getDiscussionComments, addComment } from '@/lib/community';
-import { formatRelativeTime } from '@/utils/helpers';
+import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
 import type { Discussion, DiscussionComment } from '@/lib/types';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -166,7 +166,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                         </h1>
                         <div 
                           className="text-gray-600 text-lg leading-relaxed mb-6 whitespace-pre-line"
-                          dangerouslySetInnerHTML={{ __html: discussion.content || discussion.excerpt }}
+                          dangerouslySetInnerHTML={{ __html: sanitizeHTML(discussion.content || discussion.excerpt) }}
                         />
 
                         {/* Stats & Share */}
@@ -208,7 +208,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
 
                           <div 
                             className="prose prose-sm prose-green max-w-none text-slate-700"
-                            dangerouslySetInnerHTML={{ __html: comment.content }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content) }}
                           />
                       </div>
                     ))}
@@ -237,7 +237,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                 </div>
                                 <div 
                                   className="text-sm text-gray-600 mb-3"
-                                  dangerouslySetInnerHTML={{ __html: comment.content }}
+                                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content) }}
                                 />
                                 <div className="flex gap-4">
                                     <button className="text-xs font-bold text-gray-500 hover:text-orange-500">
