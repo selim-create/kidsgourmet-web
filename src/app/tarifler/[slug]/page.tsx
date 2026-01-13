@@ -4,17 +4,21 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
-import { Recipe } from '@/lib/types';
+import { Recipe, RecipeIngredient, RecipeInstruction } from '@/lib/types';
 import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
 import AgeWarningBanner from '@/components/features/age/AgeWarningBanner';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
+import { toast } from 'sonner';
+import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
+import ClientHead from '@/components/seo/ClientHead';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
-  const [ingredients, setIngredients] = useState<any[]>([]);
-  const [instructions, setInstructions] = useState<any[]>([]);
+  const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
+  const [originalIngredients, setOriginalIngredients] = useState<RecipeIngredient[]>([]);
+  const [instructions, setInstructions] = useState<RecipeInstruction[]>([]);
   const [activePortion, setActivePortion] = useState("1 Öğün");
   const { ageGroups } = useAgeGroups();
 
@@ -28,12 +32,14 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
           setRecipe(null);
         } else {
           setRecipe(data);
-          setIngredients((data.ingredients || []).map((ing: any, index: number) => ({
+          const ingredientsList = (data.ingredients || []).map((ing: RecipeIngredient, index: number) => ({
             ...ing,
             id: ing.id ?? index,
             checked: false
-          })));
-          setInstructions((data.instructions || []).map((inst: any, index: number) => ({
+          }));
+          setIngredients(ingredientsList);
+          setOriginalIngredients(ingredientsList);
+          setInstructions((data.instructions || []).map((inst: RecipeInstruction, index: number) => ({
             ...inst,
             id: inst.id ?? index,
             completed: false
@@ -65,6 +71,20 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     }));
   };
 
+  // Porsiyon değiştirme fonksiyonu
+  const handlePortionChange = (portion: string) => {
+    setActivePortion(portion);
+    const multiplier = portionMultipliers[portion] || 1;
+    
+    // Calculate new amounts based on original ingredients
+    const updatedIngredients = originalIngredients.map(ing => ({
+      ...ing,
+      amount: ing.amount ? calculatePortion(ing.amount, multiplier) : ing.amount
+    }));
+    
+    setIngredients(updatedIngredients);
+  };
+
   // Kopyalama fonksiyonu
   const copyIngredients = () => {
     const text = ingredients.map(i => {
@@ -74,7 +94,20 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
       return `- ${amount}${unit}${name}`;
     }).join("\n");
     navigator.clipboard.writeText(text);
-    alert("Malzemeler kopyalandı!");
+    toast.success("Malzemeler kopyalandı!");
+  };
+
+  // WhatsApp ile malzeme paylaşımı
+  const shareIngredientsWhatsApp = () => {
+    const text = ingredients.map(i => {
+      const amount = i.amount ? `${i.amount} ` : '';
+      const unit = i.unit ? `${i.unit} ` : '';
+      const name = i.name || i.text || '';
+      return `• ${amount}${unit}${name}`;
+    }).join("\n");
+    
+    const message = `*${recipe?.title || 'Tarif'} - Malzemeler (${activePortion})*\n\n${text}\n\n_KidsGourmet'ten paylaşıldı_`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   // WhatsApp paylaşım fonksiyonu
@@ -99,6 +132,14 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
+        {/* SEO Meta Tags */}
+        <ClientHead
+          title={recipe.seo?.title || `${decodeHTMLEntities(recipe.title)} - KidsGourmet`}
+          description={recipe.seo?.description || decodeHTMLEntities(recipe.excerpt || recipe.content).substring(0, 160)}
+          keywords={recipe.seo?.focus_keywords || recipe.diet_types}
+          ogImage={recipe.seo?.og_image || recipe.image}
+          url={window.location.href}
+        />
         
         {/* BREADCRUMB */}
         <div className="bg-white border-b border-gray-100">
@@ -135,12 +176,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                     
                     {/* Badges */}
                     <div className="absolute top-4 left-4 flex flex-col gap-2">
-                        <span className="bg-white/90 backdrop-blur text-slate-800 px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center">
+                        <span className="bg-white/90 backdrop-blur text-slate-800 px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center w-fit">
                             <i className="fa-regular fa-clock text-orange-500 mr-2"></i> {recipe.prep_time}
                         </span>
                         {recipe.age_groups && recipe.age_groups.length > 0 && (
-                          <span className="bg-green-500 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center">
-                              <i className="fa-solid fa-baby mr-2"></i> {recipe.age_groups[0]}
+                          <span className="bg-green-500 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center w-fit">
+                              <i className="fa-solid fa-baby mr-2"></i> {decodeHTMLEntities(recipe.age_groups[0])}
                           </span>
                         )}
                     </div>
@@ -155,21 +196,50 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
                 {/* Right: Meta Info */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center">
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-3 flex-wrap">
                         {recipe.diet_types && recipe.diet_types.map((feature, index) => (
                             <span key={index} className={`text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ${index === 0 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
-                                {feature}
+                                {decodeHTMLEntities(feature)}
                             </span>
                         ))}
+                        {recipe.meal_type && (
+                            <span className="text-xs font-bold px-2 py-1 rounded uppercase tracking-wide bg-purple-100 text-purple-600">
+                                {decodeHTMLEntities(recipe.meal_type)}
+                            </span>
+                        )}
                     </div>
                     
                     <h1 className="font-display font-bold text-3xl md:text-4xl text-slate-800 mb-4 leading-tight font-sans">
-                        {recipe.title}
+                        {decodeHTMLEntities(recipe.title)}
                     </h1>
                     
                     <p className="text-gray-600 mb-6 text-lg">
-                        {recipe.excerpt || recipe.content}
+                        {decodeHTMLEntities(recipe.excerpt || recipe.content)}
                     </p>
+
+                    {/* Quick Info Grid */}
+                    {(recipe.cook_time || recipe.serving_size || recipe.prep_time) && (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+                        {recipe.prep_time && (
+                          <div className="bg-orange-50 rounded-lg p-3 text-center">
+                            <div className="text-xs text-orange-600 font-medium mb-1">Hazırlık</div>
+                            <div className="font-bold text-slate-800">{recipe.prep_time}</div>
+                          </div>
+                        )}
+                        {recipe.cook_time && (
+                          <div className="bg-red-50 rounded-lg p-3 text-center">
+                            <div className="text-xs text-red-600 font-medium mb-1">Pişirme</div>
+                            <div className="font-bold text-slate-800">{recipe.cook_time}</div>
+                          </div>
+                        )}
+                        {recipe.serving_size && (
+                          <div className="bg-blue-50 rounded-lg p-3 text-center">
+                            <div className="text-xs text-blue-600 font-medium mb-1">Porsiyon</div>
+                            <div className="font-bold text-slate-800">{recipe.serving_size}</div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Expert Approval Box */}
                     {recipe.expert && recipe.expert.approved && (
@@ -222,6 +292,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                     <button onClick={copyIngredients} className="bg-gray-100 hover:bg-gray-200 text-gray-600 w-9 h-9 rounded-lg flex items-center justify-center transition-colors" title="Kopyala">
                                         <i className="fa-regular fa-copy"></i>
                                     </button>
+                                    <button onClick={shareIngredientsWhatsApp} className="bg-green-50 hover:bg-green-100 text-green-600 w-9 h-9 rounded-lg flex items-center justify-center transition-colors" title="WhatsApp ile Paylaş">
+                                        <i className="fa-brands fa-whatsapp"></i>
+                                    </button>
                                 </div>
 
                                 <div className="w-px h-6 bg-gray-200 hidden md:block"></div>
@@ -231,7 +304,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                     {["Tadım", "1 Öğün", "2 Günlük"].map((portion) => (
                                         <button 
                                             key={portion}
-                                            onClick={() => setActivePortion(portion)}
+                                            onClick={() => handlePortionChange(portion)}
                                             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                                 activePortion === portion 
                                                 ? "bg-white text-slate-800 shadow-sm border border-gray-200" 
@@ -328,18 +401,45 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                 <i className="fa-solid fa-circle-info text-blue-400 mr-2"></i> Besin Değerleri
                             </h4>
                             <div className="space-y-2 text-sm text-gray-600">
-                                <div className="flex justify-between border-b border-blue-100 pb-1">
-                                    <span>Kalori</span>
-                                    <span className="font-bold">65 kcal</span>
-                                </div>
-                                <div className="flex justify-between border-b border-blue-100 pb-1">
-                                    <span>A Vitamini</span>
-                                    <span className="font-bold text-green-600">Yüksek</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Lif</span>
-                                    <span className="font-bold">2.4g</span>
-                                </div>
+                                {recipe.nutrition?.calories && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Kalori</span>
+                                      <span className="font-bold">{recipe.nutrition.calories}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.protein && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Protein</span>
+                                      <span className="font-bold">{recipe.nutrition.protein}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.carbs && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Karbonhidrat</span>
+                                      <span className="font-bold">{recipe.nutrition.carbs}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.fat && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Yağ</span>
+                                      <span className="font-bold">{recipe.nutrition.fat}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.fiber && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Lif</span>
+                                      <span className="font-bold">{recipe.nutrition.fiber}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.vitamins && (
+                                  <div className="flex justify-between">
+                                      <span>Vitaminler</span>
+                                      <span className="font-bold text-green-600">{decodeHTMLEntities(recipe.nutrition.vitamins)}</span>
+                                  </div>
+                                )}
+                                {!recipe.nutrition?.calories && !recipe.nutrition?.protein && !recipe.nutrition?.fiber && (
+                                  <p className="text-gray-500 text-xs italic">Besin değerleri henüz eklenmemiş.</p>
+                                )}
                             </div>
                         </div>
 
@@ -347,7 +447,20 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                             <h4 className="font-bold text-slate-800 mb-3 flex items-center">
                                 <i className="fa-solid fa-triangle-exclamation text-red-400 mr-2"></i> Alerjen Uyarısı
                             </h4>
-                            <p className="text-sm text-gray-600 mb-2">Bu tarif düşük alerjen riskine sahiptir. Ancak bebeğinizin daha önce bal kabağı veya patates denediğinden emin olun.</p>
+                            {recipe.allergens && recipe.allergens.length > 0 ? (
+                              <>
+                                <p className="text-sm text-gray-600 mb-3">Bu tarif aşağıdaki alerjenleri içermektedir:</p>
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {recipe.allergens.map((allergen, index) => (
+                                    <span key={index} className="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full">
+                                      {decodeHTMLEntities(allergen)}
+                                    </span>
+                                  ))}
+                                </div>
+                              </>
+                            ) : (
+                              <p className="text-sm text-gray-600 mb-2">Bu tarif düşük alerjen riskine sahiptir. Ancak bebeğinizin malzemeleri daha önce denediğinden emin olun.</p>
+                            )}
                             {/* Localde Link kullanın */}
                             <Link href="#" className="text-xs font-bold text-red-500 underline">3 Gün Kuralı Nedir?</Link>
                         </div>

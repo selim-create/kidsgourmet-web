@@ -7,6 +7,9 @@ export interface Recipe {
   excerpt: string;
   image: string;
   prep_time: string;
+  cook_time?: string;
+  serving_size?: string;
+  meal_type?: string;
   ingredients: RecipeIngredient[];
   instructions: RecipeInstruction[];
   nutrition: NutritionInfo;
@@ -19,6 +22,7 @@ export interface Recipe {
   expert: ExpertInfo;
   related_recipes?: RecipeCard[];
   cross_sell?: CrossSellInfo;
+  seo?: SEOData;
 }
 
 export interface RecipeIngredient {
@@ -44,6 +48,8 @@ export interface RecipeInstruction {
 export interface NutritionInfo {
   calories?: string;
   protein?: string;
+  carbs?: string;
+  fat?: string;
   fiber?: string;
   vitamins?: string;
 }
@@ -214,6 +220,14 @@ export interface PaginatedResponse<T> {
   page: number;
   per_page: number;
   total_pages: number;
+}
+
+// SEO Data
+export interface SEOData {
+  title?: string;
+  description?: string;
+  focus_keywords?: string[];
+  og_image?: string;
 }
 
 export interface ApiError {

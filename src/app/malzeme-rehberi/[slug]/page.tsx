@@ -5,6 +5,8 @@ import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { ingredientService } from '@/services/ingredient-service';
 import { Ingredient, PrepByAge, IngredientPairing } from '@/lib/types';
+import { sanitizeHTML, decodeHTMLEntities } from '@/utils/helpers';
+import ClientHead from '@/components/seo/ClientHead';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -59,6 +61,14 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
+        {/* SEO Meta Tags */}
+        <ClientHead
+          title={`${decodeHTMLEntities(ingredient.name)} - Malzeme Rehberi - KidsGourmet`}
+          description={decodeHTMLEntities(ingredient.description).substring(0, 160)}
+          keywords={[ingredient.name, ingredient.category || '', 'bebek beslenmesi', 'ek gıda']}
+          ogImage={ingredient.image}
+          url={window.location.href}
+        />
 
         {/* BREADCRUMB */}
         <div className="bg-white border-b border-gray-100">
@@ -89,7 +99,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                 {/* LEFT COLUMN (Main Content) */}
                 <div className="lg:col-span-2 flex flex-col gap-8">
                     
-                    {/* HERO CARD */}
+                    {/* HERO CARD - Mobile only, image moved to sidebar on desktop */}
                     <div className="bg-green-50 rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-sm border border-green-100">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-green-200 rounded-full blur-3xl opacity-50"></div>
                         <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-100 rounded-full blur-3xl opacity-50"></div>
@@ -97,12 +107,12 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         <div className="relative z-10 flex-1 text-center md:text-left">
                             {ingredient.category && (
                               <span className="bg-white text-green-600 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wide shadow-sm mb-4 inline-block">
-                                {ingredient.category}
+                                {decodeHTMLEntities(ingredient.category)}
                               </span>
                             )}
-                            <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">{ingredient.name}</h1>
+                            <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">{decodeHTMLEntities(ingredient.name)}</h1>
                             <p className="text-slate-600 text-lg leading-relaxed mb-6">
-                                {ingredient.description}
+                                {decodeHTMLEntities(ingredient.description)}
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                                 <Link href="#recipes" className="bg-green-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-green-600 transition-colors inline-flex items-center justify-center">
@@ -114,17 +124,13 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                             </div>
                         </div>
 
-                        <div className="relative z-10 w-full md:w-1/3 flex justify-center">
+                        {/* Image visible only on mobile */}
+                        <div className="relative z-10 w-full md:w-1/3 flex justify-center lg:hidden">
                             <img 
                               src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} 
                               alt={ingredient.name}
                               className="w-64 h-64 md:w-full md:h-auto rounded-[2rem] shadow-xl transform hover:scale-105 transition-transform object-cover"
                             />
-                            {ingredient.ai_generated && (
-                              <span className="absolute bottom-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                                🤖 AI
-                              </span>
-                            )}
                         </div>
                     </div>
 
@@ -135,15 +141,18 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         {ingredient.benefits && (
                           <div>
                               <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 flex items-center font-sans">
-                                  <i className="fa-solid fa-star text-yellow-400 mr-3 text-xl"></i> Neden {ingredient.name}?
+                                  <i className="fa-solid fa-star text-yellow-400 mr-3 text-xl"></i> Neden {decodeHTMLEntities(ingredient.name)}?
                               </h2>
-                              <div className="prose prose-slate max-w-none text-gray-600 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                                  <p className="mb-4">{ingredient.benefits}</p>
+                              <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                  <div 
+                                    className="prose prose-slate max-w-none text-gray-600 mb-4"
+                                    dangerouslySetInnerHTML={{ __html: sanitizeHTML(ingredient.benefits) }}
+                                  />
                                   {nutritionItems.length > 0 && (
                                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 list-none pl-0">
                                       {nutritionItems.map((item, index) => (
                                         <li key={index} className="flex items-center">
-                                          <i className={`fa-solid ${item.icon} text-green-500 mr-2`}></i> {item.text}
+                                          <i className={`fa-solid ${item.icon} text-green-500 mr-2`}></i> {decodeHTMLEntities(item.text)}
                                         </li>
                                       ))}
                                     </ul>
@@ -276,6 +285,15 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                 <div className="lg:col-span-1 hidden lg:block">
                     <div className="sticky top-24 space-y-6">
                         
+                        {/* IMAGE CARD - Desktop only */}
+                        <div className="rounded-3xl overflow-hidden shadow-lg">
+                            <img 
+                              src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} 
+                              alt={ingredient.name}
+                              className="w-full h-auto object-cover"
+                            />
+                        </div>
+                        
                         {/* AT A GLANCE CARD */}
                         <div className="bg-white rounded-3xl shadow-lg p-6 border border-gray-100 relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-full h-2 bg-green-500"></div>
@@ -310,14 +328,42 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                     <span className="font-bold text-slate-800">{ingredient.season}</span>
                                 </div>
                                 
-                                {/* Besin Değerleri */}
-                                {ingredient.nutrition?.calories && (
-                                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                    <div className="flex items-center text-gray-600">
-                                      <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center mr-3 text-green-500"><i className="fa-solid fa-fire"></i></div>
-                                      <span className="font-medium text-sm">Kalori</span>
+                                {/* Besin Değerleri (100g başına) */}
+                                {(ingredient.nutrition?.calories || ingredient.nutrition?.protein || ingredient.nutrition?.carbs || ingredient.nutrition?.fat || ingredient.nutrition?.fiber) && (
+                                  <div className="pt-3 border-t border-gray-100">
+                                    <h4 className="font-bold text-slate-800 text-sm mb-3">Besin Değerleri (100g)</h4>
+                                    <div className="space-y-2 text-sm">
+                                      {ingredient.nutrition?.calories && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Kalori</span>
+                                          <span className="font-bold text-slate-800">{ingredient.nutrition.calories}</span>
+                                        </div>
+                                      )}
+                                      {ingredient.nutrition?.protein && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Protein</span>
+                                          <span className="font-bold text-slate-800">{ingredient.nutrition.protein}</span>
+                                        </div>
+                                      )}
+                                      {ingredient.nutrition?.carbs && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Karbonhidrat</span>
+                                          <span className="font-bold text-slate-800">{ingredient.nutrition.carbs}</span>
+                                        </div>
+                                      )}
+                                      {ingredient.nutrition?.fat && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Yağ</span>
+                                          <span className="font-bold text-slate-800">{ingredient.nutrition.fat}</span>
+                                        </div>
+                                      )}
+                                      {ingredient.nutrition?.fiber && (
+                                        <div className="flex justify-between">
+                                          <span className="text-gray-600">Lif</span>
+                                          <span className="font-bold text-slate-800">{ingredient.nutrition.fiber}</span>
+                                        </div>
+                                      )}
                                     </div>
-                                    <span className="font-bold text-slate-800">{ingredient.nutrition.calories}</span>
                                   </div>
                                 )}
                             </div>
