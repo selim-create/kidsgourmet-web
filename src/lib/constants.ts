@@ -44,4 +44,16 @@ export const API_ENDPOINTS = {
   // Taxonomies
   AGE_GROUPS: `${WP_API_NAMESPACE}/age-group`,
   MEAL_TYPES: `${WP_API_NAMESPACE}/meal-type`,
+  
+  // Community / Discussion Endpoints
+  CIRCLES: `${KG_API_NAMESPACE}/circles`,
+  CIRCLE_FOLLOW: (id: number) => `${KG_API_NAMESPACE}/circles/${id}/follow`,
+  CIRCLE_UNFOLLOW: (id: number) => `${KG_API_NAMESPACE}/circles/${id}/unfollow`,
+  USER_CIRCLES: `${KG_API_NAMESPACE}/user/circles`,
+  DISCUSSIONS: `${KG_API_NAMESPACE}/discussions`,
+  DISCUSSION_BY_ID: (id: number) => `${KG_API_NAMESPACE}/discussions/${id}`,
+  DISCUSSION_BY_SLUG: (slug: string) => `${KG_API_NAMESPACE}/discussions?slug=${slug}`,
+  DISCUSSION_COMMENTS: (id: number) => `${KG_API_NAMESPACE}/discussions/${id}/comments`,
+  USER_DISCUSSIONS: `${KG_API_NAMESPACE}/user/discussions`,
+  FEED: `${KG_API_NAMESPACE}/feed`,
 } as const;

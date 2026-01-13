@@ -247,3 +247,86 @@ export interface SponsorData {
   gam_impression_url: string | null;
   gam_click_url: string | null;
 }
+
+// ==================== COMMUNITY / DISCUSSION TYPES ====================
+
+export interface Circle {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  color_code: string;
+  order: number;
+  is_following: boolean;
+  discussion_count: number;
+}
+
+export interface DiscussionAuthor {
+  id: number;
+  name: string;
+  avatar: string | null;
+}
+
+export interface DiscussionCircle {
+  id: number;
+  name: string;
+  slug: string;
+  icon: string;
+  color_code: string;
+}
+
+export interface Discussion {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content?: string;
+  status: 'publish' | 'pending' | 'draft';
+  author: DiscussionAuthor;
+  circle: DiscussionCircle | null;
+  is_featured: boolean;
+  expert_answered: boolean;
+  comment_count: number;
+  created_at: string;
+  type: 'discussion';
+}
+
+export interface DiscussionComment {
+  id: number;
+  content: string;
+  author: {
+    id: number;
+    name: string;
+    avatar: string;
+  };
+  is_expert_comment: boolean;
+  parent_id: number;
+  created_at: string;
+}
+
+export interface DiscussionsResponse {
+  discussions: Discussion[];
+  total: number;
+  pages: number;
+  current_page: number;
+}
+
+export interface FeedResponse {
+  discussions: Discussion[];
+  recipes: RecipeCard[];
+  total: number;
+}
+
+export interface CreateDiscussionRequest {
+  title: string;
+  content: string;
+  circle_id: number;
+  is_anonymous?: boolean;
+}
+
+export interface CreateDiscussionResponse {
+  id: number;
+  message: string;
+  status: 'pending';
+}
