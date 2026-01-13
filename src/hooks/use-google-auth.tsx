@@ -74,7 +74,7 @@ export function useGoogleAuth() {
     }
   }, []);
 
-  const initializeGoogleButton = useCallback((elementId: string, onSuccess: (user: any) => void) => {
+  const initializeGoogleButton = useCallback((elementId: string, onSuccess: () => void) => {
     if (!isScriptLoaded || !window.google || !clientId) {
       console.warn('Google Sign-In henüz yüklenmedi veya Client ID eksik');
       return;
@@ -90,9 +90,9 @@ export function useGoogleAuth() {
       client_id: clientId,
       callback: async (response) => {
         try {
-          const authResponse = await handleGoogleResponse(response);
-          onSuccess(authResponse.user);
-        } catch (err) {
+          await handleGoogleResponse(response);
+          onSuccess();
+        } catch {
           // Error already handled in handleGoogleResponse
         }
       },

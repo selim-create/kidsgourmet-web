@@ -20,7 +20,7 @@ export default function RegisterPage() {
   // Google butonunu initialize et
   useEffect(() => {
     if (isScriptLoaded && googleButtonRef.current) {
-      initializeGoogleButton('google-register-button', async (user) => {
+      initializeGoogleButton('google-register-button', async () => {
         await refreshUser();
         router.push("/dashboard");
       });

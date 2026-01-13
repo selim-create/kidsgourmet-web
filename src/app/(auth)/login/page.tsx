@@ -19,7 +19,7 @@ export default function LoginPage() {
   // Google butonunu initialize et
   useEffect(() => {
     if (isScriptLoaded && googleButtonRef.current) {
-      initializeGoogleButton('google-signin-button', async (user) => {
+      initializeGoogleButton('google-signin-button', async () => {
         await refreshUser();
         router.push("/dashboard");
       });
