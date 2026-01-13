@@ -122,7 +122,7 @@ export default function DashboardPage() {
                       <img src={user.avatar_url} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User" />
                     ) : (
                       <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold">
-                        {user?.name.charAt(0).toUpperCase()}
+                        {user?.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?'}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -144,7 +144,7 @@ export default function DashboardPage() {
                       <img src={user.avatar_url} className="w-8 h-8 rounded-full border border-gray-100" alt="User" />
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold">
-                        {user?.name.charAt(0).toUpperCase()}
+                        {user?.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?'}
                       </div>
                     )}
                     <span className="font-bold text-slate-800">Merhaba, {user?.display_name || user?.name}!</span>

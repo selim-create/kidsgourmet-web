@@ -90,7 +90,13 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     
     try {
-      const updateData: any = {
+      interface UpdateProfileData {
+        name: string;
+        email: string;
+        password?: string;
+      }
+
+      const updateData: UpdateProfileData = {
         name,
         email,
       };

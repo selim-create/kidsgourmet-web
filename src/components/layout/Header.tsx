@@ -143,7 +143,10 @@ export default function Header() {
                                 <Link href="/profil" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
                                     <i className="fa-solid fa-user-pen"></i> Profili Düzenle
                                 </Link>
-                                <Link href={`/profil/${user.name.toLowerCase().replace(/\s+/g, '-')}`} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
+                                <Link 
+                                  href={`/profil/${user.name ? user.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : 'profil'}`}
+                                  className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+                                >
                                     <i className="fa-solid fa-user"></i> Profili Görüntüle
                                 </Link>
                                 <Link href="/topluluk/soru-sor" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">

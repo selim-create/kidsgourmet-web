@@ -50,15 +50,22 @@ export default function ChildModal({ isOpen, onClose, onSave, child }: ChildModa
     setIsLoading(true);
 
     try {
-      const childData = {
-        ...(child?.id ? { id: child.id } : {}),
-        name,
-        birth_date: birthDate,
-        allergens: selectedAllergens,
-        notes,
-      };
+      const childData: Omit<Child, 'id'> | Child = child?.id
+        ? {
+            id: child.id,
+            name,
+            birth_date: birthDate,
+            allergens: selectedAllergens,
+            notes,
+          }
+        : {
+            name,
+            birth_date: birthDate,
+            allergens: selectedAllergens,
+            notes,
+          };
 
-      await onSave(childData as any);
+      await onSave(childData);
       onClose();
     } catch (error) {
       console.error('Error saving child:', error);

@@ -30,7 +30,12 @@ export default function UserDropdown() {
 
   const avatarInitial = user.avatar_url 
     ? null 
-    : user.name.charAt(0).toUpperCase();
+    : (user.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?');
+
+  // Generate a safe slug from username
+  const userSlug = user.name 
+    ? user.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') 
+    : 'profil';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -80,7 +85,7 @@ export default function UserDropdown() {
             </Link>
 
             <Link
-              href={`/profil/${user.name.toLowerCase().replace(/\s+/g, '-')}`}
+              href={`/profil/${userSlug}`}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
