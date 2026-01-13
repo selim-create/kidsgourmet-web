@@ -146,15 +146,13 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
               <i className="fa-regular fa-calendar"></i> {new Date(post.date).toLocaleDateString('tr-TR')}
             </div>
           </div>
-          {isSponsored && sponsorData && (
+          {isSponsored && sponsorData && (sponsorData.sponsor_light_logo || sponsorData.sponsor_logo) && (
             <div className="mt-4 flex items-center gap-2">
-              {sponsorData.sponsor_logo && (
-                <img 
-                  src={sponsorData.sponsor_light_logo || sponsorData.sponsor_logo} 
-                  alt={sponsorData.sponsor_name}
-                  className="h-6 object-contain filter brightness-0 invert"
-                />
-              )}
+              <img 
+                src={(sponsorData.sponsor_light_logo || sponsorData.sponsor_logo) as string} 
+                alt={sponsorData.sponsor_name}
+                className="h-6 object-contain"
+              />
             </div>
           )}
         </div>
