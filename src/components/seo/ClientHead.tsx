@@ -26,7 +26,9 @@ export default function ClientHead({ title, description, keywords, ogImage, url 
       if (!content) return;
       
       const attribute = isProperty ? 'property' : 'name';
-      let element = document.querySelector(`meta[${attribute}="${name}"]`);
+      // Safely escape the name value to prevent selector injection
+      const escapedName = name.replace(/"/g, '\\"');
+      let element = document.querySelector(`meta[${attribute}="${escapedName}"]`);
       
       if (!element) {
         element = document.createElement('meta');

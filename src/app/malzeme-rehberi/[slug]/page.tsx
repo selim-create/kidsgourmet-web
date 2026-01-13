@@ -67,7 +67,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
           description={decodeHTMLEntities(ingredient.description).substring(0, 160)}
           keywords={[ingredient.name, ingredient.category || '', 'bebek beslenmesi', 'ek gıda']}
           ogImage={ingredient.image}
-          url={typeof window !== 'undefined' ? window.location.href : undefined}
+          url={window.location.href}
         />
 
         {/* BREADCRUMB */}

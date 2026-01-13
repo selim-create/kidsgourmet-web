@@ -138,7 +138,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
           description={recipe.seo?.description || decodeHTMLEntities(recipe.excerpt || recipe.content).substring(0, 160)}
           keywords={recipe.seo?.focus_keywords || recipe.diet_types}
           ogImage={recipe.seo?.og_image || recipe.image}
-          url={typeof window !== 'undefined' ? window.location.href : undefined}
+          url={window.location.href}
         />
         
         {/* BREADCRUMB */}

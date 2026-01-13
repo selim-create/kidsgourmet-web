@@ -63,10 +63,10 @@ export function calculatePortion(originalAmount: string, multiplier: number): st
   // Calculate new amount
   const newAmount = numericPart * multiplier;
   
-  // Format: remove .0 if whole number, otherwise show 1 decimal
+  // Format: remove trailing zeros after decimal point
   const formatted = newAmount % 1 === 0 
     ? newAmount.toString() 
-    : newAmount.toFixed(1).replace(/\.0$/, '');
+    : newAmount.toFixed(1);
   
   // Replace the numeric part in the original string
   return originalAmount.replace(numericMatch[1], formatted);
