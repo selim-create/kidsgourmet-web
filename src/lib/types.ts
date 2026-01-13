@@ -235,3 +235,15 @@ export interface ApiError {
   message: string;
   status: number;
 }
+
+// Sponsor Data Interface
+export interface SponsorData {
+  is_sponsored: boolean;
+  sponsor_name: string;
+  sponsor_url: string;
+  sponsor_logo: string | null;
+  sponsor_light_logo: string | null;
+  direct_redirect: boolean;
+  gam_impression_url: string | null;
+  gam_click_url: string | null;
+}

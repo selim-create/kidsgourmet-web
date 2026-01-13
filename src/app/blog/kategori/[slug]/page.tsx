@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { use } from 'react'; // Next.js 15+ için gerekli
 import { blogService, BlogPost } from '@/services/blog-service';
+import SponsoredPostCard from '@/components/features/SponsoredPostCard';
 
 export default function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -165,28 +166,10 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
             {/* FEATURED IN CATEGORY (First Post) */}
             {featuredPost && (
                 <div className="mb-12">
-                    {/* Localde Link kullanın */}
-                    <Link href={`/blog/${featuredPost.slug}`} className="group relative block rounded-[2.5rem] overflow-hidden shadow-xl aspect-[16/8] md:aspect-[21/8]">
-                        <img src={getImageUrl(featuredPost)} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={featuredPost.title.rendered} />
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-900/80 to-transparent"></div>
-                        
-                        <div className="absolute bottom-0 left-0 top-0 p-8 md:p-12 max-w-2xl flex flex-col justify-center">
-                            <span className="inline-block w-fit px-3 py-1 bg-white/20 backdrop-blur text-white border border-white/30 rounded-lg text-xs font-bold uppercase tracking-wider mb-4">
-                                Öne Çıkan
-                            </span>
-                            <h2 
-                                className="font-display font-bold text-3xl md:text-4xl text-white mb-4 leading-tight group-hover:underline decoration-white decoration-2 underline-offset-4 font-sans"
-                                dangerouslySetInnerHTML={{ __html: featuredPost.title.rendered }}
-                            />
-                            <p className="text-green-50 text-lg mb-6 line-clamp-2 md:line-clamp-3">
-                                {stripHtml(featuredPost.excerpt.rendered)}
-                            </p>
-                            <div className="flex items-center text-white/90 text-sm gap-4">
-                                <span className="bg-white text-green-800 px-4 py-2 rounded-full font-bold text-xs hover:bg-green-50 transition-colors">Okumaya Başla</span>
-                                <span><i className="fa-regular fa-calendar mr-1"></i> {new Date(featuredPost.date).toLocaleDateString('tr-TR')}</span>
-                            </div>
-                        </div>
-                    </Link>
+                    <SponsoredPostCard 
+                        post={featuredPost} 
+                        variant="hero"
+                    />
                 </div>
             )}
 
@@ -198,29 +181,10 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                     {otherPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {otherPosts.map((post) => (
-                                <article key={post.id} className="flex flex-col group h-full">
-                                    {/* Localde Link kullanın */}
-                                    <Link href={`/blog/${post.slug}`} className="block overflow-hidden rounded-3xl mb-4 relative aspect-[4/3]">
-                                        <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
-                                        <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-green-600 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                                            {categoryInfo?.name}
-                                        </span>
-                                    </Link>
-                                    <div className="flex-1 flex flex-col">
-                                        <h3 className="font-display font-bold text-lg text-slate-800 mb-2 leading-snug group-hover:text-green-600 transition-colors font-sans">
-                                            {/* Localde Link kullanın */}
-                                            <Link href={`/blog/${post.slug}`} dangerouslySetInnerHTML={{ __html: post.title.rendered }} />
-                                        </h3>
-                                        <p className="text-gray-500 text-sm line-clamp-2 mb-3">
-                                            {stripHtml(post.excerpt.rendered)}
-                                        </p>
-                                        <div className="mt-auto flex items-center text-xs text-gray-400 gap-3">
-                                            <span><i className="fa-regular fa-calendar mr-1"></i> {new Date(post.date).toLocaleDateString('tr-TR')}</span>
-                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                            <span>{getAuthorName(post)}</span>
-                                        </div>
-                                    </div>
-                                </article>
+                                <SponsoredPostCard 
+                                    key={post.id}
+                                    post={post}
+                                />
                             ))}
                         </div>
                     ) : (
