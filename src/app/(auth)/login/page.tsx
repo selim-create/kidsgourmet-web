@@ -50,7 +50,7 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <h2 className="font-display font-bold text-4xl text-slate-800 mb-4">Mutfakta Yalnız Değilsiniz.</h2>
-                <p className="text-gray-600 text-lg">KidsGourmet'e giriş yapın, bebeğinize özel haftalık planlara ve uzman onaylı tariflere ulaşın.</p>
+                <p className="text-gray-600 text-lg">KidsGourmet&apos;e giriş yapın, bebeğinize özel haftalık planlara ve uzman onaylı tariflere ulaşın.</p>
             </div>
         </div>
 
