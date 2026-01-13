@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   AUTH_LOGIN: `${KG_API_NAMESPACE}/auth/login`,
   AUTH_REGISTER: `${KG_API_NAMESPACE}/auth/register`,
   AUTH_ME: `${KG_API_NAMESPACE}/auth/me`,
+  AUTH_GOOGLE: `${KG_API_NAMESPACE}/auth/google`,
   
   // User
   USER_PROFILE: `${KG_API_NAMESPACE}/user/profile`,

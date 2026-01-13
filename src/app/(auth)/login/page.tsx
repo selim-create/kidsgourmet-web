@@ -1,17 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useUser();
+  const { login, refreshUser } = useUser();
+  const { isScriptLoaded, initializeGoogleButton, isLoading: googleLoading, error: googleError } = useGoogleAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  // Google butonunu initialize et
+  useEffect(() => {
+    if (isScriptLoaded && googleButtonRef.current) {
+      initializeGoogleButton('google-signin-button', async () => {
+        await refreshUser();
+        router.push("/dashboard");
+      });
+    }
+  }, [isScriptLoaded, initializeGoogleButton, refreshUser, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,12 +77,29 @@ export default function LoginPage() {
                     </p>
                 </div>
 
+                {/* Google Sign-In Button */}
                 <div>
-                    <button className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                        <i className="fa-brands fa-google text-lg text-red-500"></i> Google ile Giriş Yap
-                    </button>
+                    <div 
+                      id="google-signin-button" 
+                      ref={googleButtonRef}
+                      className="w-full flex items-center justify-center"
+                    >
+                      {/* Google SDK butonu buraya render edilecek */}
+                      {!isScriptLoaded && (
+                        <button 
+                          disabled 
+                          className="w-full flex items-center justify-center gap-2 bg-gray-100 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-400 cursor-not-allowed"
+                        >
+                          <i className="fa-brands fa-google text-lg"></i> Google ile Giriş Yap
+                        </button>
+                      )}
+                    </div>
+                    {googleError && (
+                      <p className="text-red-500 text-sm mt-2 text-center">{googleError}</p>
+                    )}
                 </div>
 
+                {/* Divider */}
                 <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                         <div className="w-full border-t border-gray-200"></div>
@@ -79,6 +109,7 @@ export default function LoginPage() {
                     </div>
                 </div>
 
+                {/* Error Message */}
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
                     {error}
@@ -131,7 +162,7 @@ export default function LoginPage() {
                     <div>
                         <button 
                           type="submit" 
-                          disabled={isLoading}
+                          disabled={isLoading || googleLoading}
                           className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
