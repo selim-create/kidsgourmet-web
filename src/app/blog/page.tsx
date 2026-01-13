@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { blogService, BlogPost } from '@/services/blog-service';
+import SponsoredPostCard from '@/components/features/SponsoredPostCard';
 
 export default function BlogListPage() {
   const [activeCategory, setActiveCategory] = useState<number | "Tümü">("Tümü");
@@ -117,34 +118,11 @@ export default function BlogListPage() {
                     {/* FEATURED POST (Hero Card) - Only show on "All" tab */}
                     {activeCategory === "Tümü" && featuredPost && (
                         <div className="mb-16">
-                            {/* Localde Link kullanın */}
-                            <Link href={`/blog/${featuredPost.slug}`} className="group relative block rounded-[2.5rem] overflow-hidden shadow-xl aspect-[16/9] md:aspect-[21/9]">
-                                <img src={getImageUrl(featuredPost)} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={featuredPost.title.rendered} />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                                
-                                <div className="absolute bottom-0 left-0 p-8 md:p-12 max-w-4xl">
-                                    <span className="inline-block px-3 py-1 bg-orange-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
-                                        Editörün Seçimi
-                                    </span>
-                                    <h2 
-                                        className="font-display font-bold text-3xl md:text-5xl text-white mb-4 leading-tight group-hover:underline decoration-green-500 decoration-4 underline-offset-4 font-sans"
-                                        dangerouslySetInnerHTML={{ __html: featuredPost.title.rendered }}
-                                    />
-                                    <p className="text-gray-200 text-lg mb-6 line-clamp-2 hidden md:block">
-                                        {stripHtml(featuredPost.excerpt.rendered)}
-                                    </p>
-                                    <div className="flex items-center text-white/80 text-sm gap-6">
-                                        <div className="flex items-center gap-2">
-                                            {/* Yazar avatarı olmadığı için placeholder */}
-                                            <img src="https://placehold.co/50x50/AED581/ffffff?text=Dr" className="w-8 h-8 rounded-full border border-white/50" alt="Author" />
-                                            <span>{getAuthorName(featuredPost)}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <i className="fa-regular fa-calendar"></i> {new Date(featuredPost.date).toLocaleDateString('tr-TR')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
+                            <SponsoredPostCard 
+                                post={featuredPost} 
+                                categories={categories}
+                                variant="hero"
+                            />
                         </div>
                     )}
 
@@ -153,34 +131,11 @@ export default function BlogListPage() {
                         {posts.map((post) => (
                              // Featured post'u listede tekrar gösterme (sadece "Tümü" sekmesinde)
                             (activeCategory !== "Tümü" || post.id !== featuredPost?.id) && (
-                                <article key={post.id} className="flex flex-col group h-full">
-                                    {/* Localde Link kullanın */}
-                                    <Link href={`/blog/${post.slug}`} className="block overflow-hidden rounded-[2rem] mb-4 relative aspect-[4/3]">
-                                        <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
-                                        <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-500 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                                            {getCategoryName(post)}
-                                        </span>
-                                    </Link>
-                                    <div className="flex-1 flex flex-col">
-                                        <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
-                                            <span>{new Date(post.date).toLocaleDateString('tr-TR')}</span>
-                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                            <span>{getAuthorName(post)}</span>
-                                        </div>
-                                        <h3 className="font-display font-bold text-xl text-slate-800 mb-3 leading-snug group-hover:text-orange-500 transition-colors font-sans">
-                                            {/* Localde Link kullanın */}
-                                            <Link href={`/blog/${post.slug}`} dangerouslySetInnerHTML={{ __html: post.title.rendered }} />
-                                        </h3>
-                                        <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
-                                            {stripHtml(post.excerpt.rendered)}
-                                        </p>
-                                        <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
-                                             <Link href={`/blog/${post.slug}`} className="text-xs font-bold text-slate-700 hover:text-orange-500 transition-colors">
-                                                Devamını Oku <i className="fa-solid fa-arrow-right ml-1"></i>
-                                             </Link>
-                                        </div>
-                                    </div>
-                                </article>
+                                <SponsoredPostCard 
+                                    key={post.id}
+                                    post={post}
+                                    categories={categories}
+                                />
                             )
                         ))}
                     </div>
