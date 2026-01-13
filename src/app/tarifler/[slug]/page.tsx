@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
-import { Recipe, RecipeIngredient } from '@/lib/types';
+import { Recipe, RecipeIngredient, RecipeInstruction } from '@/lib/types';
 import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
 import AgeWarningBanner from '@/components/features/age/AgeWarningBanner';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
@@ -16,9 +16,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const { slug } = use(params);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
-  const [ingredients, setIngredients] = useState<any[]>([]);
-  const [originalIngredients, setOriginalIngredients] = useState<any[]>([]);
-  const [instructions, setInstructions] = useState<any[]>([]);
+  const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
+  const [originalIngredients, setOriginalIngredients] = useState<RecipeIngredient[]>([]);
+  const [instructions, setInstructions] = useState<RecipeInstruction[]>([]);
   const [activePortion, setActivePortion] = useState("1 Öğün");
   const { ageGroups } = useAgeGroups();
 
@@ -32,14 +32,14 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
           setRecipe(null);
         } else {
           setRecipe(data);
-          const ingredientsList = (data.ingredients || []).map((ing: any, index: number) => ({
+          const ingredientsList = (data.ingredients || []).map((ing: RecipeIngredient, index: number) => ({
             ...ing,
             id: ing.id ?? index,
             checked: false
           }));
           setIngredients(ingredientsList);
           setOriginalIngredients(ingredientsList);
-          setInstructions((data.instructions || []).map((inst: any, index: number) => ({
+          setInstructions((data.instructions || []).map((inst: RecipeInstruction, index: number) => ({
             ...inst,
             id: inst.id ?? index,
             completed: false
