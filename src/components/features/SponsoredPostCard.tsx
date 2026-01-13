@@ -93,7 +93,13 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   const renderSponsorLogo = () => {
     if (!isSponsored || !sponsorData) return null;
 
-    const logoUrl = sponsorData.sponsor_logo || sponsorData.sponsor_light_logo;
+    // Logo URL'ini güvenli şekilde al
+    const logoUrl = typeof sponsorData.sponsor_logo === 'string' 
+      ? sponsorData.sponsor_logo 
+      : (typeof sponsorData.sponsor_light_logo === 'string' 
+          ? sponsorData.sponsor_light_logo 
+          : null);
+    
     if (!logoUrl) return null;
 
     return (
@@ -101,7 +107,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
         <span className="text-xs text-gray-400">Sponsor:</span>
         <img 
           src={logoUrl} 
-          alt={sponsorData.sponsor_name}
+          alt={sponsorData.sponsor_name || 'Sponsor'}
           className="h-4 object-contain"
         />
       </div>
@@ -146,15 +152,22 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
               <i className="fa-regular fa-calendar"></i> {new Date(post.date).toLocaleDateString('tr-TR')}
             </div>
           </div>
-          {isSponsored && sponsorData && (sponsorData.sponsor_light_logo || sponsorData.sponsor_logo) && (
-            <div className="mt-4 flex items-center gap-2">
-              <img 
-                src={(sponsorData.sponsor_light_logo || sponsorData.sponsor_logo) as string} 
-                alt={sponsorData.sponsor_name}
-                className="h-6 object-contain"
-              />
-            </div>
-          )}
+          {isSponsored && sponsorData && (() => {
+            const logoUrl = typeof sponsorData.sponsor_light_logo === 'string' 
+              ? sponsorData.sponsor_light_logo 
+              : (typeof sponsorData.sponsor_logo === 'string' 
+                  ? sponsorData.sponsor_logo 
+                  : null);
+            return logoUrl ? (
+              <div className="mt-4 flex items-center gap-2">
+                <img 
+                  src={logoUrl} 
+                  alt={sponsorData.sponsor_name || 'Sponsor'}
+                  className="h-6 object-contain"
+                />
+              </div>
+            ) : null;
+          })()}
         </div>
       </>
     );

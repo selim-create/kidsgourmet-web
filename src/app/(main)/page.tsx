@@ -1,31 +1,56 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect, FormEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { recipeService } from '@/services/recipe-service';
+import { blogService, BlogPost } from '@/services/blog-service';
 import { RecipeCard } from '@/lib/types';
+import { decodeHTMLEntities } from '@/utils/helpers';
+import { useAgeGroups } from '@/hooks/useAgeGroups';
+import FeaturedSlider from '@/components/features/FeaturedSlider';
+import BlogSection from '@/components/features/BlogSection';
+import RecipeCardComponent from '@/components/ui/RecipeCard';
 
 // --- HOME PAGE ---
 export default function Home() {
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const [featuredRecipes, setFeaturedRecipes] = useState<RecipeCard[]>([]);
+  const router = useRouter();
+  const { ageGroups } = useAgeGroups();
   const [latestRecipes, setLatestRecipes] = useState<RecipeCard[]>([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedAge, setSelectedAge] = useState('');
+
+  // Prepare featured content for slider
+  const [featuredContent, setFeaturedContent] = useState<any[]>([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
-        const [featured, latest] = await Promise.all([
+        const [featuredRecipes, latest, posts] = await Promise.all([
           recipeService.getFeatured(5),
-          recipeService.getAll({ perPage: 8 })
+          recipeService.getAll({ perPage: 8 }),
+          blogService.getAll(1, 6)
         ]);
-        setFeaturedRecipes(featured || []);
+        
+        // Prepare featured content (recipes only for now, can be extended with other types)
+        const featured = (featuredRecipes || []).map((recipe: RecipeCard) => ({
+          id: recipe.id,
+          type: 'recipe' as const,
+          date: new Date().toISOString(), // Would come from API in real scenario
+          data: recipe
+        }));
+        
+        setFeaturedContent(featured);
         setLatestRecipes(latest || []);
+        setBlogPosts(posts || []);
       } catch (error) {
         console.error("Ana sayfa verileri yüklenirken hata:", error);
-        setFeaturedRecipes([]);
+        setFeaturedContent([]);
         setLatestRecipes([]);
+        setBlogPosts([]);
       } finally {
         setLoading(false);
       }
@@ -33,15 +58,12 @@ export default function Home() {
     fetchData();
   }, []);
 
-  const scrollSlider = (direction: 'left' | 'right') => {
-    if (sliderRef.current) {
-      const scrollAmount = 400; // Kart genişliğine yakın bir değer
-      if (direction === 'left') {
-        sliderRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-      } else {
-        sliderRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-      }
-    }
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (searchTerm) params.append('q', searchTerm);
+    if (selectedAge) params.append('age', selectedAge);
+    router.push(`/arama?${params.toString()}`);
   };
 
   // Dalgalı arka plan görseli (SVG)
@@ -52,131 +74,26 @@ export default function Home() {
       {/* FontAwesome CDN Link */}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       
-      {/* MAIN SLIDER (Native Ads & Content) */}
-      <div className="relative bg-orange-50/50 pt-8 pb-12 overflow-hidden" style={{ backgroundImage: `url("${waveBgImage}")`, backgroundColor: '#FFFBE6' }}>
+      {/* FEATURED SLIDER */}
+      {loading ? (
+        <div className="relative bg-orange-50/50 pt-8 pb-12" style={{ backgroundImage: `url("${waveBgImage}")`, backgroundColor: '#FFFBE6' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              
-              {/* Slider Header */}
-              <div className="flex justify-between items-end mb-6 px-2">
-                  <div>
-                      <h2 className="font-sans font-bold text-3xl text-slate-800">Öne Çıkanlar</h2>
-                      <p className="text-gray-500 text-sm">Bu hafta anneler neler konuşuyor?</p>
-                  </div>
-                  <div className="flex gap-2">
-                      <button onClick={() => scrollSlider('left')} className="w-10 h-10 rounded-full bg-white shadow-md text-gray-600 hover:text-orange-500 hover:scale-110 transition-all flex items-center justify-center z-10 cursor-pointer">
-                          <i className="fa-solid fa-chevron-left"></i>
-                      </button>
-                      <button onClick={() => scrollSlider('right')} className="w-10 h-10 rounded-full bg-white shadow-md text-gray-600 hover:text-orange-500 hover:scale-110 transition-all flex items-center justify-center z-10 cursor-pointer">
-                          <i className="fa-solid fa-chevron-right"></i>
-                      </button>
-                  </div>
-              </div>
-
-              {/* Scroll Container */}
-              <div ref={sliderRef} className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 scroll-smooth px-1 scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-                  
-                  {loading ? (
-                    <div className="flex justify-center items-center w-full h-64">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-                    </div>
-                  ) : featuredRecipes.length > 0 ? (
-                    <>
-                      {/* SLIDE 1: Hero Recipe (Wide) - Featured Recipe */}
-                      {featuredRecipes[0] && (
-                        <Link href={`/tarifler/${featuredRecipes[0].slug}`} className="flex-shrink-0 w-full md:w-[650px] lg:w-[800px] snap-center bg-white rounded-[2rem] shadow-lg overflow-hidden relative flex flex-col md:flex-row group cursor-pointer border border-gray-100">
-                            <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden bg-gray-100">
-                                <img src={featuredRecipes[0].image || 'https://placehold.co/800x800/FF8A65/ffffff?text=Tarif'} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={featuredRecipes[0].title} />
-                                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-orange-500 shadow-sm">
-                                    <i className="fa-solid fa-fire mr-1"></i> Haftanın Tarifi
-                                </div>
-                            </div>
-                            <div className="p-8 md:p-10 flex flex-col justify-center w-full md:w-1/2 bg-white">
-                                <span className="text-green-500 font-bold text-sm mb-2 uppercase tracking-wider">{featuredRecipes[0].age_group}</span>
-                                <h3 className="font-sans font-bold text-3xl text-slate-800 mb-4 leading-tight">{featuredRecipes[0].title}</h3>
-                                <div className="flex items-center gap-4">
-                                    <span className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-md group-hover:bg-orange-600 transition-colors">
-                                        Tarife Git
-                                    </span>
-                                    <span className="text-xs text-gray-400">
-                                        <i className="fa-solid fa-clock mr-1"></i> {featuredRecipes[0].prep_time}
-                                    </span>
-                                </div>
-                            </div>
-                        </Link>
-                      )}
-                    </>
-                  ) : (
-                    <div className="flex-shrink-0 w-full md:w-[650px] lg:w-[800px] snap-center bg-white rounded-[2rem] shadow-lg overflow-hidden relative flex flex-col md:flex-row group cursor-pointer border border-gray-100">
-                        <div className="w-full md:w-1/2 h-64 md:h-auto relative overflow-hidden bg-gray-100">
-                            <img src="https://placehold.co/800x800/FF8A65/ffffff?text=Sebze+Corbasi" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Sebze Çorbası" />
-                            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-xs font-bold text-orange-500 shadow-sm">
-                                <i className="fa-solid fa-fire mr-1"></i> Haftanın Tarifi
-                            </div>
-                        </div>
-                        <div className="p-8 md:p-10 flex flex-col justify-center w-full md:w-1/2 bg-white">
-                            <span className="text-green-500 font-bold text-sm mb-2 uppercase tracking-wider">6-9 Ay • Bağışıklık</span>
-                            <h3 className="font-sans font-bold text-3xl text-slate-800 mb-4 leading-tight">Kış Güneşi: Bal Kabaklı Bebek Çorbası</h3>
-                            <p className="text-gray-500 mb-6 line-clamp-2">Bebeğinizin bağışıklığını güçlendirecek, vitamin deposu ve sindirimi kolay harika bir kış çorbası tarifi.</p>
-                            <div className="flex items-center gap-4">
-                                <button className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold shadow-md hover:bg-orange-600 transition-colors">
-                                    Tarife Git
-                                </button>
-                                <span className="text-xs text-gray-400">
-                                    <i className="fa-solid fa-clock mr-1"></i> 20 dk
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                  )}
-                  
-                  {/* SLIDE 2: Native AD (Sponsored) */}
-                  <div className="flex-shrink-0 w-full md:w-[400px] lg:w-[450px] snap-center bg-blue-50 rounded-[2rem] shadow-md overflow-hidden relative flex flex-col border border-blue-100">
-                      <div className="h-48 relative overflow-hidden bg-blue-100">
-                          <img src="https://placehold.co/800x400/81D4FA/ffffff?text=Organik+Pure+Reklami" className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Reklam Görseli" />
-                          <div className="absolute top-4 right-4 bg-black/20 text-white px-2 py-0.5 rounded text-[10px] font-medium backdrop-blur">
-                              Sponsorlu
-                          </div>
-                      </div>
-                      <div className="p-6 flex flex-col flex-grow">
-                          <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center p-1">
-                                  <i className="fa-solid fa-star text-yellow-400 text-xs"></i>
-                              </div>
-                              <span className="text-xs font-bold text-gray-500 uppercase">Organik Bebek</span>
-                          </div>
-                          <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">İlk Kaşığım Organik Kavanoz Serisi</h3>
-                          <p className="text-sm text-gray-600 mb-4 flex-grow">Katkı maddesiz, %100 doğal meyve püreleri şimdi KidsGourmet üyelerine özel %20 indirimli.</p>
-                          <button className="w-full bg-white text-blue-500 border-2 border-blue-500 hover:bg-blue-500 hover:text-white py-2 rounded-full font-bold transition-all text-sm">
-                              İncele
-                          </button>
-                      </div>
-                  </div>
-
-                  {/* SLIDE 3: Blog / Guide */}
-                  <div className="flex-shrink-0 w-full md:w-[400px] lg:w-[450px] snap-center bg-white rounded-[2rem] shadow-md overflow-hidden relative flex flex-col border border-gray-100">
-                      <div className="h-48 relative overflow-hidden bg-green-100">
-                          <img src="https://placehold.co/800x400/AED581/ffffff?text=BLW+Rehberi" className="absolute inset-0 w-full h-full object-cover" alt="BLW Rehberi" />
-                          <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/50 to-transparent"></div>
-                          <span className="absolute bottom-4 left-4 text-white font-bold text-lg font-sans">BLW'ye Başlangıç</span>
-                      </div>
-                      <div className="p-6 flex flex-col flex-grow">
-                          <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">Kendi Kendine Beslenme (BLW) Nedir?</h3>
-                          <p className="text-sm text-gray-600 mb-4 flex-grow">Bebeğinizin kendi kendine yemesine izin vermenin 5 altın kuralı ve güvenlik önlemleri.</p>
-                          <Link href="#" className="text-orange-500 font-bold text-sm hover:underline flex items-center">
-                              Rehberi Oku <i className="fa-solid fa-arrow-right ml-2"></i>
-                          </Link>
-                      </div>
-                  </div>
-
-              </div>
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+            </div>
           </div>
-      </div>
+        </div>
+      ) : (
+        <div style={{ backgroundImage: `url("${waveBgImage}")`, backgroundColor: '#FFFBE6' }}>
+          <FeaturedSlider items={featuredContent} />
+        </div>
+      )}
 
       {/* QUICK SEARCH (With Age Filter) */}
       <div className="bg-white -mt-6 relative z-10 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
           <div className="max-w-7xl mx-auto px-4 py-8">
                {/* Search Bar */}
-               <div className="max-w-3xl mx-auto -mt-16 mb-10 relative">
+               <form onSubmit={handleSearch} className="max-w-3xl mx-auto -mt-16 mb-10 relative">
                   <div className="bg-white p-2 rounded-[2rem] shadow-xl border border-gray-100 flex flex-col sm:flex-row items-center gap-2">
                       
                       {/* Search Input */}
@@ -184,7 +101,13 @@ export default function Home() {
                           <div className="text-gray-400 mr-3">
                               <i className="fa-solid fa-carrot text-xl"></i>
                           </div>
-                          <input type="text" placeholder="Evde ne var? (Örn: Havuç, Yumurta)" className="w-full py-3 outline-none text-gray-700 font-medium bg-transparent placeholder-gray-400" />
+                          <input 
+                            type="text" 
+                            placeholder="Evde ne var? (Örn: Havuç, Yumurta)" 
+                            className="w-full py-3 outline-none text-gray-700 font-medium bg-transparent placeholder-gray-400"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
                       </div>
 
                       {/* Separator (Desktop) */}
@@ -192,33 +115,40 @@ export default function Home() {
 
                       {/* Age Filter */}
                       <div className="w-full sm:w-auto px-2">
-                          <select className="w-full bg-gray-50 text-gray-600 font-medium text-sm rounded-xl p-3 outline-none border border-transparent hover:border-orange-200 cursor-pointer transition-colors focus:ring-2 focus:ring-orange-200 appearance-none">
+                          <select 
+                            className="w-full bg-gray-50 text-gray-600 font-medium text-sm rounded-xl p-3 outline-none border border-transparent hover:border-orange-200 cursor-pointer transition-colors focus:ring-2 focus:ring-orange-200 appearance-none"
+                            value={selectedAge}
+                            onChange={(e) => setSelectedAge(e.target.value)}
+                          >
                               <option value="">Tüm Aylar</option>
-                              <option value="6-9">6-9 Ay (Başlangıç)</option>
-                              <option value="9-12">9-12 Ay (Pütürlü)</option>
-                              <option value="12+">12+ Ay (Sofra)</option>
+                              {ageGroups.map(ag => (
+                                <option key={ag.id} value={ag.slug}>{ag.name}</option>
+                              ))}
                           </select>
                       </div>
 
                       {/* Submit Button */}
-                      <button className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-md whitespace-nowrap">
+                      <button 
+                        type="submit"
+                        className="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition-all shadow-md whitespace-nowrap"
+                      >
                           Tarif Bul
                       </button>
                   </div>
-              </div>
+              </form>
 
               {/* Categories */}
               <div className="flex flex-wrap justify-center gap-3">
-                  <Link href="#" className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-full hover:bg-red-100 transition-all font-bold text-sm border border-red-100">
+                  <Link href="/tarifler?category=ilk-tadimlar" className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-500 rounded-full hover:bg-red-100 transition-all font-bold text-sm border border-red-100">
                       <i className="fa-solid fa-apple-whole"></i> İlk Tadımlar
                   </Link>
-                  <Link href="#" className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-all font-bold text-sm border border-green-100">
+                  <Link href="/tarifler?diet-type=vegan" className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-600 rounded-full hover:bg-green-100 transition-all font-bold text-sm border border-green-100">
                       <i className="fa-solid fa-leaf"></i> Vegan
                   </Link>
-                  <Link href="#" className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-500 rounded-full hover:bg-blue-100 transition-all font-bold text-sm border border-blue-100">
+                  <Link href="/tarifler?meal-type=corba" className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-500 rounded-full hover:bg-blue-100 transition-all font-bold text-sm border border-blue-100">
                       <i className="fa-solid fa-bowl-food"></i> Çorbalar
                   </Link>
-                  <Link href="#" className="flex items-center gap-2 px-4 py-2 bg-yellow-50 text-yellow-600 rounded-full hover:bg-yellow-100 transition-all font-bold text-sm border border-yellow-100">
+                  <Link href="/tarifler?meal-type=atistirmalik" className="flex items-center gap-2 px-4 py-2 bg-yellow-50 text-yellow-600 rounded-full hover:bg-yellow-100 transition-all font-bold text-sm border border-yellow-100">
                       <i className="fa-solid fa-cookie-bite"></i> Atıştırmalık
                   </Link>
               </div>
@@ -239,33 +169,17 @@ export default function Home() {
                 </div>
               ) : latestRecipes.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {latestRecipes.map((recipe) => (
-                      <Link href={`/tarifler/${recipe.slug}`} key={recipe.id} className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-                          <div className="h-56 relative overflow-hidden bg-gray-50">
-                              <img src={recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif'} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={recipe.title} />
-                              <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                                  <i className="fa-regular fa-heart"></i>
-                              </button>
-                              <div className="absolute bottom-3 left-3 flex gap-2">
-                                   <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                      {recipe.age_group}
-                                  </span>
-                              </div>
-                          </div>
-                          <div className="p-5">
-                              <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">{recipe.title}</h3>
-                              <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3">
-                                  <span><i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}</span>
-                              </div>
-                              <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                                   <div className="flex items-center">
-                                      <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-                                      <span className="text-xs text-gray-500 font-medium">Uzman Onaylı</span>
-                                   </div>
-                              </div>
-                          </div>
-                      </Link>
-                    ))}
+                    {latestRecipes.map((recipe) => {
+                      // Enhance recipe with age group color from ageGroups
+                      const ageGroup = ageGroups.find(ag => ag.name === recipe.age_group);
+                      const enhancedRecipe = {
+                        ...recipe,
+                        age_group_color: ageGroup?.age_group_meta?.color_code
+                      };
+                      return (
+                        <RecipeCardComponent key={recipe.id} recipe={enhancedRecipe} />
+                      );
+                    })}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -427,7 +341,7 @@ export default function Home() {
                       </div>
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">BLW Hazırlık Testi</h3>
                       <p className="text-gray-600 text-sm mb-6 flex-grow">Bebeğiniz katı gıdaya hazır mı? 8 soruluk interaktif test ile öğrenin.</p>
-                      <Link href="#" className="text-blue-500 font-bold flex items-center hover:underline">
+                      <Link href="/araclar/blw-testi" className="text-blue-500 font-bold flex items-center hover:underline">
                           Teste Başla <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>
@@ -439,7 +353,7 @@ export default function Home() {
                       </div>
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Ek Gıda Arama Motoru</h3>
                       <p className="text-gray-600 text-sm mb-6 flex-grow">"Bebekler bal yiyebilir mi?" gibi soruların cevabını anında bulun.</p>
-                      <Link href="#" className="text-orange-500 font-bold flex items-center hover:underline">
+                      <Link href="/arama" className="text-orange-500 font-bold flex items-center hover:underline">
                           Sorgula <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>
@@ -451,13 +365,16 @@ export default function Home() {
                       </div>
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Çocuğum Profili</h3>
                       <p className="text-gray-600 text-sm mb-6 flex-grow">Ayına özel haftalık planlar ve alerjen filtreli öneriler için profil oluşturun.</p>
-                      <Link href="#" className="text-green-500 font-bold flex items-center hover:underline">
+                      <Link href="/dashboard/profil" className="text-green-500 font-bold flex items-center hover:underline">
                           Profil Oluştur <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>
               </div>
           </div>
       </div>
+
+      {/* BLOG SECTION */}
+      <BlogSection posts={blogPosts} />
 
       {/* FEATURES SECTION ("NEDEN KIDSGOURMET") */}
       <div className="py-16 bg-white relative overflow-hidden border-t border-gray-50">
