@@ -1,9 +1,113 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
+import { useUser } from "@/hooks/use-user";
+import { userService } from "@/services/user-service";
+import { Child } from "@/lib/types";
+import ChildModal from "@/components/features/ChildModal";
+import { toast } from "sonner";
 
 export default function ProfileSettingsPage() {
+  const { user, logout, refreshUser } = useUser();
+  const [children, setChildren] = useState<Child[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingChild, setEditingChild] = useState<Child | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setName(user.display_name || user.name);
+      setEmail(user.email);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchChildren();
+  }, []);
+
+  const fetchChildren = async () => {
+    try {
+      const childrenData = await userService.getChildren();
+      setChildren(childrenData);
+    } catch (error) {
+      console.error('Error fetching children:', error);
+      toast.error('Çocuk bilgileri yüklenirken hata oluştu');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddChild = () => {
+    setEditingChild(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditChild = (child: Child) => {
+    setEditingChild(child);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveChild = async (childData: Omit<Child, 'id'> | Child) => {
+    try {
+      if ('id' in childData && childData.id) {
+        // Update existing child
+        await userService.updateChild(childData.id, childData);
+        toast.success('Çocuk bilgileri güncellendi');
+      } else {
+        // Add new child
+        await userService.addChild(childData as Omit<Child, 'id'>);
+        toast.success('Çocuk başarıyla eklendi');
+      }
+      await fetchChildren();
+      await refreshUser();
+    } catch (error) {
+      console.error('Error saving child:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteChild = async (childId: string) => {
+    if (!confirm('Bu çocuğu silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+
+    try {
+      await userService.deleteChild(childId);
+      toast.success('Çocuk başarıyla silindi');
+      await fetchChildren();
+      await refreshUser();
+    } catch (error) {
+      console.error('Error deleting child:', error);
+      toast.error('Çocuk silinirken hata oluştu');
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      const updateData: any = {
+        name,
+        email,
+      };
+
+      if (password) {
+        updateData.password = password;
+      }
+
+      await userService.updateProfile(updateData);
+      toast.success('Profil bilgileri güncellendi');
+      await refreshUser();
+      setPassword(''); // Clear password field
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Profil güncellenirken hata oluştu');
+    }
+  };
   return (
     <div className="flex min-h-screen relative">
 
@@ -32,7 +136,7 @@ export default function ProfileSettingsPage() {
             </nav>
 
             <div className="p-4 border-t border-gray-50 mt-auto">
-                <button className="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold">
+                <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold">
                     <i className="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap
                 </button>
             </div>
@@ -44,7 +148,7 @@ export default function ProfileSettingsPage() {
             {/* MOBILE HEADER */}
             <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
                 <span className="font-display font-bold text-lg text-slate-800">Profilim</span>
-                <button className="text-red-500 text-sm font-bold">Çıkış</button>
+                <button onClick={logout} className="text-red-500 text-sm font-bold">Çıkış</button>
             </div>
 
             {/* PROFILE CONTENT */}
@@ -54,81 +158,96 @@ export default function ProfileSettingsPage() {
                 <section>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="font-display font-bold text-xl text-slate-800">Çocuklarım</h2>
-                        <button className="bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-green-600 hover:text-white transition-colors flex items-center gap-2">
+                        <button 
+                          onClick={handleAddChild}
+                          className="bg-green-100 text-green-600 px-4 py-2 rounded-full text-sm font-bold hover:bg-green-600 hover:text-white transition-colors flex items-center gap-2"
+                        >
                             <i className="fa-solid fa-plus"></i> <span className="hidden sm:inline">Yeni Ekle</span>
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {isLoading ? (
+                      <div className="text-center py-12">
+                        <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-gray-600">Yükleniyor...</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         
-                        {/* Child Card 1 */}
-                        <div className="bg-white rounded-3xl border-2 border-orange-500 shadow-sm p-6 relative overflow-hidden group">
-                            <div className="absolute top-3 right-3">
-                                <button className="text-gray-300 hover:text-orange-500 transition-colors"><i className="fa-solid fa-pen-to-square"></i></button>
+                        {children.map((child, index) => (
+                          <div 
+                            key={child.id} 
+                            className={`bg-white rounded-3xl shadow-sm p-6 relative overflow-hidden group ${
+                              index === 0 ? 'border-2 border-orange-500' : 'border border-gray-100 hover:shadow-md transition-shadow'
+                            }`}
+                          >
+                            <div className="absolute top-3 right-3 flex gap-2">
+                              <button 
+                                onClick={() => handleEditChild(child)}
+                                className="text-gray-300 hover:text-orange-500 transition-colors"
+                              >
+                                <i className="fa-solid fa-pen-to-square"></i>
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteChild(child.id)}
+                                className="text-gray-300 hover:text-red-500 transition-colors"
+                              >
+                                <i className="fa-solid fa-trash"></i>
+                              </button>
                             </div>
                             <div className="flex items-center gap-4 mb-4">
-                                <img src="https://placehold.co/100x100/FFF3E0/FF8A65?text=D" className="w-16 h-16 rounded-full border-2 border-orange-500 p-0.5" alt="Deniz" />
+                                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${
+                                  index === 0 ? 'bg-orange-100 text-orange-500 border-2 border-orange-500' : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                  {child.name.charAt(0).toUpperCase()}
+                                </div>
                                 <div>
-                                    <h3 className="font-bold text-lg text-slate-800">Deniz</h3>
-                                    <p className="text-sm text-orange-500 font-medium">9 Aylık</p>
+                                    <h3 className="font-bold text-lg text-slate-800">{child.name}</h3>
+                                    <p className={`text-sm font-medium ${index === 0 ? 'text-orange-500' : 'text-gray-500'}`}>
+                                      {child.age_months ? `${child.age_months} Aylık` : 'Bebek'}
+                                    </p>
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-500">Cinsiyet</span>
-                                    <span className="font-medium text-slate-700">Erkek</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-500">Beslenme</span>
-                                    <span className="font-medium text-slate-700">BLW + Püre</span>
+                                    <span className="text-gray-500">Doğum Tarihi</span>
+                                    <span className="font-medium text-slate-700">
+                                      {new Date(child.birth_date).toLocaleDateString('tr-TR')}
+                                    </span>
                                 </div>
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-100">
                                 <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Alerjenler</p>
-                                <div className="flex flex-wrap gap-2">
-                                    <span className="px-2 py-1 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100">İnek Sütü</span>
-                                    <span className="px-2 py-1 bg-yellow-50 text-yellow-600 rounded-lg text-xs font-bold border border-yellow-100">Domates</span>
-                                </div>
+                                {child.allergens && child.allergens.length > 0 ? (
+                                  <div className="flex flex-wrap gap-2">
+                                    {child.allergens.map((allergen) => (
+                                      <span key={allergen} className="px-2 py-1 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100">
+                                        {allergen}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-green-500 font-medium">
+                                    <i className="fa-solid fa-check mr-1"></i> Bilinen alerji yok
+                                  </span>
+                                )}
                             </div>
-                        </div>
-
-                        {/* Child Card 2 */}
-                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 relative overflow-hidden hover:shadow-md transition-shadow">
-                            <div className="absolute top-3 right-3">
-                                <button className="text-gray-300 hover:text-orange-500 transition-colors"><i className="fa-solid fa-pen-to-square"></i></button>
-                            </div>
-                            <div className="flex items-center gap-4 mb-4">
-                                <img src="https://placehold.co/100x100/E1BEE7/8E24AA?text=A" className="w-16 h-16 rounded-full border border-gray-100" alt="Ada" />
-                                <div>
-                                    <h3 className="font-bold text-lg text-slate-800">Ada</h3>
-                                    <p className="text-sm text-gray-500 font-medium">3 Yaş</p>
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-500">Cinsiyet</span>
-                                    <span className="font-medium text-slate-700">Kız</span>
-                                </div>
-                                <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-500">Beslenme</span>
-                                    <span className="font-medium text-slate-700">Her Şey</span>
-                                </div>
-                            </div>
-                            <div className="mt-4 pt-4 border-t border-gray-100">
-                                <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Alerjenler</p>
-                                <span className="text-xs text-green-500 font-medium"><i className="fa-solid fa-check mr-1"></i> Bilinen alerji yok</span>
-                            </div>
-                        </div>
+                          </div>
+                        ))}
 
                         {/* Add New Child Card */}
-                        <button className="border-2 border-dashed border-gray-300 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-400 hover:border-green-500 hover:text-green-600 hover:bg-green-50 transition-all group h-full min-h-[200px]">
+                        <button 
+                          onClick={handleAddChild}
+                          className="border-2 border-dashed border-gray-300 rounded-3xl p-6 flex flex-col items-center justify-center text-gray-400 hover:border-green-500 hover:text-green-600 hover:bg-green-50 transition-all group h-full min-h-[200px]"
+                        >
                             <div className="w-12 h-12 rounded-full bg-gray-100 group-hover:bg-white flex items-center justify-center text-xl mb-3 transition-colors">
                                 <i className="fa-solid fa-plus"></i>
                             </div>
                             <span className="font-bold text-sm">Yeni Çocuk Ekle</span>
                         </button>
 
-                    </div>
+                      </div>
+                    )}
                 </section>
 
                 <hr className="border-gray-200" />
@@ -141,25 +260,41 @@ export default function ProfileSettingsPage() {
                             <i className="fa-solid fa-id-card text-orange-500"></i> Ebeveyn Bilgileri
                         </h2>
                         
-                        <form className="space-y-5">
+                        <form onSubmit={handleUpdateProfile} className="space-y-5">
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <div className="flex-1">
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ad Soyad</label>
-                                    <input type="text" defaultValue="Elif Yılmaz" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" />
+                                    <input 
+                                      type="text" 
+                                      value={name} 
+                                      onChange={(e) => setName(e.target.value)}
+                                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" 
+                                    />
                                 </div>
                                 <div className="flex-1">
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">E-Posta</label>
-                                    <input type="email" defaultValue="elif@email.com" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" />
+                                    <input 
+                                      type="email" 
+                                      value={email}
+                                      onChange={(e) => setEmail(e.target.value)}
+                                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" 
+                                    />
                                 </div>
                             </div>
                             
                             <div>
                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Şifre Değiştir</label>
-                                <input type="password" placeholder="Yeni şifreniz (Değiştirmek istemiyorsanız boş bırakın)" className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" />
+                                <input 
+                                  type="password" 
+                                  value={password}
+                                  onChange={(e) => setPassword(e.target.value)}
+                                  placeholder="Yeni şifreniz (Değiştirmek istemiyorsanız boş bırakın)" 
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" 
+                                />
                             </div>
 
                             <div className="pt-2 flex justify-end">
-                                <button type="button" className="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-slate-700 transition-colors">
+                                <button type="submit" className="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-slate-700 transition-colors">
                                     Bilgileri Güncelle
                                 </button>
                             </div>
@@ -240,6 +375,14 @@ export default function ProfileSettingsPage() {
                 <span className="text-[10px] font-bold">Profil</span>
             </Link>
         </div>
+
+        {/* Child Modal */}
+        <ChildModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSaveChild}
+          child={editingChild}
+        />
 
     </div>
   );
