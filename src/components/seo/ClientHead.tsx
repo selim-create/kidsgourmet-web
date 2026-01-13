@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 interface ClientHeadProps {
   title?: string;
   description?: string;
-  keywords?: string[];
+  keywords?: string[] | string;
   ogImage?: string;
   url?: string;
 }
@@ -46,9 +46,19 @@ export default function ClientHead({ title, description, keywords, ogImage, url 
       setMetaTag('twitter:description', description);
     }
 
-    // Set keywords
-    if (keywords && keywords.length > 0) {
-      setMetaTag('keywords', keywords.join(', '));
+    // Set keywords - handle both string and array types
+    if (keywords) {
+      let keywordsString: string;
+      if (Array.isArray(keywords)) {
+        keywordsString = keywords.join(', ');
+      } else if (typeof keywords === 'string') {
+        keywordsString = keywords;
+      } else {
+        keywordsString = '';
+      }
+      if (keywordsString) {
+        setMetaTag('keywords', keywordsString);
+      }
     }
 
     // Set Open Graph tags
