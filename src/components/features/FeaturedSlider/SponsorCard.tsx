@@ -1,28 +1,19 @@
 "use client";
 
 import React from 'react';
-import { BlogPost } from '@/services/blog-service';
+import { FeaturedItem } from '@/services/featured-service';
 import { decodeEntities } from '@/utils/textHelpers';
-import DOMPurify from 'isomorphic-dompurify';
 
 interface SponsorCardProps {
-  sponsor: BlogPost;
+  item: FeaturedItem;
 }
 
-export default function SponsorCard({ sponsor }: SponsorCardProps) {
-  const stripHtml = (html: string) => {
-    // Sanitize first, then strip
-    const sanitized = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
-    return sanitized;
-  };
-  const sponsorData = sponsor.sponsor_data;
-  const imageUrl = sponsorData?.sponsor_logo || 
-                   sponsor._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
-                   'https://placehold.co/800x400/E8E8E8/666666?text=Sponsor';
-  
-  const url = sponsorData?.sponsor_url || `/blog/${sponsor.slug}`;
-  const readTime = '5 dk'; // Default read time
-  const hasDiscount = false; // Default no discount
+export default function SponsorCard({ item }: SponsorCardProps) {
+  const imageUrl = item.image || 'https://placehold.co/800x400/E8E8E8/666666?text=Sponsor';
+  const url = item.meta?.sponsor_url || `/blog/${item.slug}`;
+  const readTime = item.meta?.read_time || '5 dk';
+  const hasDiscount = item.meta?.has_discount || false;
+  const discountText = item.meta?.discount_text || 'İndirim';
 
   return (
     <a
@@ -34,7 +25,7 @@ export default function SponsorCard({ sponsor }: SponsorCardProps) {
         <img
           src={imageUrl}
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-          alt={sponsorData?.sponsor_name || 'Sponsorlu İçerik'}
+          alt={item.meta?.sponsor_name || 'Sponsorlu İçerik'}
         />
         
         {/* Sponsorlu Badge - Sağ Üst */}
@@ -55,10 +46,10 @@ export default function SponsorCard({ sponsor }: SponsorCardProps) {
 
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="font-display font-bold text-xl text-slate-800 mb-2 leading-tight group-hover:text-orange-500 transition-colors">
-          {decodeEntities(stripHtml(sponsor.title.rendered))}
+          {decodeEntities(item.title)}
         </h3>
         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-          {sponsor.excerpt ? decodeEntities(stripHtml(sponsor.excerpt.rendered)) : ''}
+          {item.excerpt ? decodeEntities(item.excerpt) : ''}
         </p>
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
@@ -68,7 +59,7 @@ export default function SponsorCard({ sponsor }: SponsorCardProps) {
             </span>
             {hasDiscount && (
               <span className="bg-slate-50 text-slate-600 font-bold px-2 py-1 rounded-lg">
-                <i className="fa-solid fa-tag mr-1"></i> İndirim
+                <i className="fa-solid fa-tag mr-1"></i> {discountText}
               </span>
             )}
           </div>

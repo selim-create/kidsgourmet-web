@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from 'react';
-import { RecipeCard as RecipeCardType } from '@/lib/types';
-import { BlogPost } from '@/services/blog-service';
-import { Discussion } from '@/lib/types';
+import { FeaturedItem } from '@/services/featured-service';
 import RecipeCard from './RecipeCard';
 import QuestionCard from './QuestionCard';
 import GuideCard from './GuideCard';
@@ -15,7 +13,7 @@ interface FeaturedContent {
   id: number;
   type: FeaturedContentType;
   date: string;
-  data: RecipeCardType | BlogPost | Discussion | any;
+  data: FeaturedItem;
 }
 
 interface FeaturedSliderProps {
@@ -76,15 +74,17 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
   }, [filteredItems.length]);
 
   const renderCard = (item: FeaturedContent) => {
+    const featuredItem = item.data;
+    
     switch (item.type) {
       case 'recipe':
-        return <RecipeCard key={`recipe-${item.id}`} recipe={item.data as RecipeCardType} />;
+        return <RecipeCard key={`recipe-${item.id}`} item={featuredItem} />;
       case 'blog':
-        return <GuideCard key={`blog-${item.id}`} post={item.data as BlogPost} />;
+        return <GuideCard key={`blog-${item.id}`} item={featuredItem} />;
       case 'question':
-        return <QuestionCard key={`question-${item.id}`} question={item.data as Discussion} />;
+        return <QuestionCard key={`question-${item.id}`} item={featuredItem} />;
       case 'sponsored':
-        return <SponsorCard key={`sponsored-${item.id}`} sponsor={item.data as BlogPost} />;
+        return <SponsorCard key={`sponsored-${item.id}`} item={featuredItem} />;
       default:
         return null;
     }

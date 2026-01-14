@@ -2,26 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BlogPost } from '@/services/blog-service';
+import { FeaturedItem } from '@/services/featured-service';
 import { decodeEntities } from '@/utils/textHelpers';
-import DOMPurify from 'isomorphic-dompurify';
 
 interface GuideCardProps {
-  post: BlogPost;
+  item: FeaturedItem;
 }
 
-export default function GuideCard({ post }: GuideCardProps) {
-  const stripHtml = (html: string) => {
-    // Sanitize first, then strip
-    const sanitized = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
-    return sanitized;
-  };
-  const imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
-                   'https://placehold.co/800x400/81D4FA/ffffff?text=Rehber';
+export default function GuideCard({ item }: GuideCardProps) {
+  const imageUrl = item.image || 'https://placehold.co/800x400/81D4FA/ffffff?text=Rehber';
 
   return (
     <Link
-      href={`/blog/${post.slug}`}
+      href={`/blog/${item.slug}`}
       data-type="guide"
       className="featured-card flex-shrink-0 w-[85vw] md:w-[420px] snap-center bg-white rounded-4xl shadow-md hover:shadow-xl overflow-hidden relative flex flex-col group cursor-pointer border border-gray-100 transition-all duration-300 hover:-translate-y-1"
     >
@@ -29,7 +22,7 @@ export default function GuideCard({ post }: GuideCardProps) {
         <img
           src={imageUrl}
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-          alt={decodeEntities(stripHtml(post.title.rendered))}
+          alt={decodeEntities(item.title)}
         />
         <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
           <i className="fa-solid fa-book-open"></i> Rehber
@@ -37,10 +30,10 @@ export default function GuideCard({ post }: GuideCardProps) {
       </div>
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="font-display font-bold text-xl text-slate-800 mb-2 leading-tight">
-          {decodeEntities(stripHtml(post.title.rendered))}
+          {decodeEntities(item.title)}
         </h3>
         <p className="text-sm text-gray-500 mb-4 line-clamp-2">
-          {post.excerpt ? decodeEntities(stripHtml(post.excerpt.rendered)) : ''}
+          {item.excerpt ? decodeEntities(item.excerpt) : ''}
         </p>
         <div className="mt-auto flex items-center text-blue-500 text-sm font-bold group-hover:translate-x-1 transition-transform">
           İncelemeye Başla <i className="fa-solid fa-arrow-right ml-2"></i>
