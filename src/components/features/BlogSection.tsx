@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
-import { decodeHTMLEntities } from '@/utils/helpers';
+import { decodeEntities } from '@/utils/textHelpers';
 
 interface BlogSectionProps {
   posts: BlogPost[];
@@ -60,7 +60,7 @@ export default function BlogSection({ posts }: BlogSectionProps) {
                 <img 
                   src={getImageUrl(post)} 
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                  alt={decodeHTMLEntities(stripHtml(post.title.rendered))} 
+                  alt={decodeEntities(stripHtml(post.title.rendered))} 
                 />
                 <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-500 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                   {getCategoryName(post)}
@@ -82,7 +82,7 @@ export default function BlogSection({ posts }: BlogSectionProps) {
                 </Link>
                 
                 <p className="text-gray-600 text-sm line-clamp-3 mb-4">
-                  {decodeHTMLEntities(stripHtml(post.excerpt.rendered))}
+                  {decodeEntities(stripHtml(post.excerpt.rendered))}
                 </p>
                 
                 <Link 
