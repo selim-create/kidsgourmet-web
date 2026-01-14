@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { userService } from "@/services/user-service";
 import { Child } from "@/lib/types";
-import ChildModal from "@/components/features/ChildModal";
+import ChildWizard from "@/components/features/ChildWizard";
 import { toast } from "sonner";
 
 export default function ProfileSettingsPage() {
@@ -382,8 +382,8 @@ export default function ProfileSettingsPage() {
             </Link>
         </div>
 
-        {/* Child Modal */}
-        <ChildModal
+        {/* Child Wizard */}
+        <ChildWizard
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onSave={handleSaveChild}

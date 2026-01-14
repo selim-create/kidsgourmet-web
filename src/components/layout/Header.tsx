@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker';
 import UserDropdown from '@/components/ui/UserDropdown';
+import ChildSwitcher from '@/components/features/ChildSwitcher';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -69,6 +70,11 @@ export default function Header() {
 
                     {/* Right Actions */}
                     <div className="flex items-center gap-3">
+                        
+                        {/* Child Switcher (for authenticated users with children) */}
+                        {isAuthenticated && user && user.children?.length > 0 && (
+                          <ChildSwitcher />
+                        )}
                         
                         {/* Child Age Picker */}
                         <ChildBirthDatePicker />
