@@ -211,6 +211,80 @@ export interface Favorite {
   created_at: string;
 }
 
+// Yeni Favoriler API Tipleri
+export type FavoriteItemType = 'recipe' | 'ingredient' | 'post' | 'discussion';
+
+export interface FavoriteRecipeCard {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  age_group: string;
+  age_group_color?: string;
+  prep_time: string;
+  categories?: string[];
+}
+
+export interface FavoriteIngredientCard {
+  id: number;
+  name: string;
+  slug: string;
+  image: string;
+  start_age: string;
+  allergy_risk: 'Düşük' | 'Orta' | 'Yüksek';
+}
+
+export interface FavoriteBlogCard {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  category: string;
+  read_time: string;
+}
+
+export interface FavoriteDiscussionCard {
+  id: number;
+  title: string;
+  slug: string;
+  author: string;
+  author_avatar?: string;
+  answer_count: number;
+  circle?: string;
+}
+
+export interface FavoritesResponse {
+  recipes: FavoriteRecipeCard[];
+  ingredients: FavoriteIngredientCard[];
+  posts: FavoriteBlogCard[];
+  discussions: FavoriteDiscussionCard[];
+  counts: { all: number; recipes: number; ingredients: number; posts: number; discussions: number; };
+}
+
+export interface CollectionItem {
+  item_id: number;
+  item_type: FavoriteItemType;
+  added_at: string;
+  data?: FavoriteRecipeCard | FavoriteIngredientCard | FavoriteBlogCard | FavoriteDiscussionCard;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  icon: string;
+  color: string;
+  item_count: number;
+  items?: CollectionItem[];
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface CollectionInput {
+  name: string;
+  icon: string;
+  color: string;
+}
+
 // Alışveriş Listesi
 export interface ShoppingListItem {
   id: number;
