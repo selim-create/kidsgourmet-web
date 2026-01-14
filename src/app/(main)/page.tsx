@@ -39,7 +39,7 @@ export default function Home() {
         const [featuredData, latest, posts] = await Promise.all([
           featuredService.getAll(5),
           recipeService.getAll({ perPage: 8 }),
-          blogService.getAll(1, 6)
+          blogService.getAll(1, 12)
         ]);
         
         // Prepare featured content - map FeaturedItem to content types
@@ -105,7 +105,7 @@ export default function Home() {
   
   // Filter out featured content from lower sections
   const filteredRecipes = latestRecipes.filter(recipe => !featuredIds.includes(recipe.id));
-  const filteredPosts = blogPosts.filter(post => !featuredIds.includes(post.id));
+  const filteredPosts = blogPosts.filter(post => !featuredIds.includes(post.id)).slice(0, 6);
 
   // Dalgalı arka plan görseli (SVG)
   const waveBgImage = "data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.184 20c.357-.13.72-.264 1.088-.402l1.768-.661C33.64 15.347 39.647 14 50 14c10.271 0 15.362 1.222 24.629 4.928.955.383 1.869.74 2.75 1.072h6.225c-2.51-.73-5.139-1.691-8.233-2.928C65.888 12.878 58.749 10 50 10c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h6.225zM0 20c2.51-.73 5.139-1.691 8.233-2.928C18.749 12.878 24.889 10 35 10c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928H0zM50 0c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928C74.638 6.253 68.647 5 50 5c-10.271 0-15.362 1.222-24.629 4.928C14.112 14.122 6.973 17 0 17v3h100v-3s-2.51-.73-5.139-1.691C84.362 10.928 77.223 8 68.474 8c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928C24.362 14.072 17.223 11 11.526 11c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h11.474z' fill='%23FFF8E1' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E";
