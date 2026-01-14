@@ -23,13 +23,13 @@ interface RecipeCardProps {
 
 export default function RecipeCard({ recipe }: RecipeCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const isFav = isFavorite(recipe.id);
+  const isFav = isFavorite(recipe.id, 'recipe');
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await toggleFavorite(recipe.id);
+      await toggleFavorite(recipe.id, 'recipe');
     } catch (error) {
       console.error('Favori işlemi başarısız:', error);
     }

@@ -2,17 +2,104 @@
 
 import React, { useState } from 'react';
 import Link from "next/link";
+import { useFavorites } from '@/hooks/use-favorites';
+import { useUser } from '@/hooks/use-user';
+import { FavoriteItemType } from '@/lib/types';
+import CollectionCard from '@/components/favorites/CollectionCard';
+import CreateCollectionModal from '@/components/favorites/CreateCollectionModal';
+import FavoriteRecipeCard from '@/components/favorites/FavoriteRecipeCard';
+import FavoriteIngredientCard from '@/components/favorites/FavoriteIngredientCard';
+import FavoriteBlogCard from '@/components/favorites/FavoriteBlogCard';
+import FavoriteDiscussionCard from '@/components/favorites/FavoriteDiscussionCard';
 
 export default function FavoritesPage() {
-  const [activeTab, setActiveTab] = useState("Tümü");
+  const { isAuthenticated, isLoading: authLoading } = useUser();
+  const {
+    favorites,
+    collections,
+    isLoading,
+    error,
+    counts,
+    toggleFavorite,
+    createCollection,
+    deleteCollection,
+  } = useFavorites();
+
+  const [activeFilter, setActiveFilter] = useState<FavoriteItemType | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const tabs = [
-    { name: "Tümü", count: 24 },
-    { name: "Tarifler", count: 18 },
-    { name: "Malzemeler", count: 1 },
-    { name: "Blog & Rehber", count: 3 },
-    { name: "Topluluk", count: 2 }
+    { name: "Tümü", key: "all" as const, count: counts.all },
+    { name: "Tarifler", key: "recipe" as const, count: counts.recipes },
+    { name: "Malzemeler", key: "ingredient" as const, count: counts.ingredients },
+    { name: "Blog & Rehber", key: "post" as const, count: counts.posts },
+    { name: "Topluluk", key: "discussion" as const, count: counts.discussions }
   ];
+
+  // Auth kontrolü
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-500">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i className="fa-solid fa-heart text-orange-500 text-3xl"></i>
+          </div>
+          <h2 className="font-display font-bold text-2xl text-slate-800 mb-2">
+            Favorilerinize Erişin
+          </h2>
+          <p className="text-gray-500 mb-6">
+            Favori tariflerinizi, malzemelerinizi ve daha fazlasını kaydetmek için giriş yapın.
+          </p>
+          <Link
+            href="/giris"
+            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
+          >
+            Giriş Yap
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Filtrelenmiş içerik
+  const getFilteredContent = () => {
+    if (!favorites) return { recipes: [], ingredients: [], posts: [], discussions: [] };
+    
+    const filterBySearch = <T extends { title?: string; name?: string }>(items: T[]) => {
+      if (!searchQuery) return items;
+      return items.filter(item => {
+        const text = item.title || item.name || '';
+        return text.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    };
+
+    return {
+      recipes: activeFilter === 'all' || activeFilter === 'recipe' 
+        ? filterBySearch(favorites.recipes || []) : [],
+      ingredients: activeFilter === 'all' || activeFilter === 'ingredient'
+        ? filterBySearch(favorites.ingredients || []) : [],
+      posts: activeFilter === 'all' || activeFilter === 'post'
+        ? filterBySearch(favorites.posts || []) : [],
+      discussions: activeFilter === 'all' || activeFilter === 'discussion'
+        ? filterBySearch(favorites.discussions || []) : [],
+    };
+  };
+
+  const filtered = getFilteredContent();
+  const hasContent = filtered.recipes.length + filtered.ingredients.length + 
+                     filtered.posts.length + filtered.discussions.length > 0;
 
   return (
     <div className="flex min-h-screen relative">
@@ -55,7 +142,12 @@ export default function FavoritesPage() {
             {/* MOBILE HEADER */}
             <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
                 <span className="font-display font-bold text-lg text-slate-800">Favorilerim</span>
-                <button className="text-gray-500 text-xl"><i className="fa-solid fa-plus"></i></button>
+                <button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="text-gray-500 text-xl"
+                >
+                  <i className="fa-solid fa-plus"></i>
+                </button>
             </div>
 
             {/* FAVORITES CONTENT */}
@@ -65,42 +157,31 @@ export default function FavoritesPage() {
                 <section>
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="font-display font-bold text-xl text-slate-800">Koleksiyonlarım</h2>
-                        <button className="text-orange-500 text-sm font-bold hover:underline">+ Yeni Oluştur</button>
+                        <button 
+                          onClick={() => setShowCreateModal(true)}
+                          className="text-orange-500 text-sm font-bold hover:underline"
+                        >
+                          + Yeni Oluştur
+                        </button>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {/* Collection 1 */}
-                        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group text-center">
-                            <div className="w-12 h-12 mx-auto bg-orange-50 rounded-full flex items-center justify-center text-orange-500 text-xl mb-3 group-hover:scale-110 transition-transform">
-                                <i className="fa-solid fa-mug-hot"></i>
-                            </div>
-                            <h3 className="font-bold text-slate-800 text-sm">Kahvaltılar</h3>
-                            <p className="text-xs text-gray-400 mt-1">12 Tarif</p>
-                        </div>
-
-                        {/* Collection 2 */}
-                        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group text-center">
-                            <div className="w-12 h-12 mx-auto bg-blue-50 rounded-full flex items-center justify-center text-blue-500 text-xl mb-3 group-hover:scale-110 transition-transform">
-                                <i className="fa-solid fa-snowflake"></i>
-                            </div>
-                            <h3 className="font-bold text-slate-800 text-sm">Buzluk İçin</h3>
-                            <p className="text-xs text-gray-400 mt-1">5 Tarif</p>
-                        </div>
-
-                        {/* Collection 3 */}
-                        <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer group text-center">
-                            <div className="w-12 h-12 mx-auto bg-green-50 rounded-full flex items-center justify-center text-green-600 text-xl mb-3 group-hover:scale-110 transition-transform">
-                                <i className="fa-solid fa-carrot"></i>
-                            </div>
-                            <h3 className="font-bold text-slate-800 text-sm">Sebzeli</h3>
-                            <p className="text-xs text-gray-400 mt-1">8 Tarif</p>
-                        </div>
-
+                        {collections.map((collection) => (
+                          <CollectionCard
+                            key={collection.id}
+                            collection={collection}
+                            onDelete={deleteCollection}
+                          />
+                        ))}
+                        
                         {/* Add New (Placeholder Visual) */}
-                        <div className="border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 transition-colors cursor-pointer h-full">
+                        <button
+                          onClick={() => setShowCreateModal(true)}
+                          className="border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 transition-colors cursor-pointer h-full"
+                        >
                             <i className="fa-solid fa-plus text-xl mb-2"></i>
                             <span className="text-xs font-bold">Yeni Liste</span>
-                        </div>
+                        </button>
                     </div>
                 </section>
 
@@ -114,130 +195,101 @@ export default function FavoritesPage() {
                         <div className="flex gap-2 overflow-x-auto hide-scroll pb-2 w-full md:w-auto scrollbar-hide">
                             {tabs.map((tab) => (
                                 <button 
-                                    key={tab.name}
-                                    onClick={() => setActiveTab(tab.name)}
+                                    key={tab.key}
+                                    onClick={() => setActiveFilter(tab.key)}
                                     className={`px-4 py-2 rounded-full font-bold text-sm shadow-sm whitespace-nowrap transition-all border ${
-                                        activeTab === tab.name 
+                                        activeFilter === tab.key 
                                         ? "bg-slate-800 text-white border-slate-800" 
                                         : "bg-white text-gray-600 border-gray-200 hover:border-orange-500 hover:text-orange-500"
                                     }`}
                                 >
-                                    {tab.name} <span className={`ml-1 text-xs ${activeTab === tab.name ? "text-gray-300" : "text-gray-400"}`}>({tab.count})</span>
+                                    {tab.name} <span className={`ml-1 text-xs ${activeFilter === tab.key ? "text-gray-300" : "text-gray-400"}`}>({tab.count})</span>
                                 </button>
                             ))}
                         </div>
                         
                         {/* Search Within Favorites */}
                         <div className="relative w-full md:w-64 flex-shrink-0">
-                            <input type="text" placeholder="Favorilerde ara..." className="w-full bg-white border border-gray-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-orange-500 transition-colors" />
+                            <input 
+                              type="text" 
+                              placeholder="Favorilerde ara..." 
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              className="w-full bg-white border border-gray-200 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-orange-500 transition-colors" 
+                            />
                             <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-gray-400 text-xs"></i>
                         </div>
                     </div>
 
+                    {/* Loading State */}
+                    {isLoading && (
+                      <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                        <p className="text-gray-500">Favoriler yükleniyor...</p>
+                      </div>
+                    )}
+
+                    {/* Error State */}
+                    {error && (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <i className="fa-solid fa-exclamation-triangle text-red-500 text-2xl"></i>
+                        </div>
+                        <p className="text-red-500 font-bold mb-2">Hata Oluştu</p>
+                        <p className="text-gray-500">{error}</p>
+                      </div>
+                    )}
+
+                    {/* Empty State */}
+                    {!isLoading && !error && !hasContent && (
+                      <div className="text-center py-12">
+                        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <i className="fa-solid fa-heart text-gray-400 text-3xl"></i>
+                        </div>
+                        <h3 className="font-bold text-slate-800 mb-2">
+                          {searchQuery ? 'Arama Sonucu Bulunamadı' : 'Henüz Favori Eklemediniz'}
+                        </h3>
+                        <p className="text-gray-500 mb-6">
+                          {searchQuery 
+                            ? `"${searchQuery}" için sonuç bulunamadı`
+                            : 'Beğendiğiniz içerikleri favorilere ekleyerek kolayca erişebilirsiniz'
+                          }
+                        </p>
+                        {!searchQuery && (
+                          <Link
+                            href="/tarifler"
+                            className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
+                          >
+                            Tarifleri Keşfet
+                          </Link>
+                        )}
+                      </div>
+                    )}
+
                     {/* CONTENT GRID */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {!isLoading && !error && hasContent && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {/* Recipe Cards */}
+                        {filtered.recipes.map((recipe) => (
+                          <FavoriteRecipeCard key={`recipe-${recipe.id}`} recipe={recipe} />
+                        ))}
+
+                        {/* Ingredient Cards */}
+                        {filtered.ingredients.map((ingredient) => (
+                          <FavoriteIngredientCard key={`ingredient-${ingredient.id}`} ingredient={ingredient} />
+                        ))}
                         
-                        {/* Render content based on active tab (Mockup logic) */}
-                        {(activeTab === "Tümü" || activeTab === "Tarifler") && (
-                            <>
-                                {/* Recipe Card 1 */}
-                                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden flex flex-col">
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img src="https://placehold.co/400x300/FFF8E1/FF8A65?text=Pankek" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Pankek" />
-                                        <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm hover:scale-110 transition-transform">
-                                            <i className="fa-solid fa-heart"></i>
-                                        </button>
-                                        <div className="absolute bottom-3 left-3">
-                                            <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                                +8 Ay
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 flex-grow flex flex-col">
-                                        <h3 className="font-bold text-slate-800 mb-1 group-hover:text-orange-500 transition-colors">Muzlu Bebek Pankeki</h3>
-                                        <p className="text-xs text-gray-500 mb-3">Kahvaltılar</p>
-                                        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
-                                            <span className="text-xs text-gray-400"><i className="fa-regular fa-clock mr-1"></i> 15 dk</span>
-                                            <button className="text-gray-400 hover:text-slate-600"><i className="fa-solid fa-ellipsis"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
+                        {/* Blog Post Cards */}
+                        {filtered.posts.map((post) => (
+                          <FavoriteBlogCard key={`post-${post.id}`} post={post} />
+                        ))}
 
-                                {/* Recipe Card 2 */}
-                                <div className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden flex flex-col">
-                                    <div className="relative h-48 overflow-hidden">
-                                        <img src="https://placehold.co/400x300/E8F5E9/AED581?text=Corba" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Çorba" />
-                                        <button className="absolute top-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm hover:scale-110 transition-transform">
-                                            <i className="fa-solid fa-heart"></i>
-                                        </button>
-                                        <div className="absolute bottom-3 left-3">
-                                            <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                                +6 Ay
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 flex-grow flex flex-col">
-                                        <h3 className="font-bold text-slate-800 mb-1 group-hover:text-orange-500 transition-colors">Brokoli Çorbası</h3>
-                                        <p className="text-xs text-gray-500 mb-3">Sebzeli, Buzluk İçin</p>
-                                        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
-                                            <span className="text-xs text-gray-400"><i className="fa-regular fa-clock mr-1"></i> 25 dk</span>
-                                            <button className="text-gray-400 hover:text-slate-600"><i className="fa-solid fa-ellipsis"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-                        {/* Ingredient Card (Mockup for other tabs) */}
-                        {(activeTab === "Tümü" || activeTab === "Malzemeler") && (
-                             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden flex flex-col relative">
-                                <div className="absolute top-3 right-3 z-10">
-                                    <button className="w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm hover:scale-110 transition-transform">
-                                        <i className="fa-solid fa-heart"></i>
-                                    </button>
-                                </div>
-                                <div className="w-full h-40 bg-green-50 relative overflow-hidden">
-                                    <img src="https://placehold.co/400x300/AED581/ffffff?text=Avokado" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Avokado" />
-                                    <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                                        +6 Ay
-                                    </div>
-                                </div>
-                                <div className="p-4 flex-grow flex flex-col">
-                                    <h3 className="font-bold text-slate-800 mb-1 group-hover:text-green-500 transition-colors">Avokado</h3>
-                                    <p className="text-xs text-gray-500 mb-3">Malzeme Rehberi</p>
-                                    <div className="mt-auto pt-3 border-t border-gray-50">
-                                         <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded border border-green-200">Düşük Alerjen</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Blog Post Card */}
-                        {(activeTab === "Tümü" || activeTab === "Blog & Rehber") && (
-                             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden flex flex-col relative">
-                                <div className="absolute top-3 right-3 z-10">
-                                    <button className="w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm hover:scale-110 transition-transform">
-                                        <i className="fa-solid fa-heart"></i>
-                                    </button>
-                                </div>
-                                <div className="w-full h-40 bg-blue-50 relative overflow-hidden">
-                                    <img src="https://placehold.co/400x300/E3F2FD/81D4FA?text=Su+Tuketimi" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Su Tüketimi" />
-                                    <span className="absolute bottom-2 left-2 bg-white/90 backdrop-blur text-blue-500 px-2 py-1 rounded-lg text-xs font-bold shadow-sm">
-                                        Sağlık
-                                    </span>
-                                </div>
-                                <div className="p-4 flex-grow flex flex-col">
-                                    <h3 className="font-bold text-slate-800 mb-1 group-hover:text-blue-500 transition-colors line-clamp-2">Bebekler Ne Zaman Su İçmeli?</h3>
-                                    <p className="text-xs text-gray-500 mb-3">Blog Yazısı</p>
-                                    <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-50">
-                                        <span className="text-xs text-gray-400">4 dk okuma</span>
-                                        <button className="text-gray-400 hover:text-slate-600"><i className="fa-solid fa-ellipsis"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                    </div>
+                        {/* Discussion Cards */}
+                        {filtered.discussions.map((discussion) => (
+                          <FavoriteDiscussionCard key={`discussion-${discussion.id}`} discussion={discussion} />
+                        ))}
+                      </div>
+                    )}
                 </section>
 
             </div>
@@ -268,6 +320,13 @@ export default function FavoritesPage() {
                 <span className="text-[10px] font-medium">Profil</span>
             </Link>
         </div>
+
+        {/* Create Collection Modal */}
+        <CreateCollectionModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={createCollection}
+        />
 
     </div>
   );
