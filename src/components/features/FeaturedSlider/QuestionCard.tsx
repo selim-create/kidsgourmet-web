@@ -12,11 +12,16 @@ interface QuestionCardProps {
 export default function QuestionCard({ question }: QuestionCardProps) {
   // Get initials from author name
   const getInitials = () => {
-    const names = question.author.name.split(' ');
+    const name = question.author.name?.trim() || '';
+    
+    // Validate name exists
+    if (!name) return 'U'; // Default to 'U' for unknown
+    
+    const names = name.split(' ');
     if (names.length >= 2) {
-      return names[0][0] + names[names.length - 1][0];
+      return (names[0][0] || '') + (names[names.length - 1][0] || '');
     }
-    return question.author.name.substring(0, 2).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (

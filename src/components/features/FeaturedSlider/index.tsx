@@ -62,7 +62,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
   // Update current index on scroll
   useEffect(() => {
     const slider = sliderRef.current;
-    if (!slider) return;
+    if (!slider || filteredItems.length === 0) return;
 
     const handleScroll = () => {
       const scrollLeft = slider.scrollLeft;
@@ -182,14 +182,16 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
             <button
               onClick={() => scrollSlider('left')}
               className="w-10 h-10 rounded-full bg-white shadow-md text-gray-600 hover:text-orange-500 transition-colors flex items-center justify-center"
+              aria-label="Önceki içerik"
             >
-              <i className="fa-solid fa-chevron-left"></i>
+              <i className="fa-solid fa-chevron-left" aria-hidden="true"></i>
             </button>
             <button
               onClick={() => scrollSlider('right')}
               className="w-10 h-10 rounded-full bg-white shadow-md text-gray-600 hover:text-orange-500 transition-colors flex items-center justify-center"
+              aria-label="Sonraki içerik"
             >
-              <i className="fa-solid fa-chevron-right"></i>
+              <i className="fa-solid fa-chevron-right" aria-hidden="true"></i>
             </button>
           </div>
         </div>

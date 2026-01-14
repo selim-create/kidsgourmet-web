@@ -54,7 +54,7 @@ export const featuredService = {
       
       return response?.data || [];
     } catch (error) {
-      console.error('Featured content yüklenemedi:', error);
+      console.error('Failed to load featured content:', error);
       return [];
     }
   }
