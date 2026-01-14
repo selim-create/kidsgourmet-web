@@ -24,7 +24,8 @@ export const removeToken = (): void => {
 export async function fetchAPI<T>(
   endpoint: string, 
   options: FetchOptions = {},
-  requireAuth: boolean = false
+  requireAuth: boolean = false,
+  silentErrors: number[] = [] // Don't console.error for these status codes
 ): Promise<T> {
   const headers: Record<string, string> = { 
     'Content-Type': 'application/json', 
@@ -47,7 +48,11 @@ export async function fetchAPI<T>(
 
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
+    
+    // Don't log errors for silent status codes
+    if (!silentErrors.includes(res.status)) {
+      console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
+    }
     
     if (res.status === 401) {
       removeToken();
@@ -63,6 +68,10 @@ export async function fetchAPI<T>(
 /**
  * Auth gerektiren istekler için wrapper
  */
-export async function fetchAuthAPI<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
-  return fetchAPI<T>(endpoint, options, true);
+export async function fetchAuthAPI<T>(
+  endpoint: string, 
+  options: FetchOptions = {}, 
+  silentErrors: number[] = []
+): Promise<T> {
+  return fetchAPI<T>(endpoint, options, true, silentErrors);
 }

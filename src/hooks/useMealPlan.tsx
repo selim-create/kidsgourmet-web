@@ -69,15 +69,19 @@ export function useMealPlan() {
         week_start: currentWeekStart,
       });
 
-      if (response.success && response.plan) {
-        setPlan(response.plan);
+      // Response validation - plan can be directly in response or in response.plan
+      const newPlan = response?.plan || response;
+      
+      if (newPlan && newPlan.id && newPlan.days) {
+        setPlan(newPlan);
         toast.success('Haftalık plan başarıyla oluşturuldu! 🎉');
       } else {
-        toast.error(response.message || 'Plan oluşturulamadı');
+        console.error('Invalid plan response:', response);
+        toast.error('Plan oluşturuldu ancak format hatalı');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Plan oluşturma hatası:', err);
-      toast.error('Plan oluşturulurken bir hata oluştu');
+      toast.error(err?.message || 'Plan oluşturulurken bir hata oluştu');
     } finally {
       setIsGenerating(false);
     }
@@ -88,8 +92,9 @@ export function useMealPlan() {
     if (!plan?.id) return;
 
     try {
-      const updatedPlan = await mealPlanService.refreshSlot(plan.id, slotId);
-      setPlan(updatedPlan);
+      await mealPlanService.refreshSlot(plan.id, slotId);
+      // Reload entire plan after slot is updated
+      await loadActivePlan();
       toast.success('Alternatif tarif getirildi');
     } catch (err) {
       console.error('Slot refresh hatası:', err);
@@ -102,8 +107,9 @@ export function useMealPlan() {
     if (!plan?.id) return;
 
     try {
-      const updatedPlan = await mealPlanService.skipSlot(plan.id, slotId, reason);
-      setPlan(updatedPlan);
+      await mealPlanService.skipSlot(plan.id, slotId, reason);
+      // Reload entire plan after slot is skipped
+      await loadActivePlan();
       toast.success('Öğün işaretlendi');
     } catch (err) {
       console.error('Slot skip hatası:', err);
