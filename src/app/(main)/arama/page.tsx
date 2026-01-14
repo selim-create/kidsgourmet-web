@@ -431,13 +431,14 @@ function SearchContent() {
                     </div>
 
                 </aside>
-                </>
-            )}
 
             </div>
-        </div>
+            </>
+            )}
 
+        </div>
     </div>
+
   );
 }
 
