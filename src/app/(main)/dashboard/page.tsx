@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
@@ -10,11 +11,28 @@ import AllergyBanner from "@/components/features/AllergyBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
 export default function DashboardPage() {
-  const { user } = useUser();
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading: userLoading } = useUser();
   const { activeChild, children, setActiveChild } = useActiveChild();
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Auth guard
+  useEffect(() => {
+    if (!userLoading && !isAuthenticated) {
+      router.push('/login?redirect=/dashboard');
+    }
+  }, [userLoading, isAuthenticated, router]);
+
+  // Role-based redirect for experts
+  useEffect(() => {
+    if (user?.role && ['administrator', 'editor', 'kg_expert'].includes(user.role)) {
+      // Expert kullanıcılar için özel dashboard'a yönlendir
+      // veya burada expert widget'larını göster
+      // Şimdilik yönlendirme yapmıyoruz, expert panele link veriyoruz
+    }
+  }, [user?.role]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -42,7 +60,7 @@ export default function DashboardPage() {
   }, [user]);
 
   // Loading state
-  if (isLoading) {
+  if (userLoading || !isAuthenticated || isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">

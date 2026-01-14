@@ -113,6 +113,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
             gender,
             allergies,
             feeding_style: feedingStyle,
+            kvkk_consent: true,
           };
 
       await onSave(childData);

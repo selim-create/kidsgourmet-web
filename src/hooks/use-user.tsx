@@ -3,6 +3,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Child } from '@/lib/types';
 import { authService } from '@/services/auth-service';
+import { userService } from '@/services/user-service';
 
 interface UserContextType {
   user: User | null;
@@ -29,15 +30,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const checkAuth = async () => {
+    setIsLoading(true);
     if (authService.isAuthenticated()) {
       try {
-        const userData = await authService.getCurrentUser();
+        // Tam profil bilgisini al (children dahil)
+        const userData = await userService.getFullProfile();
         setUser(userData);
         if (userData?.children?.length) {
           setActiveChild(userData.children[0]);
         }
       } catch (error) {
+        console.error('Auth check failed:', error);
         authService.logout();
+        setUser(null);
       }
     }
     setIsLoading(false);
@@ -45,10 +50,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     const response = await authService.login({ username, password });
-    setUser(response.user);
-    // Check if children array exists before accessing it
-    if (response.user?.children && response.user.children.length > 0) {
-      setActiveChild(response.user.children[0]);
+    // Login sonrası tam profil al
+    const userData = await userService.getFullProfile();
+    setUser(userData);
+    if (userData?.children && userData.children.length > 0) {
+      setActiveChild(userData.children[0]);
     }
   };
 
@@ -60,12 +66,28 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, name: string) => {
     const response = await authService.register({ email, password, name });
-    setUser(response.user);
+    // Register sonrası tam profil al
+    const userData = await userService.getFullProfile();
+    setUser(userData);
   };
 
   const refreshUser = async () => {
-    const userData = await authService.getCurrentUser();
-    setUser(userData);
+    try {
+      const userData = await userService.getFullProfile();
+      setUser(userData);
+      // Active child'ı da güncelle
+      if (userData?.children?.length) {
+        const currentActiveId = activeChild?.id;
+        const stillExists = userData.children.find(c => c.id === currentActiveId);
+        if (!stillExists) {
+          setActiveChild(userData.children[0]);
+        }
+      } else {
+        setActiveChild(null);
+      }
+    } catch (error) {
+      console.error('Refresh user failed:', error);
+    }
   };
 
   return (
