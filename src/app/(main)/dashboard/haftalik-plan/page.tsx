@@ -34,7 +34,6 @@ export default function WeeklyPlanPage() {
     goToPreviousWeek
   } = useMealPlan();
 
-  const [activeSlotMenu, setActiveSlotMenu] = useState<string | null>(null);
   const [isCreatingShoppingList, setIsCreatingShoppingList] = useState(false);
 
   // Alışveriş listesi oluştur
@@ -62,6 +61,7 @@ export default function WeeklyPlanPage() {
   // Slot kartı bileşeni
   const SlotCard = ({ slot }: { slot: MealSlot }) => {
     const colors = SLOT_COLORS[slot.slot_type] || SLOT_COLORS.breakfast;
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     if (slot.status === 'skipped') {
       return (
@@ -89,69 +89,83 @@ export default function WeeklyPlanPage() {
     if (slot.status === 'empty' || !slot.recipe) {
       return (
         <button 
-          className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50 transition-all h-20 group"
+          onClick={() => toast.info('Bu öğün için tarif eklemek için favorilerinizden seçin')}
+          className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50 transition-all h-20 w-full"
         >
-          <i className="fa-solid fa-plus mr-1 group-hover:scale-110 transition-transform"></i>
+          <i className="fa-solid fa-plus mr-1"></i>
           <span className="text-xs font-bold">{slot.slot_label}</span>
         </button>
       );
     }
 
     return (
-      <div className={`bg-white p-3 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group relative cursor-pointer`}>
+      <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative">
         <div className="flex items-start justify-between mb-2">
           <span className={`text-[10px] font-bold ${colors.text} ${colors.label} px-2 py-0.5 rounded`}>
             {slot.slot_label}
           </span>
-          <div className="relative">
-            <button 
-              onClick={() => setActiveSlotMenu(activeSlotMenu === slot.id ? null : slot.id)}
-              className="text-gray-300 hover:text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <i className="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-            
-            {activeSlotMenu === slot.id && (
-              <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-100 p-1 z-50 min-w-[150px]">
+          
+          {/* Menü Butonu - Her zaman görünür */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(!isMenuOpen);
+            }}
+            className="text-gray-400 hover:text-orange-500 p-1 -mr-1"
+          >
+            <i className="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+          
+          {/* Dropdown Menü */}
+          {isMenuOpen && (
+            <>
+              {/* Backdrop */}
+              <div 
+                className="fixed inset-0 z-40" 
+                onClick={() => setIsMenuOpen(false)}
+              />
+              <div className="absolute right-0 top-8 bg-white rounded-lg shadow-xl border border-gray-100 p-1 z-50 min-w-[160px]">
                 <button
                   onClick={() => {
                     refreshSlot(slot.id);
-                    setActiveSlotMenu(null);
+                    setIsMenuOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center gap-2"
                 >
-                  <i className="fa-solid fa-rotate"></i> Değiştir
+                  <i className="fa-solid fa-rotate text-blue-500"></i> Değiştir
                 </button>
                 <button
                   onClick={() => {
                     skipSlot(slot.id, 'eating_out');
-                    setActiveSlotMenu(null);
+                    setIsMenuOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center gap-2"
                 >
-                  <i className="fa-solid fa-utensils"></i> Dışarıdayız
+                  <i className="fa-solid fa-utensils text-orange-500"></i> Dışarıdayız
                 </button>
                 <button
                   onClick={() => {
                     skipSlot(slot.id, 'ready_meal');
-                    setActiveSlotMenu(null);
+                    setIsMenuOpen(false);
                   }}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 rounded flex items-center gap-2"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center gap-2"
                 >
-                  <i className="fa-solid fa-baby"></i> Hazır Mama
+                  <i className="fa-solid fa-jar text-purple-500"></i> Hazır Mama
                 </button>
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
+        
+        {/* Tarif Bilgisi */}
         <Link href={`/tarifler/${slot.recipe.slug}`}>
           <div className="flex items-center gap-2 mb-2">
             <img 
-              src={slot.recipe.image || 'https://placehold.co/100x100/FFF3E0/FF8A65?text=No+Image'} 
-              className="w-10 h-10 rounded-lg object-cover" 
+              src={slot.recipe.image || 'https://placehold.co/100x100/FFF3E0/FF8A65?text=Tarif'} 
+              className="w-12 h-12 rounded-lg object-cover" 
               alt={slot.recipe.title} 
             />
-            <p className="text-xs font-bold text-slate-700 line-clamp-2">{slot.recipe.title}</p>
+            <p className="text-xs font-bold text-slate-700 line-clamp-2 flex-1">{slot.recipe.title}</p>
           </div>
           <p className="text-[10px] text-gray-400 flex items-center gap-1">
             <i className="fa-regular fa-clock"></i> {slot.recipe.prep_time}
@@ -367,8 +381,10 @@ export default function WeeklyPlanPage() {
                 </div>
             </div>
 
-            {/* MAIN GRID */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
+            {/* MAIN GRID - Updated flex structure */}
+            <div className="flex flex-1 overflow-hidden">
+              {/* WEEK GRID */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
                 <div className="max-w-6xl mx-auto pb-24">
                     
                     {isLoading ? (
@@ -419,6 +435,41 @@ export default function WeeklyPlanPage() {
                     )}
                     
                 </div>
+              </div>
+              
+              {/* RECIPE POOL SIDEBAR - Desktop Only */}
+              <aside className="hidden xl:flex w-80 bg-white border-l border-gray-100 flex-col overflow-hidden">
+                <div className="p-4 border-b border-gray-100">
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    <i className="fa-solid fa-bookmark text-orange-500"></i> Tarif Havuzu
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Sürükleyip slotlara bırakın</p>
+                </div>
+                
+                {/* Favoriler */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Favorilerim</h4>
+                    <div className="space-y-2">
+                      {/* Favori tarifler buraya gelecek - useFavorites hook'u ile */}
+                      <div className="text-center py-6 text-gray-400">
+                        <i className="fa-regular fa-heart text-2xl mb-2"></i>
+                        <p className="text-xs">Favori tarifleriniz burada görünecek</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Önerilen</h4>
+                    <div className="space-y-2">
+                      <div className="text-center py-6 text-gray-400">
+                        <i className="fa-solid fa-wand-magic-sparkles text-2xl mb-2"></i>
+                        <p className="text-xs">Yaşa uygun öneriler</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </aside>
             </div>
 
         </main>
