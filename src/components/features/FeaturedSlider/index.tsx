@@ -40,6 +40,12 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
     ingredient: items.filter(item => item.type === 'ingredient').length,
   };
 
+  // Get last sponsor info for the sponsor filter button
+  const lastSponsor = items.find(item => item.type === 'sponsored');
+  const sponsorMeta = lastSponsor?.data?.meta || {};
+  const sponsorName = sponsorMeta.sponsor_name || 'Sponsor';
+  const sponsorLogo = sponsorMeta.sponsor_logo || '';
+
   useEffect(() => {
     // Reset to first item when filter changes
     setCurrentIndex(0);
@@ -163,13 +169,18 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.sponsored > 0 && (
                 <button
                   onClick={() => setFilter('sponsored')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 ${
                     filter === 'sponsored'
-                      ? 'border-slate-200 bg-slate-50 text-slate-600'
+                      ? 'bg-slate-700 text-white border-slate-700'
                       : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
                   }`}
                 >
-                  <i className="fa-solid fa-badge-check mr-2"></i>Sponsor
+                  {sponsorLogo ? (
+                    <img src={sponsorLogo} alt={`${sponsorName} logo`} className="h-4 object-contain" />
+                  ) : (
+                    <i className="fa-solid fa-badge-check"></i>
+                  )}
+                  {sponsorName}
                 </button>
               )}
               
