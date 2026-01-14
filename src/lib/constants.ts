@@ -33,6 +33,9 @@ export const API_ENDPOINTS = {
   USER_CHILDREN: `${KG_API_NAMESPACE}/user/children`,
   USER_FAVORITES: `${KG_API_NAMESPACE}/user/favorites`,
   USER_SHOPPING_LIST: `${KG_API_NAMESPACE}/user/shopping-list`,
+  USER_COLLECTIONS: `${KG_API_NAMESPACE}/user/collections`,
+  USER_COLLECTION_BY_ID: (id: string) => `${KG_API_NAMESPACE}/user/collections/${id}`,
+  USER_COLLECTION_ITEMS: (id: string) => `${KG_API_NAMESPACE}/user/collections/${id}/items`,
   
   // Search
   SEARCH: `${KG_API_NAMESPACE}/search`,

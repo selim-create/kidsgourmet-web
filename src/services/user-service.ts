@@ -1,6 +1,18 @@
 import { fetchAuthAPI, fetchAPI } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { User, Child, RecipeCard, ShoppingListItem, PublicProfile, ExpertDashboard } from '@/lib/types';
+import { 
+  User, 
+  Child, 
+  RecipeCard, 
+  ShoppingListItem, 
+  PublicProfile, 
+  ExpertDashboard,
+  FavoritesResponse,
+  FavoriteItemType,
+  Collection,
+  CollectionInput,
+  CollectionItem
+} from '@/lib/types';
 
 export const userService = {
   /**
@@ -45,7 +57,7 @@ export const userService = {
     });
   },
 
-  // Favoriler
+  // Favoriler (eski metodlar - backward compatibility için saklanıyor)
   getFavorites: async (): Promise<RecipeCard[]> => {
     return await fetchAuthAPI<RecipeCard[]>(API_ENDPOINTS.USER_FAVORITES);
   },
@@ -59,6 +71,67 @@ export const userService = {
 
   removeFavorite: async (recipeId: number): Promise<void> => {
     await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_FAVORITES}/${recipeId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Yeni Favoriler API
+  getAllFavorites: async (type?: 'all' | 'recipe' | 'ingredient' | 'post' | 'discussion'): Promise<FavoritesResponse> => {
+    const queryParam = type ? `?type=${type}` : '';
+    return await fetchAuthAPI<FavoritesResponse>(`${API_ENDPOINTS.USER_FAVORITES}${queryParam}`);
+  },
+
+  addFavoriteItem: async (itemId: number, itemType: FavoriteItemType): Promise<void> => {
+    await fetchAuthAPI<void>(API_ENDPOINTS.USER_FAVORITES, {
+      method: 'POST',
+      body: JSON.stringify({ item_id: itemId, item_type: itemType }),
+    });
+  },
+
+  removeFavoriteItem: async (itemId: number, itemType: FavoriteItemType): Promise<void> => {
+    await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_FAVORITES}/${itemId}?type=${itemType}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Koleksiyonlar API
+  getCollections: async (): Promise<Collection[]> => {
+    return await fetchAuthAPI<Collection[]>(API_ENDPOINTS.USER_COLLECTIONS);
+  },
+
+  createCollection: async (data: CollectionInput): Promise<Collection> => {
+    return await fetchAuthAPI<Collection>(API_ENDPOINTS.USER_COLLECTIONS, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getCollection: async (id: string): Promise<Collection> => {
+    return await fetchAuthAPI<Collection>(API_ENDPOINTS.USER_COLLECTION_BY_ID(id));
+  },
+
+  updateCollection: async (id: string, data: CollectionInput): Promise<Collection> => {
+    return await fetchAuthAPI<Collection>(API_ENDPOINTS.USER_COLLECTION_BY_ID(id), {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteCollection: async (id: string): Promise<void> => {
+    await fetchAuthAPI<void>(API_ENDPOINTS.USER_COLLECTION_BY_ID(id), {
+      method: 'DELETE',
+    });
+  },
+
+  addCollectionItem: async (collectionId: string, itemId: number, itemType: FavoriteItemType): Promise<void> => {
+    await fetchAuthAPI<void>(API_ENDPOINTS.USER_COLLECTION_ITEMS(collectionId), {
+      method: 'POST',
+      body: JSON.stringify({ item_id: itemId, item_type: itemType }),
+    });
+  },
+
+  removeCollectionItem: async (collectionId: string, itemId: number, itemType: FavoriteItemType): Promise<void> => {
+    await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_COLLECTION_ITEMS(collectionId)}/${itemId}?type=${itemType}`, {
       method: 'DELETE',
     });
   },
