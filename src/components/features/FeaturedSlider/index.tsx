@@ -176,7 +176,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
                   }`}
                 >
                   {sponsorLogo ? (
-                    <img src={sponsorLogo} alt="" className="h-4 object-contain" />
+                    <img src={sponsorLogo} alt={`${sponsorName} logo`} className="h-4 object-contain" />
                   ) : (
                     <i className="fa-solid fa-badge-check"></i>
                   )}
