@@ -451,7 +451,7 @@ export default function WeeklyPlanPage() {
                   <div>
                     <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Favorilerim</h4>
                     <div className="space-y-2">
-                      {/* Favori tarifler buraya gelecek - useFavorites hook'u ile */}
+                      {/* Favorite recipes will be added here - with useFavorites hook */}
                       <div className="text-center py-6 text-gray-400">
                         <i className="fa-regular fa-heart text-2xl mb-2"></i>
                         <p className="text-xs">Favori tarifleriniz burada görünecek</p>

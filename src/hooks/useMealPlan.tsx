@@ -69,9 +69,7 @@ export function useMealPlan() {
         week_start: currentWeekStart,
       });
 
-      console.log('Generate plan response:', response); // Debug için
-
-      // Response kontrolü - plan doğrudan response'ta veya response.plan'da olabilir
+      // Response validation - plan can be directly in response or in response.plan
       const newPlan = response?.plan || response;
       
       if (newPlan && newPlan.id && newPlan.days) {
@@ -95,7 +93,7 @@ export function useMealPlan() {
 
     try {
       await mealPlanService.refreshSlot(plan.id, slotId);
-      // Slot güncellendiğinde tüm planı yeniden yükle
+      // Reload entire plan after slot is updated
       await loadActivePlan();
       toast.success('Alternatif tarif getirildi');
     } catch (err) {
@@ -110,7 +108,7 @@ export function useMealPlan() {
 
     try {
       await mealPlanService.skipSlot(plan.id, slotId, reason);
-      // Plan'ı yeniden yükle
+      // Reload entire plan after slot is skipped
       await loadActivePlan();
       toast.success('Öğün işaretlendi');
     } catch (err) {

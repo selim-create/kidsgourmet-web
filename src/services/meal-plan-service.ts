@@ -28,15 +28,15 @@ export const mealPlanService = {
       const response = await fetchAuthAPI<{ success: boolean; plan: MealPlan }>(
         API_ENDPOINTS.MEAL_PLANS_ACTIVE(childId),
         {},
-        [404] // 404 beklenen bir durum - konsola log atma
+        [404] // 404 is expected when no plan exists - don't log to console
       );
       return response?.plan || null;
     } catch (error: any) {
-      // 404 = Plan yok, bu beklenen bir durum
+      // 404 = No plan, this is expected
       if (error?.message?.includes('404') || error?.message?.includes('No active plan')) {
         return null;
       }
-      // Diğer hatalar için log at ama null dön
+      // Log other errors but still return null
       console.warn('Active plan fetch warning:', error?.message);
       return null;
     }

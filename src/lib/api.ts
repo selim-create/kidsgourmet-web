@@ -25,7 +25,7 @@ export async function fetchAPI<T>(
   endpoint: string, 
   options: FetchOptions = {},
   requireAuth: boolean = false,
-  silentErrors: number[] = [] // Bu status kodları için console.error yapma
+  silentErrors: number[] = [] // Don't console.error for these status codes
 ): Promise<T> {
   const headers: Record<string, string> = { 
     'Content-Type': 'application/json', 
@@ -49,7 +49,7 @@ export async function fetchAPI<T>(
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     
-    // Silent errors için log atma
+    // Don't log errors for silent status codes
     if (!silentErrors.includes(res.status)) {
       console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
     }
