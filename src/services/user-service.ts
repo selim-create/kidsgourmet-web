@@ -142,10 +142,22 @@ export const userService = {
   },
 
   addToShoppingList: async (items: Omit<ShoppingListItem, 'id'>[]): Promise<ShoppingListItem[]> => {
-    return await fetchAuthAPI<ShoppingListItem[]>(API_ENDPOINTS.USER_SHOPPING_LIST, {
-      method: 'POST',
-      body: JSON.stringify({ items }),
-    });
+    // Backend tek item kabul ediyor ve 'item' ile 'quantity' parametreleri bekliyor
+    // Her item için ayrı ayrı API çağrısı yap
+    const addedItems: ShoppingListItem[] = [];
+    
+    for (const item of items) {
+      const response = await fetchAuthAPI<ShoppingListItem>(API_ENDPOINTS.USER_SHOPPING_LIST, {
+        method: 'POST',
+        body: JSON.stringify({
+          item: item.ingredient,      // 'ingredient' -> 'item'
+          quantity: item.amount || '1 adet',  // 'amount' -> 'quantity'
+        }),
+      });
+      addedItems.push(response);
+    }
+    
+    return addedItems;
   },
 
   removeFromShoppingList: async (id: number): Promise<void> => {

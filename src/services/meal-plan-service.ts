@@ -21,15 +21,21 @@ export const mealPlanService = {
 
   /**
    * Aktif planı getir
+   * Plan yoksa null döner (404 beklenen bir durum)
    */
   getActivePlan: async (childId: string): Promise<MealPlan | null> => {
     try {
       const response = await fetchAuthAPI<{ success: boolean; plan: MealPlan }>(
         API_ENDPOINTS.MEAL_PLANS_ACTIVE(childId)
       );
-      return response.plan || null;
-    } catch (error) {
-      console.error('Active plan fetch error:', error);
+      return response?.plan || null;
+    } catch (error: any) {
+      // 404 = Plan yok, bu beklenen bir durum
+      if (error?.message?.includes('404') || error?.message?.includes('No active plan')) {
+        return null;
+      }
+      // Diğer hatalar için log at ama null dön
+      console.warn('Active plan fetch warning:', error?.message);
       return null;
     }
   },

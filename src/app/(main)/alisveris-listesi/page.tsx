@@ -65,9 +65,9 @@ export default function ShoppingListPage() {
         checked: false,
       }]);
       setNewItem('');
-      toast.success('Ürün eklendi');
-    } catch {
-      toast.error('Ürün eklenemedi');
+    } catch (error) {
+      console.error('Add item error:', error);
+      // Error handling is already done in useShoppingList hook
     }
   };
 

@@ -26,6 +26,7 @@ export function useMealPlan() {
   const loadActivePlan = useCallback(async () => {
     if (!activeChild?.id) {
       setIsLoading(false);
+      setPlan(null);
       return;
     }
     
@@ -34,10 +35,15 @@ export function useMealPlan() {
     
     try {
       const activePlan = await mealPlanService.getActivePlan(activeChild.id);
+      // Plan null olabilir - bu hata değil, henüz plan oluşturulmamış demek
       setPlan(activePlan);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Plan yüklenemedi:', err);
-      setError('Plan yüklenirken bir hata oluştu');
+      // Sadece gerçek hatalarda error state'i set et
+      if (!err?.message?.includes('404') && !err?.message?.includes('No active plan')) {
+        setError('Plan yüklenirken bir hata oluştu');
+      }
+      setPlan(null);
     } finally {
       setIsLoading(false);
     }
