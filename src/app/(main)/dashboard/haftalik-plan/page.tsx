@@ -11,6 +11,44 @@ import { mealPlanService } from '@/services/meal-plan-service';
 import { recipeService } from '@/services/recipe-service';
 import { toast } from 'sonner';
 
+// Constants
+const SEARCH_DEBOUNCE_MS = 300;
+const PLACEHOLDER_RECIPE_IMAGE = 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T';
+
+// Age group mapping
+const AGE_GROUP_SLUGS: Record<string, string> = {
+  '0-6': '0-6-ay-sadece-sut',
+  '6-8': '6-8-ay-baslangic',
+  '9-11': '9-11-ay-kesif',
+  '12-24': '12-24-ay-gecis',
+  '24+': '2-yas-ve-uzeri',
+};
+
+// Helper function for age group calculation
+const getAgeGroupSlug = (ageInMonths: number): string => {
+  if (ageInMonths < 6) return AGE_GROUP_SLUGS['0-6'];
+  if (ageInMonths <= 8) return AGE_GROUP_SLUGS['6-8'];
+  if (ageInMonths <= 11) return AGE_GROUP_SLUGS['9-11'];
+  if (ageInMonths <= 24) return AGE_GROUP_SLUGS['12-24'];
+  return AGE_GROUP_SLUGS['24+'];
+};
+
+// Helper function for age calculation
+const calculateAgeInMonths = (birthDate: string): number => {
+  const birth = new Date(birthDate);
+  const now = new Date();
+  return (now.getFullYear() - birth.getFullYear()) * 12 + 
+         (now.getMonth() - birth.getMonth());
+};
+
+// Lightweight recipe type for sidebar cards
+interface RecipeCardLite {
+  id: number;
+  title: string;
+  image?: string;
+  prep_time?: string;
+}
+
 // Slot renkleri
 const SLOT_COLORS: Record<MealSlotType, { bg: string; text: string; label: string }> = {
   breakfast: { bg: 'bg-yellow-50', text: 'text-yellow-600', label: 'bg-yellow-100' },
@@ -47,23 +85,6 @@ export default function WeeklyPlanPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
-
-  // Yaş hesaplama helper
-  const calculateAgeInMonths = (birthDate: string): number => {
-    const birth = new Date(birthDate);
-    const now = new Date();
-    return (now.getFullYear() - birth.getFullYear()) * 12 + 
-           (now.getMonth() - birth.getMonth());
-  };
-
-  // Yaş grubu slug mapping
-  const getAgeGroupSlug = (ageInMonths: number): string => {
-    if (ageInMonths < 6) return '0-6-ay-sadece-sut';
-    if (ageInMonths <= 8) return '6-8-ay-baslangic';
-    if (ageInMonths <= 11) return '9-11-ay-kesif';
-    if (ageInMonths <= 24) return '12-24-ay-gecis';
-    return '2-yas-ve-uzeri';
-  };
 
   // Alışveriş listesi oluştur
   const handleCreateShoppingList = async () => {
@@ -140,7 +161,7 @@ export default function WeeklyPlanPage() {
       if (searchQuery) {
         handleSearch(searchQuery);
       }
-    }, 300);
+    }, SEARCH_DEBOUNCE_MS);
     
     return () => clearTimeout(timer);
   }, [searchQuery]);
@@ -284,7 +305,7 @@ export default function WeeklyPlanPage() {
 
   // RecipePoolCard bileşeni (Sidebar için mini kart)
   interface RecipePoolCardProps {
-    recipe: Recipe | { id: number; title: string; image?: string; prep_time?: string };
+    recipe: Recipe | RecipeCardLite;
     onSelect: () => void;
     isSelectable: boolean;
   }
@@ -295,7 +316,7 @@ export default function WeeklyPlanPage() {
       return 'slug' in r && 'content' in r;
     };
     
-    const image = isFullRecipe(recipe) ? recipe.image : (recipe.image || 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T');
+    const image = isFullRecipe(recipe) ? recipe.image : (recipe.image || PLACEHOLDER_RECIPE_IMAGE);
     const prepTime = isFullRecipe(recipe) ? recipe.prep_time : recipe.prep_time;
 
     return (
