@@ -26,7 +26,9 @@ export const mealPlanService = {
   getActivePlan: async (childId: string): Promise<MealPlan | null> => {
     try {
       const response = await fetchAuthAPI<{ success: boolean; plan: MealPlan }>(
-        API_ENDPOINTS.MEAL_PLANS_ACTIVE(childId)
+        API_ENDPOINTS.MEAL_PLANS_ACTIVE(childId),
+        {},
+        [404] // 404 beklenen bir durum - konsola log atma
       );
       return response?.plan || null;
     } catch (error: any) {
