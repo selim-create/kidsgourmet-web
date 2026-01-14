@@ -181,7 +181,7 @@ export function useMealPlan() {
 
   return {
     plan,
-    setPlan, // Manuel güncelleme için
+    setPlan, // El ile güncelleme için
     isLoading,
     isGenerating,
     error,

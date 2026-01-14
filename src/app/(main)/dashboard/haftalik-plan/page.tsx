@@ -122,15 +122,12 @@ export default function WeeklyPlanPage() {
         const ageInMonths = calculateAgeInMonths(activeChild.birth_date);
         const ageGroup = getAgeGroupSlug(ageInMonths);
         
-        console.log('Loading suggestions for age group:', ageGroup);
-        
         // Tarifler API'sini kullan
         const recipes = await recipeService.getByFilters({
           age_group: ageGroup,
           per_page: 10,
         });
         
-        console.log('Loaded suggestions:', recipes.length);
         setSuggestedRecipes(recipes);
       } catch (error) {
         console.error('Öneriler yüklenemedi:', error);

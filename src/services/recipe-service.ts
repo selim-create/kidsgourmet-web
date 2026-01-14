@@ -251,6 +251,7 @@ export const recipeService = {
 
   /**
    * Filtrelere göre tarif getir (yaş grubu, öğün tipi vs.)
+   * Not: WordPress REST API parametreleri hyphen format kullanır (age-group, meal-type)
    */
   getByFilters: async (filters: {
     age_group?: string;
@@ -261,7 +262,7 @@ export const recipeService = {
     try {
       const params = new URLSearchParams();
       
-      // WordPress REST API için taxonomy filtresi
+      // WordPress REST API için taxonomy filtresi - hyphen formatına çevir
       if (filters.age_group) {
         params.append('age-group', filters.age_group);
       }
