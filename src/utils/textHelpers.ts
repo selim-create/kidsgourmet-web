@@ -3,6 +3,8 @@
  * For HTML entity decoding and text manipulation
  */
 
+import DOMPurify from 'isomorphic-dompurify';
+
 /**
  * SSR-safe version of HTML entity decoder
  * Use this in components that render server-side
@@ -11,19 +13,15 @@
 export function decodeEntities(text: string | null | undefined): string {
   if (!text) return '';
   
-  // Decode in specific order to avoid double-escaping issues
-  // First decode numeric entities, then named entities
-  return text
-    .replace(/&#8217;/g, "'")
-    .replace(/&#8220;/g, '"')
-    .replace(/&#8221;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&#038;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&'); // Decode &amp; last to avoid double-decoding
+  // Use DOMPurify to safely decode HTML entities
+  // This prevents double-escaping and XSS issues
+  const decoded = DOMPurify.sanitize(text, { 
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true 
+  });
+  
+  return decoded;
 }
 
 /**
