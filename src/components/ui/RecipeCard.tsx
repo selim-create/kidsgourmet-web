@@ -62,7 +62,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             className="text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm"
             style={{ backgroundColor: recipe.age_group_color || '#22C55E' }}
           >
-            {recipe.age_group}
+            {decodeEntities(recipe.age_group)}
           </span>
           
           {/* Featured Badge */}
