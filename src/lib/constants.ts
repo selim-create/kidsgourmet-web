@@ -37,6 +37,9 @@ export const API_ENDPOINTS = {
   // Search
   SEARCH: `${KG_API_NAMESPACE}/search`,
   
+  // Featured Content
+  FEATURED: `${KG_API_NAMESPACE}/featured`,
+  
   // Tariften.com Cross-Sell
   TARIFTEN_BY_INGREDIENT: (ingredient: string) => 
     `${TARIFTEN_API_URL}/recipes/by-ingredient?ingredient=${encodeURIComponent(ingredient)}&limit=3`,

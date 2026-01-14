@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
-import { decodeHTMLEntities } from '@/utils/helpers';
+import { decodeEntities } from '@/utils/textHelpers';
 import { useFavorites } from '@/hooks/use-favorites';
 
 interface RecipeCardProps {
@@ -44,7 +44,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         <img 
           src={recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif'} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-          alt={decodeHTMLEntities(recipe.title)} 
+          alt={decodeEntities(recipe.title)} 
         />
         
         {/* Favorite Button */}
@@ -76,7 +76,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
       
       <div className="p-5">
         <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">
-          {decodeHTMLEntities(recipe.title)}
+          {decodeEntities(recipe.title)}
         </h3>
         
         {/* Recipe Info */}
@@ -89,14 +89,14 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           {/* Diet Types */}
           {recipe.diet_types && recipe.diet_types.length > 0 && (
             <span>
-              <i className="fa-solid fa-leaf mr-1"></i> {recipe.diet_types[0]}
+              <i className="fa-solid fa-leaf mr-1"></i> {decodeEntities(recipe.diet_types[0])}
             </span>
           )}
           
           {/* Meal Type */}
           {recipe.meal_type && (
             <span>
-              <i className="fa-solid fa-bowl-food mr-1"></i> {recipe.meal_type}
+              <i className="fa-solid fa-utensils mr-1"></i> {decodeEntities(recipe.meal_type)}
             </span>
           )}
           
