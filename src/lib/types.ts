@@ -437,3 +437,106 @@ export interface ExpertDashboard {
     comments_moderated: number;
   };
 }
+
+// ========== MEAL PLAN TYPES ==========
+
+export interface MealPlan {
+  id: string;
+  child_id: string;
+  week_start: string;
+  week_end: string;
+  status: 'draft' | 'active' | 'completed';
+  days: MealPlanDay[];
+  nutrition_summary?: WeeklyNutritionSummary;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MealPlanDay {
+  date: string;
+  day_name: string;
+  slots: MealSlot[];
+}
+
+export interface MealSlot {
+  id: string;
+  slot_type: MealSlotType;
+  slot_label: string;
+  status: MealSlotStatus;
+  recipe?: MealSlotRecipe | null;
+  skip_reason?: SkipReason | null;
+  time_range?: string;
+  color_code?: string;
+}
+
+export type MealSlotType = 
+  | 'breakfast' 
+  | 'lunch' 
+  | 'snack_morning' 
+  | 'snack_afternoon' 
+  | 'dinner';
+
+export type MealSlotStatus = 'filled' | 'empty' | 'skipped';
+
+export type SkipReason = 
+  | 'eating_out' 
+  | 'ready_meal' 
+  | 'family_meal' 
+  | 'other';
+
+export interface MealSlotRecipe {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  prep_time: string;
+  age_group: string;
+  allergens: string[];
+}
+
+export interface WeeklyNutritionSummary {
+  total_meals: number;
+  vegetables_servings: number;
+  protein_servings: number;
+  grains_servings: number;
+  fruits_servings: number;
+  new_allergens_introduced: string[];
+}
+
+export interface GeneratePlanRequest {
+  child_id: string;
+  week_start: string;
+  preferences?: {
+    exclude_recipes?: number[];
+    preferred_recipes?: number[];
+    max_prep_time?: number;
+  };
+}
+
+export interface GeneratePlanResponse {
+  success: boolean;
+  plan: MealPlan;
+  message?: string;
+}
+
+export interface AggregatedShoppingItem {
+  ingredient_name: string;
+  total_amount: number;
+  unit: string;
+  category: ShoppingCategory;
+  recipes: { id: number; title: string; amount: string }[];
+  checked: boolean;
+}
+
+export type ShoppingCategory = 
+  | 'fruits_vegetables' 
+  | 'meat_protein' 
+  | 'dairy' 
+  | 'grains' 
+  | 'other';
+
+export interface GenerateShoppingListResponse {
+  success: boolean;
+  items: AggregatedShoppingItem[];
+  total_count: number;
+}
