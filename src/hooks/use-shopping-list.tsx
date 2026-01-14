@@ -37,7 +37,13 @@ export function useShoppingList() {
     try {
       const added = await userService.addToShoppingList(newItems);
       setItems(prev => [...prev, ...added]);
-      toast.success(`${newItems.length} ürün listeye eklendi`);
+      
+      // Başarılı eklenen item sayısına göre mesaj göster
+      if (added.length === newItems.length) {
+        toast.success(`${newItems.length} ürün listeye eklendi`);
+      } else if (added.length > 0) {
+        toast.success(`${added.length}/${newItems.length} ürün eklendi`);
+      }
     } catch (error) {
       console.error('Shopping list add error:', error);
       toast.error('Ürünler eklenirken hata oluştu');
