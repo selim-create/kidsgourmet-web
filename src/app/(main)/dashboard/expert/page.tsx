@@ -297,7 +297,7 @@ export default function ExpertDashboardPage() {
                 <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-800">
-                    <span className="font-bold">"BLW İlk Gün"</span> sorusunu cevapladınız
+                    <span className="font-bold">&ldquo;BLW İlk Gün&rdquo;</span> sorusunu cevapladınız
                   </p>
                   <p className="text-xs text-gray-500">30 dakika önce</p>
                 </div>
@@ -315,7 +315,7 @@ export default function ExpertDashboardPage() {
                 <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-800">
-                    Yeni tarif <span className="font-bold">"Avokadolu Püresi"</span> eklediniz
+                    Yeni tarif <span className="font-bold">&ldquo;Avokadolu Püresi&rdquo;</span> eklediniz
                   </p>
                   <p className="text-xs text-gray-500">2 saat önce</p>
                 </div>

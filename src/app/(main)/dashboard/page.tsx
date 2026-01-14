@@ -5,14 +5,13 @@ import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
-import { Child, RecipeCard, ShoppingListItem } from "@/lib/types";
+import { RecipeCard, ShoppingListItem } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
 export default function DashboardPage() {
   const { user } = useUser();
   const { activeChild, children, setActiveChild } = useActiveChild();
-  const [favorites, setFavorites] = useState<RecipeCard[]>([]);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,12 +25,10 @@ export default function DashboardPage() {
       
       try {
         // Fetch all data in parallel
-        const [favoritesData, shoppingListData] = await Promise.all([
-          userService.getFavorites(),
+        const [shoppingListData] = await Promise.all([
           userService.getShoppingList(),
         ]);
         
-        setFavorites(favoritesData);
         setShoppingList(shoppingListData);
       } catch (err) {
         console.error('Dashboard data fetch error:', err);
@@ -361,7 +358,7 @@ export default function DashboardPage() {
                             <h3 className="font-bold text-slate-800 text-sm">Dyt. Ayşe Yılmaz</h3>
                         </div>
                         <p className="text-sm text-slate-700 italic mb-3">
-                            "{activeChild ? activeChild.name : 'Çocuğunuz'} için beslenme takvimi oluşturmayı unutmayın. Düzenli öğünler gelişim için önemlidir..."
+                            &ldquo;{activeChild ? activeChild.name : 'Çocuğunuz'} için beslenme takvimi oluşturmayı unutmayın. Düzenli öğünler gelişim için önemlidir...&rdquo;
                         </p>
                         <Link href="#" className="text-xs font-bold text-green-600 hover:underline">Devamını Oku (Rejimde.com)</Link>
                     </div>
