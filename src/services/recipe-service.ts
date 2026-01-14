@@ -250,7 +250,7 @@ export const recipeService = {
   },
 
   /**
-   * Filtrelere göre tarif getir
+   * Filtrelere göre tarif getir (yaş grubu, öğün tipi vs.)
    */
   getByFilters: async (filters: {
     age_group?: string;
@@ -258,22 +258,62 @@ export const recipeService = {
     per_page?: number;
     orderby?: string;
   }): Promise<Recipe[]> => {
-    const params = new URLSearchParams();
-    if (filters.age_group) params.append('age_group', filters.age_group);
-    if (filters.meal_type) params.append('meal_type', filters.meal_type);
-    if (filters.per_page) params.append('per_page', filters.per_page.toString());
-    if (filters.orderby) params.append('orderby', filters.orderby);
-    
-    return await fetchAPI<Recipe[]>(`${API_ENDPOINTS.RECIPES}?${params.toString()}`);
+    try {
+      const params = new URLSearchParams();
+      
+      // WordPress REST API için taxonomy filtresi
+      if (filters.age_group) {
+        params.append('age-group', filters.age_group);
+      }
+      if (filters.meal_type) {
+        params.append('meal-type', filters.meal_type);
+      }
+      if (filters.per_page) {
+        params.append('per_page', filters.per_page.toString());
+      }
+      if (filters.orderby) {
+        params.append('orderby', filters.orderby);
+      }
+      
+      const queryString = params.toString();
+      const endpoint = queryString 
+        ? `${API_ENDPOINTS.RECIPES}?${queryString}` 
+        : API_ENDPOINTS.RECIPES;
+      
+      const response = await fetchAPI<Recipe[] | { recipes: Recipe[] }>(endpoint);
+      
+      // Response array veya object olabilir
+      if (Array.isArray(response)) {
+        return response;
+      }
+      return response.recipes || [];
+    } catch (error) {
+      console.error('getByFilters error:', error);
+      return [];
+    }
   },
 
   /**
    * Tarif ara
    */
   search: async (query: string, options?: { per_page?: number }): Promise<Recipe[]> => {
-    const params = new URLSearchParams({ search: query });
-    if (options?.per_page) params.append('per_page', options.per_page.toString());
-    
-    return await fetchAPI<Recipe[]>(`${API_ENDPOINTS.RECIPES}?${params.toString()}`);
+    try {
+      const params = new URLSearchParams({ search: query });
+      if (options?.per_page) {
+        params.append('per_page', options.per_page.toString());
+      }
+      
+      const response = await fetchAPI<Recipe[] | { recipes: Recipe[] }>(
+        `${API_ENDPOINTS.RECIPES}?${params.toString()}`
+      );
+      
+      if (Array.isArray(response)) {
+        return response;
+      }
+      return response.recipes || [];
+    } catch (error) {
+      console.error('search error:', error);
+      return [];
+    }
   },
 };

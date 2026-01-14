@@ -22,8 +22,8 @@ export function useMealPlan() {
     return monday.toISOString().split('T')[0];
   });
 
-  // Aktif planı yükle
-  const loadActivePlan = useCallback(async () => {
+  // Hafta bazlı plan yükle
+  const loadPlanForWeek = useCallback(async (weekStart: string) => {
     if (!activeChild?.id) {
       setIsLoading(false);
       setPlan(null);
@@ -34,12 +34,12 @@ export function useMealPlan() {
     setError(null);
     
     try {
-      const activePlan = await mealPlanService.getActivePlan(activeChild.id);
-      // Plan null olabilir - bu hata değil, henüz plan oluşturulmamış demek
+      // Hafta bilgisi ile plan getir
+      const activePlan = await mealPlanService.getPlanForWeek(activeChild.id, weekStart);
       setPlan(activePlan);
     } catch (err: any) {
       console.error('Plan yüklenemedi:', err);
-      // Sadece gerçek hatalarda error state'i set et
+      // 404 = O hafta için plan yok - hata değil
       if (!err?.message?.includes('404') && !err?.message?.includes('No active plan')) {
         setError('Plan yüklenirken bir hata oluştu');
       }
@@ -49,9 +49,10 @@ export function useMealPlan() {
     }
   }, [activeChild?.id]);
 
+  // currentWeekStart veya activeChild değiştiğinde planı yükle
   useEffect(() => {
-    loadActivePlan();
-  }, [loadActivePlan, currentWeekStart]);
+    loadPlanForWeek(currentWeekStart);
+  }, [currentWeekStart, activeChild?.id, loadPlanForWeek]);
 
   // AI ile plan oluştur
   const generatePlan = async () => {
@@ -94,7 +95,7 @@ export function useMealPlan() {
     try {
       await mealPlanService.refreshSlot(plan.id, slotId);
       // Reload entire plan after slot is updated
-      await loadActivePlan();
+      await loadPlanForWeek(currentWeekStart);
       toast.success('Alternatif tarif getirildi');
     } catch (err) {
       console.error('Slot refresh hatası:', err);
@@ -109,7 +110,7 @@ export function useMealPlan() {
     try {
       await mealPlanService.skipSlot(plan.id, slotId, reason);
       // Reload entire plan after slot is skipped
-      await loadActivePlan();
+      await loadPlanForWeek(currentWeekStart);
       toast.success('Öğün işaretlendi');
     } catch (err) {
       console.error('Slot skip hatası:', err);
@@ -117,17 +118,26 @@ export function useMealPlan() {
     }
   };
 
-  // Hafta değiştir
+  // Hafta değiştir - İLERİ
   const goToNextWeek = () => {
     const next = new Date(currentWeekStart);
     next.setDate(next.getDate() + 7);
-    setCurrentWeekStart(next.toISOString().split('T')[0]);
+    const nextWeekStart = next.toISOString().split('T')[0];
+    
+    // Önce plan'ı temizle (yeni hafta yüklenirken)
+    setPlan(null);
+    setCurrentWeekStart(nextWeekStart);
   };
 
+  // Hafta değiştir - GERİ
   const goToPreviousWeek = () => {
     const prev = new Date(currentWeekStart);
     prev.setDate(prev.getDate() - 7);
-    setCurrentWeekStart(prev.toISOString().split('T')[0]);
+    const prevWeekStart = prev.toISOString().split('T')[0];
+    
+    // Önce plan'ı temizle
+    setPlan(null);
+    setCurrentWeekStart(prevWeekStart);
   };
 
   // Hafta tarihi formatla
@@ -138,9 +148,25 @@ export function useMealPlan() {
     
     const startDay = start.getDate();
     const endDay = end.getDate();
+    const startMonth = start.toLocaleDateString('tr-TR', { month: 'short' });
     const endMonth = end.toLocaleDateString('tr-TR', { month: 'long' });
     
-    return `${startDay} - ${endDay} ${endMonth}`;
+    // Aynı ay içindeyse sadece bitiş ayını göster
+    if (start.getMonth() === end.getMonth()) {
+      return `${startDay} - ${endDay} ${endMonth}`;
+    }
+    return `${startDay} ${startMonth} - ${endDay} ${endMonth}`;
+  }, [currentWeekStart]);
+
+  // Bu hafta mı kontrol et
+  const isCurrentWeek = useCallback(() => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const thisMonday = new Date(today);
+    thisMonday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    const thisMondayStr = thisMonday.toISOString().split('T')[0];
+    
+    return currentWeekStart === thisMondayStr;
   }, [currentWeekStart]);
 
   // İstatistikleri hesapla
@@ -155,17 +181,19 @@ export function useMealPlan() {
 
   return {
     plan,
+    setPlan, // Manuel güncelleme için
     isLoading,
     isGenerating,
     error,
     currentWeekStart,
     weekRange: formatWeekRange(),
+    isCurrentWeek: isCurrentWeek(),
     stats,
     generatePlan,
     refreshSlot,
     skipSlot,
     goToNextWeek,
     goToPreviousWeek,
-    reload: loadActivePlan,
+    reload: () => loadPlanForWeek(currentWeekStart),
   };
 }

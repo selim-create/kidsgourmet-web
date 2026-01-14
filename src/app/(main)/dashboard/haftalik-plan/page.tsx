@@ -66,6 +66,7 @@ export default function WeeklyPlanPage() {
     isLoading, 
     isGenerating, 
     weekRange, 
+    isCurrentWeek,
     stats,
     generatePlan, 
     refreshSlot, 
@@ -111,23 +112,29 @@ export default function WeeklyPlanPage() {
   // Yaşa uygun önerileri yükle
   useEffect(() => {
     const loadSuggestions = async () => {
-      if (!activeChild?.birth_date) return;
+      if (!activeChild?.birth_date) {
+        setSuggestedRecipes([]);
+        return;
+      }
       
       setIsSuggestionsLoading(true);
       try {
         const ageInMonths = calculateAgeInMonths(activeChild.birth_date);
         const ageGroup = getAgeGroupSlug(ageInMonths);
         
-        // API'den yaşa uygun tarifleri getir
+        console.log('Loading suggestions for age group:', ageGroup);
+        
+        // Tarifler API'sini kullan
         const recipes = await recipeService.getByFilters({
           age_group: ageGroup,
           per_page: 10,
-          orderby: 'rand'
         });
         
+        console.log('Loaded suggestions:', recipes.length);
         setSuggestedRecipes(recipes);
       } catch (error) {
         console.error('Öneriler yüklenemedi:', error);
+        setSuggestedRecipes([]);
       } finally {
         setIsSuggestionsLoading(false);
       }
@@ -475,18 +482,25 @@ export default function WeeklyPlanPage() {
                               </div>
                             )}
 
-                            {/* Date Nav */}
+                            {/* Date Nav - Geliştirilmiş */}
                             <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-200">
                                 <button 
                                   onClick={goToPreviousWeek}
                                   className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm text-gray-500 transition-all"
+                                  title="Önceki hafta"
                                 >
                                     <i className="fa-solid fa-chevron-left"></i>
                                 </button>
-                                <span className="px-4 text-sm font-bold text-slate-700">{weekRange}</span>
+                                <div className="px-4 text-center">
+                                  <span className="text-sm font-bold text-slate-700 block">{weekRange}</span>
+                                  {isCurrentWeek && (
+                                    <span className="text-[10px] text-orange-500 font-medium">Bu Hafta</span>
+                                  )}
+                                </div>
                                 <button 
                                   onClick={goToNextWeek}
                                   className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm text-gray-500 transition-all"
+                                  title="Sonraki hafta"
                                 >
                                     <i className="fa-solid fa-chevron-right"></i>
                                 </button>
