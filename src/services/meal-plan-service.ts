@@ -43,6 +43,28 @@ export const mealPlanService = {
   },
 
   /**
+   * Belirli hafta için plan getir
+   * Plan yoksa null döner
+   */
+  getPlanForWeek: async (childId: string, weekStart: string): Promise<MealPlan | null> => {
+    try {
+      const response = await fetchAuthAPI<{ success: boolean; plan: MealPlan }>(
+        `${API_ENDPOINTS.MEAL_PLANS_ACTIVE(childId)}&week_start=${weekStart}`,
+        {},
+        [404] // 404'ü sessizce handle et
+      );
+      return response?.plan || null;
+    } catch (error: any) {
+      // 404 = Plan yok, beklenen durum
+      if (error?.message?.includes('404') || error?.message?.includes('No active plan')) {
+        return null;
+      }
+      console.warn('Plan fetch warning:', error?.message);
+      return null;
+    }
+  },
+
+  /**
    * Plan detayı
    */
   getPlanById: async (planId: string): Promise<MealPlan> => {
