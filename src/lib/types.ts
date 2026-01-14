@@ -165,8 +165,10 @@ export interface User {
   email: string;
   name: string;
   display_name: string;
+  parent_role?: 'Anne' | 'Baba' | 'Bakıcı' | 'Diğer';
   avatar_url?: string;
   children: Child[];
+  role?: string; // 'subscriber' | 'kg_expert' | 'editor' | 'administrator'
   created_at: string;
 }
 
@@ -174,9 +176,14 @@ export interface Child {
   id: string;
   name: string;
   birth_date: string;
-  age_months?: number; // Hesaplanmış ay
-  allergens: string[];
+  gender: 'male' | 'female' | 'unspecified';
+  allergies: string[];
+  feeding_style: 'blw' | 'puree' | 'mixed';
+  photo_id?: number | null;
+  age_months?: number;
   notes?: string;
+  // Backward compatibility
+  allergens?: string[];
 }
 
 export interface AuthResponse {
@@ -329,4 +336,29 @@ export interface CreateDiscussionResponse {
   id: number;
   message: string;
   status: 'pending';
+}
+
+// ==================== PUBLIC PROFILE & EXPERT DASHBOARD ====================
+
+export interface PublicProfile {
+  id: number;
+  display_name: string;
+  parent_role?: string;
+  avatar_url?: string;
+  badges: string[];
+  stats: {
+    question_count: number;
+    approved_comments: number;
+  };
+  recent_questions?: Discussion[];
+}
+
+export interface ExpertDashboard {
+  pending_questions: number;
+  pending_comments: number;
+  today_answers: number;
+  weekly_stats: {
+    questions_answered: number;
+    comments_moderated: number;
+  };
 }
