@@ -67,4 +67,15 @@ export const API_ENDPOINTS = {
   USER_ME: `${KG_API_NAMESPACE}/user/me`,
   USER_PUBLIC: (username: string) => `${KG_API_NAMESPACE}/user/public/${username}`,
   EXPERT_DASHBOARD: `${KG_API_NAMESPACE}/expert/dashboard`,
+  
+  // Meal Plans
+  MEAL_PLANS_GENERATE: `${KG_API_NAMESPACE}/meal-plans/generate`,
+  MEAL_PLANS_ACTIVE: (childId: string) => `${KG_API_NAMESPACE}/meal-plans/active?child_id=${childId}`,
+  MEAL_PLAN_BY_ID: (id: string) => `${KG_API_NAMESPACE}/meal-plans/${id}`,
+  MEAL_PLAN_REFRESH_SLOT: (planId: string, slotId: string) => 
+    `${KG_API_NAMESPACE}/meal-plans/${planId}/slots/${slotId}/refresh`,
+  MEAL_PLAN_SKIP_SLOT: (planId: string, slotId: string) => 
+    `${KG_API_NAMESPACE}/meal-plans/${planId}/slots/${slotId}/skip`,
+  MEAL_PLAN_SHOPPING_LIST: (planId: string) => 
+    `${KG_API_NAMESPACE}/meal-plans/${planId}/shopping-list`,
 } as const;
