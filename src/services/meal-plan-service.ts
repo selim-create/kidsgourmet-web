@@ -82,6 +82,20 @@ export const mealPlanService = {
   },
 
   /**
+   * Slot'a tarif ata (manuel ekleme)
+   */
+  assignRecipeToSlot: async (planId: string, slotId: string, recipeId: number): Promise<MealPlan> => {
+    const response = await fetchAuthAPI<{ success: boolean; plan: MealPlan }>(
+      API_ENDPOINTS.MEAL_PLAN_ASSIGN_SLOT(planId, slotId),
+      { 
+        method: 'PUT',
+        body: JSON.stringify({ recipe_id: recipeId }),
+      }
+    );
+    return response.plan;
+  },
+
+  /**
    * Alışveriş listesi oluştur
    */
   generateShoppingList: async (planId: string): Promise<GenerateShoppingListResponse> => {

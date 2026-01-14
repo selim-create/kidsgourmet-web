@@ -248,4 +248,32 @@ export const recipeService = {
   getRelated: async (recipeId: number, limit: number = 4): Promise<RecipeCard[]> => {
     return await fetchAPI<RecipeCard[]>(`${API_ENDPOINTS.RECIPES}/${recipeId}/related?limit=${limit}`);
   },
+
+  /**
+   * Filtrelere göre tarif getir
+   */
+  getByFilters: async (filters: {
+    age_group?: string;
+    meal_type?: string;
+    per_page?: number;
+    orderby?: string;
+  }): Promise<Recipe[]> => {
+    const params = new URLSearchParams();
+    if (filters.age_group) params.append('age_group', filters.age_group);
+    if (filters.meal_type) params.append('meal_type', filters.meal_type);
+    if (filters.per_page) params.append('per_page', filters.per_page.toString());
+    if (filters.orderby) params.append('orderby', filters.orderby);
+    
+    return await fetchAPI<Recipe[]>(`${API_ENDPOINTS.RECIPES}?${params.toString()}`);
+  },
+
+  /**
+   * Tarif ara
+   */
+  search: async (query: string, options?: { per_page?: number }): Promise<Recipe[]> => {
+    const params = new URLSearchParams({ search: query });
+    if (options?.per_page) params.append('per_page', options.per_page.toString());
+    
+    return await fetchAPI<Recipe[]>(`${API_ENDPOINTS.RECIPES}?${params.toString()}`);
+  },
 };
