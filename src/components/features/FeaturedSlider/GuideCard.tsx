@@ -4,13 +4,18 @@ import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import { decodeEntities } from '@/utils/textHelpers';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface GuideCardProps {
   post: BlogPost;
 }
 
 export default function GuideCard({ post }: GuideCardProps) {
-  const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
+  const stripHtml = (html: string) => {
+    // Sanitize first, then strip
+    const sanitized = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
+    return sanitized;
+  };
   const imageUrl = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
                    'https://placehold.co/800x400/81D4FA/ffffff?text=Rehber';
 

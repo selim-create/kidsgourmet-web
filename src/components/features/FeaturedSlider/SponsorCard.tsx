@@ -3,13 +3,18 @@
 import React from 'react';
 import { BlogPost } from '@/services/blog-service';
 import { decodeEntities } from '@/utils/textHelpers';
+import DOMPurify from 'isomorphic-dompurify';
 
 interface SponsorCardProps {
   sponsor: BlogPost;
 }
 
 export default function SponsorCard({ sponsor }: SponsorCardProps) {
-  const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
+  const stripHtml = (html: string) => {
+    // Sanitize first, then strip
+    const sanitized = DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
+    return sanitized;
+  };
   const sponsorData = sponsor.sponsor_data;
   const imageUrl = sponsorData?.sponsor_logo || 
                    sponsor._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
