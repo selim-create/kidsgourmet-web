@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { userService } from "@/services/user-service";
@@ -9,7 +10,8 @@ import ChildWizard from "@/components/features/ChildWizard";
 import { toast } from "sonner";
 
 export default function ProfileSettingsPage() {
-  const { user, logout, refreshUser } = useUser();
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading: userLoading, logout, refreshUser } = useUser();
   const [children, setChildren] = useState<Child[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +20,13 @@ export default function ProfileSettingsPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  // Auth guard - giriş yapmamış kullanıcıları yönlendir
+  useEffect(() => {
+    if (!userLoading && !isAuthenticated) {
+      router.push('/login?redirect=/profil');
+    }
+  }, [userLoading, isAuthenticated, router]);
+
   useEffect(() => {
     if (user) {
       setName(user.display_name || user.name);
@@ -25,9 +34,24 @@ export default function ProfileSettingsPage() {
     }
   }, [user]);
 
+  // fetchChildren sadece authenticated ise çalışsın
   useEffect(() => {
-    fetchChildren();
-  }, []);
+    if (isAuthenticated) {
+      fetchChildren();
+    }
+  }, [isAuthenticated]);
+
+  // Giriş yapılmadıysa veya yükleme devam ediyorsa loading göster
+  if (userLoading || !isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
 
   const fetchChildren = async () => {
     try {

@@ -182,6 +182,7 @@ export interface Child {
   photo_id?: number | null;
   age_months?: number;
   notes?: string;
+  kvkk_consent?: boolean;
   // Backward compatibility
   allergens?: string[];
 }
