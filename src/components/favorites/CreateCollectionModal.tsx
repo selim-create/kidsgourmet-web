@@ -10,35 +10,38 @@ interface CreateCollectionModalProps {
 }
 
 const iconOptions = [
-  'fa-solid fa-mug-hot',
-  'fa-solid fa-snowflake',
-  'fa-solid fa-carrot',
-  'fa-solid fa-heart',
-  'fa-solid fa-star',
-  'fa-solid fa-cake-candles',
-  'fa-solid fa-apple-whole',
-  'fa-solid fa-fish',
-  'fa-solid fa-egg',
-  'fa-solid fa-bowl-rice',
+  { value: 'mug-hot', class: 'fa-solid fa-mug-hot', label: 'Kahve' },
+  { value: 'snowflake', class: 'fa-solid fa-snowflake', label: 'Kar' },
+  { value: 'carrot', class: 'fa-solid fa-carrot', label: 'Havuç' },
+  { value: 'heart', class: 'fa-solid fa-heart', label: 'Kalp' },
+  { value: 'star', class: 'fa-solid fa-star', label: 'Yıldız' },
+  { value: 'bookmark', class: 'fa-solid fa-bookmark', label: 'İşaret' },
+  { value: 'folder', class: 'fa-solid fa-folder', label: 'Klasör' },
+  { value: 'utensils', class: 'fa-solid fa-utensils', label: 'Çatal' },
+  { value: 'apple-whole', class: 'fa-solid fa-apple-whole', label: 'Elma' },
+  { value: 'fish', class: 'fa-solid fa-fish', label: 'Balık' },
+  { value: 'egg', class: 'fa-solid fa-egg', label: 'Yumurta' },
+  { value: 'bread-slice', class: 'fa-solid fa-bread-slice', label: 'Ekmek' },
+  { value: 'sun', class: 'fa-solid fa-sun', label: 'Güneş' },
+  { value: 'moon', class: 'fa-solid fa-moon', label: 'Ay' },
+  { value: 'cookie', class: 'fa-solid fa-cookie', label: 'Kurabiye' },
 ];
 
 const colorOptions = [
-  '#FF8A65',
-  '#4FC3F7',
-  '#81C784',
-  '#FFD54F',
-  '#BA68C8',
-  '#FF6B6B',
-  '#4ECDC4',
-  '#95E1D3',
-  '#F38181',
-  '#AA96DA',
+  { value: 'orange', hex: '#FF8A65', label: 'Turuncu' },
+  { value: 'blue', hex: '#4FC3F7', label: 'Mavi' },
+  { value: 'green', hex: '#81C784', label: 'Yeşil' },
+  { value: 'purple', hex: '#BA68C8', label: 'Mor' },
+  { value: 'pink', hex: '#F06292', label: 'Pembe' },
+  { value: 'yellow', hex: '#FFD54F', label: 'Sarı' },
+  { value: 'red', hex: '#EF5350', label: 'Kırmızı' },
+  { value: 'teal', hex: '#4DB6AC', label: 'Turkuaz' },
 ];
 
 export default function CreateCollectionModal({ isOpen, onClose, onCreate }: CreateCollectionModalProps) {
   const [name, setName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState(iconOptions[0]);
-  const [selectedColor, setSelectedColor] = useState(colorOptions[0]);
+  const [selectedIcon, setSelectedIcon] = useState(iconOptions[0].value);
+  const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -55,8 +58,8 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
         color: selectedColor,
       });
       setName('');
-      setSelectedIcon(iconOptions[0]);
-      setSelectedColor(colorOptions[0]);
+      setSelectedIcon(iconOptions[0].value);
+      setSelectedColor(colorOptions[0].value);
       onClose();
     } catch (error) {
       console.error('Failed to create collection:', error);
@@ -102,16 +105,16 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
             <div className="grid grid-cols-5 gap-2">
               {iconOptions.map((icon) => (
                 <button
-                  key={icon}
+                  key={icon.value}
                   type="button"
-                  onClick={() => setSelectedIcon(icon)}
+                  onClick={() => setSelectedIcon(icon.value)}
                   className={`w-full aspect-square rounded-xl border-2 flex items-center justify-center text-xl transition-all ${
-                    selectedIcon === icon
+                    selectedIcon === icon.value
                       ? 'border-orange-500 bg-orange-50 text-orange-500'
                       : 'border-gray-200 bg-white text-gray-400 hover:border-gray-300'
                   }`}
                 >
-                  <i className={icon}></i>
+                  <i className={icon.class}></i>
                 </button>
               ))}
             </div>
@@ -124,17 +127,17 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
             <div className="grid grid-cols-5 gap-2">
               {colorOptions.map((color) => (
                 <button
-                  key={color}
+                  key={color.value}
                   type="button"
-                  onClick={() => setSelectedColor(color)}
+                  onClick={() => setSelectedColor(color.value)}
                   className={`w-full aspect-square rounded-xl border-2 flex items-center justify-center transition-all ${
-                    selectedColor === color
+                    selectedColor === color.value
                       ? 'border-slate-800 scale-110'
                       : 'border-gray-200 hover:scale-105'
                   }`}
-                  style={{ backgroundColor: color }}
+                  style={{ backgroundColor: color.hex }}
                 >
-                  {selectedColor === color && (
+                  {selectedColor === color.value && (
                     <i className="fa-solid fa-check text-white text-sm"></i>
                   )}
                 </button>
