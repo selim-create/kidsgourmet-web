@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { userService } from '@/services/user-service';
-import { Collection, CollectionItem } from '@/lib/types';
+import { Collection, FavoriteRecipeCard as FavoriteRecipeCardType, FavoriteIngredientCard as FavoriteIngredientCardType, FavoriteBlogCard as FavoriteBlogCardType, FavoriteDiscussionCard as FavoriteDiscussionCardType } from '@/lib/types';
 import FavoriteRecipeCard from '@/components/favorites/FavoriteRecipeCard';
 import FavoriteIngredientCard from '@/components/favorites/FavoriteIngredientCard';
 import FavoriteBlogCard from '@/components/favorites/FavoriteBlogCard';
@@ -21,13 +21,7 @@ export default function CollectionDetailPage() {
 
   const collectionId = params.id as string;
 
-  useEffect(() => {
-    if (isAuthenticated && collectionId) {
-      loadCollection();
-    }
-  }, [isAuthenticated, collectionId]);
-
-  const loadCollection = async () => {
+  const loadCollection = React.useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -39,7 +33,13 @@ export default function CollectionDetailPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [collectionId]);
+
+  useEffect(() => {
+    if (isAuthenticated && collectionId) {
+      loadCollection();
+    }
+  }, [isAuthenticated, collectionId, loadCollection]);
 
   const handleRemoveItem = async (itemId: number, itemType: string) => {
     try {
@@ -156,7 +156,7 @@ export default function CollectionDetailPage() {
                 return (
                   <FavoriteRecipeCard
                     key={`recipe-${item.item_id}`}
-                    recipe={item.data as any}
+                    recipe={item.data as FavoriteRecipeCardType}
                   />
                 );
               }
@@ -164,7 +164,7 @@ export default function CollectionDetailPage() {
                 return (
                   <FavoriteIngredientCard
                     key={`ingredient-${item.item_id}`}
-                    ingredient={item.data as any}
+                    ingredient={item.data as FavoriteIngredientCardType}
                   />
                 );
               }
@@ -172,7 +172,7 @@ export default function CollectionDetailPage() {
                 return (
                   <FavoriteBlogCard
                     key={`post-${item.item_id}`}
-                    post={item.data as any}
+                    post={item.data as FavoriteBlogCardType}
                   />
                 );
               }
@@ -180,7 +180,7 @@ export default function CollectionDetailPage() {
                 return (
                   <FavoriteDiscussionCard
                     key={`discussion-${item.item_id}`}
-                    discussion={item.data as any}
+                    discussion={item.data as FavoriteDiscussionCardType}
                   />
                 );
               }

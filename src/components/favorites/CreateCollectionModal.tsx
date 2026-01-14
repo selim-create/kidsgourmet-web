@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from 'react';
-import { CollectionInput } from '@/lib/types';
+import { CollectionInput, Collection } from '@/lib/types';
 
 interface CreateCollectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (data: CollectionInput) => Promise<void>;
+  onCreate: (data: CollectionInput) => Promise<void | Collection>;
 }
 
 const iconOptions = [
