@@ -97,11 +97,11 @@ export default function BlogSection({ posts }: BlogSectionProps) {
                   </p>
                   
                   {/* Sponsor Logo - SADECE SPONSORLU İÇİN */}
-                  {isSponsored && post.sponsor_data?.sponsor_logo && (
+                  {isSponsored && post.sponsor_data?.sponsor_logo && typeof post.sponsor_data.sponsor_logo === 'string' && post.sponsor_data.sponsor_logo !== '' && (
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-xs text-gray-400">Sponsor:</span>
                       <img 
-                        src={typeof post.sponsor_data.sponsor_logo === 'string' ? post.sponsor_data.sponsor_logo : ''} 
+                        src={post.sponsor_data.sponsor_logo} 
                         alt={post.sponsor_data.sponsor_name || 'Sponsor'}
                         className="h-4 object-contain"
                       />
