@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { recipeService } from '@/services/recipe-service';
 import { blogService, BlogPost } from '@/services/blog-service';
+import { featuredService, FeaturedItem } from '@/services/featured-service';
 import { RecipeCard } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
@@ -23,31 +24,45 @@ export default function Home() {
   const [selectedAge, setSelectedAge] = useState('');
 
   // Prepare featured content for slider
-  const [featuredContent, setFeaturedContent] = useState<any[]>([]);
+  const [featuredContent, setFeaturedContent] = useState<Array<{
+    id: number;
+    type: 'recipe' | 'blog' | 'question' | 'sponsored';
+    date: string;
+    data: FeaturedItem;
+  }>>([]);
   const [featuredIds, setFeaturedIds] = useState<number[]>([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setLoading(true);
-        const [featuredRecipes, latest, posts] = await Promise.all([
-          recipeService.getFeatured(5),
+        const [featuredData, latest, posts] = await Promise.all([
+          featuredService.getAll(5),
           recipeService.getAll({ perPage: 8 }),
           blogService.getAll(1, 6)
         ]);
         
-        // Prepare featured content (recipes only for now, can be extended with other types)
-        const featured = (featuredRecipes || []).map((recipe: RecipeCard) => ({
-          id: recipe.id,
-          type: 'recipe' as const,
-          date: new Date().toISOString(), // Would come from API in real scenario
-          data: recipe
-        }));
+        // Prepare featured content - map FeaturedItem to content types
+        const featured = (featuredData || []).map((item: FeaturedItem) => {
+          let type: 'recipe' | 'blog' | 'question' | 'sponsored' = 'recipe';
+          
+          if (item.type === 'post') type = 'blog';
+          else if (item.type === 'question') type = 'question';
+          else if (item.type === 'sponsor') type = 'sponsored';
+          else if (item.type === 'ingredient') type = 'recipe'; // ingredient shown as recipe
+          
+          return {
+            id: item.id,
+            type,
+            date: item.date,
+            data: item
+          };
+        });
         
         setFeaturedContent(featured);
         
         // Track featured IDs to exclude from lower sections
-        const ids = featured.map((item: any) => item.id);
+        const ids = featured.map((item) => item.id);
         setFeaturedIds(ids);
         
         setLatestRecipes(latest || []);
@@ -132,7 +147,7 @@ export default function Home() {
                           >
                               <option value="">Tüm Aylar</option>
                               {ageGroups.map(ag => (
-                                <option key={ag.id} value={ag.slug}>{ag.name}</option>
+                                <option key={ag.id} value={ag.slug}>{decodeEntities(ag.name)}</option>
                               ))}
                           </select>
                       </div>
