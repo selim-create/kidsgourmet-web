@@ -18,6 +18,7 @@ interface RecipeCardProps {
       approved: boolean;
     };
     is_featured?: boolean;
+    excerpt?: string;
   };
 }
 

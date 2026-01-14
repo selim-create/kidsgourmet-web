@@ -6,9 +6,7 @@ import { BlogPost } from '@/services/blog-service';
 import { decodeEntities } from '@/utils/textHelpers';
 
 interface GuideCardProps {
-  post: BlogPost & {
-    excerpt?: string;
-  };
+  post: BlogPost;
 }
 
 export default function GuideCard({ post }: GuideCardProps) {

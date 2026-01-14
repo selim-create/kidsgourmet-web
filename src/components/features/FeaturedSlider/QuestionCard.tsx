@@ -6,15 +6,12 @@ import { Discussion } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 
 interface QuestionCardProps {
-  question: Discussion & {
-    author_initials?: string;
-  };
+  question: Discussion;
 }
 
 export default function QuestionCard({ question }: QuestionCardProps) {
-  // Get initials from author name if not provided
+  // Get initials from author name
   const getInitials = () => {
-    if (question.author_initials) return question.author_initials;
     const names = question.author.name.split(' ');
     if (names.length >= 2) {
       return names[0][0] + names[names.length - 1][0];

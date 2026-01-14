@@ -5,22 +5,19 @@ import { BlogPost } from '@/services/blog-service';
 import { decodeEntities } from '@/utils/textHelpers';
 
 interface SponsorCardProps {
-  sponsor: BlogPost & {
-    sponsor_url?: string;
-    sponsor_image?: string;
-    read_time?: string;
-    has_discount?: boolean;
-  };
+  sponsor: BlogPost;
 }
 
 export default function SponsorCard({ sponsor }: SponsorCardProps) {
   const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
   const sponsorData = sponsor.sponsor_data;
-  const imageUrl = sponsor.sponsor_image || 
+  const imageUrl = sponsorData?.sponsor_logo || 
                    sponsor._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
                    'https://placehold.co/800x400/E8E8E8/666666?text=Sponsor';
   
-  const url = sponsor.sponsor_url || sponsorData?.sponsor_url || `/blog/${sponsor.slug}`;
+  const url = sponsorData?.sponsor_url || `/blog/${sponsor.slug}`;
+  const readTime = '5 dk'; // Default read time
+  const hasDiscount = false; // Default no discount
 
   return (
     <a
@@ -61,12 +58,10 @@ export default function SponsorCard({ sponsor }: SponsorCardProps) {
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
           <div className="flex items-center gap-2 text-xs text-gray-400">
-            {sponsor.read_time && (
-              <span className="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded-lg">
-                <i className="fa-regular fa-clock mr-1"></i> {sponsor.read_time}
-              </span>
-            )}
-            {sponsor.has_discount && (
+            <span className="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded-lg">
+              <i className="fa-regular fa-clock mr-1"></i> {readTime}
+            </span>
+            {hasDiscount && (
               <span className="bg-slate-50 text-slate-600 font-bold px-2 py-1 rounded-lg">
                 <i className="fa-solid fa-tag mr-1"></i> İndirim
               </span>
