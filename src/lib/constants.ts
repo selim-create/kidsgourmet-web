@@ -59,4 +59,9 @@ export const API_ENDPOINTS = {
   DISCUSSION_COMMENTS: (id: number) => `${KG_API_NAMESPACE}/discussions/${id}/comments`,
   USER_DISCUSSIONS: `${KG_API_NAMESPACE}/user/discussions`,
   FEED: `${KG_API_NAMESPACE}/feed`,
+  
+  // Expert & Public Profile Endpoints
+  USER_ME: `${KG_API_NAMESPACE}/user/me`,
+  USER_PUBLIC: (username: string) => `${KG_API_NAMESPACE}/user/public/${username}`,
+  EXPERT_DASHBOARD: `${KG_API_NAMESPACE}/expert/dashboard`,
 } as const;

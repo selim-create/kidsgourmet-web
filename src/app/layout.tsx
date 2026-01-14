@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { UserProvider } from "@/hooks/use-user";
 import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
+import { ActiveChildProvider } from "@/contexts/ActiveChildContext";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
@@ -21,10 +22,12 @@ export default function RootLayout({
       </head>
       <body className="bg-gray-50 text-brand-dark font-sans antialiased">
         <UserProvider>
-          <ChildProfileProvider>
-            {children}
-            <Toaster position="top-center" richColors />
-          </ChildProfileProvider>
+          <ActiveChildProvider>
+            <ChildProfileProvider>
+              {children}
+              <Toaster position="top-center" richColors />
+            </ChildProfileProvider>
+          </ActiveChildProvider>
         </UserProvider>
       </body>
     </html>

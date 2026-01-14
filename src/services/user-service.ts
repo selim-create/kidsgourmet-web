@@ -1,6 +1,6 @@
-import { fetchAuthAPI } from '@/lib/api';
+import { fetchAuthAPI, fetchAPI } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { User, Child, RecipeCard, ShoppingListItem } from '@/lib/types';
+import { User, Child, RecipeCard, ShoppingListItem, PublicProfile, ExpertDashboard } from '@/lib/types';
 
 export const userService = {
   /**
@@ -86,5 +86,19 @@ export const userService = {
       method: 'PATCH',
       body: JSON.stringify({ checked }),
     });
+  },
+
+  // Full Profile & Public Profile
+  getFullProfile: async (): Promise<User> => {
+    return await fetchAuthAPI<User>(API_ENDPOINTS.USER_ME);
+  },
+
+  getPublicProfile: async (username: string): Promise<PublicProfile> => {
+    return await fetchAPI<PublicProfile>(API_ENDPOINTS.USER_PUBLIC(username));
+  },
+
+  // Expert Dashboard
+  getExpertDashboard: async (): Promise<ExpertDashboard> => {
+    return await fetchAuthAPI<ExpertDashboard>(API_ENDPOINTS.EXPERT_DASHBOARD);
   },
 };

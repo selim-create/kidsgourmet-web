@@ -55,13 +55,17 @@ export default function ChildModal({ isOpen, onClose, onSave, child }: ChildModa
             id: child.id,
             name,
             birth_date: birthDate,
-            allergens: selectedAllergens,
+            gender: 'unspecified',
+            allergies: selectedAllergens,
+            feeding_style: 'mixed',
             notes,
           }
         : {
             name,
             birth_date: birthDate,
-            allergens: selectedAllergens,
+            gender: 'unspecified',
+            allergies: selectedAllergens,
+            feeding_style: 'mixed',
             notes,
           };
 
