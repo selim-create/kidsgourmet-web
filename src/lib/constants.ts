@@ -76,6 +76,8 @@ export const API_ENDPOINTS = {
     `${KG_API_NAMESPACE}/meal-plans/${planId}/slots/${slotId}/refresh`,
   MEAL_PLAN_SKIP_SLOT: (planId: string, slotId: string) => 
     `${KG_API_NAMESPACE}/meal-plans/${planId}/slots/${slotId}/skip`,
+  MEAL_PLAN_ASSIGN_SLOT: (planId: string, slotId: string) => 
+    `${KG_API_NAMESPACE}/meal-plans/${planId}/slots/${slotId}/assign`,
   MEAL_PLAN_SHOPPING_LIST: (planId: string) => 
     `${KG_API_NAMESPACE}/meal-plans/${planId}/shopping-list`,
 } as const;

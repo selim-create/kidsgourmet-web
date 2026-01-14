@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { useUser } from '@/hooks/use-user';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { useMealPlan } from '@/hooks/useMealPlan';
-import { MealSlot, MealSlotType } from '@/lib/types';
+import { useFavorites } from '@/hooks/use-favorites';
+import { MealSlot, MealSlotType, Recipe } from '@/lib/types';
 import { mealPlanService } from '@/services/meal-plan-service';
+import { recipeService } from '@/services/recipe-service';
 import { toast } from 'sonner';
 
 // Slot renkleri
@@ -31,10 +33,37 @@ export default function WeeklyPlanPage() {
     refreshSlot, 
     skipSlot,
     goToNextWeek,
-    goToPreviousWeek
+    goToPreviousWeek,
+    reload: reloadPlan
   } = useMealPlan();
+  const { favorites, isLoading: favoritesLoading } = useFavorites();
 
   const [isCreatingShoppingList, setIsCreatingShoppingList] = useState(false);
+  
+  // Yeni state'ler
+  const [suggestedRecipes, setSuggestedRecipes] = useState<Recipe[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Recipe[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
+  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
+
+  // Yaş hesaplama helper
+  const calculateAgeInMonths = (birthDate: string): number => {
+    const birth = new Date(birthDate);
+    const now = new Date();
+    return (now.getFullYear() - birth.getFullYear()) * 12 + 
+           (now.getMonth() - birth.getMonth());
+  };
+
+  // Yaş grubu slug mapping
+  const getAgeGroupSlug = (ageInMonths: number): string => {
+    if (ageInMonths < 6) return '0-6-ay-sadece-sut';
+    if (ageInMonths <= 8) return '6-8-ay-baslangic';
+    if (ageInMonths <= 11) return '9-11-ay-kesif';
+    if (ageInMonths <= 24) return '12-24-ay-gecis';
+    return '2-yas-ve-uzeri';
+  };
 
   // Alışveriş listesi oluştur
   const handleCreateShoppingList = async () => {
@@ -55,6 +84,80 @@ export default function WeeklyPlanPage() {
       toast.error('Liste oluşturulamadı');
     } finally {
       setIsCreatingShoppingList(false);
+    }
+  };
+
+  // Yaşa uygun önerileri yükle
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      if (!activeChild?.birth_date) return;
+      
+      setIsSuggestionsLoading(true);
+      try {
+        const ageInMonths = calculateAgeInMonths(activeChild.birth_date);
+        const ageGroup = getAgeGroupSlug(ageInMonths);
+        
+        // API'den yaşa uygun tarifleri getir
+        const recipes = await recipeService.getByFilters({
+          age_group: ageGroup,
+          per_page: 10,
+          orderby: 'rand'
+        });
+        
+        setSuggestedRecipes(recipes);
+      } catch (error) {
+        console.error('Öneriler yüklenemedi:', error);
+      } finally {
+        setIsSuggestionsLoading(false);
+      }
+    };
+    
+    loadSuggestions();
+  }, [activeChild?.birth_date]);
+
+  // Tarif arama
+  const handleSearch = async (query: string) => {
+    if (query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    
+    setIsSearching(true);
+    try {
+      const results = await recipeService.search(query, { per_page: 10 });
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Arama hatası:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        handleSearch(searchQuery);
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Slot'a tarif ekle
+  const handleAddRecipeToSlot = async (slotId: string, recipeId: number) => {
+    if (!plan?.id) return;
+    
+    try {
+      // API çağrısı ile slot'u güncelle
+      await mealPlanService.assignRecipeToSlot(plan.id, slotId, recipeId);
+      await reloadPlan();
+      setSelectedSlotId(null);
+      toast.success('Tarif eklendi!');
+    } catch (error) {
+      console.error('Tarif eklenemedi:', error);
+      toast.error('Tarif eklenirken hata oluştu');
     }
   };
 
@@ -89,8 +192,12 @@ export default function WeeklyPlanPage() {
     if (slot.status === 'empty' || !slot.recipe) {
       return (
         <button 
-          onClick={() => toast.info('Bu öğün için tarif eklemek için favorilerinizden seçin')}
-          className="border-2 border-dashed border-gray-200 rounded-xl p-3 flex items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50 transition-all h-20 w-full"
+          onClick={() => setSelectedSlotId(slot.id)}
+          className={`border-2 border-dashed rounded-xl p-3 flex items-center justify-center transition-all h-20 w-full ${
+            selectedSlotId === slot.id 
+              ? 'border-orange-500 bg-orange-50 text-orange-500' 
+              : 'border-gray-200 text-gray-400 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50'
+          }`}
         >
           <i className="fa-solid fa-plus mr-1"></i>
           <span className="text-xs font-bold">{slot.slot_label}</span>
@@ -174,6 +281,42 @@ export default function WeeklyPlanPage() {
       </div>
     );
   };
+
+  // RecipePoolCard bileşeni (Sidebar için mini kart)
+  interface RecipePoolCardProps {
+    recipe: Recipe | { id: number; title: string; image?: string; prep_time?: string };
+    onSelect: () => void;
+    isSelectable: boolean;
+  }
+
+  const RecipePoolCard = ({ recipe, onSelect, isSelectable }: RecipePoolCardProps) => (
+    <div 
+      onClick={isSelectable ? onSelect : undefined}
+      className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
+        isSelectable 
+          ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300' 
+          : 'border-gray-100 bg-gray-50 opacity-60'
+      }`}
+    >
+      <img 
+        src={(recipe as any).image || (recipe as any).featured_image || 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T'} 
+        alt={recipe.title}
+        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+      />
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-slate-700 line-clamp-2">{recipe.title}</p>
+        {(recipe as any).prep_time && (
+          <p className="text-[10px] text-gray-400 mt-0.5">
+            <i className="fa-regular fa-clock mr-1"></i>
+            {(recipe as any).prep_time}
+          </p>
+        )}
+      </div>
+      {isSelectable && (
+        <i className="fa-solid fa-plus text-orange-500 text-sm flex-shrink-0"></i>
+      )}
+    </div>
+  );
 
   // Auth check
   if (userLoading) {
@@ -443,31 +586,135 @@ export default function WeeklyPlanPage() {
                   <h3 className="font-bold text-slate-800 flex items-center gap-2">
                     <i className="fa-solid fa-bookmark text-orange-500"></i> Tarif Havuzu
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">Sürükleyip slotlara bırakın</p>
+                  {selectedSlotId ? (
+                    <p className="text-xs text-orange-500 mt-1 font-medium">
+                      <i className="fa-solid fa-arrow-left mr-1"></i>
+                      Eklemek için tarife tıklayın
+                    </p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">Önce bir slot seçin</p>
+                  )}
                 </div>
                 
-                {/* Favoriler */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Favorilerim</h4>
-                    <div className="space-y-2">
-                      {/* Favorite recipes will be added here - with useFavorites hook */}
-                      <div className="text-center py-6 text-gray-400">
-                        <i className="fa-regular fa-heart text-2xl mb-2"></i>
-                        <p className="text-xs">Favori tarifleriniz burada görünecek</p>
-                      </div>
-                    </div>
+                {/* Arama */}
+                <div className="p-4 border-b border-gray-100">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Tarif ara..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    />
+                    <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    {isSearching && (
+                      <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 text-sm"></i>
+                    )}
                   </div>
+                </div>
+                
+                {/* İçerik */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-6">
                   
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Önerilen</h4>
-                    <div className="space-y-2">
-                      <div className="text-center py-6 text-gray-400">
-                        <i className="fa-solid fa-wand-magic-sparkles text-2xl mb-2"></i>
-                        <p className="text-xs">Yaşa uygun öneriler</p>
-                      </div>
+                  {/* Arama Sonuçları */}
+                  {searchQuery && (
+                    <div>
+                      <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                        <i className="fa-solid fa-search"></i> Arama Sonuçları
+                      </h4>
+                      {isSearching ? (
+                        <div className="text-center py-4">
+                          <i className="fa-solid fa-spinner fa-spin text-orange-500"></i>
+                        </div>
+                      ) : searchResults.length > 0 ? (
+                        <div className="space-y-2">
+                          {searchResults.map(recipe => (
+                            <RecipePoolCard 
+                              key={recipe.id} 
+                              recipe={recipe} 
+                              onSelect={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
+                              isSelectable={!!selectedSlotId}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-400 text-center py-4">Sonuç bulunamadı</p>
+                      )}
                     </div>
-                  </div>
+                  )}
+                  
+                  {/* Favorilerim */}
+                  {!searchQuery && (
+                    <>
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                          <i className="fa-solid fa-heart text-red-400"></i> Favorilerim
+                        </h4>
+                        {favoritesLoading ? (
+                          <div className="text-center py-4">
+                            <i className="fa-solid fa-spinner fa-spin text-orange-500"></i>
+                          </div>
+                        ) : favorites?.recipes && favorites.recipes.length > 0 ? (
+                          <div className="space-y-2">
+                            {favorites.recipes.slice(0, 5).map(recipe => (
+                              <RecipePoolCard 
+                                key={recipe.id} 
+                                recipe={recipe} 
+                                onSelect={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
+                                isSelectable={!!selectedSlotId}
+                              />
+                            ))}
+                            {favorites.recipes.length > 5 && (
+                              <Link 
+                                href="/favoriler" 
+                                className="block text-center text-xs text-orange-500 hover:underline py-2"
+                              >
+                                Tümünü gör ({favorites.recipes.length})
+                              </Link>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 text-gray-400">
+                            <i className="fa-regular fa-heart text-2xl mb-2 block"></i>
+                            <p className="text-xs">Henüz favori tarifiniz yok</p>
+                            <Link href="/tarifler" className="text-xs text-orange-500 hover:underline mt-1 inline-block">
+                              Tariflere göz at
+                            </Link>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Yaşa Uygun Öneriler */}
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                          <i className="fa-solid fa-wand-magic-sparkles text-purple-400"></i> 
+                          {activeChild?.name} İçin Öneriler
+                        </h4>
+                        {isSuggestionsLoading ? (
+                          <div className="text-center py-4">
+                            <i className="fa-solid fa-spinner fa-spin text-orange-500"></i>
+                          </div>
+                        ) : suggestedRecipes.length > 0 ? (
+                          <div className="space-y-2">
+                            {suggestedRecipes.map(recipe => (
+                              <RecipePoolCard 
+                                key={recipe.id} 
+                                recipe={recipe} 
+                                onSelect={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
+                                isSelectable={!!selectedSlotId}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-6 text-gray-400">
+                            <i className="fa-solid fa-carrot text-2xl mb-2 block"></i>
+                            <p className="text-xs">Öneri bulunamadı</p>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                  
                 </div>
               </aside>
             </div>
