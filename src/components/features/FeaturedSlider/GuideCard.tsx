@@ -4,16 +4,30 @@ import React from 'react';
 import Link from 'next/link';
 import { FeaturedItem } from '@/services/featured-service';
 import { decodeEntities } from '@/utils/textHelpers';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface GuideCardProps {
   item: FeaturedItem;
 }
 
 export default function GuideCard({ item }: GuideCardProps) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const isFav = isFavorite(item.id, 'post');
+  
   const imageUrl = item.image || 'https://placehold.co/800x400/81D4FA/ffffff?text=Rehber';
   const category = item.meta?.category || '';
   const author = item.meta?.author || '';
   const readTime = item.meta?.read_time || '5 dk';
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await toggleFavorite(item.id, 'post');
+    } catch (error) {
+      console.error('Favori işlemi başarısız:', error);
+    }
+  };
 
   return (
     <Link
@@ -30,6 +44,14 @@ export default function GuideCard({ item }: GuideCardProps) {
         <div className="absolute top-4 left-4 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
           <i className="fa-solid fa-book-open"></i> {category || 'Rehber'}
         </div>
+        
+        {/* Favorite Button */}
+        <button 
+          onClick={handleFavoriteClick}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
+        >
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
+        </button>
       </div>
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="font-display font-bold text-xl text-slate-800 mb-2 leading-tight group-hover:text-blue-600 transition-colors">
