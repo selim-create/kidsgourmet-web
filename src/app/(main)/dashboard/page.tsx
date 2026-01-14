@@ -3,17 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
+import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
 import { Child, RecipeCard, ShoppingListItem } from "@/lib/types";
+import AllergyBanner from "@/components/features/AllergyBanner";
+import { formatAge } from "@/utils/ageFormatter";
 
 export default function DashboardPage() {
   const { user } = useUser();
-  const [children, setChildren] = useState<Child[]>([]);
+  const { activeChild, children, setActiveChild } = useActiveChild();
   const [favorites, setFavorites] = useState<RecipeCard[]>([]);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeChildId, setActiveChildId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -24,20 +26,13 @@ export default function DashboardPage() {
       
       try {
         // Fetch all data in parallel
-        const [childrenData, favoritesData, shoppingListData] = await Promise.all([
-          userService.getChildren(),
+        const [favoritesData, shoppingListData] = await Promise.all([
           userService.getFavorites(),
           userService.getShoppingList(),
         ]);
         
-        setChildren(childrenData);
         setFavorites(favoritesData);
         setShoppingList(shoppingListData);
-        
-        // Set active child to first child if available
-        if (childrenData.length > 0) {
-          setActiveChildId(childrenData[0].id);
-        }
       } catch (err) {
         console.error('Dashboard data fetch error:', err);
         setError(err instanceof Error ? err.message : 'Veriler yüklenirken hata oluştu');
@@ -48,8 +43,6 @@ export default function DashboardPage() {
 
     fetchDashboardData();
   }, [user]);
-
-  const activeChild = children.find(c => c.id === activeChildId) || children[0];
 
   // Loading state
   if (isLoading) {
@@ -173,17 +166,17 @@ export default function DashboardPage() {
                                 {children.map((child) => (
                                     <button
                                         key={child.id}
-                                        onClick={() => setActiveChildId(child.id)}
+                                        onClick={() => setActiveChild(child)}
                                         className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
-                                            activeChildId === child.id 
+                                            activeChild?.id === child.id 
                                             ? "bg-white/20 backdrop-blur border-white/40 shadow-sm ring-2 ring-white" 
                                             : "bg-black/10 hover:bg-black/20 border-transparent opacity-70 hover:opacity-100"
                                         }`}
                                     >
-                                        <div className={`w-6 h-6 rounded-full border ${activeChildId === child.id ? "border-white" : "border-white/50"} bg-white/20 flex items-center justify-center text-xs font-bold`}>
+                                        <div className={`w-6 h-6 rounded-full border ${activeChild?.id === child.id ? "border-white" : "border-white/50"} bg-white/20 flex items-center justify-center text-xs font-bold`}>
                                           {child.name.charAt(0).toUpperCase()}
                                         </div>
-                                        <span className={`text-sm ${activeChildId === child.id ? "font-bold" : "font-medium"}`}>{child.name}</span>
+                                        <span className={`text-sm ${activeChild?.id === child.id ? "font-bold" : "font-medium"}`}>{child.name}</span>
                                     </button>
                                 ))}
                                 
@@ -203,7 +196,7 @@ export default function DashboardPage() {
                                           </span>
                                       </div>
                                       <div className="absolute bottom-0 right-0 bg-white text-orange-500 text-xs font-bold px-3 py-1 rounded-full shadow-sm border border-orange-100">
-                                          {activeChild.age_months ? `${activeChild.age_months} Aylık` : 'Bebek'}
+                                          {activeChild.birth_date ? formatAge(activeChild.birth_date) : activeChild.age_months ? `${activeChild.age_months} Aylık` : 'Bebek'}
                                       </div>
                                   </div>
 
@@ -215,9 +208,9 @@ export default function DashboardPage() {
                                       
                                       {/* Quick Stats/Info */}
                                       <div className="flex flex-wrap justify-center md:justify-start gap-3">
-                                          {activeChild.allergens && activeChild.allergens.length > 0 && (
+                                          {((activeChild.allergies && activeChild.allergies.length > 0) || (activeChild.allergens && activeChild.allergens.length > 0)) && (
                                             <div className="bg-white/20 backdrop-blur px-4 py-2 rounded-xl flex items-center gap-2 text-xs md:text-sm font-bold border border-white/10">
-                                                <i className="fa-solid fa-triangle-exclamation"></i> {activeChild.allergens.length} Alerjen
+                                                <i className="fa-solid fa-triangle-exclamation"></i> {(activeChild.allergies || activeChild.allergens || []).length} Alerjen
                                             </div>
                                           )}
                                           <Link href="/profil" className="bg-white text-orange-500 px-4 py-2 rounded-xl text-xs md:text-sm font-bold shadow-sm hover:bg-orange-50 transition-colors">
@@ -245,6 +238,11 @@ export default function DashboardPage() {
                         )}
                     </div>
                 </div>
+
+                {/* Allergy Warning Banner */}
+                {activeChild && (
+                  <AllergyBanner child={activeChild} />
+                )}
 
                 {/* 2. WEEKLY PLAN (Scrollable) */}
                 {activeChild && (
@@ -386,6 +384,93 @@ export default function DashboardPage() {
                     </div>
 
                 </div>
+
+                {/* 4. NEW FEATURE WIDGETS */}
+                {activeChild && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    {/* Today's Menu Widget */}
+                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-3xl border border-orange-100 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-4 flex items-center">
+                        <i className="fa-solid fa-sun text-yellow-500 mr-2"></i> Bugünün Menüsü
+                      </h3>
+                      <div className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <i className="fa-solid fa-bowl-food text-orange-500 text-2xl"></i>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-slate-800 text-sm">Sebzeli Pirinç Pilavı</h4>
+                            <p className="text-xs text-gray-500">{activeChild.age_months ? `${activeChild.age_months} ay` : 'Bebek'} • 25 dk</p>
+                          </div>
+                        </div>
+                        <Link href="/tarifler" className="block w-full bg-orange-500 text-white text-center py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors">
+                          Tarifi Gör
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* My Circles Widget */}
+                    <div className="bg-purple-50 p-6 rounded-3xl border border-purple-100 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-4 flex items-center">
+                        <i className="fa-solid fa-users text-purple-500 mr-2"></i> Çemberlerim
+                      </h3>
+                      <div className="space-y-2 mb-4">
+                        <div className="bg-white rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow cursor-pointer">
+                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i className="fa-solid fa-carrot text-purple-500 text-sm"></i>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-slate-800">BLW Deneyimleri</p>
+                            <p className="text-xs text-gray-500">24 yeni mesaj</p>
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow cursor-pointer">
+                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i className="fa-solid fa-apple-whole text-green-500 text-sm"></i>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-slate-800">İlk 1000 Gün</p>
+                            <p className="text-xs text-gray-500">12 yeni mesaj</p>
+                          </div>
+                        </div>
+                      </div>
+                      <Link href="/topluluk" className="block w-full bg-purple-500 text-white text-center py-2 rounded-xl text-sm font-bold hover:bg-purple-600 transition-colors">
+                        Tüm Çemberler
+                      </Link>
+                    </div>
+
+                    {/* Quick Shortcuts Widget */}
+                    <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-4 flex items-center">
+                        <i className="fa-solid fa-bolt text-blue-500 mr-2"></i> Kısayollar
+                      </h3>
+                      <div className="space-y-2">
+                        <Link href="/araclar" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i className="fa-solid fa-chart-line text-blue-500"></i>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-slate-800">Büyüme Grafiği</p>
+                            <p className="text-xs text-gray-500">Boy & kilo takibi</p>
+                          </div>
+                          <i className="fa-solid fa-chevron-right text-gray-300"></i>
+                        </Link>
+                        <Link href="/araclar" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
+                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i className="fa-solid fa-syringe text-green-500"></i>
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold text-sm text-slate-800">Aşı Takvimi</p>
+                            <p className="text-xs text-gray-500">Aşı hatırlatıcı</p>
+                          </div>
+                          <i className="fa-solid fa-chevron-right text-gray-300"></i>
+                        </Link>
+                      </div>
+                    </div>
+
+                  </div>
+                )}
 
             </div>
         </main>
