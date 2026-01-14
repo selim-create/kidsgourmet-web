@@ -25,16 +25,23 @@ export interface FeaturedItem {
     };
     // Post/Guide meta
     category?: string;
+    category_slug?: string;
     author?: string;
+    author_avatar?: string;
     read_time?: string;
     // Question meta
     author_name?: string;
     author_initials?: string;
     answer_count?: number;
+    // Ingredient meta
+    start_age?: string;
+    allergy_risk?: string;
+    season?: string;
     // Sponsor meta
     sponsor_name?: string;
     sponsor_logo?: string;
     sponsor_url?: string;
+    direct_redirect?: boolean;
     has_discount?: boolean;
     discount_text?: string;
   };

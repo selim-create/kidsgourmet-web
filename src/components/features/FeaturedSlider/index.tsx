@@ -6,8 +6,9 @@ import RecipeCard from './RecipeCard';
 import QuestionCard from './QuestionCard';
 import GuideCard from './GuideCard';
 import SponsorCard from './SponsorCard';
+import IngredientCard from './IngredientCard';
 
-type FeaturedContentType = 'recipe' | 'blog' | 'question' | 'sponsored';
+type FeaturedContentType = 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient';
 
 interface FeaturedContent {
   id: number;
@@ -36,6 +37,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
     blog: items.filter(item => item.type === 'blog').length,
     question: items.filter(item => item.type === 'question').length,
     sponsored: items.filter(item => item.type === 'sponsored').length,
+    ingredient: items.filter(item => item.type === 'ingredient').length,
   };
 
   useEffect(() => {
@@ -85,6 +87,8 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
         return <QuestionCard key={`question-${item.id}`} item={featuredItem} />;
       case 'sponsored':
         return <SponsorCard key={`sponsored-${item.id}`} item={featuredItem} />;
+      case 'ingredient':
+        return <IngredientCard key={`ingredient-${item.id}`} item={featuredItem} />;
       default:
         return null;
     }
@@ -166,6 +170,19 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
                   }`}
                 >
                   <i className="fa-solid fa-badge-check mr-2"></i>Sponsor
+                </button>
+              )}
+              
+              {typeCounts.ingredient > 0 && (
+                <button
+                  onClick={() => setFilter('ingredient')}
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                    filter === 'ingredient'
+                      ? 'border-green-200 bg-green-50 text-green-600'
+                      : 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'
+                  }`}
+                >
+                  <i className="fa-solid fa-seedling mr-2"></i>Malzeme
                 </button>
               )}
 
