@@ -289,34 +289,44 @@ export default function WeeklyPlanPage() {
     isSelectable: boolean;
   }
 
-  const RecipePoolCard = ({ recipe, onSelect, isSelectable }: RecipePoolCardProps) => (
-    <div 
-      onClick={isSelectable ? onSelect : undefined}
-      className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
-        isSelectable 
-          ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300' 
-          : 'border-gray-100 bg-gray-50 opacity-60'
-      }`}
-    >
-      <img 
-        src={(recipe as any).image || (recipe as any).featured_image || 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T'} 
-        alt={recipe.title}
-        className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-slate-700 line-clamp-2">{recipe.title}</p>
-        {(recipe as any).prep_time && (
-          <p className="text-[10px] text-gray-400 mt-0.5">
-            <i className="fa-regular fa-clock mr-1"></i>
-            {(recipe as any).prep_time}
-          </p>
+  const RecipePoolCard = ({ recipe, onSelect, isSelectable }: RecipePoolCardProps) => {
+    // Type guard to check if it's a full Recipe
+    const isFullRecipe = (r: RecipePoolCardProps['recipe']): r is Recipe => {
+      return 'slug' in r && 'content' in r;
+    };
+    
+    const image = isFullRecipe(recipe) ? recipe.image : (recipe.image || 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T');
+    const prepTime = isFullRecipe(recipe) ? recipe.prep_time : recipe.prep_time;
+
+    return (
+      <div 
+        onClick={isSelectable ? onSelect : undefined}
+        className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
+          isSelectable 
+            ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300' 
+            : 'border-gray-100 bg-gray-50 opacity-60'
+        }`}
+      >
+        <img 
+          src={image} 
+          alt={recipe.title}
+          className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-slate-700 line-clamp-2">{recipe.title}</p>
+          {prepTime && (
+            <p className="text-[10px] text-gray-400 mt-0.5">
+              <i className="fa-regular fa-clock mr-1"></i>
+              {prepTime}
+            </p>
+          )}
+        </div>
+        {isSelectable && (
+          <i className="fa-solid fa-plus text-orange-500 text-sm flex-shrink-0"></i>
         )}
       </div>
-      {isSelectable && (
-        <i className="fa-solid fa-plus text-orange-500 text-sm flex-shrink-0"></i>
-      )}
-    </div>
-  );
+    );
+  };
 
   // Auth check
   if (userLoading) {
