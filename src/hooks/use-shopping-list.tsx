@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ShoppingListItem } from '@/lib/types';
 import { userService } from '@/services/user-service';
 import { useUser } from './use-user';
+import { toast } from 'sonner';
 
 export function useShoppingList() {
   const { isAuthenticated } = useUser();
@@ -23,14 +24,33 @@ export function useShoppingList() {
       setItems(data);
     } catch (error) {
       console.error('Failed to load shopping list:', error);
+      toast.error('Alışveriş listesi yüklenemedi');
     } finally {
       setIsLoading(false);
     }
   };
 
   const addItems = async (newItems: Omit<ShoppingListItem, 'id'>[]) => {
-    const added = await userService.addToShoppingList(newItems);
-    setItems(prev => [...prev, ...added]);
+    if (!isAuthenticated) return;
+    
+    setIsLoading(true);
+    try {
+      const added = await userService.addToShoppingList(newItems);
+      setItems(prev => [...prev, ...added]);
+      
+      // Başarılı eklenen item sayısına göre mesaj göster
+      if (added.length === newItems.length) {
+        toast.success(`${newItems.length} ürün listeye eklendi`);
+      } else if (added.length > 0) {
+        toast.success(`${added.length}/${newItems.length} ürün eklendi`);
+      }
+    } catch (error) {
+      console.error('Shopping list add error:', error);
+      toast.error('Ürünler eklenirken hata oluştu');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const removeItem = async (id: number) => {

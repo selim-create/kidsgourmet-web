@@ -142,10 +142,38 @@ export const userService = {
   },
 
   addToShoppingList: async (items: Omit<ShoppingListItem, 'id'>[]): Promise<ShoppingListItem[]> => {
-    return await fetchAuthAPI<ShoppingListItem[]>(API_ENDPOINTS.USER_SHOPPING_LIST, {
-      method: 'POST',
-      body: JSON.stringify({ items }),
-    });
+    // Backend tek item kabul ediyor ve 'item' ile 'quantity' parametreleri bekliyor
+    // Her item için ayrı ayrı API çağrısı yap
+    const addedItems: ShoppingListItem[] = [];
+    const failedItems: string[] = [];
+    
+    for (const item of items) {
+      try {
+        const response = await fetchAuthAPI<ShoppingListItem>(API_ENDPOINTS.USER_SHOPPING_LIST, {
+          method: 'POST',
+          body: JSON.stringify({
+            item: item.ingredient,      // 'ingredient' -> 'item'
+            quantity: item.amount || '1 adet',  // 'amount' -> 'quantity'
+          }),
+        });
+        addedItems.push(response);
+      } catch (error) {
+        console.error(`Failed to add item: ${item.ingredient}`, error);
+        failedItems.push(item.ingredient);
+      }
+    }
+    
+    // Eğer hiçbir item eklenemedi ise hata fırlat
+    if (addedItems.length === 0 && items.length > 0) {
+      throw new Error(`Hiçbir ürün eklenemedi. Başarısız: ${failedItems.join(', ')}`);
+    }
+    
+    // Bazı itemlar başarısız olduysa konsola log at
+    if (failedItems.length > 0) {
+      console.warn(`${failedItems.length} ürün eklenemedi: ${failedItems.join(', ')}`);
+    }
+    
+    return addedItems;
   },
 
   removeFromShoppingList: async (id: number): Promise<void> => {
