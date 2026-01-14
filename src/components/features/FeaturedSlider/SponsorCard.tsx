@@ -10,14 +10,22 @@ interface SponsorCardProps {
 
 export default function SponsorCard({ item }: SponsorCardProps) {
   const imageUrl = item.image || 'https://placehold.co/800x400/E8E8E8/666666?text=Sponsor';
-  const url = item.meta?.sponsor_url || `/blog/${item.slug}`;
-  const readTime = item.meta?.read_time || '5 dk';
+  
+  // Sponsor meta verileri
+  const sponsorName = item.meta?.sponsor_name || '';
+  const sponsorLogo = item.meta?.sponsor_logo || '';
+  const sponsorUrl = item.meta?.sponsor_url || '';
+  const directRedirect = item.meta?.direct_redirect || false;
   const hasDiscount = item.meta?.has_discount || false;
   const discountText = item.meta?.discount_text || 'İndirim';
+  const readTime = item.meta?.read_time || '5 dk';
+
+  // URL - direct_redirect'e göre karar ver
+  const href = directRedirect && sponsorUrl ? sponsorUrl : `/blog/${item.slug}`;
 
   return (
     <a
-      href={url}
+      href={href}
       data-type="sponsor"
       className="featured-card flex-shrink-0 w-[85vw] md:w-[420px] snap-center bg-white rounded-4xl shadow-md hover:shadow-xl overflow-hidden relative flex flex-col group border border-gray-100 transition-all duration-300 hover:-translate-y-1"
     >
@@ -25,7 +33,7 @@ export default function SponsorCard({ item }: SponsorCardProps) {
         <img
           src={imageUrl}
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-          alt={item.meta?.sponsor_name || 'Sponsorlu İçerik'}
+          alt={sponsorName || 'Sponsorlu İçerik'}
         />
         
         {/* Sponsorlu Badge - Sağ Üst */}
@@ -33,18 +41,22 @@ export default function SponsorCard({ item }: SponsorCardProps) {
           <i className="fa-solid fa-badge-check text-blue-500"></i> Sponsorlu
         </div>
 
-        {/* Kategori Badge - Sol Üst */}
-        <div className="absolute top-4 left-4 bg-slate-900/70 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1 backdrop-blur">
-          <i className="fa-solid fa-bullhorn"></i> Öneri
-        </div>
-
-        {/* Marka İçeriği - Sol Alt */}
-        <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur text-[10px] px-2 py-1 rounded text-slate-600 font-bold">
-          <i className="fa-regular fa-bookmark"></i> Marka İçeriği
-        </div>
+        {/* Sponsor Logo - Sol Alt */}
+        {sponsorLogo && (
+          <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded">
+            <img src={sponsorLogo} alt={sponsorName} className="h-4 object-contain" />
+          </div>
+        )}
       </div>
 
       <div className="p-6 flex flex-col flex-grow">
+        {/* Sponsor Adı */}
+        {sponsorName && (
+          <div className="text-xs text-gray-400 mb-1">
+            <span className="font-bold text-blue-600">{sponsorName}</span> tarafından
+          </div>
+        )}
+        
         <h3 className="font-display font-bold text-xl text-slate-800 mb-2 leading-tight group-hover:text-orange-500 transition-colors">
           {decodeEntities(item.title)}
         </h3>
@@ -53,16 +65,13 @@ export default function SponsorCard({ item }: SponsorCardProps) {
         </p>
 
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span className="bg-blue-50 text-blue-600 font-bold px-2 py-1 rounded-lg">
-              <i className="fa-regular fa-clock mr-1"></i> {readTime}
+          {/* İndirim Badge */}
+          {hasDiscount && discountText && (
+            <span className="bg-red-50 text-red-600 font-bold px-2 py-1 rounded-lg text-xs">
+              <i className="fa-solid fa-tag mr-1"></i> {discountText}
             </span>
-            {hasDiscount && (
-              <span className="bg-slate-50 text-slate-600 font-bold px-2 py-1 rounded-lg">
-                <i className="fa-solid fa-tag mr-1"></i> {discountText}
-              </span>
-            )}
-          </div>
+          )}
+          
           <span className="text-blue-500 text-sm font-bold group-hover:translate-x-1 transition-transform">
             İncele <i className="fa-solid fa-arrow-right ml-2"></i>
           </span>

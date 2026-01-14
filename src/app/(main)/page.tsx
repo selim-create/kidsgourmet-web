@@ -26,7 +26,7 @@ export default function Home() {
   // Prepare featured content for slider
   const [featuredContent, setFeaturedContent] = useState<Array<{
     id: number;
-    type: 'recipe' | 'blog' | 'question' | 'sponsored';
+    type: 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient';
     date: string;
     data: FeaturedItem;
   }>>([]);
@@ -44,12 +44,28 @@ export default function Home() {
         
         // Prepare featured content - map FeaturedItem to content types
         const featured = (featuredData || []).map((item: FeaturedItem) => {
-          let type: 'recipe' | 'blog' | 'question' | 'sponsored' = 'recipe';
+          let type: 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient';
           
-          if (item.type === 'post') type = 'blog';
-          else if (item.type === 'question') type = 'question';
-          else if (item.type === 'sponsor') type = 'sponsored';
-          else if (item.type === 'ingredient') type = 'recipe'; // ingredient shown as recipe
+          // API'den gelen tip doğrudan kullan, dönüştürme yapma
+          switch(item.type) {
+            case 'recipe':
+              type = 'recipe';
+              break;
+            case 'post':
+              type = 'blog';  // Normal post = blog/rehber
+              break;
+            case 'sponsor':
+              type = 'sponsored';  // Sponsorlu = sponsored
+              break;
+            case 'question':
+              type = 'question';
+              break;
+            case 'ingredient':
+              type = 'ingredient';  // Malzeme = ingredient
+              break;
+            default:
+              type = 'blog';
+          }
           
           return {
             id: item.id,
