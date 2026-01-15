@@ -79,7 +79,8 @@ export default function BesinTakvimiPage() {
     if (activeChild) {
       loadTrials();
     }
-  }, [isAuthenticated, authLoading, activeChild, currentWeekStart, router, loadTrials]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, authLoading, activeChild, currentWeekStart, loadTrials]);
 
   // Ingredient search effect
   useEffect(() => {
