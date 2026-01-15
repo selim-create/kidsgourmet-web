@@ -6,15 +6,139 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { toolService } from '@/services/tool-service';
 import { setToken } from '@/lib/api';
+import { toast } from 'sonner';
 import type { 
   BLWTestQuestion, 
   BLWTestAnswer,
   BLWTestResult,
   BLWRedFlag,
-  BLWResultBucket
+  BLWResultBucket,
+  Child
 } from '@/lib/types';
 
 type TestStage = 'intro' | 'test' | 'result';
+
+// Helper: Calculate child age display
+const calculateAgeDisplay = (child: Child): string => {
+  // Önce age_months varsa kullan
+  if (child.age_months !== undefined && child.age_months !== null) {
+    const years = Math.floor(child.age_months / 12);
+    const months = child.age_months % 12;
+    if (years > 0) {
+      return months > 0 ? `${years} yıl ${months} ay` : `${years} yıl`;
+    }
+    return `${child.age_months} aylık`;
+  }
+  
+  // Fallback: birth_date'den hesapla
+  if (child.birth_date) {
+    const birthDate = new Date(child.birth_date);
+    const today = new Date();
+    const ageInMonths = Math.floor(
+      (today.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+    );
+    const years = Math.floor(ageInMonths / 12);
+    const months = ageInMonths % 12;
+    if (years > 0) {
+      return months > 0 ? `${years} yıl ${months} ay` : `${years} yıl`;
+    }
+    return `${ageInMonths} aylık`;
+  }
+  
+  return 'Yaş bilgisi yok';
+};
+
+// Helper: Get result icon with emoji fallback
+const getResultIcon = (icon: string): React.ReactNode => {
+  const iconMap: Record<string, string> = {
+    'fa-check-circle': '✅',
+    'fa-circle-check': '✅',
+    'fa-hourglass-half': '⏳',
+    'fa-clock': '🕐',
+    'fa-info-circle': 'ℹ️',
+  };
+  
+  // Try to find matching emoji
+  const emoji = Object.entries(iconMap).find(([key]) => icon.includes(key))?.[1];
+  
+  return emoji ? <span>{emoji}</span> : <i className={icon}></i>;
+};
+
+// Confirm Modal Component
+interface ConfirmModalProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  variant?: 'danger' | 'warning' | 'info';
+}
+
+const ConfirmModal: React.FC<ConfirmModalProps> = ({
+  isOpen,
+  title,
+  message,
+  confirmText = 'Onayla',
+  cancelText = 'İptal',
+  onConfirm,
+  onCancel,
+  variant = 'info'
+}) => {
+  if (!isOpen) return null;
+
+  const variantStyles = {
+    danger: {
+      icon: 'fa-solid fa-triangle-exclamation',
+      iconBg: 'bg-red-100',
+      iconColor: 'text-red-500',
+      confirmBg: 'bg-red-500 hover:bg-red-600',
+    },
+    warning: {
+      icon: 'fa-solid fa-exclamation-circle',
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-500',
+      confirmBg: 'bg-amber-500 hover:bg-amber-600',
+    },
+    info: {
+      icon: 'fa-solid fa-info-circle',
+      iconBg: 'bg-blue-100',
+      iconColor: 'text-blue-500',
+      confirmBg: 'bg-blue-500 hover:bg-blue-600',
+    },
+  };
+
+  const styles = variantStyles[variant];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 animate-in fade-in zoom-in-95 duration-200">
+        <div className="text-center">
+          <div className={`w-16 h-16 ${styles.iconBg} ${styles.iconColor} rounded-full flex items-center justify-center mx-auto mb-4 text-2xl`}>
+            <i className={styles.icon}></i>
+          </div>
+          <h3 className="font-display font-bold text-xl text-slate-800 mb-2">{title}</h3>
+          <p className="text-gray-500 mb-6">{message}</p>
+          <div className="flex gap-3">
+            <button
+              onClick={onCancel}
+              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-xl font-bold transition-colors"
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={onConfirm}
+              className={`flex-1 ${styles.confirmBg} text-white px-4 py-3 rounded-xl font-bold transition-colors`}
+            >
+              {confirmText}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // Default questions (Backend ile uyumlu ID'ler)
 const defaultQuestions: BLWTestQuestion[] = [
@@ -244,6 +368,8 @@ export default function BLWTestPage() {
   // Modals
   const [showRegistration, setShowRegistration] = useState(false);
   const [showChildSelector, setShowChildSelector] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Registration form
   const [regName, setRegName] = useState('');
@@ -382,10 +508,16 @@ export default function BLWTestPage() {
       await refreshUser();
       
       setShowRegistration(false);
-      setStage('result');
+      setShowSuccessModal(true);
+      
+      // Hide success modal and show result after 2 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setStage('result');
+      }, 2000);
     } catch (error) {
       console.error('Registration failed:', error);
-      alert('Kayıt başarısız oldu. Lütfen tekrar deneyin.');
+      toast.error('Kayıt başarısız oldu. Lütfen tekrar deneyin.');
     } finally {
       setIsLoading(false);
     }
@@ -398,10 +530,11 @@ export default function BLWTestPage() {
     try {
       await toolService.submitBLWTest(result.answers, selectedChildId);
       setShowChildSelector(false);
+      toast.success('Test sonucunuz kaydedildi!');
       setStage('result');
     } catch (error) {
       console.error('Submit failed:', error);
-      alert('Kayıt başarısız oldu. Lütfen tekrar deneyin.');
+      toast.error('Kayıt başarısız oldu. Lütfen tekrar deneyin.');
     } finally {
       setIsLoading(false);
     }
@@ -585,11 +718,7 @@ export default function BLWTestPage() {
                 {/* Exit Button */}
                 <div className="text-center mt-8">
                   <button 
-                    onClick={() => {
-                      if (confirm('Testi bırakmak istediğinizden emin misiniz?')) {
-                        handleRestart();
-                      }
-                    }}
+                    onClick={() => setShowExitConfirm(true)}
                     className="text-gray-400 hover:text-gray-600 text-sm"
                   >
                     Testi Bırak
@@ -634,7 +763,7 @@ export default function BLWTestPage() {
             <div className={`rounded-[2rem] border-2 ${getBucketBorderColor(resultBucket.color)} ${getBucketBgColor(resultBucket.color)} overflow-hidden`}>
               <div className={`bg-gradient-to-r ${getBucketColor(resultBucket.color)} text-white p-8 text-center`}>
                 <div className="text-6xl mb-4">
-                  <i className={resultBucket.icon}></i>
+                  {getResultIcon(resultBucket.icon)}
                 </div>
                 <h2 className="font-display font-bold text-3xl mb-2">
                   {resultBucket.title}
@@ -864,7 +993,7 @@ export default function BLWTestPage() {
                   <div>
                     <div className="font-bold text-slate-800">{child.name}</div>
                     <div className="text-sm text-gray-500">
-                      {child.age_months} aylık • {child.gender === 'male' ? 'Erkek' : child.gender === 'female' ? 'Kız' : 'Diğer'}
+                      {calculateAgeDisplay(child)} • {child.gender === 'male' ? 'Erkek' : child.gender === 'female' ? 'Kız' : ''}
                     </div>
                   </div>
                 </label>
@@ -885,6 +1014,34 @@ export default function BLWTestPage() {
             >
               Kaydetmeden devam et
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Exit Confirm Modal */}
+      <ConfirmModal
+        isOpen={showExitConfirm}
+        title="Testi Bırakmak İstiyor musunuz?"
+        message="İlerlemeniz kaydedilmeyecek ve baştan başlamanız gerekecek."
+        confirmText="Evet, Bırak"
+        cancelText="Devam Et"
+        variant="warning"
+        onConfirm={() => {
+          setShowExitConfirm(false);
+          handleRestart();
+        }}
+        onCancel={() => setShowExitConfirm(false)}
+      />
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-8 text-center animate-in fade-in zoom-in-95">
+            <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
+              ✅
+            </div>
+            <h3 className="font-display font-bold text-2xl text-slate-800 mb-2">Başarılı!</h3>
+            <p className="text-gray-500">Hesabınız oluşturuldu ve test sonucunuz kaydedildi.</p>
           </div>
         </div>
       )}
