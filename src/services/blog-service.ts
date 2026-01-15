@@ -1,4 +1,4 @@
-import { fetchAPI } from '@/lib/api';
+import { fetchAPI, fetchAPIWithHeaders } from '@/lib/api';
 import { WP_API_NAMESPACE } from '@/lib/constants';
 import { SponsorData } from '@/lib/types';
 
@@ -17,6 +17,7 @@ export interface BlogPost {
     rendered: string;
   };
   featured_media: number;
+  comment_count?: number;
   sponsor_data?: SponsorData | null;
   _embedded?: {
     'wp:featuredmedia'?: Array<{
@@ -37,17 +38,29 @@ export interface BlogPost {
   };
 }
 
+export interface BlogPostsResponse {
+  posts: BlogPost[];
+  total: number;
+  totalPages: number;
+}
+
 export const blogService = {
   
   // Tüm blog yazılarını getir (Sayfalama ve Embed destekli)
-  getAll: async (page = 1, perPage = 10, category?: number) => {
+  getAll: async (page = 1, perPage = 10, category?: number): Promise<BlogPostsResponse> => {
     let endpoint = `${WP_API_NAMESPACE}/posts?page=${page}&per_page=${perPage}&_embed`;
     
     if (category) {
       endpoint += `&categories=${category}`;
     }
 
-    return await fetchAPI<BlogPost[]>(endpoint);
+    const response = await fetchAPIWithHeaders<BlogPost[]>(endpoint);
+    
+    return {
+      posts: response.data,
+      total: parseInt(response.headers['x-wp-total'] || '0'),
+      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1')
+    };
   },
 
   // Tekil blog yazısı detayı (Slug ile)

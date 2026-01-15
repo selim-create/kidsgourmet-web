@@ -75,3 +75,57 @@ export async function fetchAuthAPI<T>(
 ): Promise<T> {
   return fetchAPI<T>(endpoint, options, true, silentErrors);
 }
+
+/**
+ * API İstek Fonksiyonu - Headers ile birlikte döner
+ */
+export async function fetchAPIWithHeaders<T>(
+  endpoint: string, 
+  options: FetchOptions = {},
+  requireAuth: boolean = false,
+  silentErrors: number[] = []
+): Promise<{ data: T; headers: Record<string, string> }> {
+  const headers: Record<string, string> = { 
+    'Content-Type': 'application/json', 
+    ...options.headers 
+  };
+  
+  // Auth token varsa header'a ekle
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else if (requireAuth) {
+    throw new Error('Authentication required');
+  }
+
+  const res = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers,
+    next: { revalidate: options.next?.revalidate ?? 60 }
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    
+    // Don't log errors for silent status codes
+    if (!silentErrors.includes(res.status)) {
+      console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
+    }
+    
+    if (res.status === 401) {
+      removeToken();
+      throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
+    }
+    
+    throw new Error(errorData.message || 'API isteği başarısız oldu');
+  }
+
+  // Extract headers
+  const responseHeaders: Record<string, string> = {};
+  res.headers.forEach((value, key) => {
+    responseHeaders[key] = value;
+  });
+
+  const data = await res.json();
+  return { data, headers: responseHeaders };
+}
