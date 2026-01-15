@@ -90,6 +90,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     if (!post?.content?.rendered) return;
     
     const extractHeadings = (content: string) => {
+      // Match H2 and H3 tags with optional id attribute
+      // Pattern: <h(2|3) [attributes] id="optional-id">heading text</h(2|3)>
       const headingRegex = /<h([2-3])[^>]*(?:id="([^"]*)")?[^>]*>(.*?)<\/h\1>/gi;
       const headings: { level: number; id: string; text: string }[] = [];
       let match;
@@ -111,6 +113,10 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }, [post]);
 
   // Intersection Observer for active heading
+  // Configuration constants for TOC visibility tracking
+  const OBSERVER_ROOT_MARGIN = '-100px 0px -80% 0px'; // Top and bottom margins for visibility
+  const OBSERVER_THRESHOLDS = [0, 0.25, 0.5, 0.75, 1]; // Track visibility at these percentages
+  
   const observerCallback = useCallback((entries: IntersectionObserverEntry[]) => {
     // Find the most visible (highest intersection ratio) heading
     const visibleEntries = entries.filter(entry => entry.isIntersecting);
@@ -127,7 +133,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
     const observer = new IntersectionObserver(
       observerCallback,
-      { rootMargin: '-100px 0px -80% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
+      { rootMargin: OBSERVER_ROOT_MARGIN, threshold: OBSERVER_THRESHOLDS }
     );
 
     headings.forEach((heading) => {
@@ -183,7 +189,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
   const getAuthorSlug = (post: BlogPost) => {
     const author = post._embedded?.author?.[0];
-    return author?.slug || author?.id?.toString() || '';
+    const slug = author?.slug || author?.id?.toString();
+    // Return fallback to avoid broken links
+    return slug || 'unknown';
   };
 
   const getCategoryName = (post: BlogPost) => {
