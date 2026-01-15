@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from "next/link";
 import { blogService, BlogPost } from '@/services/blog-service';
 import { recipeService } from '@/services/recipe-service';
@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation';
 import { useFavorites } from '@/hooks/use-favorites';
 import { toast } from 'sonner';
 import ClientHead from '@/components/seo/ClientHead';
+import { SITE_URL } from '@/lib/constants';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -110,20 +111,22 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }, [post]);
 
   // Intersection Observer for active heading
+  const observerCallback = useCallback((entries: IntersectionObserverEntry[]) => {
+    // Find the most visible (highest intersection ratio) heading
+    const visibleEntries = entries.filter(entry => entry.isIntersecting);
+    if (visibleEntries.length > 0) {
+      const mostVisible = visibleEntries.reduce((prev, current) => 
+        (current.intersectionRatio > prev.intersectionRatio) ? current : prev
+      );
+      setActiveHeading(mostVisible.target.id);
+    }
+  }, []);
+
   useEffect(() => {
     if (headings.length === 0) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        // Find the most visible (highest intersection ratio) heading
-        const visibleEntries = entries.filter(entry => entry.isIntersecting);
-        if (visibleEntries.length > 0) {
-          const mostVisible = visibleEntries.reduce((prev, current) => 
-            (current.intersectionRatio > prev.intersectionRatio) ? current : prev
-          );
-          setActiveHeading(mostVisible.target.id);
-        }
-      },
+      observerCallback,
       { rootMargin: '-100px 0px -80% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
 
@@ -133,7 +136,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     });
 
     return () => observer.disconnect();
-  }, [headings]);
+  }, [headings, observerCallback]);
 
   if (loading) {
     return (
@@ -199,7 +202,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   // Social sharing functions
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://kidsgourmet.com/kesfet/${slug}`;
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/kesfet/${slug}`;
   const shareTitle = post ? stripHtml(post.title.rendered) : '';
 
   const shareFacebook = () => {
@@ -215,6 +218,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   const copyLink = () => {
+    if (!navigator.clipboard) {
+      toast.error('Clipboard desteği mevcut değil. Lütfen URL\'yi manuel olarak kopyalayın.');
+      return;
+    }
+    
     navigator.clipboard.writeText(shareUrl).then(() => {
       toast.success('Link kopyalandı!');
     }).catch(() => {
@@ -248,7 +256,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
             description={post.seo?.description || stripHtml(post.excerpt.rendered).substring(0, 160)}
             keywords={post.seo?.focus_keywords || [getCategoryName(post)]}
             ogImage={post.seo?.og_image || getImageUrl(post)}
-            url={`https://kidsgourmet.com/kesfet/${slug}`}
+            url={`${SITE_URL}/kesfet/${slug}`}
           />
         )}
 
