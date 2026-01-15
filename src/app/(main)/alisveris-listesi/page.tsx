@@ -125,10 +125,10 @@ export default function ShoppingListPage() {
                 <div className="pt-6 pb-2">
                     <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Araçlar</p>
                 </div>
-                <Link href="/araclar" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
                     <i className="fa-solid fa-chart-line"></i> Gelişim Takibi
                 </Link>
-                <Link href="/araclar" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
                     <i className="fa-solid fa-check-double"></i> BLW Testi
                 </Link>
             </nav>

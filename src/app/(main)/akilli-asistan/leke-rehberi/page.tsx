@@ -85,7 +85,7 @@ export default function StainEncyclopediaPage() {
           </>
         ) : (
           <>
-            <Link href="/araclar" className="text-gray-600">
+            <Link href="/akilli-asistan" className="text-gray-600">
               <i className="fa-solid fa-arrow-left"></i>
             </Link>
             <span className="font-display font-bold text-lg text-slate-800">Leke Ansiklopedisi</span>
@@ -299,7 +299,7 @@ export default function StainEncyclopediaPage() {
                     Geri
                   </button>
                   <Link
-                    href="/araclar"
+                    href="/akilli-asistan"
                     className="flex-1 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-500 text-white rounded-xl font-bold text-center hover:from-violet-600 hover:to-purple-600 transition-all duration-300"
                   >
                     Diğer Araçlar

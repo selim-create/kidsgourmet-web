@@ -382,7 +382,7 @@ export default function Home() {
                       </div>
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">BLW Hazırlık Testi</h3>
                       <p className="text-gray-600 text-sm mb-6 flex-grow">Bebeğiniz katı gıdaya hazır mı? 8 soruluk interaktif test ile öğrenin.</p>
-                      <Link href="/araclar/blw-testi" className="text-blue-500 font-bold flex items-center hover:underline">
+                      <Link href="/akilli-asistan/blw-testi" className="text-blue-500 font-bold flex items-center hover:underline">
                           Teste Başla <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>

@@ -122,10 +122,10 @@ export default function DashboardPage() {
                 <div className="pt-6 pb-2">
                     <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Araçlar</p>
                 </div>
-                <Link href="/araclar" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
                     <i className="fa-solid fa-chart-line"></i> Gelişim Takibi
                 </Link>
-                <Link href="/araclar" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
                     <i className="fa-solid fa-check-double"></i> BLW Testi
                 </Link>
             </nav>
@@ -394,11 +394,11 @@ export default function DashboardPage() {
                             <i className="fa-solid fa-toolbox text-blue-400 mr-2"></i> Hızlı Araçlar
                         </h3>
                         <div className="grid grid-cols-2 gap-3">
-                            <Link href="/malzeme-rehberi" className="flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 p-3 rounded-2xl transition-colors">
+                            <Link href="/beslenme-rehberi" className="flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 p-3 rounded-2xl transition-colors">
                                 <i className="fa-solid fa-magnifying-glass text-blue-500 mb-1"></i>
                                 <span className="text-xs font-bold text-blue-700">Gıda Ara</span>
                             </Link>
-                            <Link href="/araclar" className="flex flex-col items-center justify-center bg-purple-50 hover:bg-purple-100 p-3 rounded-2xl transition-colors">
+                            <Link href="/akilli-asistan" className="flex flex-col items-center justify-center bg-purple-50 hover:bg-purple-100 p-3 rounded-2xl transition-colors">
                                 <i className="fa-solid fa-chart-line text-purple-500 mb-1"></i>
                                 <span className="text-xs font-bold text-purple-700">Gelişim</span>
                             </Link>
@@ -413,7 +413,7 @@ export default function DashboardPage() {
                             <i className="fa-solid fa-baby text-green-500"></i>
                             BLW Hazırlık Testi
                           </h3>
-                          <Link href="/araclar/blw-testi" className="text-sm text-orange-500 hover:underline">
+                          <Link href="/akilli-asistan/blw-testi" className="text-sm text-orange-500 hover:underline">
                             Tekrar Test Et
                           </Link>
                         </div>
@@ -452,7 +452,7 @@ export default function DashboardPage() {
                             <i className="fa-solid fa-chart-line text-blue-500"></i>
                             Büyüme Takibi
                           </h3>
-                          <Link href="/araclar/persentil" className="text-sm text-orange-500 hover:underline">
+                          <Link href="/akilli-asistan/persentil" className="text-sm text-orange-500 hover:underline">
                             Yeni Ölçüm
                           </Link>
                         </div>
@@ -553,7 +553,7 @@ export default function DashboardPage() {
                         <i className="fa-solid fa-bolt text-blue-500 mr-2"></i> Kısayollar
                       </h3>
                       <div className="space-y-2">
-                        <Link href="/araclar" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
+                        <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
                           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                             <i className="fa-solid fa-chart-line text-blue-500"></i>
                           </div>
@@ -563,7 +563,7 @@ export default function DashboardPage() {
                           </div>
                           <i className="fa-solid fa-chevron-right text-gray-300"></i>
                         </Link>
-                        <Link href="/araclar" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
+                        <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
                           <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                             <i className="fa-solid fa-syringe text-green-500"></i>
                           </div>
