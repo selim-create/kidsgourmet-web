@@ -10,6 +10,17 @@ export interface IngredientFilters {
   season?: string;
 }
 
+export interface IngredientsResponse {
+  ingredients: Ingredient[];
+  total: number;
+  pages: number;
+}
+
+// Type guard to check if response is paginated
+function isIngredientsResponse(response: any): response is IngredientsResponse {
+  return response && typeof response === 'object' && 'ingredients' in response && 'total' in response && 'pages' in response;
+}
+
 // Transform function for WordPress REST API format to Ingredient - GÜNCELLENMİŞ
 const transformWPIngredient = (wp: any): Ingredient => ({
   id: wp.id,
@@ -88,7 +99,7 @@ export const ingredientService = {
   /**
    * Tüm malzemeleri getir
    */
-  getAll: async (filters: IngredientFilters = {}): Promise<Ingredient[]> => {
+  getAll: async (filters: IngredientFilters = {}): Promise<Ingredient[] | IngredientsResponse> => {
     const { page = 1, perPage = 24, startAge, allergyRisk, season } = filters;
     
     const params = new URLSearchParams({
@@ -110,7 +121,12 @@ export const ingredientService = {
       } else if (response && Array.isArray(response.data)) {
         return response.data.map(transformIngredient);
       } else if (response && Array.isArray(response.ingredients)) {
-        return response.ingredients.map(transformIngredient);
+        // Backend pagination response format: {ingredients: [...], total: 150, pages: 7}
+        return {
+          ingredients: response.ingredients.map(transformIngredient),
+          total: response.total || 0,
+          pages: response.pages || 1,
+        };
       }
       
       console.warn('Unexpected API response format:', response);
@@ -179,7 +195,8 @@ export const ingredientService = {
       console.error('Ingredient search error:', error);
       // Fallback: tüm ingredients'ı getir ve frontend'de filtrele
       try {
-        const allIngredients = await ingredientService.getAll({ perPage: 100 });
+        const response = await ingredientService.getAll({ perPage: 100 });
+        const allIngredients = Array.isArray(response) ? response : response.ingredients;
         const queryLower = query.toLowerCase();
         return allIngredients.filter(ing => 
           ing.name.toLowerCase().includes(queryLower) ||
@@ -208,7 +225,8 @@ export const ingredientService = {
     
     // Fallback: Tüm ingredients'tan unique kategorileri çıkar
     try {
-      const allIngredients = await ingredientService.getAll({ perPage: 200 });
+      const response = await ingredientService.getAll({ perPage: 200 });
+      const allIngredients = Array.isArray(response) ? response : response.ingredients;
       const uniqueCategories = [...new Set(
         allIngredients
           .map(i => i.category)
@@ -235,7 +253,8 @@ export const ingredientService = {
       return [];
     } catch (error) {
       // Fallback: tüm ingredients'tan filtrele
-      const all = await ingredientService.getAll({ perPage: 100 });
+      const response = await ingredientService.getAll({ perPage: 100 });
+      const all = Array.isArray(response) ? response : response.ingredients;
       return all.filter(i => i.season?.includes(season)).slice(0, 10);
     }
   },
