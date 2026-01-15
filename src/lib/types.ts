@@ -611,7 +611,7 @@ export interface GenerateShoppingListResponse {
 // TOOL (ARAÇ) TİPLERİ
 // ===============================
 
-export type ToolType = 'blw_test' | 'percentile' | 'water_calculator' | 'meal_planner';
+export type ToolType = 'blw_test' | 'percentile' | 'water_calculator' | 'meal_planner' | 'food_guide' | 'solid_food_readiness' | 'food_checker' | 'allergen_planner' | 'food_trial_calendar';
 
 export interface Tool {
   id: number;
