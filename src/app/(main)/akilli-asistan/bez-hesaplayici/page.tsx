@@ -122,7 +122,7 @@ export default function DiaperCalculatorPage() {
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
       <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
-        <Link href="/araclar" className="text-gray-600">
+        <Link href="/akilli-asistan" className="text-gray-600">
           <i className="fa-solid fa-arrow-left"></i>
         </Link>
         <span className="font-display font-bold text-lg text-slate-800">Bez Hesaplayıcı</span>
@@ -509,7 +509,7 @@ export default function DiaperCalculatorPage() {
                 Yeni Hesaplama
               </button>
               <Link
-                href="/araclar"
+                href="/akilli-asistan"
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-center hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
               >
                 Diğer Araçlar
@@ -591,7 +591,7 @@ export default function DiaperCalculatorPage() {
                 Yeni Analiz
               </button>
               <Link
-                href="/araclar"
+                href="/akilli-asistan"
                 className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold text-center hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
               >
                 Diğer Araçlar

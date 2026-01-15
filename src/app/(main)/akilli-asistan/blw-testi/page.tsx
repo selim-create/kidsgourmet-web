@@ -844,10 +844,10 @@ export default function BLWTestPage() {
                 <Link href="/tarifler?age=6-9-ay" className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-blue-700 transition-colors">
                   <i className="fa-solid fa-utensils mr-1"></i> BLW Tarifleri
                 </Link>
-                <Link href="/malzeme-rehberi" className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-green-700 transition-colors">
+                <Link href="/beslenme-rehberi" className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-green-700 transition-colors">
                   <i className="fa-solid fa-carrot mr-1"></i> Malzeme Rehberi
                 </Link>
-                <Link href="/blog" className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-purple-700 transition-colors">
+                <Link href="/kesfet" className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-purple-700 transition-colors">
                   <i className="fa-solid fa-book mr-1"></i> BLW Rehberi
                 </Link>
               </div>
