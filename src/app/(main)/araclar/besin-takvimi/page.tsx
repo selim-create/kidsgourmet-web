@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { toolService } from '@/services/tool-service';
+import { ingredientService } from '@/services/ingredient-service';
 import { toast } from 'sonner';
-import type { FoodTrial, FoodTrialInput } from '@/lib/types';
+import type { FoodTrial, FoodTrialInput, Ingredient } from '@/lib/types';
 
 export default function BesinTakvimiPage() {
   const router = useRouter();
@@ -22,6 +23,12 @@ export default function BesinTakvimiPage() {
   const [newTrialReaction, setNewTrialReaction] = useState<'none' | 'mild' | 'moderate' | 'severe'>('none');
   const [newTrialNotes, setNewTrialNotes] = useState('');
   const [newTrialRating, setNewTrialRating] = useState<number>(0);
+  
+  // Ingredient autocomplete state
+  const [ingredientSearch, setIngredientSearch] = useState('');
+  const [ingredientSuggestions, setIngredientSuggestions] = useState<Ingredient[]>([]);
+  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     if (authLoading) return; // Wait for auth check to complete
@@ -35,6 +42,24 @@ export default function BesinTakvimiPage() {
       loadTrials();
     }
   }, [isAuthenticated, authLoading, activeChild, currentWeekStart]);
+
+  // Ingredient search effect
+  useEffect(() => {
+    const searchIngredients = async () => {
+      if (ingredientSearch.length < 2) {
+        setIngredientSuggestions([]);
+        return;
+      }
+      try {
+        const results = await ingredientService.search(ingredientSearch);
+        setIngredientSuggestions(results.slice(0, 5));
+      } catch (error) {
+        console.error('Search error:', error);
+      }
+    };
+    const debounce = setTimeout(searchIngredients, 300);
+    return () => clearTimeout(debounce);
+  }, [ingredientSearch]);
 
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
@@ -79,14 +104,17 @@ export default function BesinTakvimiPage() {
     e.preventDefault();
     if (!activeChild) return;
 
-    if (!newTrialName.trim()) {
+    const finalName = selectedIngredient ? selectedIngredient.name : newTrialName;
+    
+    if (!finalName.trim()) {
       toast.error('Lütfen besin adı girin');
       return;
     }
 
     const trialInput: FoodTrialInput = {
       child_id: activeChild.id,
-      ingredient_name: newTrialName,
+      ingredient_id: selectedIngredient?.id,
+      ingredient_name: finalName,
       trial_date: newTrialDate,
       form: newTrialForm,
       reaction: newTrialReaction,
@@ -113,6 +141,10 @@ export default function BesinTakvimiPage() {
     setNewTrialReaction('none');
     setNewTrialNotes('');
     setNewTrialRating(0);
+    setIngredientSearch('');
+    setSelectedIngredient(null);
+    setIngredientSuggestions([]);
+    setShowSuggestions(false);
   };
 
   const getTrialsForDate = (date: Date): FoodTrial[] => {
@@ -362,14 +394,80 @@ export default function BesinTakvimiPage() {
                 <label className="block text-sm font-bold text-slate-800 mb-2">
                   Besin Adı <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={newTrialName}
-                  onChange={(e) => setNewTrialName(e.target.value)}
-                  placeholder="Örn: Elma, Havuç..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={selectedIngredient ? selectedIngredient.name : ingredientSearch}
+                    onChange={(e) => {
+                      setIngredientSearch(e.target.value);
+                      setSelectedIngredient(null);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    placeholder="Örn: Elma, Havuç... (aramaya başlayın)"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                  
+                  {/* Autocomplete Suggestions */}
+                  {showSuggestions && ingredientSuggestions.length > 0 && !selectedIngredient && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                      {ingredientSuggestions.map((ingredient) => (
+                        <button
+                          key={ingredient.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedIngredient(ingredient);
+                            setIngredientSearch('');
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
+                        >
+                          <img 
+                            src={ingredient.image || 'https://placehold.co/400x400/AED581/ffffff?text=Malzeme'} 
+                            alt={ingredient.name}
+                            className="w-10 h-10 rounded-lg object-cover"
+                          />
+                          <div>
+                            <div className="font-medium text-slate-800">{ingredient.name}</div>
+                            <div className="text-xs text-gray-500">{ingredient.start_age}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Selected Ingredient Display */}
+                  {selectedIngredient && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={selectedIngredient.image || 'https://placehold.co/400x400/AED581/ffffff?text=Malzeme'} 
+                          alt={selectedIngredient.name}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
+                        <div>
+                          <div className="font-medium text-slate-800">{selectedIngredient.name}</div>
+                          <div className="text-xs text-gray-600">{selectedIngredient.start_age}</div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIngredient(null);
+                          setIngredientSearch('');
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <i className="fa-solid fa-times"></i>
+                      </button>
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Rehberdeki malzemelerden seçebilir veya kendiniz yazabilirsiniz
+                  </p>
+                </div>
               </div>
 
               <div>

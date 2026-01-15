@@ -151,6 +151,30 @@ export const ingredientService = {
    * Malzeme arama (Ek gıda rehberi için)
    */
   search: async (query: string): Promise<Ingredient[]> => {
-    return await fetchAPI<Ingredient[]>(`${API_ENDPOINTS.INGREDIENTS_SEARCH}?q=${encodeURIComponent(query)}`);
+    try {
+      const response = await fetchAPI<any>(`${API_ENDPOINTS.INGREDIENTS_SEARCH}?q=${encodeURIComponent(query)}`);
+      
+      // Response format kontrolü - backend array veya {ingredients: [...]} dönebilir
+      if (Array.isArray(response)) {
+        return response.map(transformIngredient);
+      } else if (response && Array.isArray(response.ingredients)) {
+        return response.ingredients.map(transformIngredient);
+      }
+      return [];
+    } catch (error) {
+      console.error('Ingredient search error:', error);
+      // Fallback: tüm ingredients'ı getir ve frontend'de filtrele
+      try {
+        const allIngredients = await ingredientService.getAll({ perPage: 100 });
+        const queryLower = query.toLowerCase();
+        return allIngredients.filter(ing => 
+          ing.name.toLowerCase().includes(queryLower) ||
+          ing.description?.toLowerCase().includes(queryLower)
+        ).slice(0, 10);
+      } catch (fallbackError) {
+        console.error('Fallback search also failed:', fallbackError);
+        return [];
+      }
+    }
   },
 };

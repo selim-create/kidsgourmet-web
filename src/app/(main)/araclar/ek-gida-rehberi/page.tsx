@@ -257,7 +257,7 @@ export default function EkGidaRehberiPage() {
                   {/* Image */}
                   <div className="relative h-48 overflow-hidden bg-gray-100">
                     <img
-                      src={ingredient.image}
+                      src={ingredient.image || 'https://placehold.co/400x400/AED581/ffffff?text=Malzeme'}
                       alt={ingredient.name}
                       className="w-full h-full object-cover transition-transform group-hover:scale-110"
                     />

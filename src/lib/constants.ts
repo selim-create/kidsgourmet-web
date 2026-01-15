@@ -108,8 +108,8 @@ export const API_ENDPOINTS = {
   ALLERGEN_PLAN: (allergenId: string) => `${KG_API_NAMESPACE}/tools/allergen-planner/${allergenId}`,
   
   // Food Trial Calendar
-  FOOD_TRIALS: `${KG_API_NAMESPACE}/user/food-trials`,
-  FOOD_TRIAL_ADD: `${KG_API_NAMESPACE}/user/food-trials/add`,
+  FOOD_TRIALS: `${KG_API_NAMESPACE}/tools/food-trials`,
+  FOOD_TRIAL_ADD: `${KG_API_NAMESPACE}/tools/food-trials`,
   FOOD_TRIAL_SUMMARY: (childId: string, startDate: string, endDate: string) => 
-    `${KG_API_NAMESPACE}/user/food-trials/summary?child_id=${childId}&start_date=${startDate}&end_date=${endDate}`,
+    `${KG_API_NAMESPACE}/tools/food-trials/summary?child_id=${childId}&start_date=${startDate}&end_date=${endDate}`,
 } as const;
