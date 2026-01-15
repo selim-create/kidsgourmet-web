@@ -239,6 +239,41 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                           </div>
                         )}
 
+                        {/* Section 5: Alerjen Detayları - YENİ */}
+                        {ingredient.allergen_info && (
+                          <div className="bg-red-50 rounded-3xl p-6 border border-red-100">
+                            <h3 className="font-bold text-red-700 mb-4 flex items-center">
+                              <i className="fa-solid fa-triangle-exclamation mr-2"></i> Alerjen Bilgileri
+                            </h3>
+                            
+                            {ingredient.allergen_info.is_allergen && (
+                              <div className="mb-3">
+                                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                                  Bu malzeme alerjen içerir
+                                </span>
+                              </div>
+                            )}
+                            
+                            {ingredient.allergen_info.cross_contamination_risk && (
+                              <p className="text-sm text-gray-700 mb-2">
+                                <strong>Çapraz Bulaşma Riski:</strong> {ingredient.allergen_info.cross_contamination_risk}
+                              </p>
+                            )}
+                            
+                            {ingredient.allergen_info.allergy_symptoms && (
+                              <p className="text-sm text-gray-700 mb-2">
+                                <strong>Olası Semptomlar:</strong> {ingredient.allergen_info.allergy_symptoms}
+                              </p>
+                            )}
+                            
+                            {ingredient.allergen_info.alternative_ingredients && (
+                              <p className="text-sm text-gray-700">
+                                <strong>Alternatif Malzemeler:</strong> {ingredient.allergen_info.alternative_ingredients}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
                     </div>
 
                     {/* RELATED RECIPES GRID */}
@@ -292,6 +327,11 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                               alt={ingredient.name}
                               className="w-full h-auto object-cover"
                             />
+                            {ingredient.image_credit && (
+                              <p className="text-xs text-gray-400 text-center mt-2">
+                                📷 {ingredient.image_source === 'dall-e-3' ? 'AI Generated' : ingredient.image_credit}
+                              </p>
+                            )}
                         </div>
                         
                         {/* AT A GLANCE CARD */}
@@ -328,41 +368,76 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                     <span className="font-bold text-slate-800">{ingredient.season}</span>
                                 </div>
                                 
-                                {/* Besin Değerleri (100g başına) */}
-                                {(ingredient.nutrition?.calories || ingredient.nutrition?.protein || ingredient.nutrition?.carbs || ingredient.nutrition?.fat || ingredient.nutrition?.fiber) && (
+                                {/* Besin Değerleri (100g başına) - Her iki formatı destekle */}
+                                {(() => {
+                                  const nutritionData = ingredient.nutrition_per_100g || ingredient.nutrition;
+                                  const hasNutrition = nutritionData && (
+                                    nutritionData.calories || nutritionData.protein || 
+                                    nutritionData.carbs || nutritionData.fat || 
+                                    nutritionData.fiber || nutritionData.sugar || nutritionData.minerals
+                                  );
+                                  
+                                  return hasNutrition ? (
+                                    <div className="pt-3 border-t border-gray-100">
+                                      <h4 className="font-bold text-slate-800 text-sm mb-3">Besin Değerleri (100g)</h4>
+                                      <div className="space-y-2 text-sm">
+                                        {nutritionData.calories && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Kalori</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.calories}</span>
+                                          </div>
+                                        )}
+                                        {nutritionData.protein && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Protein</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.protein}</span>
+                                          </div>
+                                        )}
+                                        {nutritionData.carbs && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Karbonhidrat</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.carbs}</span>
+                                          </div>
+                                        )}
+                                        {nutritionData.fat && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Yağ</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.fat}</span>
+                                          </div>
+                                        )}
+                                        {nutritionData.fiber && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Lif</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.fiber}</span>
+                                          </div>
+                                        )}
+                                        {nutritionData.sugar && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Şeker</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.sugar}</span>
+                                          </div>
+                                        )}
+                                        {nutritionData.minerals && (
+                                          <div className="flex justify-between">
+                                            <span className="text-gray-600">Mineraller</span>
+                                            <span className="font-bold text-slate-800">{nutritionData.minerals}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  ) : null;
+                                })()}
+                                
+                                {/* İçerdiği Alerjenler (Taxonomy) - YENİ */}
+                                {ingredient.allergens && ingredient.allergens.length > 0 && (
                                   <div className="pt-3 border-t border-gray-100">
-                                    <h4 className="font-bold text-slate-800 text-sm mb-3">Besin Değerleri (100g)</h4>
-                                    <div className="space-y-2 text-sm">
-                                      {ingredient.nutrition?.calories && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Kalori</span>
-                                          <span className="font-bold text-slate-800">{ingredient.nutrition.calories}</span>
-                                        </div>
-                                      )}
-                                      {ingredient.nutrition?.protein && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Protein</span>
-                                          <span className="font-bold text-slate-800">{ingredient.nutrition.protein}</span>
-                                        </div>
-                                      )}
-                                      {ingredient.nutrition?.carbs && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Karbonhidrat</span>
-                                          <span className="font-bold text-slate-800">{ingredient.nutrition.carbs}</span>
-                                        </div>
-                                      )}
-                                      {ingredient.nutrition?.fat && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Yağ</span>
-                                          <span className="font-bold text-slate-800">{ingredient.nutrition.fat}</span>
-                                        </div>
-                                      )}
-                                      {ingredient.nutrition?.fiber && (
-                                        <div className="flex justify-between">
-                                          <span className="text-gray-600">Lif</span>
-                                          <span className="font-bold text-slate-800">{ingredient.nutrition.fiber}</span>
-                                        </div>
-                                      )}
+                                    <h4 className="font-bold text-red-600 text-sm mb-2">⚠️ İçerdiği Alerjenler</h4>
+                                    <div className="flex flex-wrap gap-1">
+                                      {ingredient.allergens.map((allergen, idx) => (
+                                        <span key={idx} className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
+                                          {allergen}
+                                        </span>
+                                      ))}
                                     </div>
                                   </div>
                                 )}
