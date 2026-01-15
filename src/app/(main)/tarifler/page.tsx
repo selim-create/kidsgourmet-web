@@ -46,6 +46,25 @@ interface FilterState {
   ingredientSearch: string;
 }
 
+// Age Group with Display Label
+interface AgeGroupWithLabel {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  age_group_meta: {
+    min_month: number;
+    max_month: number;
+    daily_meal_count: number;
+    max_salt_limit: string;
+    texture_guide: string;
+    forbidden_list: string[];
+    color_code: string;
+    warning_message: string;
+  };
+  displayLabel: string;
+}
+
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +72,6 @@ export default function RecipesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecipes, setTotalRecipes] = useState(0);
   const [sortBy, setSortBy] = useState<'date' | 'popular' | 'prep_time'>('date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   
   const RECIPES_PER_PAGE = 12;
@@ -72,7 +90,7 @@ export default function RecipesPage() {
   });
   
   // Tarifleri getir
-  const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, order: string, orderBy: string) => {
+  const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, order: string) => {
     try {
       setLoading(true);
       const data = await recipeService.getAll({
@@ -83,8 +101,8 @@ export default function RecipesPage() {
         dietType: currentFilters.dietTypes.join(','),
         specialCondition: currentFilters.specialConditions.join(','),
         ingredient: currentFilters.ingredientSearch,
-        orderBy: orderBy as 'date' | 'popular' | 'prep_time',
-        order: order as 'asc' | 'desc',
+        orderBy: order as 'date' | 'popular' | 'prep_time',
+        order: 'desc',
       });
       
       // Response kontrolü
@@ -109,8 +127,8 @@ export default function RecipesPage() {
 
   // İlk yükleme ve filtre/sıralama değişimlerinde fetch
   useEffect(() => {
-    fetchRecipes(currentPage, filters, sortOrder, sortBy);
-  }, [currentPage, filters, sortOrder, sortBy, fetchRecipes]);
+    fetchRecipes(currentPage, filters, sortBy);
+  }, [currentPage, filters, sortBy, fetchRecipes]);
 
   // Filtre değiştir
   const handleFilterChange = (filterType: keyof FilterState, value: string) => {
@@ -179,7 +197,7 @@ export default function RecipesPage() {
     return AGE_GROUPS_ORDER.map(orderItem => {
       const ageGroup = ageGroups.find(ag => ag.slug === orderItem.slug);
       return ageGroup ? { ...ageGroup, displayLabel: orderItem.label } : null;
-    }).filter(Boolean);
+    }).filter((item): item is AgeGroupWithLabel => item !== null);
   }, [ageGroups]);
 
   return (
@@ -215,7 +233,7 @@ export default function RecipesPage() {
                 <i className="fa-solid fa-baby text-orange-500 mr-2"></i> Yaş Grubu
               </h3>
               <div className="space-y-2">
-                {sortedAgeGroups.map((ageGroup: any) => (
+                {sortedAgeGroups.map((ageGroup) => (
                   <label key={ageGroup.id} className="flex items-center space-x-3 cursor-pointer group">
                     <input 
                       type="checkbox" 
@@ -489,7 +507,7 @@ export default function RecipesPage() {
                   <i className="fa-solid fa-baby text-orange-500 mr-2"></i> Yaş Grubu
                 </h4>
                 <div className="space-y-2">
-                  {sortedAgeGroups.map((ageGroup: any) => (
+                  {sortedAgeGroups.map((ageGroup) => (
                     <label key={ageGroup.id} className="flex items-center space-x-3 cursor-pointer">
                       <input 
                         type="checkbox" 
