@@ -19,6 +19,11 @@ export default function ProfileSettingsPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [parentRole, setParentRole] = useState<string>("");
+  const [gender, setGender] = useState<string>("");
+  const [birthDate, setBirthDate] = useState("");
+  const [avatarId, setAvatarId] = useState<number | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>("");
 
   // Auth guard - giriş yapmamış kullanıcıları yönlendir
   useEffect(() => {
@@ -31,6 +36,10 @@ export default function ProfileSettingsPage() {
     if (user) {
       setName(user.display_name || user.name);
       setEmail(user.email);
+      setParentRole(user.parent_role || "");
+      setGender(user.gender || "");
+      setBirthDate(user.birth_date || "");
+      setAvatarPreview(user.avatar_url || "");
     }
   }, [user]);
 
@@ -114,22 +123,29 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     
     try {
-      interface UpdateProfileData {
+      interface UpdateData {
         name: string;
         email: string;
         password?: string;
+        parent_role?: string;
+        gender?: string;
+        birth_date?: string;
+        avatar_id?: number;
       }
 
-      const updateData: UpdateProfileData = {
+      const updateData: UpdateData = {
         name,
         email,
       };
 
-      if (password) {
-        updateData.password = password;
-      }
+      if (password) updateData.password = password;
+      if (parentRole) updateData.parent_role = parentRole;
+      if (gender) updateData.gender = gender;
+      if (birthDate) updateData.birth_date = birthDate;
+      if (avatarId) updateData.avatar_id = avatarId;
 
-      await userService.updateProfile(updateData);
+      // Cast to the service's expected type
+      await userService.updateProfile(updateData as any);
       toast.success('Profil bilgileri güncellendi');
       await refreshUser();
       setPassword(''); // Clear password field
@@ -138,6 +154,33 @@ export default function ProfileSettingsPage() {
       toast.error('Profil güncellenirken hata oluştu');
     }
   };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Dosya boyutu kontrolü (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Dosya boyutu 2MB\'dan küçük olmalı');
+      return;
+    }
+    
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+      toast.error('Sadece resim dosyaları yüklenebilir');
+      return;
+    }
+    
+    try {
+      const response = await userService.uploadAvatar(file);
+      setAvatarId(response.id);
+      setAvatarPreview(response.url);
+      toast.success('Profil fotoğrafı yüklendi');
+    } catch (error) {
+      toast.error('Fotoğraf yüklenirken hata oluştu');
+    }
+  };
+
   return (
     <div className="flex min-h-screen relative">
 
@@ -291,6 +334,47 @@ export default function ProfileSettingsPage() {
                         </h2>
                         
                         <form onSubmit={handleUpdateProfile} className="space-y-5">
+                            {/* Username - Read Only */}
+                            {user?.username && (
+                              <div>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Kullanıcı Adı</label>
+                                <div className="w-full bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-gray-500 font-medium">
+                                  @{user.username}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Avatar Upload */}
+                            <div>
+                              <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Profil Fotoğrafı</label>
+                              <div className="flex items-center gap-4">
+                                <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+                                  {avatarPreview ? (
+                                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <i className="fa-solid fa-user text-3xl text-gray-400"></i>
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    className="hidden"
+                                    id="avatar-upload"
+                                  />
+                                  <label
+                                    htmlFor="avatar-upload"
+                                    className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-xl font-bold cursor-pointer transition-colors"
+                                  >
+                                    <i className="fa-solid fa-upload mr-2"></i>
+                                    Fotoğraf Yükle
+                                  </label>
+                                  <p className="text-xs text-gray-500 mt-1">Maksimum 2MB, JPG veya PNG</p>
+                                </div>
+                              </div>
+                            </div>
+
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <div className="flex-1">
                                     <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Ad Soyad</label>
@@ -310,6 +394,54 @@ export default function ProfileSettingsPage() {
                                       className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" 
                                     />
                                 </div>
+                            </div>
+
+                            {/* Parent Role */}
+                            <div>
+                              <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Ebeveyn Rolü</label>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                {['Anne', 'Baba', 'Bakıcı', 'Diğer'].map((role) => (
+                                  <button
+                                    key={role}
+                                    type="button"
+                                    onClick={() => setParentRole(role)}
+                                    className={`px-4 py-2 rounded-xl font-bold transition-colors ${
+                                      parentRole === role
+                                        ? 'bg-orange-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                  >
+                                    {role}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Gender and Birth Date */}
+                            <div className="flex flex-col sm:flex-row gap-4">
+                              <div className="flex-1">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Cinsiyet</label>
+                                <select
+                                  value={gender}
+                                  onChange={(e) => setGender(e.target.value)}
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors"
+                                >
+                                  <option value="">Seçiniz</option>
+                                  <option value="female">Kadın</option>
+                                  <option value="male">Erkek</option>
+                                  <option value="other">Diğer</option>
+                                </select>
+                              </div>
+                              <div className="flex-1">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Doğum Tarihi</label>
+                                <input
+                                  type="date"
+                                  value={birthDate}
+                                  onChange={(e) => setBirthDate(e.target.value)}
+                                  max={new Date().toISOString().split('T')[0]}
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors"
+                                />
+                              </div>
                             </div>
                             
                             <div>

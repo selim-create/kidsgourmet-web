@@ -1,5 +1,5 @@
-import { fetchAuthAPI, fetchAPI } from '@/lib/api';
-import { API_ENDPOINTS } from '@/lib/constants';
+import { fetchAuthAPI, fetchAPI, getToken } from '@/lib/api';
+import { API_ENDPOINTS, API_URL } from '@/lib/constants';
 import { 
   User, 
   Child, 
@@ -11,7 +11,9 @@ import {
   FavoriteItemType,
   Collection,
   CollectionInput,
-  CollectionItem
+  CollectionItem,
+  ExpertPublicProfile,
+  SocialLinks
 } from '@/lib/types';
 
 export const userService = {
@@ -25,7 +27,16 @@ export const userService = {
   /**
    * Profil güncelle
    */
-  updateProfile: async (data: Partial<User>): Promise<User> => {
+  updateProfile: async (data: Partial<User> & {
+    parent_role?: string;
+    gender?: string;
+    birth_date?: string;
+    avatar_id?: number;
+    biography?: string;
+    social_links?: SocialLinks;
+    show_email?: boolean;
+    expertise?: string[];
+  }): Promise<User> => {
     return await fetchAuthAPI<User>(API_ENDPOINTS.USER_PROFILE, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -201,5 +212,41 @@ export const userService = {
   // Expert Dashboard
   getExpertDashboard: async (): Promise<ExpertDashboard> => {
     return await fetchAuthAPI<ExpertDashboard>(API_ENDPOINTS.EXPERT_DASHBOARD);
+  },
+
+  // Uzman public profil getir
+  getExpertPublicProfile: async (username: string): Promise<ExpertPublicProfile> => {
+    return await fetchAPI<ExpertPublicProfile>(API_ENDPOINTS.EXPERT_PUBLIC(username));
+  },
+
+  // Avatar yükleme
+  uploadAvatar: async (file: File): Promise<{ id: number; url: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // WordPress media endpoint kullan
+    const token = getToken();
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await fetch(`${API_URL}/wp/v2/media`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error('Avatar yüklenemedi');
+    }
+    
+    const data = await response.json();
+    return {
+      id: data.id,
+      url: data.source_url,
+    };
   },
 };
