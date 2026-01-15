@@ -409,6 +409,7 @@ export interface SponsorData {
   direct_redirect: boolean;
   gam_impression_url: string | null;
   gam_click_url: string | null;
+  discount_text?: string | null;
 }
 
 // ==================== COMMUNITY / DISCUSSION TYPES ====================

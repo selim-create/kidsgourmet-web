@@ -41,4 +41,6 @@ body {
 .hide-scroll {
   -ms-overflow-style: none;
   scrollbar-width: none;
+  scroll-behavior: smooth;
+  scroll-padding-left: 1rem;
 }
