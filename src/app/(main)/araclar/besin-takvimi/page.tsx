@@ -17,7 +17,6 @@ export default function BesinTakvimiPage() {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
   
   // Form state
-  const [newTrialName, setNewTrialName] = useState('');
   const [newTrialDate, setNewTrialDate] = useState(new Date().toISOString().split('T')[0]);
   const [newTrialForm, setNewTrialForm] = useState<'puree' | 'finger_food' | 'mixed'>('puree');
   const [newTrialReaction, setNewTrialReaction] = useState<'none' | 'mild' | 'moderate' | 'severe'>('none');
@@ -104,7 +103,7 @@ export default function BesinTakvimiPage() {
     e.preventDefault();
     if (!activeChild) return;
 
-    const finalName = selectedIngredient ? selectedIngredient.name : newTrialName;
+    const finalName = selectedIngredient ? selectedIngredient.name : ingredientSearch;
     
     if (!finalName.trim()) {
       toast.error('Lütfen besin adı girin');
@@ -135,7 +134,6 @@ export default function BesinTakvimiPage() {
   };
 
   const resetForm = () => {
-    setNewTrialName('');
     setNewTrialDate(new Date().toISOString().split('T')[0]);
     setNewTrialForm('puree');
     setNewTrialReaction('none');

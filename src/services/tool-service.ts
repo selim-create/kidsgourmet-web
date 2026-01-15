@@ -314,7 +314,7 @@ export const toolService = {
       body: JSON.stringify({
         child_id: trial.child_id,
         ingredient_name: trial.ingredient_name,
-        ingredient_id: trial.ingredient_id || 0,
+        ...(trial.ingredient_id && { ingredient_id: trial.ingredient_id }),
         trial_date: trial.trial_date,
         result: mapReactionToResult(trial.reaction),
         reaction_notes: trial.reaction_notes || '',
