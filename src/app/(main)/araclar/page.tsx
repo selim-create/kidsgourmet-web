@@ -87,6 +87,61 @@ const defaultTools: Tool[] = [
     is_active: true,
     requires_auth: true,
   },
+  {
+    id: 9,
+    title: 'Banyo Rutini Planlayıcı',
+    slug: 'banyo-planlayici',
+    description: 'Bebeğiniz için mevsime ve cilt tipine uygun banyo rutini oluşturun.',
+    icon: 'fa-solid fa-bath',
+    tool_type: 'bath_planner',
+    is_active: true,
+    requires_auth: false,
+    is_sponsored: true,
+  },
+  {
+    id: 10,
+    title: 'Günlük Hijyen Hesaplayıcı',
+    slug: 'hijyen-hesaplayici',
+    description: 'Günlük mendil ve hijyen ürünü ihtiyacınızı hesaplayın.',
+    icon: 'fa-solid fa-hand-sparkles',
+    tool_type: 'hygiene_calculator',
+    is_active: true,
+    requires_auth: false,
+    is_sponsored: true,
+  },
+  {
+    id: 11,
+    title: 'Akıllı Bez Hesaplayıcı',
+    slug: 'bez-hesaplayici',
+    description: 'Doğru bez numarası ve aylık ihtiyacınızı öğrenin.',
+    icon: 'fa-solid fa-baby-carriage',
+    tool_type: 'diaper_calculator',
+    is_active: true,
+    requires_auth: false,
+    is_sponsored: true,
+  },
+  {
+    id: 12,
+    title: 'Hava Kalitesi Rehberi',
+    slug: 'hava-kalitesi',
+    description: 'Evinizin hava kalitesini değerlendirin ve öneriler alın.',
+    icon: 'fa-solid fa-wind',
+    tool_type: 'air_quality',
+    is_active: true,
+    requires_auth: false,
+    is_sponsored: true,
+  },
+  {
+    id: 13,
+    title: 'Leke Ansiklopedisi',
+    slug: 'leke-rehberi',
+    description: 'Bebek kıyafetlerindeki lekeler için çözüm rehberi.',
+    icon: 'fa-solid fa-shirt',
+    tool_type: 'stain_encyclopedia',
+    is_active: true,
+    requires_auth: false,
+    is_sponsored: true,
+  },
 ];
 
 const toolIconColors: Record<string, string> = {
@@ -99,6 +154,11 @@ const toolIconColors: Record<string, string> = {
   allergen_planner: 'bg-red-50 text-red-500',
   food_trial_calendar: 'bg-purple-50 text-purple-500',
   meal_planner: 'bg-orange-50 text-orange-500',
+  bath_planner: 'bg-blue-50 text-blue-500',
+  hygiene_calculator: 'bg-teal-50 text-teal-500',
+  diaper_calculator: 'bg-pink-50 text-pink-500',
+  air_quality: 'bg-sky-50 text-sky-500',
+  stain_encyclopedia: 'bg-violet-50 text-violet-500',
 };
 
 export default function ToolsPage() {
@@ -158,9 +218,16 @@ export default function ToolsPage() {
               <Link
                 key={tool.id}
                 href={`/araclar/${tool.slug}`}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
+                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative"
               >
                 <div className="p-6">
+                  {/* Sponsor Badge */}
+                  {tool.is_sponsored && (
+                    <div className="absolute top-3 right-3 bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-semibold">
+                      Sponsorlu
+                    </div>
+                  )}
+
                   {/* Icon */}
                   <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 text-2xl transition-transform group-hover:scale-110 ${toolIconColors[tool.tool_type] || 'bg-gray-50 text-gray-500'}`}>
                     <i className={tool.icon}></i>
