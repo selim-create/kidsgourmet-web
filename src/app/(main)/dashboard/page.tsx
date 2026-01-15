@@ -7,7 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
 import { toolService } from "@/services/tool-service";
-import { RecipeCard, ShoppingListItem, BLWTestResult } from "@/lib/types";
+import { RecipeCard, ShoppingListItem, BLWTestResult, PercentileResult } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const { activeChild, children, setActiveChild } = useActiveChild();
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [blwResults, setBlwResults] = useState<BLWTestResult[]>([]);
+  const [percentileResults, setPercentileResults] = useState<PercentileResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,13 +46,15 @@ export default function DashboardPage() {
       
       try {
         // Fetch all data in parallel
-        const [shoppingListData, blwResultsData] = await Promise.all([
+        const [shoppingListData, blwResultsData, percentileResultsData] = await Promise.all([
           userService.getShoppingList(),
           toolService.getUserBLWResults().catch(() => []),
+          toolService.getUserPercentileResults().catch(() => []),
         ]);
         
         setShoppingList(shoppingListData);
         setBlwResults(blwResultsData);
+        setPercentileResults(percentileResultsData);
       } catch (err) {
         console.error('Dashboard data fetch error:', err);
         setError(err instanceof Error ? err.message : 'Veriler yüklenirken hata oluştu');
@@ -438,6 +441,52 @@ export default function DashboardPage() {
                             )}
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Percentile Results Widget */}
+                    {percentileResults.length > 0 && (
+                      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <i className="fa-solid fa-chart-line text-blue-500"></i>
+                            Büyüme Takibi
+                          </h3>
+                          <Link href="/araclar/persentil" className="text-sm text-orange-500 hover:underline">
+                            Yeni Ölçüm
+                          </Link>
+                        </div>
+                        
+                        {percentileResults.slice(0, 3).map((result, index) => {
+                          // Get the first percentile for quick display
+                          const primaryPercentile = result.percentiles[0];
+                          const hasWarnings = result.red_flags && result.red_flags.length > 0;
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                                primaryPercentile.category === 'normal' ? 'bg-green-500' : 
+                                primaryPercentile.category === 'low' || primaryPercentile.category === 'high' ? 'bg-amber-500' : 
+                                'bg-red-500'
+                              }`}>
+                                {primaryPercentile.percentile}
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-slate-800">
+                                  {result.age_in_months} aylık - {result.percentiles.length} ölçüm
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {new Date(result.created_at).toLocaleDateString('tr-TR')}
+                                </p>
+                              </div>
+                              {hasWarnings && (
+                                <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
+                                  <i className="fa-solid fa-exclamation text-xs"></i>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
