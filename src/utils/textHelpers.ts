@@ -13,9 +13,34 @@ import DOMPurify from 'isomorphic-dompurify';
 export function decodeEntities(text: string | null | undefined): string {
   if (!text) return '';
   
-  // Use DOMPurify to safely decode HTML entities
-  // This prevents double-escaping and XSS issues
-  const decoded = DOMPurify.sanitize(text, { 
+  // First pass: decode HTML entities using a map
+  const htmlEntities: Record<string, string> = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#039;': "'",
+    '&apos;': "'",
+    '&nbsp;': ' ',
+    '&#8211;': '\u2013',
+    '&#8212;': '\u2014',
+    '&#8216;': '\u2018',
+    '&#8217;': '\u2019',
+    '&#8220;': '\u201C',
+    '&#8221;': '\u201D',
+  };
+  
+  let decoded = text;
+  
+  // Replace HTML entities (run twice for double-encoded)
+  for (let i = 0; i < 2; i++) {
+    for (const [entity, char] of Object.entries(htmlEntities)) {
+      decoded = decoded.replace(new RegExp(entity, 'gi'), char);
+    }
+  }
+  
+  // Use DOMPurify for any remaining entities
+  decoded = DOMPurify.sanitize(decoded, { 
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true 

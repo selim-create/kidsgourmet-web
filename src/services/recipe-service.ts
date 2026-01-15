@@ -26,7 +26,26 @@ const transformWPRecipeToCard = (wp: any): RecipeCard => ({
          'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif',
   age_group: wp._embedded?.['wp:term']?.flat()
     ?.find((t: any) => t.taxonomy === 'age-group')?.name || '+6 Ay',
+  age_group_color: wp._embedded?.['wp:term']?.flat()
+    ?.find((t: any) => t.taxonomy === 'age-group')?.age_group_meta?.color_code || '',
   prep_time: wp.meta?._kg_prep_time || wp.acf?.prep_time || '15 dk',
+  // YENİ ALANLAR
+  meal_type: wp._embedded?.['wp:term']?.flat()
+    ?.find((t: any) => t.taxonomy === 'meal-type')?.name || '',
+  diet_types: wp._embedded?.['wp:term']?.flat()
+    ?.filter((t: any) => t.taxonomy === 'diet-type')
+    ?.map((t: any) => t.name) || [],
+  author: wp._embedded?.author?.[0] ? {
+    id: wp._embedded.author[0].id,
+    name: wp._embedded.author[0].name,
+    avatar: wp._embedded.author[0].avatar_urls?.['48'] || '',
+  } : undefined,
+  expert: {
+    name: wp.meta?._kg_expert_name || '',
+    title: wp.meta?._kg_expert_title || '',
+    approved: wp.meta?._kg_expert_approved === '1',
+  },
+  is_featured: wp.meta?._kg_is_featured === '1',
 });
 
 // Transform function for WordPress REST API format to full Recipe
@@ -125,7 +144,22 @@ const transformRecipe = (wpRecipe: any): RecipeCard => ({
   slug: wpRecipe.slug,
   image: wpRecipe.image || wpRecipe._embedded?.['wp:featuredmedia']?.[0]?.source_url || '',
   age_group: wpRecipe.age_groups?.[0] || wpRecipe.age_group || '+6 Ay',
+  age_group_color: wpRecipe.age_group_color || '',
   prep_time: wpRecipe.prep_time || '15 dk',
+  // YENİ ALANLAR
+  meal_type: wpRecipe.meal_type || wpRecipe.meal_types?.[0] || '',
+  diet_types: wpRecipe.diet_types || [],
+  author: wpRecipe.author ? {
+    id: wpRecipe.author.id || wpRecipe.author_id || 0,
+    name: wpRecipe.author.name || wpRecipe.author_name || '',
+    avatar: wpRecipe.author.avatar || wpRecipe.author_avatar || '',
+  } : undefined,
+  expert: wpRecipe.expert ? {
+    name: wpRecipe.expert.name || '',
+    title: wpRecipe.expert.title || '',
+    approved: wpRecipe.expert.approved || false,
+  } : undefined,
+  is_featured: wpRecipe.is_featured || false,
 });
 
 export const recipeService = {

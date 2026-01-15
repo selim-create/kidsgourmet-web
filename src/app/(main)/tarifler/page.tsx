@@ -13,11 +13,11 @@ import ClientHead from '@/components/seo/ClientHead';
 
 // Yaş Grubu Sıralaması
 const AGE_GROUPS_ORDER = [
-  { slug: '0-6-ay', label: '0-6 Ay (Hazırlık Evresi)' },
-  { slug: '6-8-ay', label: '6-8 Ay (Başlangıç & Tadım)' },
-  { slug: '9-11-ay', label: '9-11 Ay (Keşif & Pütürlüye Geçiş)' },
-  { slug: '12-24-ay', label: '12-24 Ay (Aile Sofrasına Geçiş)' },
-  { slug: '2-yas', label: '2+ Yaş (Çocuk Gurme)' },
+  { slug: '0-6-ay-sadece-sut', label: '0-6 Ay (Hazırlık Evresi)' },
+  { slug: '6-8-ay-baslangic', label: '6-8 Ay (Başlangıç & Tadım)' },
+  { slug: '9-11-ay-kesif', label: '9-11 Ay (Keşif & Pütürlüye Geçiş)' },
+  { slug: '12-24-ay-gecis', label: '12-24 Ay (Aile Sofrasına Geçiş)' },
+  { slug: '2-yas-ve-uzeri', label: '2+ Yaş (Çocuk Gurme)' },
 ];
 
 // Diyet Tipleri
@@ -109,7 +109,11 @@ export default function RecipesPage() {
       if (data && data.recipes) {
         setRecipes(data.recipes);
         setTotalRecipes(data.total || 0);
-        setTotalPages(data.total_pages || 1);
+        // API total_pages düzgün dönmezse hesapla
+        const calculatedTotalPages = data.total_pages > 1 
+          ? data.total_pages 
+          : Math.ceil((data.total || data.recipes.length) / RECIPES_PER_PAGE);
+        setTotalPages(calculatedTotalPages);
       } else {
         setRecipes([]);
         setTotalRecipes(0);
@@ -697,10 +701,8 @@ function RecipeCardComponent({
           {decodeEntities(recipe.title)}
         </h3>
         
-        {/* Recipe Info */}
+        {/* Recipe Info - prep_time is shown on image badge, removed from here */}
         <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3 flex-wrap gap-y-1">
-          <span><i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}</span>
-          
           {recipe.meal_type && (
             <span><i className="fa-solid fa-utensils mr-1"></i> {decodeEntities(recipe.meal_type)}</span>
           )}
