@@ -15,6 +15,17 @@ export default function Header() {
   const { user, isAuthenticated, logout } = useUser();
   const router = useRouter();
 
+  // Check if user is an expert
+  const isExpert = user?.is_expert || ['administrator', 'editor', 'author', 'kg_expert'].includes(user?.role || '');
+  
+  // Dashboard link based on role
+  const dashboardLink = isExpert ? '/dashboard/expert' : '/dashboard';
+  
+  // Public profile link based on role
+  const publicProfileUrl = isExpert 
+    ? `/uzman/${user?.username}` 
+    : `/profil/${user?.username}`;
+
   // Handle escape key to close modal
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -195,14 +206,14 @@ export default function Header() {
                         <div className="space-y-3">
                             {isAuthenticated && user ? (
                               <>
-                                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
+                                <Link href={dashboardLink} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
                                     <i className="fa-solid fa-gauge-high"></i> Dashboard
                                 </Link>
                                 <Link href="/profil" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
                                     <i className="fa-solid fa-user-pen"></i> Profili Düzenle
                                 </Link>
                                 <Link 
-                                  href={`/profil/${user.name ? user.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : 'profil'}`}
+                                  href={publicProfileUrl}
                                   className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
                                 >
                                     <i className="fa-solid fa-user"></i> Profili Görüntüle

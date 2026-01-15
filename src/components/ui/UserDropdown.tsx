@@ -9,6 +9,17 @@ export default function UserDropdown() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useUser();
 
+  // Check if user is an expert
+  const isExpert = user?.is_expert || ['administrator', 'editor', 'author', 'kg_expert'].includes(user?.role || '');
+  
+  // Dashboard link based on role
+  const dashboardLink = isExpert ? '/dashboard/expert' : '/dashboard';
+  
+  // Public profile link based on role and use username
+  const publicProfileUrl = isExpert 
+    ? `/uzman/${user?.username}` 
+    : `/profil/${user?.username}`;
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -31,11 +42,6 @@ export default function UserDropdown() {
   const avatarInitial = user.avatar_url 
     ? null 
     : (user.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?');
-
-  // Generate a safe slug from username
-  const userSlug = user.name 
-    ? user.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') 
-    : 'profil';
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -67,7 +73,7 @@ export default function UserDropdown() {
           {/* Menu Items */}
           <div className="py-1">
             <Link
-              href="/dashboard"
+              href={dashboardLink}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
@@ -85,7 +91,7 @@ export default function UserDropdown() {
             </Link>
 
             <Link
-              href={`/profil/${userSlug}`}
+              href={publicProfileUrl}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
