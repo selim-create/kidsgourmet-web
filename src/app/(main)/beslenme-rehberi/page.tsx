@@ -68,9 +68,15 @@ export default function IngredientsGuidePage() {
 
   // LocalStorage'dan favorileri yükle
   useEffect(() => {
-    const savedFavorites = localStorage.getItem('ingredient-favorites');
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
+    try {
+      const savedFavorites = localStorage.getItem('ingredient-favorites');
+      if (savedFavorites) {
+        setFavorites(JSON.parse(savedFavorites));
+      }
+    } catch (error) {
+      console.error('Favori yükleme hatası:', error);
+      // Hatalı veriyi temizle
+      localStorage.removeItem('ingredient-favorites');
     }
   }, []);
 
@@ -139,7 +145,12 @@ export default function IngredientsGuidePage() {
         ? prev.filter(id => id !== ingredientId)
         : [...prev, ingredientId];
       
-      localStorage.setItem('ingredient-favorites', JSON.stringify(newFavorites));
+      // localStorage kontrolü
+      try {
+        localStorage.setItem('ingredient-favorites', JSON.stringify(newFavorites));
+      } catch (error) {
+        console.error('Favori kaydetme hatası:', error);
+      }
       return newFavorites;
     });
   };
@@ -273,7 +284,7 @@ export default function IngredientsGuidePage() {
                           {/* Başlangıç Yaşı Badge - Sol Üst */}
                           <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
                               <i className="fa-solid fa-baby text-green-500 mr-1"></i> 
-                              {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : `${ingredient.start_age} ay`}
+                              {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : ingredient.start_age ? `${ingredient.start_age} ay` : '6 ay'}
                           </div>
                           
                           {/* Favori Butonu - Sağ Üst */}
