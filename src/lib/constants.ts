@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   INGREDIENTS: `${KG_API_NAMESPACE}/ingredients`,
   INGREDIENT_BY_SLUG: (slug: string) => `${KG_API_NAMESPACE}/ingredients/${slug}`,
   INGREDIENTS_SEARCH: `${KG_API_NAMESPACE}/ingredients/search`,
+  INGREDIENT_CATEGORIES: `${KG_API_NAMESPACE}/ingredient-categories`,
+  INGREDIENTS_BY_SEASON: (season: string) => `${KG_API_NAMESPACE}/ingredients?season=${encodeURIComponent(season)}`,
   
   // Auth
   AUTH_LOGIN: `${KG_API_NAMESPACE}/auth/login`,

@@ -5,28 +5,103 @@ import Link from "next/link";
 import { ingredientService } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 
+// Türkçe ay isimleri
+const turkishMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+                       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+
+// Ay -> Mevsim mapping
+const monthToSeason: Record<number, string[]> = {
+  0: ['Kış'],        // Ocak
+  1: ['Kış'],        // Şubat
+  2: ['İlkbahar'],   // Mart
+  3: ['İlkbahar'],   // Nisan
+  4: ['İlkbahar'],   // Mayıs
+  5: ['Yaz'],        // Haziran
+  6: ['Yaz'],        // Temmuz
+  7: ['Yaz'],        // Ağustos
+  8: ['Sonbahar'],   // Eylül
+  9: ['Sonbahar'],   // Ekim
+  10: ['Sonbahar'],  // Kasım
+  11: ['Kış'],       // Aralık
+};
+
 export default function IngredientsGuidePage() {
   const [activeCategory, setActiveCategory] = useState("Tümü");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [categories, setCategories] = useState<string[]>(["Tümü"]);
   const [loading, setLoading] = useState(true);
+  
+  // Arama state'leri
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Ingredient[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  
+  // Mevsimlik malzemeler
+  const [seasonalIngredients, setSeasonalIngredients] = useState<Ingredient[]>([]);
 
-  const categories = ["Tümü", "Sebzeler", "Meyveler", "Tahıllar", "Protein"];
-
+  // Kategorileri ve malzemeleri yükle
   useEffect(() => {
-    async function fetchIngredients() {
+    async function fetchData() {
       try {
         setLoading(true);
+        
+        // Kategorileri çek
+        const cats = await ingredientService.getCategories();
+        setCategories(["Tümü", ...cats]);
+        
+        // Tüm malzemeleri çek
         const data = await ingredientService.getAll();
         setIngredients(data || []);
+        
+        // Mevsimlik malzemeleri filtrele
+        const currentMonth = new Date().getMonth();
+        const currentSeasons = monthToSeason[currentMonth];
+        const seasonal = (data || []).filter(ing => 
+          ing.season && currentSeasons.some(season => ing.season?.includes(season))
+        ).slice(0, 6);
+        setSeasonalIngredients(seasonal);
+        
       } catch (error) {
-        console.error("Malzemeler yüklenirken hata:", error);
+        console.error("Veri yüklenirken hata:", error);
         setIngredients([]);
       } finally {
         setLoading(false);
       }
     }
-    fetchIngredients();
+    fetchData();
   }, []);
+
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        try {
+          const results = await ingredientService.search(searchQuery);
+          setSearchResults(results);
+        } catch (error) {
+          console.error("Arama hatası:", error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Filtreleme logic
+  const displayedIngredients = searchQuery.trim().length >= 2 
+    ? searchResults
+    : activeCategory === "Tümü" 
+      ? ingredients 
+      : ingredients.filter(ing => ing.category === activeCategory);
+
+  // Şu anki ay
+  const currentMonth = turkishMonths[new Date().getMonth()];
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -46,13 +121,28 @@ export default function IngredientsGuidePage() {
 
               {/* Search Bar */}
               <div className="relative max-w-2xl mx-auto">
-                  <input type="text" placeholder="Merak ettiğiniz besini yazın (Örn: Yumurta, Çilek...)" className="w-full py-4 pl-14 pr-6 rounded-full shadow-lg border-2 border-white focus:border-green-400 outline-none text-gray-700 font-medium transition-colors" />
+                  <input 
+                    type="text" 
+                    placeholder="Merak ettiğiniz besini yazın (Örn: Yumurta, Çilek...)" 
+                    className="w-full py-4 pl-14 pr-6 rounded-full shadow-lg border-2 border-white focus:border-green-400 outline-none text-gray-700 font-medium transition-colors"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                   <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">
-                      <i className="fa-solid fa-magnifying-glass"></i>
+                      {isSearching ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
+                      ) : (
+                        <i className="fa-solid fa-magnifying-glass"></i>
+                      )}
                   </div>
-                  <button className="absolute right-2 top-2 bottom-2 bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-full font-bold transition-colors">
-                      Ara
-                  </button>
+                  {searchQuery && (
+                    <button 
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-2 top-2 bottom-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition-colors"
+                    >
+                      Temizle
+                    </button>
+                  )}
               </div>
           </div>
       </div>
@@ -62,56 +152,27 @@ export default function IngredientsGuidePage() {
           <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-xl border border-gray-100">
               <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display font-bold text-xl md:text-2xl text-slate-800 flex items-center font-sans">
-                      <i className="fa-solid fa-calendar-day text-orange-500 mr-3"></i> Bu Ayın Yıldızları (Ocak)
+                      <i className="fa-solid fa-calendar-day text-orange-500 mr-3"></i> Bu Ayın Yıldızları ({currentMonth})
                   </h2>
                   <span className="text-xs font-bold text-orange-500 bg-orange-50 px-3 py-1 rounded-full uppercase tracking-wider">Mevsiminde Güzel</span>
               </div>
 
               {/* Horizontal Scroll Grid */}
               <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-                  {/* Seasonal Item 1 */}
-                  {/* Localde Link kullanın */}
-                  <Link href="/malzeme-rehberi/avokado" className="group text-center">
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-orange-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all">
-                          <img src="https://placehold.co/150x150/FF8A65/ffffff?text=Bal+Kabagi" className="w-full h-full object-cover" alt="Bal Kabağı" />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-orange-500 transition-colors">Bal Kabağı</span>
-                  </Link>
-                  {/* Seasonal Item 2 */}
-                  <Link href="#" className="group text-center">
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-green-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-green-500 transition-all">
-                          <img src="https://placehold.co/150x150/AED581/ffffff?text=Brokoli" className="w-full h-full object-cover" alt="Brokoli" />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-green-500 transition-colors">Brokoli</span>
-                  </Link>
-                  {/* Seasonal Item 3 */}
-                  <Link href="#" className="group text-center">
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-green-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-green-500 transition-all">
-                          <img src="https://placehold.co/150x150/81C784/ffffff?text=Ispanak" className="w-full h-full object-cover" alt="Ispanak" />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-green-500 transition-colors">Ispanak</span>
-                  </Link>
-                  {/* Seasonal Item 4 */}
-                  <Link href="#" className="group text-center">
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-orange-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all">
-                          <img src="https://placehold.co/150x150/FFCC80/ffffff?text=Portakal" className="w-full h-full object-cover" alt="Portakal" />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-orange-500 transition-colors">Portakal</span>
-                  </Link>
-                  {/* Seasonal Item 5 */}
-                  <Link href="#" className="group text-center">
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-red-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-red-500 transition-all">
-                          <img src="https://placehold.co/150x150/EF9A9A/ffffff?text=Nar" className="w-full h-full object-cover" alt="Nar" />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-red-500 transition-colors">Nar</span>
-                  </Link>
-                  {/* Seasonal Item 6 */}
-                  <Link href="#" className="group text-center">
-                      <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-yellow-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-yellow-500 transition-all">
-                          <img src="https://placehold.co/150x150/FFF59D/ffffff?text=Karnabahar" className="w-full h-full object-cover" alt="Karnabahar" />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700 group-hover:text-yellow-500 transition-colors">Karnabahar</span>
-                  </Link>
+                  {seasonalIngredients.length > 0 ? (
+                    seasonalIngredients.map((ingredient) => (
+                      <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="group text-center">
+                          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-orange-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all">
+                              <img src={ingredient.image || `https://placehold.co/150x150/FF8A65/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover" alt={ingredient.name} />
+                          </div>
+                          <span className="text-sm font-bold text-slate-700 group-hover:text-orange-500 transition-colors">{ingredient.name}</span>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="col-span-3 md:col-span-6 text-center text-gray-500 py-4">
+                      <p className="text-sm">Bu ay için mevsimlik malzeme bulunamadı.</p>
+                    </div>
+                  )}
               </div>
           </div>
       </div>
@@ -147,133 +208,57 @@ export default function IngredientsGuidePage() {
                 <div className="col-span-full flex justify-center items-center h-64">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
                 </div>
-              ) : ingredients.length > 0 ? (
-                ingredients.map((ingredient) => (
-                  <Link key={ingredient.id} href={`/malzeme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
+              ) : displayedIngredients.length > 0 ? (
+                displayedIngredients.map((ingredient) => (
+                  <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
                       <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
-                          <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${ingredient.name}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={ingredient.name} />
+                          <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={ingredient.name} />
+                          
+                          {/* Başlangıç Yaşı Badge */}
                           <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                              <i className="fa-solid fa-baby text-green-500 mr-1"></i> {ingredient.start_age}
+                              <i className="fa-solid fa-baby text-green-500 mr-1"></i> 
+                              {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : `${ingredient.start_age} ay`}
                           </div>
+                          
+                          {/* Mevsim Badge (sağ üst) */}
+                          {ingredient.season && ingredient.season !== 'Tüm Yıl' && (
+                            <div className="absolute top-2 right-2 bg-yellow-100/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-yellow-700 shadow-sm">
+                              <i className="fa-solid fa-sun mr-1"></i> {ingredient.season}
+                            </div>
+                          )}
                       </div>
+                      
+                      {/* Kategori */}
+                      {ingredient.category && (
+                        <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1 block">
+                          {ingredient.category}
+                        </span>
+                      )}
+                      
                       <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">{ingredient.name}</h3>
                       <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ingredient.description}</p>
-                      <div className="mt-auto flex items-center gap-2">
-                          <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
-                            ingredient.allergy_risk === 'Düşük' ? 'bg-green-100 text-green-700 border-green-200' :
-                            ingredient.allergy_risk === 'Orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                            'bg-red-100 text-red-700 border-red-200'
-                          }`}>
-                            {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
-                            {ingredient.allergy_risk} Alerjen
-                          </span>
+                      
+                      {/* Alt badges */}
+                      <div className="mt-auto flex items-center gap-2 flex-wrap">
+                        {/* Alerji Risk Badge */}
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
+                          ingredient.allergy_risk === 'Düşük' ? 'bg-green-100 text-green-700 border-green-200' :
+                          ingredient.allergy_risk === 'Orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                          'bg-red-100 text-red-700 border-red-200'
+                        }`}>
+                          {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
+                          {ingredient.allergy_risk || 'Düşük'} Alerjen
+                        </span>
                       </div>
                   </Link>
                 ))
               ) : (
-                <>
-              {/* Card 1: Avokado (Ideal) */}
-              {/* Localde Link kullanın */}
-              <Link href="/malzeme-rehberi/avokado" className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
-                  <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
-                      <img src="https://placehold.co/400x300/AED581/ffffff?text=Avokado" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Avokado" />
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                          <i className="fa-solid fa-baby text-green-500 mr-1"></i> +6 Ay
-                      </div>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">Avokado</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">Sağlıklı yağlar açısından zengin, mükemmel ilk gıda.</p>
-                  <div className="mt-auto flex items-center gap-2">
-                      <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded border border-green-200">Düşük Alerjen</span>
-                  </div>
-              </Link>
-
-              {/* Card 2: Yumurta (Allergen Warning) */}
-              <Link href="#" className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
-                  <div className="w-full h-40 bg-yellow-50 rounded-2xl mb-4 overflow-hidden relative">
-                      <img src="https://placehold.co/400x300/FFF176/ffffff?text=Yumurta" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Yumurta" />
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                          <i className="fa-solid fa-baby text-orange-500 mr-1"></i> +6 Ay
-                      </div>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">Yumurta</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">Protein deposu ancak sarısı ve beyazı ayrı değerlendirilmeli.</p>
-                  <div className="mt-auto flex items-center gap-2">
-                      <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded border border-yellow-200 flex items-center">
-                          <i className="fa-solid fa-triangle-exclamation mr-1"></i> Yüksek Alerjen
-                      </span>
-                  </div>
-              </Link>
-
-              {/* Card 3: Bal (Danger - Forbidden) */}
-              <Link href="#" className="bg-white rounded-[2rem] p-5 border border-red-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
-                  <div className="w-full h-40 bg-orange-50 rounded-2xl mb-4 overflow-hidden relative grayscale group-hover:grayscale-0 transition-all">
-                      <img src="https://placehold.co/400x300/FFCC80/ffffff?text=Bal" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Bal" />
-                      
-                      {/* Updated Badge */}
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur text-slate-800 px-2 py-1 rounded-lg text-xs font-bold shadow-sm">
-                          <i className="fa-solid fa-calendar-xmark text-red-500 mr-1"></i> +12 Ay
-                      </div>
-                      <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center">
-                          <i className="fa-solid fa-ban mr-1"></i> YASAK
-                      </div>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">Bal</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">Botulizm riski nedeniyle 1 yaşından önce kesinlikle verilmez.</p>
-                  <div className="mt-auto flex items-center gap-2">
-                      <span className="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-1 rounded border border-red-200 flex items-center">
-                          <i className="fa-solid fa-skull-crossbones mr-1"></i> Hayati Risk
-                      </span>
-                  </div>
-              </Link>
-
-              {/* Card 4: Ceviz (Choking Hazard) */}
-              <Link href="#" className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
-                  <div className="w-full h-40 bg-gray-100 rounded-2xl mb-4 overflow-hidden relative">
-                      <img src="https://placehold.co/400x300/D7CCC8/ffffff?text=Ceviz" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Ceviz" />
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                          <i className="fa-solid fa-baby text-green-500 mr-1"></i> +6 Ay
-                      </div>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">Ceviz</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">Omega-3 kaynağı. Sadece ezilerek veya toz halinde verilmeli.</p>
-                  <div className="mt-auto flex items-center gap-2">
-                      <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded border border-purple-200 flex items-center">
-                          <i className="fa-solid fa-circle-exclamation mr-1"></i> Boğulma Riski
-                      </span>
-                  </div>
-              </Link>
-
-              {/* Card 5: Çilek */}
-              <Link href="#" className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
-                  <div className="w-full h-40 bg-red-50 rounded-2xl mb-4 overflow-hidden relative">
-                      <img src="https://placehold.co/400x300/EF9A9A/ffffff?text=Cilek" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Çilek" />
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                          <i className="fa-solid fa-baby text-orange-500 mr-1"></i> +8 Ay
-                      </div>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">Çilek</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">Yüksek C vitamini. Asitli yapısı nedeniyle pişik yapabilir.</p>
-                  <div className="mt-auto flex items-center gap-2">
-                      <span className="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-1 rounded border border-yellow-200">Orta Alerjen</span>
-                  </div>
-              </Link>
-
-              {/* Card 6: İlikli Kemik Suyu */}
-              <Link href="#" className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
-                  <div className="w-full h-40 bg-yellow-50 rounded-2xl mb-4 overflow-hidden relative">
-                      <img src="https://placehold.co/400x300/FFF9C4/ffffff?text=Kemik+Suyu" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Kemik Suyu" />
-                      <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                          <i className="fa-solid fa-baby text-green-500 mr-1"></i> +6 Ay
-                      </div>
-                  </div>
-                  <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">İlikli Kemik Suyu</h3>
-                  <p className="text-xs text-gray-500 mb-3 line-clamp-2">Bağışıklık ve kemik gelişimi için doğal kolajen deposu.</p>
-                  <div className="mt-auto flex items-center gap-2">
-                      <span className="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-1 rounded border border-green-200">Süper Besin</span>
-                  </div>
-              </Link>
-            </>
+                <div className="col-span-full text-center py-12">
+                  <i className="fa-solid fa-search text-4xl text-gray-300 mb-4"></i>
+                  <p className="text-gray-500">
+                    {searchQuery ? 'Arama sonucu bulunamadı.' : 'Bu kategoride malzeme bulunamadı.'}
+                  </p>
+                </div>
               )}
 
           </div>
