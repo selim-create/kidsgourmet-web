@@ -123,24 +123,12 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     
     try {
-      interface UpdateProfileData {
-        name: string;
-        email: string;
-        password?: string;
-        parent_role?: string;
-        gender?: string;
-        birth_date?: string;
-        avatar_id?: number;
-      }
-
-      const updateData: UpdateProfileData = {
+      const updateData: any = {
         name,
         email,
       };
 
-      if (password) {
-        updateData.password = password;
-      }
+      if (password) updateData.password = password;
       if (parentRole) updateData.parent_role = parentRole;
       if (gender) updateData.gender = gender;
       if (birthDate) updateData.birth_date = birthDate;

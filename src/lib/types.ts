@@ -477,6 +477,7 @@ export interface ExpertPublicProfile {
   expertise: string[];
   social_links?: SocialLinks;
   email?: string;
+  show_email?: boolean;
   stats: {
     total_recipes: number;
     total_blog_posts: number;
