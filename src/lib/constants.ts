@@ -95,4 +95,21 @@ export const API_ENDPOINTS = {
   PERCENTILE_SAVE: `${KG_API_NAMESPACE}/tools/percentile/save`,
   USER_PERCENTILE_RESULTS: `${KG_API_NAMESPACE}/user/percentile-results`,
   CHILD_PERCENTILE_RESULTS: (childId: string) => `${KG_API_NAMESPACE}/user/children/${childId}/percentile-results`,
+  
+  // Water Calculator
+  WATER_CALCULATOR: `${KG_API_NAMESPACE}/tools/water-need/calculate`,
+  
+  // Solid Food Readiness
+  SOLID_FOOD_CONFIG: `${KG_API_NAMESPACE}/tools/solid-food-readiness/config`,
+  SOLID_FOOD_SUBMIT: `${KG_API_NAMESPACE}/tools/solid-food-readiness/submit`,
+  
+  // Allergen Planner
+  ALLERGEN_LIST: `${KG_API_NAMESPACE}/tools/allergen-planner/allergens`,
+  ALLERGEN_PLAN: (allergenId: string) => `${KG_API_NAMESPACE}/tools/allergen-planner/${allergenId}`,
+  
+  // Food Trial Calendar
+  FOOD_TRIALS: `${KG_API_NAMESPACE}/user/food-trials`,
+  FOOD_TRIAL_ADD: `${KG_API_NAMESPACE}/user/food-trials/add`,
+  FOOD_TRIAL_SUMMARY: (childId: string, startDate: string, endDate: string) => 
+    `${KG_API_NAMESPACE}/user/food-trials/summary?child_id=${childId}&start_date=${startDate}&end_date=${endDate}`,
 } as const;
