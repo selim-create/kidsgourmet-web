@@ -159,6 +159,13 @@ export interface Ingredient {
   // 🆕 AI Meta
   ai_generated?: boolean;
   image_source?: string;
+  image_credit?: string;
+  
+  // 🆕 Yeni backend alanları (konsolidasyon sonrası)
+  allergen_info?: AllergenInfo;
+  allergens?: string[];  // Taxonomy'den gelen alerjen isimleri
+  nutrition_per_100g?: NutritionPer100g;
+  prep_methods_list?: string[];
 }
 
 // 🆕 Yaşa göre hazırlama
@@ -182,6 +189,27 @@ export interface IngredientNutrition {
   fat?: string;
   fiber?: string;
   vitamins?: string;
+}
+
+// 🆕 Besin değerleri (100g başına) - Backend konsolidasyonu
+export interface NutritionPer100g {
+  calories?: string;
+  protein?: string;
+  carbs?: string;
+  fat?: string;
+  fiber?: string;
+  sugar?: string;
+  vitamins?: string;
+  minerals?: string;
+}
+
+// 🆕 Alerjen bilgileri
+export interface AllergenInfo {
+  is_allergen: boolean;
+  allergen_type?: string;
+  cross_contamination_risk?: string;
+  allergy_symptoms?: string;
+  alternative_ingredients?: string;
 }
 
 export interface FAQ {

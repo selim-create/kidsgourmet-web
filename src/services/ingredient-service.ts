@@ -39,6 +39,13 @@ const transformWPIngredient = (wp: any): Ingredient => ({
   
   ai_generated: wp.meta?._kg_ai_generated || wp.acf?.ai_generated || false,
   image_source: wp.meta?._kg_image_source || wp.acf?.image_source || '',
+  
+  // 🆕 Backend konsolidasyonu sonrası yeni alanlar
+  allergen_info: wp.meta?._kg_allergen_info || wp.acf?.allergen_info || null,
+  allergens: wp.meta?._kg_allergens || wp.acf?.allergens || [],
+  nutrition_per_100g: wp.meta?._kg_nutrition_per_100g || wp.acf?.nutrition_per_100g || null,
+  prep_methods_list: wp.meta?._kg_prep_methods_list || wp.acf?.prep_methods_list || [],
+  image_credit: wp.meta?._kg_image_credit || wp.acf?.image_credit || '',
 });
 
 // Transform function for API response format - GÜNCELLENMİŞ
@@ -68,6 +75,13 @@ const transformIngredient = (apiIngredient: any): Ingredient => ({
   
   ai_generated: apiIngredient.ai_generated || false,
   image_source: apiIngredient.image_source || '',
+  
+  // 🆕 Backend konsolidasyonu sonrası yeni alanlar
+  allergen_info: apiIngredient.allergen_info || null,
+  allergens: apiIngredient.allergens || [],
+  nutrition_per_100g: apiIngredient.nutrition_per_100g || null,
+  prep_methods_list: apiIngredient.prep_methods_list || [],
+  image_credit: apiIngredient.image_credit || '',
 });
 
 export const ingredientService = {
@@ -175,6 +189,54 @@ export const ingredientService = {
         console.error('Fallback search also failed:', fallbackError);
         return [];
       }
+    }
+  },
+
+  /**
+   * Kategorileri getir
+   */
+  getCategories: async (): Promise<string[]> => {
+    try {
+      // Önce dedicated endpoint'i dene
+      const response = await fetchAPI<{terms: {name: string, slug: string}[]}>(`${API_ENDPOINTS.INGREDIENT_CATEGORIES}`);
+      if (response?.terms) {
+        return response.terms.map(t => t.name);
+      }
+    } catch (error) {
+      console.log('Categories endpoint failed, extracting from ingredients');
+    }
+    
+    // Fallback: Tüm ingredients'tan unique kategorileri çıkar
+    try {
+      const allIngredients = await ingredientService.getAll({ perPage: 200 });
+      const uniqueCategories = [...new Set(
+        allIngredients
+          .map(i => i.category)
+          .filter((c): c is string => !!c && c.trim() !== '')
+      )];
+      return uniqueCategories.sort();
+    } catch (error) {
+      console.error('Failed to get categories:', error);
+      return ['Meyveler', 'Sebzeler', 'Proteinler', 'Tahıllar', 'Süt Ürünleri']; // Hardcoded fallback
+    }
+  },
+
+  /**
+   * Mevsimlik malzemeler için filter
+   */
+  getBySeason: async (season: string): Promise<Ingredient[]> => {
+    try {
+      const response = await fetchAPI<any>(`${API_ENDPOINTS.INGREDIENTS_BY_SEASON(season)}&per_page=10`);
+      if (Array.isArray(response)) {
+        return response.map(transformIngredient);
+      } else if (response?.ingredients) {
+        return response.ingredients.map(transformIngredient);
+      }
+      return [];
+    } catch (error) {
+      // Fallback: tüm ingredients'tan filtrele
+      const all = await ingredientService.getAll({ perPage: 100 });
+      return all.filter(i => i.season?.includes(season)).slice(0, 10);
     }
   },
 };
