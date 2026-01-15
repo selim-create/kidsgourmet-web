@@ -8,6 +8,19 @@ import type {
   RegisterData
 } from '@/lib/types';
 
+/**
+ * Frontend answer array'ini backend'in beklediği formata dönüştür
+ * Frontend: [{ question_id: 'q1', option_id: 'q1_a', score: 100 }, ...]
+ * Backend:  { 'q1': 'q1_a', 'q2': 'q2_a', ... }
+ */
+const transformAnswersForBackend = (answers: BLWTestAnswer[]): Record<string, string> => {
+  const transformed: Record<string, string> = {};
+  answers.forEach(answer => {
+    transformed[answer.question_id] = answer.option_id;
+  });
+  return transformed;
+};
+
 export const toolService = {
   /**
    * Tüm araçları getir
@@ -37,9 +50,15 @@ export const toolService = {
     answers: BLWTestAnswer[],
     childId?: string
   ): Promise<BLWTestResult> => {
+    // Transform answers to backend format
+    const transformedAnswers = transformAnswersForBackend(answers);
+    
     return fetchAuthAPI<BLWTestResult>(API_ENDPOINTS.BLW_TEST_SUBMIT, {
       method: 'POST',
-      body: JSON.stringify({ answers, child_id: childId }),
+      body: JSON.stringify({ 
+        answers: transformedAnswers, 
+        child_id: childId 
+      }),
     });
   },
 
@@ -50,11 +69,21 @@ export const toolService = {
     answers: BLWTestAnswer[],
     registrationData: RegisterData & { child_name?: string; child_birth_date?: string }
   ): Promise<{ result: BLWTestResult; token: string }> => {
+    // Transform answers to backend format
+    const transformedAnswers = transformAnswersForBackend(answers);
+    
     return fetchAPI<{ result: BLWTestResult; token: string }>(
       `${API_ENDPOINTS.BLW_TEST_SUBMIT}?register=true`,
       {
         method: 'POST',
-        body: JSON.stringify({ answers, registration: registrationData }),
+        body: JSON.stringify({ 
+          answers: transformedAnswers, 
+          email: registrationData.email,
+          password: registrationData.password,
+          name: registrationData.name,
+          child_name: registrationData.child_name,
+          child_birth_date: registrationData.child_birth_date,
+        }),
       }
     );
   },

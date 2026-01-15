@@ -16,146 +16,146 @@ import type {
 
 type TestStage = 'intro' | 'test' | 'result';
 
-// Default questions (WHO standartlarında)
+// Default questions (Backend ile uyumlu ID'ler)
 const defaultQuestions: BLWTestQuestion[] = [
   {
-    id: 'q1',
+    id: 'q1_sitting',
     category: 'physical_readiness',
     question: 'Bebeğiniz desteksiz oturabiliyor mu?',
     description: 'Mama sandalyesinde veya kucağınızda, öne veya yana devrilmeden başını dik tutarak oturabiliyor olması gerekir.',
     icon: 'fa-solid fa-chair',
     weight: 20,
     options: [
-      { id: 'q1_a', text: 'Evet, rahatça oturabiliyor', value: 100 },
-      { id: 'q1_b', text: 'Kısa süreler oturabiliyor', value: 60 },
-      { id: 'q1_c', text: 'Destekle oturabiliyor', value: 30 },
-      { id: 'q1_d', text: 'Hayır, henüz oturamıyor', value: 0 }
+      { id: 'sitting_yes', text: 'Evet, rahatça oturabiliyor', value: 100 },
+      { id: 'sitting_short', text: 'Kısa süreler oturabiliyor', value: 60 },
+      { id: 'sitting_support', text: 'Destekle oturabiliyor', value: 30 },
+      { id: 'sitting_no', text: 'Hayır, henüz oturamıyor', value: 0 }
     ]
   },
   {
-    id: 'q2',
+    id: 'q2_head_control',
     category: 'physical_readiness',
     question: 'Bebeğinizin baş kontrolü tam mı?',
     description: 'Başını dik tutabiliyor ve her iki yana rahatça çevirebiliyor olmalı.',
     icon: 'fa-solid fa-head-side-mask',
     weight: 15,
     options: [
-      { id: 'q2_a', text: 'Evet, tam kontrol var', value: 100 },
-      { id: 'q2_b', text: 'Çoğunlukla kontrol edebiliyor', value: 70 },
-      { id: 'q2_c', text: 'Bazen sallanıyor', value: 40 },
-      { id: 'q2_d', text: 'Hayır, başını tutamıyor', value: 0 }
+      { id: 'head_yes', text: 'Evet, tam kontrol var', value: 100 },
+      { id: 'head_mostly', text: 'Çoğunlukla kontrol edebiliyor', value: 70 },
+      { id: 'head_partial', text: 'Bazen sallanıyor', value: 40 },
+      { id: 'head_no', text: 'Hayır, başını tutamıyor', value: 0 }
     ]
   },
   {
-    id: 'q3',
+    id: 'q3_tongue_reflex',
     category: 'physical_readiness',
     question: 'Dil itme refleksi kayboldu mu?',
     description: 'Bebeğiniz kaşıkla verilen yiyecekleri dilinin ucuyla dışarı itmek yerine yutabiliyor mu?',
     icon: 'fa-solid fa-utensils',
     weight: 15,
     options: [
-      { id: 'q3_a', text: 'Evet, yutabiliyor', value: 100 },
-      { id: 'q3_b', text: 'Bazen itiyor bazen yutabiliyor', value: 60 },
-      { id: 'q3_c', text: 'Hala çoğunlukla itiyor', value: 20 },
-      { id: 'q3_d', text: 'Henüz deneme fırsatı olmadı', value: 50 }
+      { id: 'reflex_gone', text: 'Evet, yutabiliyor', value: 100 },
+      { id: 'reflex_sometimes', text: 'Bazen itiyor bazen yutabiliyor', value: 60 },
+      { id: 'reflex_present', text: 'Hala çoğunlukla itiyor', value: 20 },
+      { id: 'reflex_uncertain', text: 'Henüz deneme fırsatı olmadı', value: 50 }
     ]
   },
   {
-    id: 'q4',
+    id: 'q4_interest',
     category: 'feeding_history',
     question: 'Bebeğiniz yiyeceklere ilgi gösteriyor mu?',
     description: 'Sizin yediğinizi izliyor, ağzını açıyor veya yiyeceklere uzanmaya çalışıyor mu?',
     icon: 'fa-solid fa-face-smile',
     weight: 10,
     options: [
-      { id: 'q4_a', text: 'Evet, çok ilgili', value: 100 },
-      { id: 'q4_b', text: 'Bazen ilgi gösteriyor', value: 70 },
-      { id: 'q4_c', text: 'Nadiren ilgileniyor', value: 40 },
-      { id: 'q4_d', text: 'Hayır, ilgilenmiyor', value: 10 }
+      { id: 'interest_high', text: 'Evet, çok ilgili', value: 100 },
+      { id: 'interest_some', text: 'Bazen ilgi gösteriyor', value: 70 },
+      { id: 'interest_rare', text: 'Nadiren ilgileniyor', value: 40 },
+      { id: 'interest_no', text: 'Hayır, ilgilenmiyor', value: 10 }
     ]
   },
   {
-    id: 'q5',
+    id: 'q5_grasp',
     category: 'physical_readiness',
     question: 'Bebeğiniz nesneleri kavrayıp ağzına götürebiliyor mu?',
     description: 'El-göz koordinasyonu gelişmiş ve oyuncakları ağzına götürebiliyor olmalı.',
     icon: 'fa-solid fa-hand',
     weight: 10,
     options: [
-      { id: 'q5_a', text: 'Evet, rahatça yapabiliyor', value: 100 },
-      { id: 'q5_b', text: 'Bazen yapabiliyor', value: 70 },
-      { id: 'q5_c', text: 'Kavrayabiliyor ama ağzına götüremİyor', value: 40 },
-      { id: 'q5_d', text: 'Henüz yapamıyor', value: 0 }
+      { id: 'grasp_yes', text: 'Evet, rahatça yapabiliyor', value: 100 },
+      { id: 'grasp_sometimes', text: 'Bazen yapabiliyor', value: 70 },
+      { id: 'grasp_trying', text: 'Kavrayabiliyor ama ağzına götüremİyor', value: 40 },
+      { id: 'grasp_no', text: 'Henüz yapamıyor', value: 0 }
     ]
   },
   {
-    id: 'q6',
+    id: 'q6_age',
     category: 'physical_readiness',
     question: 'Bebeğinizin yaşı kaç ay?',
     description: 'WHO, ek gıdaya 6. aydan önce başlanmamasını önerir.',
     icon: 'fa-solid fa-calendar',
     weight: 10,
     options: [
-      { id: 'q6_a', text: '6+ ay', value: 100 },
-      { id: 'q6_b', text: '5-6 ay arası', value: 50 },
-      { id: 'q6_c', text: '4-5 ay arası', value: 10, is_red_flag: true, red_flag_message: '6 aydan önce ek gıdaya başlanması önerilmez. Doktorunuza danışın.' },
-      { id: 'q6_d', text: '4 aydan küçük', value: 0, is_red_flag: true, red_flag_message: '4 aydan küçük bebekler için ek gıda çok erkendir. Mutlaka doktorunuza danışın.' }
+      { id: 'age_6plus', text: '6+ ay', value: 100 },
+      { id: 'age_5', text: '5-6 ay arası', value: 50 },
+      { id: 'age_4_5', text: '4-5 ay arası', value: 10, is_red_flag: true, red_flag_message: '6 aydan önce ek gıdaya başlanması önerilmez. Doktorunuza danışın.' },
+      { id: 'age_below5', text: '4 aydan küçük', value: 0, is_red_flag: true, red_flag_message: '4 aydan küçük bebekler için ek gıda çok erkendir. Mutlaka doktorunuza danışın.' }
     ]
   },
   {
-    id: 'q7',
+    id: 'q7_highchair',
     category: 'environment',
     question: 'Uygun mama sandalyeniz var mı?',
     description: 'Bebeğinizin dik oturabileceği, ayaklarının yere basabileceği güvenli bir sandalye.',
     icon: 'fa-solid fa-chair',
     weight: 5,
     options: [
-      { id: 'q7_a', text: 'Evet, uygun sandalye var', value: 100 },
-      { id: 'q7_b', text: 'Yakında alacağız', value: 80 },
-      { id: 'q7_c', text: 'Kucakta beslemeyi planlıyoruz', value: 30 },
-      { id: 'q7_d', text: 'Henüz düşünmedik', value: 50 }
+      { id: 'chair_yes', text: 'Evet, uygun sandalye var', value: 100 },
+      { id: 'chair_planning', text: 'Yakında alacağız', value: 80 },
+      { id: 'chair_lap', text: 'Kucakta beslemeyi planlıyoruz', value: 30 },
+      { id: 'chair_no', text: 'Henüz düşünmedik', value: 50 }
     ]
   },
   {
-    id: 'q8',
+    id: 'q8_medical',
     category: 'safety',
     question: 'Bebeğinizde boğulma riskini artıran tıbbi bir durum var mı?',
     description: 'Yutma güçlüğü, nörolojik sorunlar, prematürelik vb.',
     icon: 'fa-solid fa-notes-medical',
     weight: 10,
     options: [
-      { id: 'q8_a', text: 'Hayır, bilinen bir sorun yok', value: 100 },
-      { id: 'q8_b', text: 'Küçük bir sorun var, doktora danıştık', value: 70 },
-      { id: 'q8_c', text: 'Evet var, doktora henüz danışmadık', value: 0, is_red_flag: true, red_flag_message: 'Tıbbi bir durum varsa mutlaka doktorunuza danışın.' },
-      { id: 'q8_d', text: 'Emin değilim', value: 50 }
+      { id: 'medical_no', text: 'Hayır, bilinen bir sorun yok', value: 100 },
+      { id: 'medical_mild', text: 'Küçük bir sorun var, doktora danıştık', value: 70 },
+      { id: 'medical_yes', text: 'Evet var, doktora henüz danışmadık', value: 0, is_red_flag: true, red_flag_message: 'Tıbbi bir durum varsa mutlaka doktorunuza danışın.' },
+      { id: 'medical_uncertain', text: 'Emin değilim', value: 50 }
     ]
   },
   {
-    id: 'q9',
+    id: 'q9_first_aid',
     category: 'safety',
     question: 'Bebek ilk yardımı ve Heimlich manevrası hakkında bilginiz var mı?',
     description: 'Boğulma durumunda ne yapmanız gerektiğini biliyor musunuz?',
     icon: 'fa-solid fa-kit-medical',
     weight: 5,
     options: [
-      { id: 'q9_a', text: 'Evet, eğitim aldım/videolarını izledim', value: 100 },
-      { id: 'q9_b', text: 'Kısmen biliyorum', value: 60 },
-      { id: 'q9_c', text: 'Hayır, öğrenmem gerek', value: 30 },
-      { id: 'q9_d', text: 'Hiç düşünmedim', value: 10 }
+      { id: 'firstaid_yes', text: 'Evet, eğitim aldım/videolarını izledim', value: 100 },
+      { id: 'firstaid_basic', text: 'Kısmen biliyorum', value: 60 },
+      { id: 'firstaid_learn', text: 'Hayır, öğrenmem gerek', value: 30 },
+      { id: 'firstaid_no', text: 'Hiç düşünmedim', value: 10 }
     ]
   },
   {
-    id: 'q10',
+    id: 'q10_supervision',
     category: 'environment',
     question: 'Bebek yemek yerken yanında olabilir misiniz?',
     description: 'BLW\'de sürekli gözetim şarttır. Bebeği asla yalnız bırakmayın.',
     icon: 'fa-solid fa-eye',
     weight: 0,
     options: [
-      { id: 'q10_a', text: 'Evet, her öğünde yanında olabilirim', value: 100 },
-      { id: 'q10_b', text: 'Çoğu öğünde olabilirim', value: 100 },
-      { id: 'q10_c', text: 'Bazen başkası bakacak', value: 100 },
-      { id: 'q10_d', text: 'Bilmiyorum', value: 100 }
+      { id: 'supervision_yes', text: 'Evet, her öğünde yanında olabilirim', value: 100 },
+      { id: 'supervision_mostly', text: 'Çoğu öğünde olabilirim', value: 100 },
+      { id: 'supervision_sometimes', text: 'Bazen başkası bakacak', value: 100 },
+      { id: 'supervision_uncertain', text: 'Bilmiyorum', value: 100 }
     ]
   }
 ];
