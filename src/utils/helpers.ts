@@ -142,6 +142,7 @@ export function formatRelativeTime(dateString: string): string {
  * Users with these roles or is_expert flag are considered experts
  */
 const EXPERT_ROLES = ['administrator', 'editor', 'author', 'kg_expert'] as const;
+type ExpertRole = typeof EXPERT_ROLES[number];
 
 /**
  * Check if a user has expert role
@@ -150,7 +151,7 @@ const EXPERT_ROLES = ['administrator', 'editor', 'author', 'kg_expert'] as const
  */
 export function isUserExpert(user: { is_expert?: boolean; role?: string } | null | undefined): boolean {
   if (!user) return false;
-  return user.is_expert === true || EXPERT_ROLES.includes(user.role as any);
+  return user.is_expert === true || (EXPERT_ROLES as readonly string[]).includes(user.role || '');
 }
 
 /**
@@ -177,8 +178,6 @@ export function getPublicProfileUrl(user: { is_expert?: boolean; role?: string; 
     return '/profil';
   }
   
-  // Encode username for URL safety (though validation should catch most issues)
-  const safeUsername = encodeURIComponent(user.username);
-  
-  return isUserExpert(user) ? `/uzman/${safeUsername}` : `/profil/${safeUsername}`;
+  // Username is already validated to be safe, use directly
+  return isUserExpert(user) ? `/uzman/${user.username}` : `/profil/${user.username}`;
 }
