@@ -84,7 +84,7 @@ export default function Home() {
         // Handle new getAll response format
         const latestRecipesArray = Array.isArray(latest) ? latest : (latest?.recipes || []);
         setLatestRecipes(latestRecipesArray);
-        setBlogPosts(posts || []);
+        setBlogPosts(posts?.posts || []);
       } catch (error) {
         console.error("Ana sayfa verileri yüklenirken hata:", error);
         setFeaturedContent([]);

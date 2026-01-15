@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { use } from 'react'; // Next.js 15+ için gerekli
 import { blogService, BlogPost } from '@/services/blog-service';
-import SponsoredPostCard from '@/components/features/SponsoredPostCard';
+import BlogCard from '@/components/features/BlogCard';
 
 export default function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -41,7 +41,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
 
         // 2. Bulunan kategori ID'sine göre yazıları çekelim
         const categoryPosts = await blogService.getAll(1, 10, currentCategory.id);
-        setPosts(categoryPosts);
+        setPosts(categoryPosts.posts);
 
       } catch (err) {
         console.error("Kategori verileri çekilemedi:", err);
@@ -166,7 +166,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
             {/* FEATURED IN CATEGORY (First Post) */}
             {featuredPost && (
                 <div className="mb-12">
-                    <SponsoredPostCard 
+                    <BlogCard 
                         post={featuredPost} 
                         variant="hero"
                     />
@@ -181,7 +181,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                     {otherPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {otherPosts.map((post) => (
-                                <SponsoredPostCard 
+                                <BlogCard 
                                     key={post.id}
                                     post={post}
                                 />
