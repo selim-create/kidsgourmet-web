@@ -152,7 +152,7 @@ export const ingredientService = {
    */
   search: async (query: string): Promise<Ingredient[]> => {
     try {
-      const response = await fetchAPI<any>(`${API_ENDPOINTS.INGREDIENTS_SEARCH}?q=${encodeURIComponent(query)}`);
+      const response = await fetchAPI<Ingredient[] | { ingredients: Ingredient[] }>(`${API_ENDPOINTS.INGREDIENTS_SEARCH}?q=${encodeURIComponent(query)}`);
       
       // Response format kontrolü - backend array veya {ingredients: [...]} dönebilir
       if (Array.isArray(response)) {

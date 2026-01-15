@@ -30,37 +30,6 @@ export default function BesinTakvimiPage() {
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  useEffect(() => {
-    if (authLoading) return; // Wait for auth check to complete
-    
-    if (!isAuthenticated) {
-      router.push('/giris?redirect=/araclar/besin-takvimi');
-      return;
-    }
-
-    if (activeChild) {
-      loadTrials();
-    }
-  }, [isAuthenticated, authLoading, activeChild, currentWeekStart, router, loadTrials]);
-
-  // Ingredient search effect
-  useEffect(() => {
-    const searchIngredients = async () => {
-      if (ingredientSearch.length < 2) {
-        setIngredientSuggestions([]);
-        return;
-      }
-      try {
-        const results = await ingredientService.search(ingredientSearch);
-        setIngredientSuggestions(results.slice(0, 5));
-      } catch (error) {
-        console.error('Search error:', error);
-      }
-    };
-    const debounce = setTimeout(searchIngredients, 300);
-    return () => clearTimeout(debounce);
-  }, [ingredientSearch]);
-
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
     const day = d.getDay();
@@ -99,6 +68,37 @@ export default function BesinTakvimiPage() {
       setIsLoading(false);
     }
   }, [activeChild, currentWeekStart]);
+
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth check to complete
+    
+    if (!isAuthenticated) {
+      router.push('/giris?redirect=/araclar/besin-takvimi');
+      return;
+    }
+
+    if (activeChild) {
+      loadTrials();
+    }
+  }, [isAuthenticated, authLoading, activeChild, currentWeekStart, router, loadTrials]);
+
+  // Ingredient search effect
+  useEffect(() => {
+    const searchIngredients = async () => {
+      if (ingredientSearch.length < 2) {
+        setIngredientSuggestions([]);
+        return;
+      }
+      try {
+        const results = await ingredientService.search(ingredientSearch);
+        setIngredientSuggestions(results.slice(0, 5));
+      } catch (error) {
+        console.error('Search error:', error);
+      }
+    };
+    const debounce = setTimeout(searchIngredients, 300);
+    return () => clearTimeout(debounce);
+  }, [ingredientSearch]);
 
   const handleAddTrial = async (e: React.FormEvent) => {
     e.preventDefault();
