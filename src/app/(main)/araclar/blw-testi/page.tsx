@@ -84,7 +84,7 @@ const defaultQuestions: BLWTestQuestion[] = [
     options: [
       { id: 'grasp_yes', text: 'Evet, rahatça yapabiliyor', value: 100 },
       { id: 'grasp_sometimes', text: 'Bazen yapabiliyor', value: 70 },
-      { id: 'grasp_trying', text: 'Kavrayabiliyor ama ağzına götüremİyor', value: 40 },
+      { id: 'grasp_trying', text: 'Kavrayabiliyor ama ağzına götüremiyor', value: 40 },
       { id: 'grasp_no', text: 'Henüz yapamıyor', value: 0 }
     ]
   },
