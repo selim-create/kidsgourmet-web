@@ -284,7 +284,7 @@ export default function AirQualityPage() {
             </div>
 
             {/* Risk Factors */}
-            {result.risk_factors.length > 0 && (
+            {result.risk_factors?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-exclamation-triangle text-amber-500"></i>
@@ -302,7 +302,7 @@ export default function AirQualityPage() {
             )}
 
             {/* Recommendations */}
-            {result.recommendations.length > 0 && (
+            {result.recommendations?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-lightbulb text-yellow-500"></i>
@@ -320,7 +320,7 @@ export default function AirQualityPage() {
             )}
 
             {/* Seasonal Alerts */}
-            {result.seasonal_alerts.length > 0 && (
+            {result.seasonal_alerts?.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                 <h3 className="font-bold text-lg text-amber-900 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-calendar-day"></i>

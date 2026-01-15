@@ -480,7 +480,7 @@ export default function DiaperCalculatorPage() {
             </div>
 
             {/* Tips */}
-            {diaperResult.tips.length > 0 && (
+            {diaperResult.tips?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-lightbulb text-yellow-500"></i>
@@ -544,7 +544,7 @@ export default function DiaperCalculatorPage() {
             </div>
 
             {/* Risk Factors */}
-            {rashResult.risk_factors.length > 0 && (
+            {rashResult.risk_factors?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-exclamation-triangle text-amber-500"></i>
@@ -562,7 +562,7 @@ export default function DiaperCalculatorPage() {
             )}
 
             {/* Prevention Tips */}
-            {rashResult.prevention_tips.length > 0 && (
+            {rashResult.prevention_tips?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-shield-heart text-green-500"></i>

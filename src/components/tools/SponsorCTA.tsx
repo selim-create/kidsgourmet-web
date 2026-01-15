@@ -4,11 +4,11 @@ import React from 'react';
 import type { ToolSponsorData } from '@/lib/types';
 
 interface SponsorCTAProps {
-  sponsor: ToolSponsorData;
+  sponsor?: ToolSponsorData | null;
 }
 
 export default function SponsorCTA({ sponsor }: SponsorCTAProps) {
-  if (!sponsor.is_sponsored) return null;
+  if (!sponsor || sponsor.is_sponsored !== true) return null;
 
   const handleClick = () => {
     // Track GAM click

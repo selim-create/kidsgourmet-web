@@ -253,7 +253,7 @@ export default function HygieneCalculatorPage() {
             </div>
 
             {/* Recommendations */}
-            {result.recommendations.length > 0 && (
+            {result.recommendations?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-lightbulb text-yellow-500"></i>
@@ -271,7 +271,7 @@ export default function HygieneCalculatorPage() {
             )}
 
             {/* Carry Bag Essentials */}
-            {result.carry_bag_essentials.length > 0 && (
+            {result.carry_bag_essentials?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-bag-shopping text-teal-500"></i>

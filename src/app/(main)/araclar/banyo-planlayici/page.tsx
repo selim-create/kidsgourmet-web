@@ -302,7 +302,7 @@ export default function BathPlannerPage() {
             </div>
 
             {/* Tips */}
-            {result.tips.length > 0 && (
+            {result.tips?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-lightbulb text-yellow-500"></i>
@@ -320,7 +320,7 @@ export default function BathPlannerPage() {
             )}
 
             {/* Warnings */}
-            {result.warnings.length > 0 && (
+            {result.warnings?.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                 <h3 className="font-bold text-lg text-amber-900 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-triangle-exclamation"></i>
@@ -338,7 +338,7 @@ export default function BathPlannerPage() {
             )}
 
             {/* Product Recommendations */}
-            {result.product_recommendations.length > 0 && (
+            {result.product_recommendations?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-shopping-bag text-blue-500"></i>

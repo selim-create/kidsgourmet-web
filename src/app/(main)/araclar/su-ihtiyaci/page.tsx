@@ -277,7 +277,7 @@ export default function WaterCalculatorPage() {
           </div>
 
           {/* Recommendations */}
-          {result.recommendations.length > 0 && (
+          {result.recommendations?.length > 0 && (
             <div className="bg-white rounded-2xl p-6 border border-gray-100 mb-8">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <i className="fa-solid fa-lightbulb text-cyan-500 text-xl"></i>

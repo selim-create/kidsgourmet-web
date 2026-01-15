@@ -4,20 +4,20 @@ import React, { useEffect } from 'react';
 import type { ToolSponsorData } from '@/lib/types';
 
 interface SponsorBadgeProps {
-  sponsor: ToolSponsorData;
+  sponsor?: ToolSponsorData | null;
   variant?: 'header' | 'card';
 }
 
 export default function SponsorBadge({ sponsor, variant = 'header' }: SponsorBadgeProps) {
   useEffect(() => {
     // Track GAM impression
-    if (sponsor.gam_impression_url) {
+    if (sponsor?.gam_impression_url) {
       const img = new Image();
       img.src = sponsor.gam_impression_url;
     }
-  }, [sponsor.gam_impression_url]);
+  }, [sponsor?.gam_impression_url]);
 
-  if (!sponsor.is_sponsored) return null;
+  if (!sponsor || sponsor.is_sponsored !== true) return null;
 
   if (variant === 'card') {
     return (
