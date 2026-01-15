@@ -132,7 +132,7 @@ export default function WaterCalculatorPage() {
               <div>
                 <h4 className="font-bold text-blue-900 mb-2">WHO Önerileri</h4>
                 <p className="text-blue-800 text-sm mb-2">
-                  Dünya Sağlık Örgütü&apos;ne göre:
+                  Dünya Sağlık Örgütü'ne göre:
                 </p>
                 <ul className="text-blue-800 text-sm space-y-1 list-disc list-inside">
                   <li>6 aydan küçük bebekler için ek su önerilmez</li>

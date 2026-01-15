@@ -156,7 +156,7 @@ export default function EkGidaRehberiPage() {
           </div>
           <h1 className="font-display font-bold text-3xl text-slate-800 mb-2">Ek Gıda Rehberi</h1>
           <p className="text-gray-500 max-w-2xl mx-auto">
-            &quot;Bu besin bebeğime uygun mu?&quot; sorusuna hızlı yanıt. Malzemeleri arayın, yaşa göre filtreleyin.
+            "Bu besin bebeğime uygun mu?" sorusuna hızlı yanıt. Malzemeleri arayın, yaşa göre filtreleyin.
           </p>
         </div>
 

@@ -185,6 +185,17 @@ export const toolService = {
 
   /**
    * Su ihtiyacını hesapla (frontend'de)
+   * 
+   * WHO (Dünya Sağlık Örgütü) önerilerine göre bebeğin günlük sıvı ihtiyacını hesaplar.
+   * 
+   * Formüller:
+   * - 6 aydan küçük: Su önerilmez (anne sütü/formula yeterlidir)
+   * - 6-12 ay: 30ml x kilo (kg) - Ek gıdaya yeni başlayan bebekler
+   * - 12+ ay: 40ml x kilo (kg) - Aktif toddler'lar için artırılmış ihtiyaç
+   * 
+   * @param weightKg - Bebeğin kilosu (kg cinsinden)
+   * @param ageMonths - Bebeğin yaşı (ay cinsinden)
+   * @returns WaterNeedResult - Hesaplanan günlük su ihtiyacı ve öneriler
    */
   calculateWaterNeed: async (weightKg: number, ageMonths: number): Promise<WaterNeedResult> => {
     // Basit hesaplama frontend'de yapılabilir
