@@ -1,18 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { toolService } from '@/services/tool-service';
 import { setToken } from '@/lib/api';
 import type { 
-  BLWTestConfig, 
   BLWTestQuestion, 
   BLWTestAnswer,
   BLWTestResult,
   BLWRedFlag,
-  BLWResultBucket,
-  Child
+  BLWResultBucket
 } from '@/lib/types';
 
 type TestStage = 'intro' | 'test' | 'result';
@@ -230,7 +229,7 @@ const defaultResultBuckets: BLWResultBucket[] = [
 
 export default function BLWTestPage() {
   const router = useRouter();
-  const { user, isAuthenticated, children, refreshUser } = useUser();
+  const { isAuthenticated, children, refreshUser } = useUser();
   
   const [stage, setStage] = useState<TestStage>('intro');
   const [questions, setQuestions] = useState<BLWTestQuestion[]>(defaultQuestions);
@@ -713,15 +712,15 @@ export default function BLWTestPage() {
                 İlgili Rehberler
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <a href="/tarifler?age=6-9-ay" className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-blue-700 transition-colors">
+                <Link href="/tarifler?age=6-9-ay" className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-blue-700 transition-colors">
                   <i className="fa-solid fa-utensils mr-1"></i> BLW Tarifleri
-                </a>
-                <a href="/malzeme-rehberi" className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-green-700 transition-colors">
+                </Link>
+                <Link href="/malzeme-rehberi" className="bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-green-700 transition-colors">
                   <i className="fa-solid fa-carrot mr-1"></i> Malzeme Rehberi
-                </a>
-                <a href="/blog" className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-purple-700 transition-colors">
+                </Link>
+                <Link href="/blog" className="bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl px-4 py-3 text-center text-sm font-bold text-purple-700 transition-colors">
                   <i className="fa-solid fa-book mr-1"></i> BLW Rehberi
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -729,7 +728,7 @@ export default function BLWTestPage() {
             <div className="bg-gray-100 rounded-2xl p-4 text-center">
               <p className="text-xs text-gray-500">
                 <i className="fa-solid fa-hospital mr-1"></i>
-                Acil durumlarda 112'yi arayın. Bebeğinizin sağlığıyla ilgili tüm konularda doktorunuza danışın.
+                Acil durumlarda 112&apos;yi arayın. Bebeğinizin sağlığıyla ilgili tüm konularda doktorunuza danışın.
               </p>
             </div>
 
@@ -748,7 +747,7 @@ export default function BLWTestPage() {
                   className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl font-bold transition-all"
                 >
                   <i className="fa-solid fa-gauge mr-2"></i>
-                  Dashboard'a Git
+                  Dashboard&apos;a Git
                 </button>
               )}
             </div>
