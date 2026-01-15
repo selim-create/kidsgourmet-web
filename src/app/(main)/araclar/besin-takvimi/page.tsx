@@ -9,7 +9,7 @@ import type { FoodTrial, FoodTrialInput } from '@/lib/types';
 
 export default function BesinTakvimiPage() {
   const router = useRouter();
-  const { isAuthenticated, children, activeChild } = useUser();
+  const { isAuthenticated, isLoading: authLoading, children, activeChild } = useUser();
   const [trials, setTrials] = useState<FoodTrial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -24,6 +24,8 @@ export default function BesinTakvimiPage() {
   const [newTrialRating, setNewTrialRating] = useState<number>(0);
 
   useEffect(() => {
+    if (authLoading) return; // Wait for auth check to complete
+    
     if (!isAuthenticated) {
       router.push('/giris?redirect=/araclar/besin-takvimi');
       return;
@@ -32,7 +34,7 @@ export default function BesinTakvimiPage() {
     if (activeChild) {
       loadTrials();
     }
-  }, [isAuthenticated, activeChild, currentWeekStart]);
+  }, [isAuthenticated, authLoading, activeChild, currentWeekStart]);
 
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
@@ -146,8 +148,16 @@ export default function BesinTakvimiPage() {
     reactions: trials.filter(t => t.reaction && t.reaction !== 'none').length,
   };
 
-  if (!isAuthenticated) {
-    return null; // Will redirect in useEffect
+  // Show loading state while checking auth
+  if (authLoading || (!isAuthenticated && !authLoading)) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 text-center">
+          <i className="fa-solid fa-spinner fa-spin text-3xl text-gray-400 mb-4"></i>
+          <p className="text-gray-500">Yükleniyor...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!activeChild) {
