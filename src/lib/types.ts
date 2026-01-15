@@ -166,6 +166,7 @@ export interface Ingredient {
   allergens?: string[];  // Taxonomy'den gelen alerjen isimleri
   nutrition_per_100g?: NutritionPer100g;
   prep_methods_list?: string[];
+  seo?: SEOData;  // 🆕 RankMath SEO data
 }
 
 // 🆕 Yaşa göre hazırlama

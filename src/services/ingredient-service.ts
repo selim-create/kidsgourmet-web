@@ -57,6 +57,7 @@ const transformWPIngredient = (wp: any): Ingredient => ({
   nutrition_per_100g: wp.meta?._kg_nutrition_per_100g || wp.acf?.nutrition_per_100g || null,
   prep_methods_list: wp.meta?._kg_prep_methods_list || wp.acf?.prep_methods_list || [],
   image_credit: wp.meta?._kg_image_credit || wp.acf?.image_credit || '',
+  seo: wp.meta?._kg_seo || wp.acf?.seo || undefined,
 });
 
 // Transform function for API response format - GÜNCELLENMİŞ
@@ -93,6 +94,7 @@ const transformIngredient = (apiIngredient: any): Ingredient => ({
   nutrition_per_100g: apiIngredient.nutrition_per_100g || null,
   prep_methods_list: apiIngredient.prep_methods_list || [],
   image_credit: apiIngredient.image_credit || '',
+  seo: apiIngredient.seo || undefined,
 });
 
 export const ingredientService = {

@@ -2,16 +2,21 @@
 
 import React, { useState, useEffect, use } from 'react';
 import Link from "next/link";
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { ingredientService } from '@/services/ingredient-service';
 import { Ingredient, PrepByAge, IngredientPairing } from '@/lib/types';
 import { sanitizeHTML, decodeHTMLEntities } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
+import { useUser } from '@/hooks/use-user';
+import { toast } from 'sonner';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   const [ingredient, setIngredient] = useState<Ingredient | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const { isAuthenticated } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchIngredient() {
@@ -45,6 +50,55 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
     return notFound();
   }
 
+  // Format start age helper
+  const formatStartAge = (age: string) => {
+    if (!age) return '';
+    // Eğer sadece sayı ise "Ay" ekle
+    if (/^\d+$/.test(age.trim())) {
+      return `${age} Ay`;
+    }
+    // Eğer "+" ile başlıyorsa ve sayı varsa
+    if (/^\+?\d+$/.test(age.trim())) {
+      return `${age.replace('+', '')}+ Ay`;
+    }
+    return age;
+  };
+
+  // Favorilere kaydetme
+  const handleSaveToFavorites = () => {
+    if (!isAuthenticated) {
+      toast.error('Bu özelliği kullanmak için giriş yapmalısınız', {
+        action: {
+          label: 'Giriş Yap',
+          onClick: () => router.push('/giris?redirect=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : ''))
+        }
+      });
+      return;
+    }
+    setIsFavorite(!isFavorite);
+    toast.success(isFavorite ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi!');
+  };
+
+  // Paylaşım fonksiyonları
+  const shareWhatsApp = () => {
+    const text = `${ingredient.name} - Bebek beslenmesi için ${ingredient.category || 'malzeme'} rehberi`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n' + window.location.href)}`, '_blank');
+  };
+
+  const shareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+  };
+
+  const shareTwitter = () => {
+    const text = `${ingredient.name} - Bebek beslenmesi için ${ingredient.category || 'malzeme'} rehberi`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link kopyalandı!');
+  };
+
   // Besin değerleri listesi oluştur
   const nutritionItems = [];
   if (ingredient.nutrition?.vitamins) {
@@ -63,15 +117,15 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
     <div className="bg-gray-50 min-h-screen pb-12">
         {/* SEO Meta Tags */}
         <ClientHead
-          title={`${decodeHTMLEntities(ingredient.name)} - Malzeme Rehberi - KidsGourmet`}
-          description={decodeHTMLEntities(ingredient.description).substring(0, 160)}
-          keywords={[ingredient.name, ingredient.category || '', 'bebek beslenmesi', 'ek gıda']}
-          ogImage={ingredient.image}
-          url={window.location.href}
+          title={ingredient.seo?.title || `${decodeHTMLEntities(ingredient.name)} - Malzeme Rehberi - KidsGourmet`}
+          description={ingredient.seo?.description || decodeHTMLEntities(ingredient.description).replace(/<[^>]*>/g, '').substring(0, 160)}
+          keywords={ingredient.seo?.focus_keywords || [ingredient.name, ingredient.category || '', 'bebek beslenmesi', 'ek gıda']}
+          ogImage={ingredient.seo?.og_image || ingredient.image}
+          url={typeof window !== 'undefined' ? window.location.href : ''}
         />
 
-        {/* BREADCRUMB */}
-        <div className="bg-white border-b border-gray-100">
+        {/* BREADCRUMB - pt-20 eklendi (header yüksekliği için) */}
+        <div className="bg-white border-b border-gray-100 pt-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
@@ -111,16 +165,60 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                               </span>
                             )}
                             <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">{decodeHTMLEntities(ingredient.name)}</h1>
-                            <p className="text-slate-600 text-lg leading-relaxed mb-6">
-                                {decodeHTMLEntities(ingredient.description)}
-                            </p>
+                            <div 
+                              className="text-slate-600 text-lg leading-relaxed mb-6"
+                              dangerouslySetInnerHTML={{ __html: sanitizeHTML(ingredient.description) }}
+                            />
                             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                                {/* Tariflere Git */}
                                 <Link href="#recipes" className="bg-green-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-green-600 transition-colors inline-flex items-center justify-center">
                                     <i className="fa-solid fa-utensils mr-2"></i> Tarifler
                                 </Link>
-                                <button className="bg-white text-slate-600 font-bold py-3 px-6 rounded-xl hover:bg-gray-100 transition-colors flex items-center justify-center border border-transparent hover:border-gray-200">
-                                    <i className="fa-regular fa-share-from-square mr-2"></i> Paylaş
+                                
+                                {/* Favorilere Ekle */}
+                                <button 
+                                  onClick={handleSaveToFavorites}
+                                  className={`font-bold py-3 px-6 rounded-xl transition-colors flex items-center justify-center ${
+                                    isFavorite 
+                                      ? 'bg-red-500 text-white hover:bg-red-600' 
+                                      : 'bg-white text-slate-600 hover:bg-gray-100 border border-gray-200'
+                                  }`}
+                                >
+                                  <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart mr-2`}></i>
+                                  {isFavorite ? 'Kaydedildi' : 'Kaydet'}
                                 </button>
+                                
+                                {/* Paylaşım Butonları */}
+                                <div className="flex gap-2">
+                                  <button 
+                                    onClick={shareWhatsApp}
+                                    className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                                    title="WhatsApp'ta Paylaş"
+                                  >
+                                    <i className="fa-brands fa-whatsapp text-xl"></i>
+                                  </button>
+                                  <button 
+                                    onClick={shareFacebook}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                                    title="Facebook'ta Paylaş"
+                                  >
+                                    <i className="fa-brands fa-facebook-f text-xl"></i>
+                                  </button>
+                                  <button 
+                                    onClick={shareTwitter}
+                                    className="bg-sky-500 hover:bg-sky-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                                    title="Twitter'da Paylaş"
+                                  >
+                                    <i className="fa-brands fa-twitter text-xl"></i>
+                                  </button>
+                                  <button 
+                                    onClick={copyLink}
+                                    className="bg-gray-500 hover:bg-gray-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                                    title="Link Kopyala"
+                                  >
+                                    <i className="fa-solid fa-link text-lg"></i>
+                                  </button>
+                                </div>
                             </div>
                         </div>
 
@@ -189,31 +287,38 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                           </div>
                         )}
 
-                        {/* Section 3: Selection & Storage Tips - DİNAMİK */}
+                        {/* Section 3: Selection & Storage Tips - DİNAMİK - Koşullu Gösterim */}
                         {(ingredient.selection_tips || ingredient.storage_tips || ingredient.pro_tips) && (
-                          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex gap-6 items-start">
-                              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0 text-2xl text-slate-500">
-                                  <i className="fa-solid fa-cart-shopping"></i>
-                              </div>
-                              <div>
-                                  <h3 className="font-bold text-slate-800 text-lg mb-2">Nasıl Seçilir ve Saklanır?</h3>
-                                  
-                                  {ingredient.selection_tips && (
-                                    <p className="text-gray-600 text-sm mb-2">{ingredient.selection_tips}</p>
-                                  )}
-                                  
-                                  {ingredient.storage_tips && (
-                                    <p className="text-gray-600 text-sm mb-2">
-                                      <span className="font-bold text-slate-800">Saklama:</span> {ingredient.storage_tips}
-                                    </p>
-                                  )}
-                                  
-                                  {ingredient.pro_tips && (
-                                    <p className="text-gray-600 text-sm">
-                                      <span className="font-bold text-slate-800">💡 Püf Noktası:</span> {ingredient.pro_tips}
-                                    </p>
-                                  )}
-                              </div>
+                          <div>
+                              {ingredient.selection_tips && (
+                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-4">
+                                  <h3 className="font-bold text-slate-800 text-lg mb-2">
+                                    <i className="fa-solid fa-cart-shopping text-green-500 mr-2"></i>
+                                    Nasıl Seçilir?
+                                  </h3>
+                                  <p className="text-gray-600 text-sm">{ingredient.selection_tips}</p>
+                                </div>
+                              )}
+                              
+                              {ingredient.storage_tips && (
+                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-4">
+                                  <h3 className="font-bold text-slate-800 text-lg mb-2">
+                                    <i className="fa-solid fa-box-archive text-blue-500 mr-2"></i>
+                                    Saklama İpuçları
+                                  </h3>
+                                  <p className="text-gray-600 text-sm">{ingredient.storage_tips}</p>
+                                </div>
+                              )}
+                              
+                              {ingredient.pro_tips && (
+                                <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+                                  <h3 className="font-bold text-slate-800 text-lg mb-2">
+                                    <i className="fa-solid fa-lightbulb text-yellow-500 mr-2"></i>
+                                    Püf Noktaları
+                                  </h3>
+                                  <p className="text-gray-600 text-sm">{ingredient.pro_tips}</p>
+                                </div>
+                              )}
                           </div>
                         )}
 
@@ -239,8 +344,13 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                           </div>
                         )}
 
-                        {/* Section 5: Alerjen Detayları - YENİ */}
+                        {/* Section 5: Alerjen Detayları - Sadece veri varsa göster */}
                         {ingredient.allergen_info && (
+                          ingredient.allergen_info.is_allergen ||
+                          ingredient.allergen_info.cross_contamination_risk ||
+                          ingredient.allergen_info.allergy_symptoms ||
+                          ingredient.allergen_info.alternative_ingredients
+                        ) && (
                           <div className="bg-red-50 rounded-3xl p-6 border border-red-100">
                             <h3 className="font-bold text-red-700 mb-4 flex items-center">
                               <i className="fa-solid fa-triangle-exclamation mr-2"></i> Alerjen Bilgileri
@@ -276,21 +386,54 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
 
                     </div>
 
-                    {/* RELATED RECIPES GRID */}
+                    {/* RELATED RECIPES GRID - 6 Tarif */}
                     <div id="recipes" className="mt-8 pt-10 border-t border-gray-100">
-                        <h2 className="font-display font-bold text-3xl text-slate-800 mb-8 font-sans">{ingredient.name} ile Tarifler</h2>
+                        <h2 className="font-display font-bold text-3xl text-slate-800 mb-8 font-sans">
+                          {decodeHTMLEntities(ingredient.name)} ile Tarifler
+                        </h2>
                         
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                              {ingredient.related_recipes.map((recipe) => (
-                                <Link key={recipe.id} href={`/tarifler/${recipe.slug}`} className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all flex gap-4 p-4 items-center group">
-                                    <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 bg-gray-100">
-                                        <img src={recipe.image || 'https://placehold.co/200x200/FFF3E0/FF8A65?text=Tarif'} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt={recipe.title} />
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                              {ingredient.related_recipes.slice(0, 6).map((recipe) => (
+                                <Link 
+                                  key={recipe.id} 
+                                  href={`/tarifler/${recipe.slug}`} 
+                                  className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden"
+                                >
+                                    <div className="aspect-[4/3] overflow-hidden relative">
+                                        <img 
+                                          src={recipe.image || 'https://placehold.co/400x300/FFF3E0/FF8A65?text=Tarif'} 
+                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                          alt={recipe.title}
+                                        />
+                                        {/* Age Group Badge */}
+                                        <span className="absolute top-3 left-3 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg">
+                                          {decodeHTMLEntities(recipe.age_group)}
+                                        </span>
+                                        {/* Prep Time Badge */}
+                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg">
+                                          <i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <div className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1">{recipe.age_group}</div>
-                                        <h3 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors">{recipe.title}</h3>
-                                        <div className="text-xs text-gray-400 mt-2"><i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}</div>
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-slate-800 group-hover:text-green-500 transition-colors mb-2">
+                                          {decodeHTMLEntities(recipe.title)}
+                                        </h3>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            {/* Meal Type */}
+                                            {recipe.meal_type && (
+                                              <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded">
+                                                <i className="fa-solid fa-utensils mr-1"></i>
+                                                {decodeHTMLEntities(recipe.meal_type)}
+                                              </span>
+                                            )}
+                                            {/* Diet Types */}
+                                            {recipe.diet_types && recipe.diet_types.length > 0 && (
+                                              <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">
+                                                {decodeHTMLEntities(recipe.diet_types[0])}
+                                              </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </Link>
                               ))}
@@ -308,7 +451,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 && (
                           <div className="mt-8 text-center">
                             <Link href={`/tarifler?malzeme=${ingredient.slug}`} className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
-                              Tüm {ingredient.name} Tarifleri <i className="fa-solid fa-arrow-right"></i>
+                              Tüm {decodeHTMLEntities(ingredient.name)} Tarifleri <i className="fa-solid fa-arrow-right"></i>
                             </Link>
                           </div>
                         )}
@@ -345,7 +488,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                         <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center mr-3 text-blue-500"><i className="fa-regular fa-calendar"></i></div>
                                         <span className="font-medium text-sm">Başlangıç</span>
                                     </div>
-                                    <span className="font-bold text-slate-800">{ingredient.start_age}</span>
+                                    <span className="font-bold text-slate-800">{formatStartAge(ingredient.start_age)}</span>
                                 </div>
 
                                 <div className="flex items-center justify-between">
@@ -461,6 +604,38 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                           </div>
                         )}
 
+                        {/* SIDEBAR ARAÇLAR - Rastgele Faydalı Araçlar */}
+                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
+                          <h3 className="font-bold text-slate-800 mb-4 flex items-center">
+                            <i className="fa-solid fa-wand-magic-sparkles text-green-500 mr-2"></i> 
+                            Faydalı Araçlar
+                          </h3>
+                          <div className="space-y-2">
+                            {[
+                              { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: 'fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
+                              { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: 'fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
+                              { name: 'Su İhtiyacı Hesaplayıcı', slug: 'su-ihtiyaci', icon: 'fa-droplet', color: 'text-cyan-500', bg: 'bg-cyan-50' },
+                              { name: 'Alerjen Planlayıcı', slug: 'alerjen-planlayici', icon: 'fa-shield-halved', color: 'text-red-500', bg: 'bg-red-50' },
+                              { name: 'Ek Gıda Rehberi', slug: 'ek-gida-rehberi', icon: 'fa-book-open', color: 'text-green-500', bg: 'bg-green-50' },
+                              { name: 'Bu Gıda Verilir mi?', slug: 'bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'text-amber-500', bg: 'bg-amber-50' },
+                            ].sort(() => Math.random() - 0.5).slice(0, 4).map((tool) => (
+                              <Link
+                                key={tool.slug}
+                                href={`/akilli-asistan/${tool.slug}`}
+                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                              >
+                                <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center`}>
+                                  <i className={`fa-solid ${tool.icon} ${tool.color}`}></i>
+                                </div>
+                                <span className="font-medium text-slate-700 group-hover:text-green-500 transition-colors text-sm">
+                                  {tool.name}
+                                </span>
+                                <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -472,7 +647,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <div className="text-xs text-gray-500 mb-1">Başlangıç</div>
-                                <div className="font-bold text-slate-800">{ingredient.start_age}</div>
+                                <div className="font-bold text-slate-800">{formatStartAge(ingredient.start_age)}</div>
                             </div>
                             <div className="border-l border-gray-100">
                                 <div className="text-xs text-gray-500 mb-1">Alerji</div>
