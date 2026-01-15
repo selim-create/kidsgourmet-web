@@ -23,6 +23,16 @@ export interface Recipe {
   related_recipes?: RecipeCard[];
   cross_sell?: CrossSellInfo;
   seo?: SEOData;
+  difficulty?: string;
+  freezable?: boolean;
+  storage_info?: string;
+  special_notes?: string;
+  author?: {
+    id: number;
+    name: string;
+    slug?: string;
+    avatar?: string;
+  };
 }
 
 export interface RecipeIngredient {
@@ -52,6 +62,9 @@ export interface NutritionInfo {
   fat?: string;
   fiber?: string;
   vitamins?: string;
+  sugar?: string;
+  sodium?: string;
+  minerals?: string;
 }
 
 export interface ExpertInfo {
@@ -59,6 +72,8 @@ export interface ExpertInfo {
   title: string;
   image?: string;
   approved: boolean;
+  note?: string;
+  slug?: string;
 }
 
 export interface Substitute {

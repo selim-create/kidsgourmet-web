@@ -20,6 +20,8 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const [originalIngredients, setOriginalIngredients] = useState<RecipeIngredient[]>([]);
   const [instructions, setInstructions] = useState<RecipeInstruction[]>([]);
   const [activePortion, setActivePortion] = useState("1 Öğün");
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   const { ageGroups } = useAgeGroups();
 
   useEffect(() => {
@@ -118,6 +120,38 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     }
   };
 
+  // Favorilere kaydetme
+  const handleSaveToFavorites = () => {
+    setIsFavorite(!isFavorite);
+    toast.success(isFavorite ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi!');
+  };
+
+  // Haftalık plana ekleme
+  const handleAddToMealPlan = () => {
+    toast.success('Tarif haftalık plana eklendi!');
+  };
+
+  // Sosyal medya paylaşımları
+  const shareFacebook = () => {
+    if (recipe) {
+      const url = window.location.href;
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+    }
+  };
+
+  const shareTwitter = () => {
+    if (recipe) {
+      const text = `${recipe.title} - KidsGourmet`;
+      const url = window.location.href;
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    }
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link kopyalandı!');
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -141,17 +175,23 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
           url={window.location.href}
         />
         
-        {/* BREADCRUMB */}
-        <div className="bg-white border-b border-gray-100">
+        {/* BREADCRUMB - Header altında kalmayacak şekilde padding ekle */}
+        <div className="bg-white border-b border-gray-100 pt-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
-                        {/* Localde Link kullanın */}
                         <li><Link href="/" className="hover:text-orange-500"><i className="fa-solid fa-house"></i></Link></li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li><Link href="/tarifler" className="hover:text-orange-500">Tarifler</Link></li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                        <li><Link href="/tarifler?kategori=corbalar" className="hover:text-orange-500">Çorbalar</Link></li>
+                        <li>
+                          <Link 
+                            href={`/tarifler?meal-type=${recipe.meal_type ? encodeURIComponent(recipe.meal_type.toLowerCase()) : ''}`} 
+                            className="hover:text-orange-500"
+                          >
+                            {recipe.meal_type || 'Tarifler'}
+                          </Link>
+                        </li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li className="font-semibold text-orange-500 capitalize">{recipe.title}</li>
                     </ol>
@@ -188,7 +228,10 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
                     {/* Video Button */}
                     {recipe.video_url && (
-                      <button className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-red-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all animate-pulse">
+                      <button 
+                        onClick={() => setShowVideoModal(true)}
+                        className="absolute bottom-4 right-4 bg-white/90 hover:bg-white text-red-500 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all animate-pulse"
+                      >
                           <i className="fa-solid fa-play text-xl ml-1"></i>
                       </button>
                     )}
@@ -197,15 +240,38 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 {/* Right: Meta Info */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        {recipe.diet_types && recipe.diet_types.map((feature, index) => (
-                            <span key={index} className={`text-xs font-bold px-2 py-1 rounded uppercase tracking-wide ${index === 0 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
-                                {decodeHTMLEntities(feature)}
-                            </span>
+                        {/* Age Groups - Tıklanabilir */}
+                        {recipe.age_groups?.map((age, index) => (
+                          <Link 
+                            key={index}
+                            href={`/tarifler?age-group=${encodeURIComponent(age.toLowerCase().replace(/\s/g, '-'))}`}
+                            className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-green-200 transition-colors"
+                          >
+                            {decodeHTMLEntities(age)}
+                          </Link>
                         ))}
+                        
+                        {/* Diet Types - Tıklanabilir */}
+                        {recipe.diet_types?.map((diet, index) => (
+                          <Link 
+                            key={index}
+                            href={`/tarifler?diet-type=${encodeURIComponent(diet.toLowerCase().replace(/\s/g, '-'))}`}
+                            className={`text-xs font-bold px-3 py-1 rounded-full hover:opacity-80 transition-colors ${
+                              index === 0 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
+                            }`}
+                          >
+                            {decodeHTMLEntities(diet)}
+                          </Link>
+                        ))}
+                        
+                        {/* Meal Type - Tıklanabilir */}
                         {recipe.meal_type && (
-                            <span className="text-xs font-bold px-2 py-1 rounded uppercase tracking-wide bg-purple-100 text-purple-600">
-                                {decodeHTMLEntities(recipe.meal_type)}
-                            </span>
+                          <Link 
+                            href={`/tarifler?meal-type=${encodeURIComponent(recipe.meal_type.toLowerCase().replace(/\s/g, '-'))}`}
+                            className="text-xs font-bold px-3 py-1 rounded uppercase tracking-wide bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors"
+                          >
+                            {decodeHTMLEntities(recipe.meal_type)}
+                          </Link>
                         )}
                     </div>
                     
@@ -217,57 +283,140 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         {decodeHTMLEntities(recipe.excerpt || recipe.content)}
                     </p>
 
-                    {/* Quick Info Grid */}
-                    {(recipe.cook_time || recipe.serving_size || recipe.prep_time) && (
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-                        {recipe.prep_time && (
-                          <div className="bg-orange-50 rounded-lg p-3 text-center">
-                            <div className="text-xs text-orange-600 font-medium mb-1">Hazırlık</div>
-                            <div className="font-bold text-slate-800">{recipe.prep_time}</div>
-                          </div>
-                        )}
-                        {recipe.cook_time && (
-                          <div className="bg-red-50 rounded-lg p-3 text-center">
-                            <div className="text-xs text-red-600 font-medium mb-1">Pişirme</div>
-                            <div className="font-bold text-slate-800">{recipe.cook_time}</div>
-                          </div>
-                        )}
-                        {recipe.serving_size && (
-                          <div className="bg-blue-50 rounded-lg p-3 text-center">
-                            <div className="text-xs text-blue-600 font-medium mb-1">Porsiyon</div>
-                            <div className="font-bold text-slate-800">{recipe.serving_size}</div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    {/* Extended Quick Info Grid */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+                      {recipe.prep_time && (
+                        <div className="bg-orange-50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-orange-600 font-medium mb-1">Hazırlık</div>
+                          <div className="font-bold text-slate-800">{recipe.prep_time}</div>
+                        </div>
+                      )}
+                      {recipe.cook_time && (
+                        <div className="bg-red-50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-red-600 font-medium mb-1">Pişirme</div>
+                          <div className="font-bold text-slate-800">{recipe.cook_time}</div>
+                        </div>
+                      )}
+                      {recipe.serving_size && (
+                        <div className="bg-blue-50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-blue-600 font-medium mb-1">Porsiyon</div>
+                          <div className="font-bold text-slate-800">{recipe.serving_size}</div>
+                        </div>
+                      )}
+                      {recipe.difficulty && (
+                        <div className="bg-purple-50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-purple-600 font-medium mb-1">Zorluk</div>
+                          <div className="font-bold text-slate-800">{recipe.difficulty}</div>
+                        </div>
+                      )}
+                      {recipe.freezable !== undefined && (
+                        <div className="bg-cyan-50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-cyan-600 font-medium mb-1">Dondurulabilir</div>
+                          <div className="font-bold text-slate-800">{recipe.freezable ? 'Evet ❄️' : 'Hayır'}</div>
+                        </div>
+                      )}
+                      {recipe.storage_info && (
+                        <div className="bg-amber-50 rounded-lg p-3 text-center col-span-2">
+                          <div className="text-xs text-amber-600 font-medium mb-1">Saklama</div>
+                          <div className="font-bold text-slate-800 text-sm">{recipe.storage_info}</div>
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Expert Approval Box */}
+                    {/* Expert Approval Box - Genişletilmiş */}
                     {recipe.expert && recipe.expert.approved && (
-                      <div className="bg-green-50 border border-green-100 rounded-2xl p-4 flex items-center gap-4 mb-6">
-                          <div className="relative">
-                              <img src={recipe.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="Uzman" />
-                              <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
-                                  <i className="fa-solid fa-check"></i>
+                      <div className="bg-green-50 border border-green-100 rounded-2xl p-5 mb-6">
+                        <div className="flex items-start gap-4">
+                          <div className="relative flex-shrink-0">
+                            <img 
+                              src={recipe.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} 
+                              className="w-14 h-14 rounded-full border-2 border-white shadow-sm object-cover" 
+                              alt={recipe.expert.name || 'Uzman'} 
+                            />
+                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
+                              <i className="fa-solid fa-check"></i>
+                            </div>
+                          </div>
+                          <div className="flex-grow">
+                            <p className="text-xs text-green-600 font-bold uppercase mb-1">Beslenme Uzmanı Onaylı</p>
+                            <p className="text-sm text-slate-700 font-medium mb-2">
+                              Bu tarif{' '}
+                              <Link 
+                                href={recipe.expert.slug ? `/uzman/${recipe.expert.slug}` : '#'} 
+                                className="text-green-600 underline decoration-dotted font-bold hover:text-green-700"
+                              >
+                                {recipe.expert.title && `${recipe.expert.title} `}{recipe.expert.name}
+                              </Link>
+                              {' '}tarafından onaylanmıştır.
+                            </p>
+                            {recipe.expert.note && (
+                              <div className="bg-white/70 rounded-xl p-3 mt-2">
+                                <p className="text-xs text-gray-500 font-medium mb-1">
+                                  <i className="fa-solid fa-comment-medical text-green-500 mr-1"></i> Uzman Notu:
+                                </p>
+                                <p className="text-sm text-gray-700">{recipe.expert.note}</p>
                               </div>
+                            )}
                           </div>
-                          <div>
-                              <p className="text-xs text-green-600 font-bold uppercase mb-0.5">Beslenme Uzmanı Onaylı</p>
-                              <p className="text-sm text-slate-700 font-medium">Bu tarif <Link href="#" className="text-green-600 underline decoration-dotted font-bold">{recipe.expert.name} (Rejimde.com)</Link> tarafından onaylanmıştır.</p>
-                          </div>
+                        </div>
                       </div>
                     )}
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-3">
-                        <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
-                            <i className="fa-solid fa-print"></i> Yazdır
+                    {/* Action Buttons - Yeniden Tasarlanmış */}
+                    <div className="flex flex-wrap gap-3">
+                      {/* Favorilere Kaydet */}
+                      <button 
+                        onClick={handleSaveToFavorites}
+                        className={`flex-1 min-w-[120px] font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 ${
+                          isFavorite 
+                            ? 'bg-red-500 text-white hover:bg-red-600' 
+                            : 'bg-white border-2 border-gray-200 hover:border-red-400 hover:text-red-500 text-gray-600'
+                        }`}
+                      >
+                        <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
+                        {isFavorite ? 'Kaydedildi' : 'Kaydet'}
+                      </button>
+                      
+                      {/* Haftalık Plana Ekle */}
+                      <button 
+                        onClick={handleAddToMealPlan}
+                        className="flex-1 min-w-[120px] bg-purple-500 hover:bg-purple-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
+                      >
+                        <i className="fa-solid fa-calendar-plus"></i>
+                        Plana Ekle
+                      </button>
+                      
+                      {/* Sosyal Paylaşım */}
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={shareWhatsapp} 
+                          className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                          title="WhatsApp'ta Paylaş"
+                        >
+                          <i className="fa-brands fa-whatsapp text-xl"></i>
                         </button>
-                        <button className="flex-1 bg-white border-2 border-gray-200 hover:border-red-400 hover:text-red-500 text-gray-600 font-bold py-3.5 px-6 rounded-xl transition-colors flex items-center justify-center gap-2">
-                            <i className="fa-regular fa-heart"></i> Kaydet
+                        <button 
+                          onClick={shareFacebook} 
+                          className="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                          title="Facebook'ta Paylaş"
+                        >
+                          <i className="fa-brands fa-facebook-f text-xl"></i>
                         </button>
-                        <button onClick={shareWhatsapp} className="bg-white border-2 border-gray-200 hover:border-green-500 hover:text-green-500 text-gray-600 w-14 rounded-xl flex items-center justify-center transition-colors">
-                            <i className="fa-brands fa-whatsapp text-xl"></i>
+                        <button 
+                          onClick={shareTwitter} 
+                          className="bg-sky-500 hover:bg-sky-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                          title="Twitter'da Paylaş"
+                        >
+                          <i className="fa-brands fa-twitter text-xl"></i>
                         </button>
+                        <button 
+                          onClick={copyLink} 
+                          className="bg-gray-500 hover:bg-gray-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                          title="Link Kopyala"
+                        >
+                          <i className="fa-solid fa-link text-lg"></i>
+                        </button>
+                      </div>
                     </div>
                 </div>
             </div>
@@ -350,11 +499,21 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                             ))}
                         </ul>
 
-                        <div className="mt-6 pt-4 border-t border-dashed border-gray-200 text-center">
-                            <p className="text-sm text-gray-500">Evde bal kabağı yok mu?</p>
-                            {/* Localde Link kullanın */}
-                            <Link href="#" className="text-orange-500 font-bold text-sm hover:underline">Havuçlu alternatif tarife git <i className="fa-solid fa-arrow-right ml-1"></i></Link>
-                        </div>
+                        {/* Alternatif Tarif Önerisi */}
+                        {recipe.substitutes && recipe.substitutes.length > 0 && (
+                          <div className="mt-6 pt-4 border-t border-dashed border-gray-200 text-center">
+                            <p className="text-sm text-gray-500">
+                              Evde {recipe.substitutes[0]?.original || 'malzeme'} yok mu?
+                            </p>
+                            <Link 
+                              href={`/tarifler?ingredient=${encodeURIComponent(recipe.substitutes[0]?.substitute || recipe.substitutes[0]?.replacement || '')}`} 
+                              className="text-orange-500 font-bold text-sm hover:underline"
+                            >
+                              {recipe.substitutes[0]?.substitute || recipe.substitutes[0]?.replacement} ile alternatif tariflere git{' '}
+                              <i className="fa-solid fa-arrow-right ml-1"></i>
+                            </Link>
+                          </div>
+                        )}
                     </div>
 
                     {/* INSTRUCTIONS */}
@@ -396,6 +555,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
                     {/* NUTRITION & WARNINGS */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Besin Değerleri - Genişletilmiş */}
                         <div className="bg-blue-50 rounded-2xl p-6 border border-blue-100">
                             <h4 className="font-bold text-slate-800 mb-3 flex items-center">
                                 <i className="fa-solid fa-circle-info text-blue-400 mr-2"></i> Besin Değerleri
@@ -431,10 +591,28 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                       <span className="font-bold">{recipe.nutrition.fiber}</span>
                                   </div>
                                 )}
+                                {recipe.nutrition?.sugar && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Şeker</span>
+                                      <span className="font-bold">{recipe.nutrition.sugar}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.sodium && (
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
+                                      <span>Sodyum</span>
+                                      <span className="font-bold">{recipe.nutrition.sodium}</span>
+                                  </div>
+                                )}
                                 {recipe.nutrition?.vitamins && (
-                                  <div className="flex justify-between">
+                                  <div className="flex justify-between border-b border-blue-100 pb-1">
                                       <span>Vitaminler</span>
                                       <span className="font-bold text-green-600">{decodeHTMLEntities(recipe.nutrition.vitamins)}</span>
+                                  </div>
+                                )}
+                                {recipe.nutrition?.minerals && (
+                                  <div className="flex justify-between">
+                                      <span>Mineraller</span>
+                                      <span className="font-bold text-blue-600">{decodeHTMLEntities(recipe.nutrition.minerals)}</span>
                                   </div>
                                 )}
                                 {!recipe.nutrition?.calories && !recipe.nutrition?.protein && !recipe.nutrition?.fiber && (
@@ -452,19 +630,79 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                 <p className="text-sm text-gray-600 mb-3">Bu tarif aşağıdaki alerjenleri içermektedir:</p>
                                 <div className="flex flex-wrap gap-2 mb-3">
                                   {recipe.allergens.map((allergen, index) => (
-                                    <span key={index} className="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full">
+                                    <Link 
+                                      key={index}
+                                      href={`/tarifler?allergen=${encodeURIComponent(allergen.toLowerCase())}`}
+                                      className="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-red-200 transition-colors"
+                                    >
                                       {decodeHTMLEntities(allergen)}
-                                    </span>
+                                    </Link>
                                   ))}
                                 </div>
                               </>
                             ) : (
                               <p className="text-sm text-gray-600 mb-2">Bu tarif düşük alerjen riskine sahiptir. Ancak bebeğinizin malzemeleri daha önce denediğinden emin olun.</p>
                             )}
-                            {/* Localde Link kullanın */}
-                            <Link href="#" className="text-xs font-bold text-red-500 underline">3 Gün Kuralı Nedir?</Link>
+                            <Link 
+                              href="/beslenme-rehberi/3-gun-kurali" 
+                              className="text-xs font-bold text-red-500 underline hover:text-red-600"
+                            >
+                              3 Gün Kuralı Nedir?
+                            </Link>
                         </div>
                     </div>
+
+                    {/* İkame Malzemeler */}
+                    {recipe.substitutes && recipe.substitutes.length > 0 && (
+                      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 md:p-8">
+                        <h2 className="font-display font-bold text-xl text-slate-800 mb-4 font-sans">
+                          <i className="fa-solid fa-arrow-right-arrow-left text-blue-500 mr-2"></i> İkame Malzemeler
+                        </h2>
+                        <div className="space-y-3">
+                          {recipe.substitutes.map((sub, index) => (
+                            <div key={index} className="bg-blue-50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className="font-bold text-slate-700">{sub.original}</span>
+                                <i className="fa-solid fa-arrow-right text-blue-400"></i>
+                                <span className="font-bold text-blue-600">{sub.substitute || sub.replacement}</span>
+                              </div>
+                              {sub.note && (
+                                <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded">{sub.note}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Özel Notlar */}
+                    {recipe.special_notes && (
+                      <div className="bg-yellow-50 rounded-2xl p-6 border border-yellow-100">
+                        <h4 className="font-bold text-slate-800 mb-3 flex items-center">
+                          <i className="fa-solid fa-sticky-note text-yellow-500 mr-2"></i> Özel Notlar
+                        </h4>
+                        <p className="text-sm text-gray-700 whitespace-pre-line">{recipe.special_notes}</p>
+                      </div>
+                    )}
+
+                    {/* Author Info - Tıklanabilir */}
+                    {recipe.author && (
+                      <Link 
+                        href={`/uzman/${recipe.author.slug || recipe.author.id}`}
+                        className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 hover:bg-gray-100 transition-colors"
+                      >
+                        <img 
+                          src={recipe.author.avatar || 'https://placehold.co/48x48/E0E0E0/757575?text=👤'} 
+                          className="w-10 h-10 rounded-full border-2 border-white shadow-sm" 
+                          alt={recipe.author.name} 
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Tarif Sahibi</p>
+                          <p className="font-bold text-slate-800 text-sm">{recipe.author.name}</p>
+                        </div>
+                        <i className="fa-solid fa-chevron-right text-gray-400 ml-auto"></i>
+                      </Link>
+                    )}
 
                 </div>
 
@@ -478,47 +716,157 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       recipeTitle={recipe.title}
                     />
 
-                    {/* RELATED RECIPES */}
-                    <div>
+                    {/* RELATED RECIPES - Sidebar Small Cards */}
+                    {recipe.related_recipes && recipe.related_recipes.length > 0 && (
+                      <div>
                         <h3 className="font-bold text-slate-800 mb-4 text-lg">Benzer Tarifler</h3>
                         <div className="space-y-4">
-                            {/* Localde Link kullanın */}
-                            <Link href="#" className="flex gap-4 group">
-                                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                    <img src="https://placehold.co/150x150/AED581/ffffff?text=Brokoli" className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Brokoli" />
+                          {recipe.related_recipes.slice(0, 2).map((related) => (
+                            <Link 
+                              key={related.id}
+                              href={`/tarifler/${related.slug}`} 
+                              className="flex gap-4 group"
+                            >
+                              <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                                <img 
+                                  src={related.image || 'https://placehold.co/150x150/FF8A65/ffffff?text=Tarif'} 
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                                  alt={related.title} 
+                                />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors text-sm mb-1">
+                                  {decodeHTMLEntities(related.title)}
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                  {related.age_group && (
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                                      {related.age_group}
+                                    </span>
+                                  )}
+                                  {related.prep_time && (
+                                    <span className="text-xs text-gray-500">
+                                      <i className="fa-regular fa-clock mr-1"></i>{related.prep_time}
+                                    </span>
+                                  )}
                                 </div>
-                                <div>
-                                    <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors text-sm mb-1">Brokoli Çorbası</h4>
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">+6 Ay</span>
-                                </div>
+                              </div>
                             </Link>
-                            
-                             <Link href="#" className="flex gap-4 group">
-                                <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                    <img src="https://placehold.co/150x150/FF8A65/ffffff?text=Havuc" className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt="Havuç" />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors text-sm mb-1">Havuç Püresi</h4>
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">+4 Ay</span>
-                                </div>
-                            </Link>
+                          ))}
                         </div>
+                      </div>
+                    )}
+
+                    {/* SIDEBAR ARAÇLAR */}
+                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-5 border border-purple-100">
+                      <h3 className="font-bold text-slate-800 mb-4 text-sm">
+                        <i className="fa-solid fa-toolbox text-purple-500 mr-2"></i> Faydalı Araçlar
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: '🍼', color: 'bg-pink-100' },
+                          { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: '📊', color: 'bg-blue-100' },
+                          { name: 'Su İhtiyacı', slug: 'su-ihtiyaci', icon: '💧', color: 'bg-cyan-100' },
+                          { name: 'Alerjen Planlayıcı', slug: 'alerjen-planlayici', icon: '⚠️', color: 'bg-red-100' },
+                          { name: 'Ek Gıda Rehberi', slug: 'ek-gida-rehberi', icon: '🥄', color: 'bg-green-100' },
+                          { name: 'Besin Takvimi', slug: 'besin-takvimi', icon: '📅', color: 'bg-yellow-100' },
+                        ].sort(() => Math.random() - 0.5).slice(0, 4).map((tool) => (
+                          <Link
+                            key={tool.slug}
+                            href={`/akilli-asistan/${tool.slug}`}
+                            className={`${tool.color} rounded-xl p-3 text-center hover:scale-105 transition-transform`}
+                          >
+                            <span className="text-2xl block mb-1">{tool.icon}</span>
+                            <span className="text-xs font-medium text-slate-700">{tool.name}</span>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
 
-                    {/* ASK AN EXPERT */}
+                    {/* ASK AN EXPERT - Topluluk'a Yönlendir */}
                     <div className="bg-orange-50/50 border border-yellow-100 rounded-2xl p-6 text-center">
                         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-yellow-500 text-xl">
                             <i className="fa-solid fa-question"></i>
                         </div>
                         <h3 className="font-bold text-slate-800 mb-2">Aklınıza takılan mı var?</h3>
-                        <p className="text-xs text-gray-600 mb-4">Bu tarifle ilgili sorunuzu Rejimde.com uzmanlarına iletin.</p>
-                        <button className="text-slate-800 font-bold text-sm underline hover:text-orange-500">Soru Sor</button>
+                        <p className="text-xs text-gray-600 mb-4">Bu tarifle ilgili sorunuzu topluluğumuza sorun.</p>
+                        <Link 
+                          href={`/topluluk/yeni-soru?konu=${encodeURIComponent(recipe.title)}`}
+                          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-5 rounded-xl transition-colors"
+                        >
+                          <i className="fa-solid fa-comment-dots"></i> Soru Sor
+                        </Link>
                     </div>
 
                 </div>
             </div>
 
+            {/* RELATED RECIPES - 3 Adet Büyük Kartlar */}
+            {recipe.related_recipes && recipe.related_recipes.length > 0 && (
+              <div className="mt-10">
+                <h3 className="font-bold text-slate-800 mb-6 text-xl flex items-center">
+                  <i className="fa-solid fa-utensils text-orange-500 mr-2"></i> Benzer Tarifler
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {recipe.related_recipes.slice(0, 3).map((related) => (
+                    <Link 
+                      key={related.id}
+                      href={`/tarifler/${related.slug}`} 
+                      className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all"
+                    >
+                      <div className="aspect-[4/3] overflow-hidden">
+                        <img 
+                          src={related.image || 'https://placehold.co/400x300/FF8A65/ffffff?text=Tarif'} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                          alt={related.title} 
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors mb-2">
+                          {decodeHTMLEntities(related.title)}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          {related.age_group && (
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                              {related.age_group}
+                            </span>
+                          )}
+                          {related.prep_time && (
+                            <span className="text-xs text-gray-500">
+                              <i className="fa-regular fa-clock mr-1"></i>{related.prep_time}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
         </div>
+
+        {/* Video Modal */}
+        {showVideoModal && recipe.video_url && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowVideoModal(false)}>
+            <div className="bg-white rounded-2xl w-full max-w-4xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="flex justify-between items-center p-4 border-b">
+                <h3 className="font-bold text-slate-800">Tarif Videosu</h3>
+                <button onClick={() => setShowVideoModal(false)} className="text-gray-500 hover:text-gray-700">
+                  <i className="fa-solid fa-times text-xl"></i>
+                </button>
+              </div>
+              <div className="aspect-video">
+                <iframe 
+                  src={recipe.video_url.replace('watch?v=', 'embed/')} 
+                  className="w-full h-full" 
+                  allowFullScreen
+                  title={recipe.title}
+                />
+              </div>
+            </div>
+          </div>
+        )}
     </div>
   );
 }
