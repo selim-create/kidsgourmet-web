@@ -71,6 +71,11 @@ export const navigationItems: NavItem[] = [
         icon: 'fa-solid fa-clipboard-check' 
       },
       { 
+        label: '3 Gün Kuralı', 
+        href: '/beslenme-rehberi/3-gun-kurali', 
+        icon: 'fa-solid fa-clock-rotate-left' 
+      },
+      { 
         label: 'Bu Gıda Verilir mi?', 
         href: '/akilli-asistan/bu-gida-verilir-mi', 
         icon: 'fa-solid fa-circle-question' 
