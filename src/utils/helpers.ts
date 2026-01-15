@@ -138,13 +138,19 @@ export function formatRelativeTime(dateString: string): string {
 }
 
 /**
+ * Expert role identifiers
+ * Users with these roles or is_expert flag are considered experts
+ */
+const EXPERT_ROLES = ['administrator', 'editor', 'author', 'kg_expert'] as const;
+
+/**
  * Check if a user has expert role
  * Expert roles: kg_expert, editor, author, administrator
  * Also checks for is_expert flag
  */
 export function isUserExpert(user: { is_expert?: boolean; role?: string } | null | undefined): boolean {
   if (!user) return false;
-  return user.is_expert === true || ['administrator', 'editor', 'author', 'kg_expert'].includes(user.role || '');
+  return user.is_expert === true || EXPERT_ROLES.includes(user.role as any);
 }
 
 /**
@@ -158,7 +164,12 @@ export function getDashboardUrl(user: { is_expert?: boolean; role?: string } | n
 /**
  * Get public profile URL based on user role
  * Experts: /uzman/{username}, Parents: /profil/{username}
- * Returns default /profil if username is invalid
+ * 
+ * @param user - User object with optional username, role, and is_expert fields
+ * @returns Profile URL path. Returns '/profil' as fallback if:
+ *          - User is null/undefined
+ *          - Username is missing
+ *          - Username contains invalid characters (only alphanumeric, underscore, hyphen allowed)
  */
 export function getPublicProfileUrl(user: { is_expert?: boolean; role?: string; username?: string } | null | undefined): string {
   // Validate username exists and contains only safe characters
