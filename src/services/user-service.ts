@@ -226,6 +226,11 @@ export const userService = {
     
     // WordPress media endpoint kullan
     const token = getToken();
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
     const response = await fetch(`${API_URL}/wp/v2/media`, {
       method: 'POST',
       headers: {

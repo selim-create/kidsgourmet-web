@@ -123,7 +123,17 @@ export default function ProfileSettingsPage() {
     e.preventDefault();
     
     try {
-      const updateData: any = {
+      interface UpdateData {
+        name: string;
+        email: string;
+        password?: string;
+        parent_role?: string;
+        gender?: string;
+        birth_date?: string;
+        avatar_id?: number;
+      }
+
+      const updateData: UpdateData = {
         name,
         email,
       };
@@ -134,7 +144,8 @@ export default function ProfileSettingsPage() {
       if (birthDate) updateData.birth_date = birthDate;
       if (avatarId) updateData.avatar_id = avatarId;
 
-      await userService.updateProfile(updateData);
+      // Cast to the service's expected type
+      await userService.updateProfile(updateData as any);
       toast.success('Profil bilgileri güncellendi');
       await refreshUser();
       setPassword(''); // Clear password field

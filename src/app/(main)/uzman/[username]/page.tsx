@@ -8,6 +8,16 @@ import { ExpertPublicProfile } from '@/lib/types';
 
 type TabType = 'recipes' | 'blog_posts' | 'answered_questions' | 'asked_questions';
 
+// Helper function to validate and sanitize color codes
+function sanitizeColor(color: string): string {
+  // Only allow valid hex colors
+  if (/^#[0-9A-Fa-f]{6}$/.test(color) || /^#[0-9A-Fa-f]{3}$/.test(color)) {
+    return color;
+  }
+  // Default fallback color
+  return '#6366f1'; // indigo-500
+}
+
 export default function ExpertPublicProfilePage() {
   const params = useParams();
   const username = params.username as string;
@@ -355,7 +365,13 @@ export default function ExpertPublicProfilePage() {
                     >
                       <div className="flex items-center gap-2 mb-2">
                         {question.circle && (
-                          <span className={`px-2 py-1 rounded-lg text-xs font-bold`} style={{ backgroundColor: `${question.circle.color_code}20`, color: question.circle.color_code }}>
+                          <span 
+                            className="px-2 py-1 rounded-lg text-xs font-bold"
+                            style={{ 
+                              backgroundColor: `${sanitizeColor(question.circle.color_code)}20`, 
+                              color: sanitizeColor(question.circle.color_code) 
+                            }}
+                          >
                             {question.circle.icon} {question.circle.name}
                           </span>
                         )}
