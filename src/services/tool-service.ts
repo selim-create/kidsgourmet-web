@@ -7,7 +7,15 @@ import type {
   BLWTestAnswer,
   RegisterData,
   PercentileMeasurement,
-  PercentileResult
+  PercentileResult,
+  WaterNeedResult,
+  SolidFoodReadinessConfig,
+  SolidFoodReadinessResult,
+  Allergen,
+  AllergenTrialPlan,
+  FoodTrial,
+  FoodTrialInput,
+  FoodTrialSummary
 } from '@/lib/types';
 
 /**
@@ -169,5 +177,139 @@ export const toolService = {
    */
   getUserPercentileResults: async (): Promise<PercentileResult[]> => {
     return fetchAuthAPI<PercentileResult[]>(API_ENDPOINTS.USER_PERCENTILE_RESULTS);
+  },
+
+  // ===============================
+  // SU İHTİYACI HESAPLAYICI
+  // ===============================
+
+  /**
+   * Su ihtiyacını hesapla (frontend'de)
+   * 
+   * WHO (Dünya Sağlık Örgütü) önerilerine göre bebeğin günlük sıvı ihtiyacını hesaplar.
+   * 
+   * Formüller:
+   * - 6 aydan küçük: Su önerilmez (anne sütü/formula yeterlidir)
+   * - 6-12 ay: 30ml x kilo (kg) - Ek gıdaya yeni başlayan bebekler
+   * - 12+ ay: 40ml x kilo (kg) - Aktif toddler'lar için artırılmış ihtiyaç
+   * 
+   * @param weightKg - Bebeğin kilosu (kg cinsinden)
+   * @param ageMonths - Bebeğin yaşı (ay cinsinden)
+   * @returns WaterNeedResult - Hesaplanan günlük su ihtiyacı ve öneriler
+   */
+  calculateWaterNeed: async (weightKg: number, ageMonths: number): Promise<WaterNeedResult> => {
+    // Basit hesaplama frontend'de yapılabilir
+    let dailyWaterMl = 0;
+    let formula = '';
+    const recommendations: string[] = [];
+    const warnings: string[] = [];
+
+    if (ageMonths < 6) {
+      warnings.push('6 aydan küçük bebekler için ek su önerilmez. Anne sütü veya formula yeterlidir.');
+      formula = 'N/A';
+    } else if (ageMonths >= 6 && ageMonths < 12) {
+      dailyWaterMl = Math.round(weightKg * 30);
+      formula = '30ml x kilo (kg)';
+      recommendations.push('Ek gıdaya yeni başlayan bebeklerde su ihtiyacı düşüktür');
+      recommendations.push('Anne sütü veya formula ana sıvı kaynağıdır');
+      recommendations.push('Yemeklerle birlikte küçük yudumlarda su sunun');
+    } else {
+      dailyWaterMl = Math.round(weightKg * 40);
+      formula = '40ml x kilo (kg)';
+      recommendations.push('Gün boyunca düzenli aralıklarla su sunun');
+      recommendations.push('Yemeklerle birlikte mutlaka su verin');
+      recommendations.push('Sıcak havalarda ve fiziksel aktivite sonrası ihtiyaç artar');
+    }
+
+    return {
+      daily_water_ml: dailyWaterMl,
+      age_months: ageMonths,
+      weight_kg: weightKg,
+      formula,
+      recommendations,
+      warnings,
+    };
+  },
+
+  // ===============================
+  // EK GIDAYA BAŞLAMA KONTROLÜ
+  // ===============================
+
+  /**
+   * Ek gıdaya başlama hazırlık testi konfigürasyonunu getir
+   */
+  getSolidFoodReadinessConfig: async (): Promise<SolidFoodReadinessConfig> => {
+    return fetchAPI<SolidFoodReadinessConfig>(API_ENDPOINTS.SOLID_FOOD_CONFIG);
+  },
+
+  /**
+   * Ek gıdaya başlama testi sonucunu kaydet
+   */
+  submitSolidFoodReadinessTest: async (
+    answers: Record<string, string>,
+    childId?: string
+  ): Promise<SolidFoodReadinessResult> => {
+    return fetchAuthAPI<SolidFoodReadinessResult>(API_ENDPOINTS.SOLID_FOOD_SUBMIT, {
+      method: 'POST',
+      body: JSON.stringify({ answers, child_id: childId }),
+    });
+  },
+
+  // ===============================
+  // ALERJEN PLANLAYICI
+  // ===============================
+
+  /**
+   * Alerjen listesini getir
+   */
+  getAllergenList: async (): Promise<Allergen[]> => {
+    return fetchAPI<Allergen[]>(API_ENDPOINTS.ALLERGEN_LIST);
+  },
+
+  /**
+   * Belirli bir alerjen için deneme planı getir
+   */
+  getAllergenTrialPlan: async (allergenId: string): Promise<AllergenTrialPlan> => {
+    return fetchAPI<AllergenTrialPlan>(API_ENDPOINTS.ALLERGEN_PLAN(allergenId));
+  },
+
+  // ===============================
+  // BESİN DENEME TAKVİMİ
+  // ===============================
+
+  /**
+   * Besin denemelerini getir
+   */
+  getFoodTrials: async (
+    childId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<FoodTrial[]> => {
+    return fetchAuthAPI<FoodTrial[]>(
+      `${API_ENDPOINTS.FOOD_TRIALS}?child_id=${childId}&start_date=${startDate}&end_date=${endDate}`
+    );
+  },
+
+  /**
+   * Yeni besin denemesi ekle
+   */
+  addFoodTrial: async (trial: FoodTrialInput): Promise<FoodTrial> => {
+    return fetchAuthAPI<FoodTrial>(API_ENDPOINTS.FOOD_TRIAL_ADD, {
+      method: 'POST',
+      body: JSON.stringify(trial),
+    });
+  },
+
+  /**
+   * Besin deneme özetini getir
+   */
+  getFoodTrialSummary: async (
+    childId: string,
+    startDate: string,
+    endDate: string
+  ): Promise<FoodTrialSummary> => {
+    return fetchAuthAPI<FoodTrialSummary>(
+      API_ENDPOINTS.FOOD_TRIAL_SUMMARY(childId, startDate, endDate)
+    );
   },
 };

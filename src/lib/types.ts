@@ -611,7 +611,16 @@ export interface GenerateShoppingListResponse {
 // TOOL (ARAÇ) TİPLERİ
 // ===============================
 
-export type ToolType = 'blw_test' | 'percentile' | 'water_calculator' | 'meal_planner';
+export type ToolType = 
+  | 'blw_test' 
+  | 'percentile' 
+  | 'water_calculator' 
+  | 'meal_planner' 
+  | 'food_guide' 
+  | 'solid_food_readiness' 
+  | 'food_checker' 
+  | 'allergen_planner' 
+  | 'food_trial_calendar';
 
 export interface Tool {
   id: number;
@@ -751,4 +760,127 @@ export interface PercentileConfig {
 export interface PercentileHistory {
   child_id: string;
   measurements: PercentileResult[];
+}
+
+// ===============================
+// SU İHTİYACI HESAPLAYICI
+// ===============================
+
+export interface WaterNeedResult {
+  daily_water_ml: number;
+  age_months: number;
+  weight_kg: number;
+  formula: string;
+  recommendations: string[];
+  warnings?: string[];
+}
+
+// ===============================
+// EK GIDAYA BAŞLAMA KONTROLÜ
+// ===============================
+
+export interface SolidFoodReadinessConfig {
+  questions: SolidFoodQuestion[];
+  result_buckets: SolidFoodResultBucket[];
+}
+
+export interface SolidFoodQuestion {
+  id: string;
+  question: string;
+  description?: string;
+  icon?: string;
+  weight: number;
+  options: SolidFoodOption[];
+}
+
+export interface SolidFoodOption {
+  id: string;
+  text: string;
+  value: number;
+  is_red_flag?: boolean;
+  red_flag_message?: string;
+}
+
+export interface SolidFoodResultBucket {
+  id: string;
+  min_score: number;
+  max_score: number;
+  title: string;
+  subtitle: string;
+  color: 'green' | 'yellow' | 'red';
+  icon: string;
+  description: string;
+  recommendations: string[];
+}
+
+export interface SolidFoodReadinessResult {
+  score: number;
+  result_bucket_id: string;
+  red_flags: string[];
+  answers: Record<string, string>;
+  created_at: string;
+}
+
+// ===============================
+// ALERJEN PLANLAYICI
+// ===============================
+
+export interface Allergen {
+  id: string;
+  name: string;
+  emoji: string;
+  risk_level: 'low' | 'medium' | 'high';
+  start_age: string;
+  description: string;
+}
+
+export interface AllergenTrialPlan {
+  allergen: Allergen;
+  days: AllergenTrialDay[];
+  warning_signs: string[];
+  emergency_info: string;
+  notes: string[];
+}
+
+export interface AllergenTrialDay {
+  day: number;
+  amount: string;
+  tip: string;
+  watch_for?: string;
+}
+
+// ===============================
+// BESİN DENEME TAKVİMİ
+// ===============================
+
+export interface FoodTrial {
+  id: string;
+  child_id: string;
+  ingredient_id?: number;
+  ingredient_name: string;
+  trial_date: string;
+  form: 'puree' | 'finger_food' | 'mixed';
+  reaction?: 'none' | 'mild' | 'moderate' | 'severe';
+  reaction_notes?: string;
+  rating?: number; // 1-5 stars
+  is_new: boolean;
+  created_at: string;
+}
+
+export interface FoodTrialInput {
+  child_id: string;
+  ingredient_id?: number;
+  ingredient_name: string;
+  trial_date: string;
+  form: 'puree' | 'finger_food' | 'mixed';
+  reaction?: 'none' | 'mild' | 'moderate' | 'severe';
+  reaction_notes?: string;
+  rating?: number;
+}
+
+export interface FoodTrialSummary {
+  total_foods: number;
+  new_this_week: number;
+  reactions: FoodTrial[];
+  latest_trials: FoodTrial[];
 }
