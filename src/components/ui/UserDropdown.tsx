@@ -42,17 +42,16 @@ export default function UserDropdown() {
       {/* Avatar Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all"
+        className="flex items-center gap-1 p-1 rounded-full hover:bg-gray-100 transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold overflow-hidden">
+        <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold overflow-hidden border-2 border-white shadow-sm">
           {user.avatar_url ? (
             <img src={user.avatar_url} alt={user.name} className="w-full h-full object-cover" />
           ) : (
             avatarInitial
           )}
         </div>
-        <span className="font-bold text-sm hidden md:inline">{user.display_name || user.name}</span>
-        <i className={`fa-solid fa-chevron-down text-xs transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
+        <i className={`fa-solid fa-chevron-down text-gray-400 text-xs transition-transform ${isOpen ? 'rotate-180' : ''}`}></i>
       </button>
 
       {/* Dropdown Menu */}

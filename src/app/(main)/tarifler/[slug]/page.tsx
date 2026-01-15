@@ -2,18 +2,20 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { Recipe, RecipeIngredient, RecipeInstruction } from '@/lib/types';
 import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
 import AgeWarningBanner from '@/components/features/age/AgeWarningBanner';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
+import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+  const router = useRouter();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
@@ -23,6 +25,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const { ageGroups } = useAgeGroups();
+  const { isAuthenticated } = useUser();
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -120,15 +123,45 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
     }
   };
 
+  // Haftalık plana ekleme
+  const handleAddToMealPlan = () => {
+    if (!isAuthenticated) {
+      toast.error('Haftalık plan oluşturmak için giriş yapmalısınız', {
+        action: {
+          label: 'Giriş Yap',
+          onClick: () => router.push('/giris?redirect=' + encodeURIComponent(window.location.pathname))
+        }
+      });
+      return;
+    }
+    toast.success('Tarif haftalık plana eklendi!');
+  };
+
   // Favorilere kaydetme
-  const handleSaveToFavorites = () => {
+  const toggleFavorite = () => {
     setIsFavorite(!isFavorite);
     toast.success(isFavorite ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi!');
   };
 
-  // Haftalık plana ekleme
-  const handleAddToMealPlan = () => {
-    toast.success('Tarif haftalık plana eklendi!');
+  const handleSaveToFavorites = () => {
+    if (!isAuthenticated) {
+      toast.error('Bu özelliği kullanmak için giriş yapmalısınız', {
+        action: {
+          label: 'Giriş Yap',
+          onClick: () => router.push('/giris?redirect=' + encodeURIComponent(window.location.pathname))
+        }
+      });
+      return;
+    }
+    toggleFavorite();
+  };
+
+  // Helper to find substitute for an ingredient
+  const getSubstituteForIngredient = (ingredientName?: string) => {
+    if (!recipe?.substitutes || !ingredientName) return null;
+    return recipe.substitutes.find(
+      sub => sub.original?.toLowerCase() === ingredientName.toLowerCase()
+    );
   };
 
   // Sosyal medya paylaşımları
@@ -323,45 +356,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       )}
                     </div>
 
-                    {/* Expert Approval Box - Genişletilmiş */}
-                    {recipe.expert && recipe.expert.approved && (
-                      <div className="bg-green-50 border border-green-100 rounded-2xl p-5 mb-6">
-                        <div className="flex items-start gap-4">
-                          <div className="relative flex-shrink-0">
-                            <img 
-                              src={recipe.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} 
-                              className="w-14 h-14 rounded-full border-2 border-white shadow-sm object-cover" 
-                              alt={recipe.expert.name || 'Uzman'} 
-                            />
-                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
-                              <i className="fa-solid fa-check"></i>
-                            </div>
-                          </div>
-                          <div className="flex-grow">
-                            <p className="text-xs text-green-600 font-bold uppercase mb-1">Beslenme Uzmanı Onaylı</p>
-                            <p className="text-sm text-slate-700 font-medium mb-2">
-                              Bu tarif{' '}
-                              <Link 
-                                href={recipe.expert.slug ? `/uzman/${recipe.expert.slug}` : '#'} 
-                                className="text-green-600 underline decoration-dotted font-bold hover:text-green-700"
-                              >
-                                {recipe.expert.title && `${recipe.expert.title} `}{recipe.expert.name}
-                              </Link>
-                              {' '}tarafından onaylanmıştır.
-                            </p>
-                            {recipe.expert.note && (
-                              <div className="bg-white/70 rounded-xl p-3 mt-2">
-                                <p className="text-xs text-gray-500 font-medium mb-1">
-                                  <i className="fa-solid fa-comment-medical text-green-500 mr-1"></i> Uzman Notu:
-                                </p>
-                                <p className="text-sm text-gray-700">{recipe.expert.note}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
                     {/* Action Buttons - Yeniden Tasarlanmış */}
                     <div className="flex flex-wrap gap-3">
                       {/* Favorilere Kaydet */}
@@ -472,27 +466,67 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                 <li 
                                     key={ing.id ?? `ingredient-${index}`} 
                                     className={`flex items-start group cursor-pointer select-none transition-all ${ing.checked ? 'opacity-50' : ''}`}
-                                    onClick={() => toggleIngredient(ing.id ?? index)}
                                 >
-                                    <div className={`mt-1 mr-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                                    <div 
+                                      className={`mt-1 mr-4 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                                         ing.checked ? 'bg-orange-500 border-orange-500' : 'border-gray-300 bg-white'
-                                    }`}>
+                                      }`}
+                                      onClick={() => toggleIngredient(ing.id ?? index)}
+                                    >
                                         <i className={`fa-solid fa-check text-white text-xs transition-transform ${ing.checked ? 'scale-100' : 'scale-0'}`}></i>
                                     </div>
                                     <div className="flex-grow border-b border-gray-50 pb-3 group-hover:border-gray-100 transition-colors">
                                         <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${ing.checked ? 'line-through text-gray-400' : 'text-slate-700'}`}>
-                                            <span className="font-bold">
+                                            <span className="font-bold" onClick={() => toggleIngredient(ing.id ?? index)}>
                                                 {ing.amount && `${ing.amount} `}
                                                 {ing.unit && `${ing.unit} `}
                                                 {ing.name || ing.text}
                                             </span>
                                             
-                                            {ing.note && !ing.checked && (
-                                                <div className="bg-blue-50 text-blue-600 text-xs px-3 py-1.5 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-blue-100 transition-colors w-fit" onClick={(e) => { e.stopPropagation(); alert(ing.note); }}>
-                                                    <i className="fa-solid fa-arrow-right-arrow-left"></i>
-                                                    <span>İkame Mevcut</span>
-                                                </div>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                {/* Malzeme Notu - Soru işareti */}
+                                                {ing.note && !ing.checked && (
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      toast.info(ing.note, {
+                                                        duration: 4000,
+                                                        icon: '💡',
+                                                      });
+                                                    }}
+                                                    className="text-blue-500 hover:text-blue-600 w-6 h-6 rounded-full bg-blue-50 hover:bg-blue-100 flex items-center justify-center transition-colors"
+                                                    title="Malzeme notu"
+                                                  >
+                                                    <i className="fa-solid fa-question text-xs"></i>
+                                                  </button>
+                                                )}
+                                                
+                                                {/* İkame Malzeme - Varsa göster */}
+                                                {getSubstituteForIngredient(ing.name || ing.text) && !ing.checked && (
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      const sub = getSubstituteForIngredient(ing.name || ing.text);
+                                                      if (sub) {
+                                                        toast(
+                                                          <div>
+                                                            <p className="font-bold text-sm mb-1">
+                                                              <i className="fa-solid fa-arrow-right-arrow-left text-blue-500 mr-2"></i>
+                                                              {sub.substitute || sub.replacement} ile değiştirilebilir
+                                                            </p>
+                                                            {sub.note && <p className="text-xs text-gray-600">{sub.note}</p>}
+                                                          </div>,
+                                                          { duration: 5000 }
+                                                        );
+                                                      }
+                                                    }}
+                                                    className="text-purple-500 hover:text-purple-600 w-6 h-6 rounded-full bg-purple-50 hover:bg-purple-100 flex items-center justify-center transition-colors"
+                                                    title="İkame malzeme mevcut"
+                                                  >
+                                                    <i className="fa-solid fa-arrow-right-arrow-left text-xs"></i>
+                                                  </button>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </li>
@@ -552,6 +586,44 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                             ))}
                         </div>
                     </div>
+
+                    {/* Expert Approval - Moved here from header */}
+                    {recipe.expert && recipe.expert.approved && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-5 mt-6">
+                        <div className="flex items-start gap-4">
+                          <div className="relative flex-shrink-0">
+                            <img 
+                              src={recipe.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} 
+                              className="w-14 h-14 rounded-full border-2 border-white shadow-sm object-cover" 
+                              alt={recipe.expert.name || 'Uzman'} 
+                            />
+                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
+                              <i className="fa-solid fa-check"></i>
+                            </div>
+                          </div>
+                          <div className="flex-grow">
+                            <p className="text-sm text-slate-700 font-medium mb-2">
+                              Bu tarif{' '}
+                              <Link 
+                                href={recipe.expert.slug ? `/uzman/${recipe.expert.slug}` : '#'} 
+                                className="text-green-600 underline decoration-dotted font-bold hover:text-green-700"
+                              >
+                                {recipe.expert.title && `${recipe.expert.title} `}{recipe.expert.name}
+                              </Link>
+                              {' '}tarafından onaylanmıştır.
+                            </p>
+                            {recipe.expert.note && (
+                              <div className="bg-white/70 rounded-xl p-3 mt-2">
+                                <p className="text-xs text-gray-500 font-medium mb-1">
+                                  <i className="fa-solid fa-comment-medical text-green-500 mr-1"></i> Uzman Notu:
+                                </p>
+                                <p className="text-sm text-gray-700">{recipe.expert.note}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* NUTRITION & WARNINGS */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -652,29 +724,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </div>
                     </div>
 
-                    {/* İkame Malzemeler */}
-                    {recipe.substitutes && recipe.substitutes.length > 0 && (
-                      <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 md:p-8">
-                        <h2 className="font-display font-bold text-xl text-slate-800 mb-4 font-sans">
-                          <i className="fa-solid fa-arrow-right-arrow-left text-blue-500 mr-2"></i> İkame Malzemeler
-                        </h2>
-                        <div className="space-y-3">
-                          {recipe.substitutes.map((sub, index) => (
-                            <div key={index} className="bg-blue-50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-2">
-                              <div className="flex items-center gap-2 flex-1">
-                                <span className="font-bold text-slate-700">{sub.original}</span>
-                                <i className="fa-solid fa-arrow-right text-blue-400"></i>
-                                <span className="font-bold text-blue-600">{sub.substitute || sub.replacement}</span>
-                              </div>
-                              {sub.note && (
-                                <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded">{sub.note}</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
                     {/* Özel Notlar */}
                     {recipe.special_notes && (
                       <div className="bg-yellow-50 rounded-2xl p-6 border border-yellow-100">
@@ -685,29 +734,42 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       </div>
                     )}
 
-                    {/* Author Info - Tıklanabilir */}
+                    {/* Author Info - Dikkat Çekici Tasarım */}
                     {recipe.author && (
                       <Link 
                         href={`/uzman/${recipe.author.slug || recipe.author.id}`}
-                        className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 hover:bg-gray-100 transition-colors"
+                        className="block bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100 rounded-2xl p-4 hover:shadow-md transition-all group mb-6"
                       >
-                        <img 
-                          src={recipe.author.avatar || 'https://placehold.co/48x48/E0E0E0/757575?text=👤'} 
-                          className="w-10 h-10 rounded-full border-2 border-white shadow-sm" 
-                          alt={recipe.author.name} 
-                        />
-                        <div>
-                          <p className="text-xs text-gray-500">Tarif Sahibi</p>
-                          <p className="font-bold text-slate-800 text-sm">{recipe.author.name}</p>
+                        <div className="flex items-center gap-4">
+                          <div className="relative">
+                            <img 
+                              src={recipe.author.avatar || 'https://placehold.co/64x64/FFF3E0/FF9800?text=👨‍🍳'} 
+                              className="w-16 h-16 rounded-full border-3 border-white shadow-md object-cover" 
+                              alt={recipe.author.name} 
+                            />
+                            <div className="absolute -bottom-1 -right-1 bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-white">
+                              <i className="fa-solid fa-utensils"></i>
+                            </div>
+                          </div>
+                          <div className="flex-grow">
+                            <p className="text-xs text-orange-600 font-semibold uppercase tracking-wide mb-1">Tarif Sahibi</p>
+                            <p className="font-bold text-slate-800 text-lg group-hover:text-orange-600 transition-colors">
+                              {recipe.author.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">Tüm tariflerini görüntüle →</p>
+                          </div>
+                          <div className="bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                            <i className="fa-solid fa-arrow-right"></i>
+                          </div>
                         </div>
-                        <i className="fa-solid fa-chevron-right text-gray-400 ml-auto"></i>
                       </Link>
                     )}
 
                 </div>
 
-                {/* RIGHT COLUMN (Sidebar) */}
-                <div className="lg:col-span-1 space-y-8">
+                {/* RIGHT COLUMN (Sidebar) - Sticky */}
+                <div className="lg:col-span-1">
+                    <div className="sticky top-24 space-y-6">
                     
                     {/* ECOSYSTEM CROSS-SELL */}
                     <CrossSellWidget 
@@ -716,68 +778,33 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       recipeTitle={recipe.title}
                     />
 
-                    {/* RELATED RECIPES - Sidebar Small Cards */}
-                    {recipe.related_recipes && recipe.related_recipes.length > 0 && (
-                      <div>
-                        <h3 className="font-bold text-slate-800 mb-4 text-lg">Benzer Tarifler</h3>
-                        <div className="space-y-4">
-                          {recipe.related_recipes.slice(0, 2).map((related) => (
-                            <Link 
-                              key={related.id}
-                              href={`/tarifler/${related.slug}`} 
-                              className="flex gap-4 group"
-                            >
-                              <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                <img 
-                                  src={related.image || 'https://placehold.co/150x150/FF8A65/ffffff?text=Tarif'} 
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
-                                  alt={related.title} 
-                                />
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors text-sm mb-1">
-                                  {decodeHTMLEntities(related.title)}
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  {related.age_group && (
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                                      {related.age_group}
-                                    </span>
-                                  )}
-                                  {related.prep_time && (
-                                    <span className="text-xs text-gray-500">
-                                      <i className="fa-regular fa-clock mr-1"></i>{related.prep_time}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* SIDEBAR ARAÇLAR */}
-                    <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-5 border border-purple-100">
-                      <h3 className="font-bold text-slate-800 mb-4 text-sm">
-                        <i className="fa-solid fa-toolbox text-purple-500 mr-2"></i> Faydalı Araçlar
+                    {/* SIDEBAR ARAÇLAR - Yeni Tasarım */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                      <h3 className="font-bold text-slate-800 mb-4 flex items-center">
+                        <i className="fa-solid fa-wand-magic-sparkles text-orange-500 mr-2"></i> 
+                        Faydalı Araçlar
                       </h3>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-2">
                         {[
-                          { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: '🍼', color: 'bg-pink-100' },
-                          { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: '📊', color: 'bg-blue-100' },
-                          { name: 'Su İhtiyacı', slug: 'su-ihtiyaci', icon: '💧', color: 'bg-cyan-100' },
-                          { name: 'Alerjen Planlayıcı', slug: 'alerjen-planlayici', icon: '⚠️', color: 'bg-red-100' },
-                          { name: 'Ek Gıda Rehberi', slug: 'ek-gida-rehberi', icon: '🥄', color: 'bg-green-100' },
-                          { name: 'Besin Takvimi', slug: 'besin-takvimi', icon: '📅', color: 'bg-yellow-100' },
+                          { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: 'fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
+                          { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: 'fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
+                          { name: 'Su İhtiyacı Hesaplayıcı', slug: 'su-ihtiyaci', icon: 'fa-droplet', color: 'text-cyan-500', bg: 'bg-cyan-50' },
+                          { name: 'Alerjen Planlayıcı', slug: 'alerjen-planlayici', icon: 'fa-shield-halved', color: 'text-red-500', bg: 'bg-red-50' },
+                          { name: 'Ek Gıda Rehberi', slug: 'ek-gida-rehberi', icon: 'fa-book-open', color: 'text-green-500', bg: 'bg-green-50' },
+                          { name: 'Bu Gıda Verilir mi?', slug: 'bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'text-amber-500', bg: 'bg-amber-50' },
                         ].sort(() => Math.random() - 0.5).slice(0, 4).map((tool) => (
                           <Link
                             key={tool.slug}
                             href={`/akilli-asistan/${tool.slug}`}
-                            className={`${tool.color} rounded-xl p-3 text-center hover:scale-105 transition-transform`}
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
                           >
-                            <span className="text-2xl block mb-1">{tool.icon}</span>
-                            <span className="text-xs font-medium text-slate-700">{tool.name}</span>
+                            <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center`}>
+                              <i className={`fa-solid ${tool.icon} ${tool.color}`}></i>
+                            </div>
+                            <span className="font-medium text-slate-700 group-hover:text-orange-500 transition-colors text-sm">
+                              {tool.name}
+                            </span>
+                            <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
                           </Link>
                         ))}
                       </div>
@@ -798,6 +825,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </Link>
                     </div>
 
+                    </div>
                 </div>
             </div>
 
