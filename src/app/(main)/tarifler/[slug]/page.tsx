@@ -620,9 +620,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                                 )}
                             </div>
                         </div>
-                                )}
-                            </div>
-                        </div>
 
                         <div className="bg-red-50 rounded-2xl p-6 border border-red-100">
                             <h4 className="font-bold text-slate-800 mb-3 flex items-center">
