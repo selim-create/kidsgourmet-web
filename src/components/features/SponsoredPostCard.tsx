@@ -15,6 +15,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   const { isFavorite, toggleFavorite } = useFavorites();
   const sponsorData = post.sponsor_data;
   const isSponsored = sponsorData?.is_sponsored ?? false;
+  const isFav = isFavorite(post.id, 'post');
 
   // Helper functions
   const stripHtml = (html: string) => {
@@ -126,9 +127,11 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
         {/* Favorite Button - Top Right */}
         <button 
           onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
           className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-10"
         >
-          <i className={isFavorite(post.id, 'post') ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart text-white"}></i>
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart text-white"}></i>
         </button>
         
         <div className="absolute bottom-0 left-0 p-8 md:p-12 max-w-4xl">
@@ -235,9 +238,11 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
         {/* Favorite Button - Top Right */}
         <button 
           onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
           className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
         >
-          <i className={isFavorite(post.id, 'post') ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
         </button>
         
         {/* Sponsor Logo - Bottom Left (for sponsored posts) */}

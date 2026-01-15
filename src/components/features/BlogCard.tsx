@@ -122,6 +122,8 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         {/* Favori Butonu */}
         <button 
           onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
           className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-10"
         >
           <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart text-white"}></i>
@@ -241,6 +243,8 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         {/* Favorite Button - Top Right */}
         <button 
           onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
           className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
         >
           <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>

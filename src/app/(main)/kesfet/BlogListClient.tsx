@@ -58,13 +58,17 @@ export default function BlogListClient() {
   const handleCategoryChange = (category: number | "Tümü") => {
     setActiveCategory(category);
     setCurrentPage(1);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // Sayfa değiştiğinde scroll to top
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
