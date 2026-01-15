@@ -154,7 +154,7 @@ export default function BuGidaVerilirMiPage() {
                       className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
                     >
                       <img 
-                        src={ingredient.image} 
+                        src={ingredient.image || 'https://placehold.co/400x400/AED581/ffffff?text=Malzeme'} 
                         alt={ingredient.name}
                         className="w-10 h-10 rounded-lg object-cover"
                       />

@@ -285,18 +285,42 @@ export const toolService = {
     startDate: string,
     endDate: string
   ): Promise<FoodTrial[]> => {
-    return fetchAuthAPI<FoodTrial[]>(
+    const response = await fetchAuthAPI<{ trials: FoodTrial[]; total: number }>(
       `${API_ENDPOINTS.FOOD_TRIALS}?child_id=${childId}&start_date=${startDate}&end_date=${endDate}`
     );
+    return response.trials || [];
   },
 
   /**
    * Yeni besin denemesi ekle
    */
   addFoodTrial: async (trial: FoodTrialInput): Promise<FoodTrial> => {
-    return fetchAuthAPI<FoodTrial>(API_ENDPOINTS.FOOD_TRIAL_ADD, {
+    // Backend FoodTrialController expects: child_id, ingredient_id, trial_date, result
+    // Frontend sends: child_id, ingredient_name, trial_date, form, reaction, etc.
+    
+    // Reaction mapping: Frontend reaction -> Backend result
+    const mapReactionToResult = (reaction?: string): string => {
+      switch (reaction) {
+        case 'none': return 'success';
+        case 'mild': return 'mild_reaction';
+        case 'moderate': return 'reaction';
+        case 'severe': return 'severe_reaction';
+        default: return 'success';
+      }
+    };
+    
+    return fetchAuthAPI<FoodTrial>(API_ENDPOINTS.FOOD_TRIALS, {
       method: 'POST',
-      body: JSON.stringify(trial),
+      body: JSON.stringify({
+        child_id: trial.child_id,
+        ingredient_name: trial.ingredient_name,
+        ...(trial.ingredient_id && { ingredient_id: trial.ingredient_id }),
+        trial_date: trial.trial_date,
+        result: mapReactionToResult(trial.reaction),
+        reaction_notes: trial.reaction_notes || '',
+        amount: trial.rating ? trial.rating.toString() : '',
+        form: trial.form || '',
+      }),
     });
   },
 

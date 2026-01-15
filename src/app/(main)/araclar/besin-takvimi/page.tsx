@@ -1,40 +1,33 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { toolService } from '@/services/tool-service';
+import { ingredientService } from '@/services/ingredient-service';
 import { toast } from 'sonner';
-import type { FoodTrial, FoodTrialInput } from '@/lib/types';
+import type { FoodTrial, FoodTrialInput, Ingredient } from '@/lib/types';
 
 export default function BesinTakvimiPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, children, activeChild } = useUser();
+  const { isAuthenticated, isLoading: authLoading, activeChild } = useUser();
   const [trials, setTrials] = useState<FoodTrial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
   
   // Form state
-  const [newTrialName, setNewTrialName] = useState('');
   const [newTrialDate, setNewTrialDate] = useState(new Date().toISOString().split('T')[0]);
   const [newTrialForm, setNewTrialForm] = useState<'puree' | 'finger_food' | 'mixed'>('puree');
   const [newTrialReaction, setNewTrialReaction] = useState<'none' | 'mild' | 'moderate' | 'severe'>('none');
   const [newTrialNotes, setNewTrialNotes] = useState('');
   const [newTrialRating, setNewTrialRating] = useState<number>(0);
-
-  useEffect(() => {
-    if (authLoading) return; // Wait for auth check to complete
-    
-    if (!isAuthenticated) {
-      router.push('/giris?redirect=/araclar/besin-takvimi');
-      return;
-    }
-
-    if (activeChild) {
-      loadTrials();
-    }
-  }, [isAuthenticated, authLoading, activeChild, currentWeekStart]);
+  
+  // Ingredient autocomplete state
+  const [ingredientSearch, setIngredientSearch] = useState('');
+  const [ingredientSuggestions, setIngredientSuggestions] = useState<Ingredient[]>([]);
+  const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
@@ -53,7 +46,7 @@ export default function BesinTakvimiPage() {
     return dates;
   }
 
-  const loadTrials = async () => {
+  const loadTrials = useCallback(async () => {
     if (!activeChild) return;
 
     setIsLoading(true);
@@ -73,20 +66,55 @@ export default function BesinTakvimiPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeChild, currentWeekStart]);
+
+  useEffect(() => {
+    if (authLoading) return; // Wait for auth check to complete
+    
+    if (!isAuthenticated) {
+      router.push('/giris?redirect=/araclar/besin-takvimi');
+      return;
+    }
+
+    if (activeChild) {
+      loadTrials();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, authLoading, activeChild, currentWeekStart, loadTrials]);
+
+  // Ingredient search effect
+  useEffect(() => {
+    const searchIngredients = async () => {
+      if (ingredientSearch.length < 2) {
+        setIngredientSuggestions([]);
+        return;
+      }
+      try {
+        const results = await ingredientService.search(ingredientSearch);
+        setIngredientSuggestions(results.slice(0, 5));
+      } catch (error) {
+        console.error('Search error:', error);
+      }
+    };
+    const debounce = setTimeout(searchIngredients, 300);
+    return () => clearTimeout(debounce);
+  }, [ingredientSearch]);
 
   const handleAddTrial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!activeChild) return;
 
-    if (!newTrialName.trim()) {
+    const finalName = selectedIngredient ? selectedIngredient.name : ingredientSearch;
+    
+    if (!finalName.trim()) {
       toast.error('Lütfen besin adı girin');
       return;
     }
 
     const trialInput: FoodTrialInput = {
       child_id: activeChild.id,
-      ingredient_name: newTrialName,
+      ingredient_id: selectedIngredient?.id,
+      ingredient_name: finalName,
       trial_date: newTrialDate,
       form: newTrialForm,
       reaction: newTrialReaction,
@@ -107,12 +135,15 @@ export default function BesinTakvimiPage() {
   };
 
   const resetForm = () => {
-    setNewTrialName('');
     setNewTrialDate(new Date().toISOString().split('T')[0]);
     setNewTrialForm('puree');
     setNewTrialReaction('none');
     setNewTrialNotes('');
     setNewTrialRating(0);
+    setIngredientSearch('');
+    setSelectedIngredient(null);
+    setIngredientSuggestions([]);
+    setShowSuggestions(false);
   };
 
   const getTrialsForDate = (date: Date): FoodTrial[] => {
@@ -175,7 +206,7 @@ export default function BesinTakvimiPage() {
             onClick={() => router.push('/dashboard')}
             className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold transition-colors"
           >
-            Dashboard'a Git
+            Dashboard&apos;a Git
           </button>
         </div>
       </div>
@@ -362,14 +393,80 @@ export default function BesinTakvimiPage() {
                 <label className="block text-sm font-bold text-slate-800 mb-2">
                   Besin Adı <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={newTrialName}
-                  onChange={(e) => setNewTrialName(e.target.value)}
-                  placeholder="Örn: Elma, Havuç..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={selectedIngredient ? selectedIngredient.name : ingredientSearch}
+                    onChange={(e) => {
+                      setIngredientSearch(e.target.value);
+                      setSelectedIngredient(null);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    placeholder="Örn: Elma, Havuç... (aramaya başlayın)"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    required
+                  />
+                  
+                  {/* Autocomplete Suggestions */}
+                  {showSuggestions && ingredientSuggestions.length > 0 && !selectedIngredient && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                      {ingredientSuggestions.map((ingredient) => (
+                        <button
+                          key={ingredient.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedIngredient(ingredient);
+                            setIngredientSearch('');
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
+                        >
+                          <img 
+                            src={ingredient.image || 'https://placehold.co/400x400/AED581/ffffff?text=Malzeme'} 
+                            alt={ingredient.name}
+                            className="w-10 h-10 rounded-lg object-cover"
+                          />
+                          <div>
+                            <div className="font-medium text-slate-800">{ingredient.name}</div>
+                            <div className="text-xs text-gray-500">{ingredient.start_age}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Selected Ingredient Display */}
+                  {selectedIngredient && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <img 
+                          src={selectedIngredient.image || 'https://placehold.co/400x400/AED581/ffffff?text=Malzeme'} 
+                          alt={selectedIngredient.name}
+                          className="w-10 h-10 rounded-lg object-cover"
+                        />
+                        <div>
+                          <div className="font-medium text-slate-800">{selectedIngredient.name}</div>
+                          <div className="text-xs text-gray-600">{selectedIngredient.start_age}</div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIngredient(null);
+                          setIngredientSearch('');
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <i className="fa-solid fa-times"></i>
+                      </button>
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Rehberdeki malzemelerden seçebilir veya kendiniz yazabilirsiniz
+                  </p>
+                </div>
               </div>
 
               <div>
@@ -416,7 +513,7 @@ export default function BesinTakvimiPage() {
                 </label>
                 <select
                   value={newTrialReaction}
-                  onChange={(e) => setNewTrialReaction(e.target.value as any)}
+                  onChange={(e) => setNewTrialReaction(e.target.value as 'none' | 'mild' | 'moderate' | 'severe')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   <option value="none">✓ Yok / İyi</option>
