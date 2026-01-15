@@ -25,7 +25,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const { ageGroups } = useAgeGroups();
-  const { user, isAuthenticated } = useUser();
+  const { isAuthenticated } = useUser();
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -157,7 +157,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   };
 
   // Helper to find substitute for an ingredient
-  const getSubstituteForIngredient = (ingredientName: string) => {
+  const getSubstituteForIngredient = (ingredientName?: string) => {
     if (!recipe?.substitutes || !ingredientName) return null;
     return recipe.substitutes.find(
       sub => sub.original?.toLowerCase() === ingredientName.toLowerCase()
