@@ -25,6 +25,30 @@ const monthToSeason: Record<number, string[]> = {
   11: ['Kış'],       // Aralık
 };
 
+// Fisher-Yates shuffle algoritması
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+// Kategori icon mapping'i genişlet
+const categoryIcons: Record<string, string> = {
+  'Sebzeler': 'fa-carrot',
+  'Meyveler': 'fa-apple-whole',
+  'Tahıllar': 'fa-wheat-awn',
+  'Proteinler': 'fa-drumstick-bite',
+  'Süt Ürünleri': 'fa-cheese',
+  'Baklagiller': 'fa-seedling',
+  'Yağlar': 'fa-droplet',
+  'Sıvılar': 'fa-glass-water',
+  'Baharatlar': 'fa-pepper-hot',
+  'Özel Ürünler': 'fa-star',
+};
+
 export default function IngredientsGuidePage() {
   const [activeCategory, setActiveCategory] = useState("Tümü");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -38,6 +62,17 @@ export default function IngredientsGuidePage() {
   
   // Mevsimlik malzemeler
   const [seasonalIngredients, setSeasonalIngredients] = useState<Ingredient[]>([]);
+  
+  // Favori state
+  const [favorites, setFavorites] = useState<number[]>([]);
+
+  // LocalStorage'dan favorileri yükle
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem('ingredient-favorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+  }, []);
 
   // Kategorileri ve malzemeleri yükle
   useEffect(() => {
@@ -53,12 +88,13 @@ export default function IngredientsGuidePage() {
         const data = await ingredientService.getAll();
         setIngredients(data || []);
         
-        // Mevsimlik malzemeleri filtrele
+        // Mevsimlik malzemeleri filtrele ve shuffle et
         const currentMonth = new Date().getMonth();
         const currentSeasons = monthToSeason[currentMonth];
-        const seasonal = (data || []).filter(ing => 
+        const seasonalFiltered = (data || []).filter(ing => 
           ing.season && currentSeasons.some(season => ing.season?.includes(season))
-        ).slice(0, 6);
+        );
+        const seasonal = shuffleArray(seasonalFiltered).slice(0, 6);
         setSeasonalIngredients(seasonal);
         
       } catch (error) {
@@ -93,6 +129,21 @@ export default function IngredientsGuidePage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Toggle favori fonksiyonu
+  const toggleFavorite = (e: React.MouseEvent, ingredientId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setFavorites(prev => {
+      const newFavorites = prev.includes(ingredientId)
+        ? prev.filter(id => id !== ingredientId)
+        : [...prev, ingredientId];
+      
+      localStorage.setItem('ingredient-favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  };
+
   // Filtreleme logic
   const displayedIngredients = searchQuery.trim().length >= 2 
     ? searchResults
@@ -107,8 +158,8 @@ export default function IngredientsGuidePage() {
     <div className="bg-gray-50 min-h-screen">
 
       {/* HERO & SEARCH */}
-      {/* DÜZELTME: -mt-8 kaldırıldı, tam genişlik için -mx sınıfları eklendi */}
-      <div className="bg-green-50/50 relative overflow-hidden pb-16 pt-12 -mx-4 sm:-mx-6 lg:-mx-8">
+      {/* DÜZELTME: -mx kaldırıldı, layout zaten full-width */}
+      <div className="bg-green-50/50 relative overflow-hidden pb-16 pt-12">
           {/* Decor */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-green-100/50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-100/50 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
@@ -123,8 +174,8 @@ export default function IngredientsGuidePage() {
               <div className="relative max-w-2xl mx-auto">
                   <input 
                     type="text" 
-                    placeholder="Merak ettiğiniz besini yazın (Örn: Yumurta, Çilek...)" 
-                    className="w-full py-4 pl-14 pr-6 rounded-full shadow-lg border-2 border-white focus:border-green-400 outline-none text-gray-700 font-medium transition-colors"
+                    placeholder="Merak ettiğiniz besini yazın..." 
+                    className="w-full py-3 md:py-4 pl-12 md:pl-14 pr-4 md:pr-6 rounded-full shadow-lg border-2 border-white focus:border-green-400 outline-none text-gray-700 font-medium transition-colors text-sm md:text-base"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -158,18 +209,24 @@ export default function IngredientsGuidePage() {
               </div>
 
               {/* Horizontal Scroll Grid */}
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                   {seasonalIngredients.length > 0 ? (
                     seasonalIngredients.map((ingredient) => (
                       <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="group text-center">
-                          <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-orange-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all">
-                              <img src={ingredient.image || `https://placehold.co/150x150/FF8A65/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover" alt={ingredient.name} />
+                          <div className="relative">
+                            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-orange-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all">
+                                <img src={ingredient.image || `https://placehold.co/150x150/FF8A65/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover" alt={ingredient.name} />
+                            </div>
+                            {/* Başlangıç Ayı Badge */}
+                            <div className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                              {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : `${ingredient.start_age}+`}
+                            </div>
                           </div>
                           <span className="text-sm font-bold text-slate-700 group-hover:text-orange-500 transition-colors">{ingredient.name}</span>
                       </Link>
                     ))
                   ) : (
-                    <div className="col-span-3 md:col-span-6 text-center text-gray-500 py-4">
+                    <div className="col-span-2 sm:col-span-3 md:col-span-6 text-center text-gray-500 py-4">
                       <p className="text-sm">Bu ay için mevsimlik malzeme bulunamadı.</p>
                     </div>
                   )}
@@ -181,28 +238,27 @@ export default function IngredientsGuidePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           
           {/* Category Tabs */}
-          <div className="flex flex-wrap gap-3 mb-8 justify-center">
-              {categories.map((cat) => (
-                  <button 
-                      key={cat}
-                      onClick={() => setActiveCategory(cat)}
-                      className={`px-6 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 ${
-                          activeCategory === cat 
-                          ? "bg-slate-800 text-white shadow-md transform scale-105" 
-                          : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
-                      }`}
-                  >
-                      {cat === "Sebzeler" && <i className="fa-solid fa-carrot"></i>}
-                      {cat === "Meyveler" && <i className="fa-solid fa-apple-whole"></i>}
-                      {cat === "Tahıllar" && <i className="fa-solid fa-wheat-awn"></i>}
-                      {cat === "Protein" && <i className="fa-solid fa-drumstick-bite"></i>}
-                      {cat}
-                  </button>
-              ))}
+          <div className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-3 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
+                  {categories.map((cat) => (
+                      <button 
+                          key={cat}
+                          onClick={() => setActiveCategory(cat)}
+                          className={`px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap ${
+                              activeCategory === cat 
+                              ? "bg-slate-800 text-white shadow-md transform scale-105" 
+                              : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
+                          }`}
+                      >
+                          {categoryIcons[cat] && <i className={`fa-solid ${categoryIcons[cat]}`}></i>}
+                          {cat}
+                      </button>
+                  ))}
+              </div>
           </div>
 
           {/* Ingredient Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
 
               {loading ? (
                 <div className="col-span-full flex justify-center items-center h-64">
@@ -210,19 +266,28 @@ export default function IngredientsGuidePage() {
                 </div>
               ) : displayedIngredients.length > 0 ? (
                 displayedIngredients.map((ingredient) => (
-                  <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col relative overflow-hidden">
+                  <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
                       <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
-                          <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={ingredient.name} />
+                          <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={ingredient.name} />
                           
-                          {/* Başlangıç Yaşı Badge */}
+                          {/* Başlangıç Yaşı Badge - Sol Üst */}
                           <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
                               <i className="fa-solid fa-baby text-green-500 mr-1"></i> 
                               {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : `${ingredient.start_age} ay`}
                           </div>
                           
-                          {/* Mevsim Badge (sağ üst) */}
+                          {/* Favori Butonu - Sağ Üst */}
+                          <button 
+                            onClick={(e) => toggleFavorite(e, ingredient.id)}
+                            className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
+                            aria-label={favorites.includes(ingredient.id) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+                          >
+                            <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart ${favorites.includes(ingredient.id) ? 'text-red-500' : 'text-gray-400'}`}></i>
+                          </button>
+                          
+                          {/* Mevsim Badge - Sağ Alt (eğer mevsim varsa) */}
                           {ingredient.season && ingredient.season !== 'Tüm Yıl' && (
-                            <div className="absolute top-2 right-2 bg-yellow-100/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-yellow-700 shadow-sm">
+                            <div className="absolute bottom-2 right-2 bg-yellow-100/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-yellow-700 shadow-sm">
                               <i className="fa-solid fa-sun mr-1"></i> {ingredient.season}
                             </div>
                           )}
@@ -238,7 +303,7 @@ export default function IngredientsGuidePage() {
                       <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">{ingredient.name}</h3>
                       <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ingredient.description}</p>
                       
-                      {/* Alt badges */}
+                      {/* Alt badges - Alerjen ve Mevsim */}
                       <div className="mt-auto flex items-center gap-2 flex-wrap">
                         {/* Alerji Risk Badge */}
                         <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
@@ -249,6 +314,14 @@ export default function IngredientsGuidePage() {
                           {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
                           {ingredient.allergy_risk || 'Düşük'} Alerjen
                         </span>
+                        
+                        {/* Mevsim Badge (kart altında da göster) */}
+                        {ingredient.season && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded bg-blue-50 text-blue-600 border border-blue-100">
+                            <i className="fa-solid fa-leaf mr-1"></i>
+                            {ingredient.season}
+                          </span>
+                        )}
                       </div>
                   </Link>
                 ))
