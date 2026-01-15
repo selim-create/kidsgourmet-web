@@ -189,6 +189,8 @@ export interface IngredientNutrition {
   fat?: string;
   fiber?: string;
   vitamins?: string;
+  sugar?: string;
+  minerals?: string;
 }
 
 // 🆕 Besin değerleri (100g başına) - Backend konsolidasyonu
