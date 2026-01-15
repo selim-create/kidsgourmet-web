@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { toolService } from '@/services/tool-service';
@@ -10,7 +10,7 @@ import type { FoodTrial, FoodTrialInput, Ingredient } from '@/lib/types';
 
 export default function BesinTakvimiPage() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: authLoading, children, activeChild } = useUser();
+  const { isAuthenticated, isLoading: authLoading, activeChild } = useUser();
   const [trials, setTrials] = useState<FoodTrial[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -41,7 +41,7 @@ export default function BesinTakvimiPage() {
     if (activeChild) {
       loadTrials();
     }
-  }, [isAuthenticated, authLoading, activeChild, currentWeekStart]);
+  }, [isAuthenticated, authLoading, activeChild, currentWeekStart, router, loadTrials]);
 
   // Ingredient search effect
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function BesinTakvimiPage() {
     return dates;
   }
 
-  const loadTrials = async () => {
+  const loadTrials = useCallback(async () => {
     if (!activeChild) return;
 
     setIsLoading(true);
@@ -98,7 +98,7 @@ export default function BesinTakvimiPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [activeChild, currentWeekStart]);
 
   const handleAddTrial = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,7 +207,7 @@ export default function BesinTakvimiPage() {
             onClick={() => router.push('/dashboard')}
             className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold transition-colors"
           >
-            Dashboard'a Git
+            Dashboard&apos;a Git
           </button>
         </div>
       </div>
@@ -514,7 +514,7 @@ export default function BesinTakvimiPage() {
                 </label>
                 <select
                   value={newTrialReaction}
-                  onChange={(e) => setNewTrialReaction(e.target.value as any)}
+                  onChange={(e) => setNewTrialReaction(e.target.value as 'none' | 'mild' | 'moderate' | 'severe')}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   <option value="none">✓ Yok / İyi</option>
