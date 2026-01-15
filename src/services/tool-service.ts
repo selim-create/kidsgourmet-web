@@ -5,7 +5,9 @@ import type {
   BLWTestConfig, 
   BLWTestResult,
   BLWTestAnswer,
-  RegisterData
+  RegisterData,
+  PercentileMeasurement,
+  PercentileResult
 } from '@/lib/types';
 
 /**
@@ -100,5 +102,72 @@ export const toolService = {
    */
   getChildBLWResults: async (childId: string): Promise<BLWTestResult[]> => {
     return fetchAuthAPI<BLWTestResult[]>(API_ENDPOINTS.CHILD_BLW_RESULTS(childId));
+  },
+
+  // ===============================
+  // PERSENTİL HESAPLAYICI METODLARI
+  // ===============================
+
+  /**
+   * Persentil hesapla
+   */
+  calculatePercentile: async (
+    measurement: PercentileMeasurement
+  ): Promise<PercentileResult> => {
+    return fetchAPI<PercentileResult>(API_ENDPOINTS.PERCENTILE_CALCULATE, {
+      method: 'POST',
+      body: JSON.stringify(measurement),
+    });
+  },
+
+  /**
+   * Persentil sonucunu kaydet (kayıtlı kullanıcı)
+   */
+  savePercentileResult: async (
+    result: PercentileResult,
+    childId?: string
+  ): Promise<PercentileResult> => {
+    return fetchAuthAPI<PercentileResult>(API_ENDPOINTS.PERCENTILE_SAVE, {
+      method: 'POST',
+      body: JSON.stringify({ ...result, child_id: childId }),
+    });
+  },
+
+  /**
+   * Persentil sonucunu kaydet ve kayıt ol (yeni kullanıcı)
+   */
+  savePercentileWithRegistration: async (
+    result: PercentileResult,
+    registrationData: RegisterData & { child_name?: string; child_birth_date?: string }
+  ): Promise<{ result: PercentileResult; token: string }> => {
+    return fetchAPI<{ result: PercentileResult; token: string }>(
+      API_ENDPOINTS.PERCENTILE_SAVE,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          ...result,
+          register: true,
+          email: registrationData.email,
+          password: registrationData.password,
+          name: registrationData.name,
+          child_name: registrationData.child_name,
+          child_birth_date: registrationData.child_birth_date,
+        }),
+      }
+    );
+  },
+
+  /**
+   * Çocuğun persentil geçmişini getir
+   */
+  getChildPercentileHistory: async (childId: string): Promise<PercentileResult[]> => {
+    return fetchAuthAPI<PercentileResult[]>(API_ENDPOINTS.CHILD_PERCENTILE_RESULTS(childId));
+  },
+
+  /**
+   * Kullanıcının persentil sonuçlarını getir
+   */
+  getUserPercentileResults: async (): Promise<PercentileResult[]> => {
+    return fetchAuthAPI<PercentileResult[]>(API_ENDPOINTS.USER_PERCENTILE_RESULTS);
   },
 };

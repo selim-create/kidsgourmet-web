@@ -89,4 +89,10 @@ export const API_ENDPOINTS = {
   BLW_TEST_SUBMIT: `${KG_API_NAMESPACE}/tools/blw-test/submit`,
   USER_BLW_RESULTS: `${KG_API_NAMESPACE}/user/blw-results`,
   CHILD_BLW_RESULTS: (childId: string) => `${KG_API_NAMESPACE}/user/children/${childId}/blw-results`,
+  
+  // Percentile Calculator
+  PERCENTILE_CALCULATE: `${KG_API_NAMESPACE}/tools/percentile/calculate`,
+  PERCENTILE_SAVE: `${KG_API_NAMESPACE}/tools/percentile/save`,
+  USER_PERCENTILE_RESULTS: `${KG_API_NAMESPACE}/user/percentile-results`,
+  CHILD_PERCENTILE_RESULTS: (childId: string) => `${KG_API_NAMESPACE}/user/children/${childId}/percentile-results`,
 } as const;

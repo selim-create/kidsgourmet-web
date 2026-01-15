@@ -696,3 +696,59 @@ export interface BLWRedFlag {
   message: string;
   severity: 'warning' | 'critical';
 }
+
+// ===============================
+// PERSENTİL HESAPLAYICI TİPLERİ
+// ===============================
+
+export interface PercentileMeasurement {
+  gender: 'male' | 'female';
+  birth_date: string;
+  measurement_date: string;
+  weight_kg?: number;
+  height_cm?: number;
+  head_circumference_cm?: number;
+}
+
+export interface PercentileValue {
+  measurement_type: 'weight_for_age' | 'height_for_age' | 'head_for_age' | 'weight_for_height' | 'bmi_for_age';
+  value: number;
+  percentile: number;
+  z_score: number;
+  category: 'very_low' | 'low' | 'normal' | 'high' | 'very_high';
+  interpretation: string;
+}
+
+export interface PercentileResult {
+  id?: string;
+  child_id?: string;
+  measurement: PercentileMeasurement;
+  age_in_days: number;
+  age_in_months: number;
+  percentiles: PercentileValue[];
+  red_flags: PercentileRedFlag[];
+  created_at: string;
+}
+
+export interface PercentileRedFlag {
+  type: 'weight' | 'height' | 'head' | 'growth_deviation';
+  message: string;
+  severity: 'warning' | 'critical';
+}
+
+export interface PercentileConfig {
+  disclaimer_text: string;
+  emergency_text: string;
+  interpretation_texts: {
+    very_low: string;
+    low: string;
+    normal: string;
+    high: string;
+    very_high: string;
+  };
+}
+
+export interface PercentileHistory {
+  child_id: string;
+  measurements: PercentileResult[];
+}
