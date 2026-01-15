@@ -250,7 +250,7 @@ export default function StainEncyclopediaPage() {
                 </div>
 
                 {/* Warnings */}
-                {selectedStain.warnings.length > 0 && (
+                {selectedStain.warnings?.length > 0 && (
                   <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                     <h3 className="font-bold text-lg text-amber-900 mb-4 flex items-center gap-2">
                       <i className="fa-solid fa-triangle-exclamation"></i>
@@ -268,7 +268,7 @@ export default function StainEncyclopediaPage() {
                 )}
 
                 {/* Related Ingredients */}
-                {selectedStain.related_ingredients.length > 0 && (
+                {selectedStain.related_ingredients?.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-lg p-6">
                     <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                       <i className="fa-solid fa-flask text-violet-500"></i>
