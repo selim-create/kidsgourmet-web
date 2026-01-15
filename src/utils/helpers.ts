@@ -144,7 +144,7 @@ export function formatRelativeTime(dateString: string): string {
  */
 export function isUserExpert(user: { is_expert?: boolean; role?: string } | null | undefined): boolean {
   if (!user) return false;
-  return user.is_expert || ['administrator', 'editor', 'author', 'kg_expert'].includes(user.role || '');
+  return user.is_expert === true || ['administrator', 'editor', 'author', 'kg_expert'].includes(user.role || '');
 }
 
 /**
@@ -158,8 +158,16 @@ export function getDashboardUrl(user: { is_expert?: boolean; role?: string } | n
 /**
  * Get public profile URL based on user role
  * Experts: /uzman/{username}, Parents: /profil/{username}
+ * Returns default /profil if username is invalid
  */
 export function getPublicProfileUrl(user: { is_expert?: boolean; role?: string; username?: string } | null | undefined): string {
-  if (!user?.username) return '/profil';
-  return isUserExpert(user) ? `/uzman/${user.username}` : `/profil/${user.username}`;
+  // Validate username exists and contains only safe characters
+  if (!user?.username || !/^[a-zA-Z0-9_-]+$/.test(user.username)) {
+    return '/profil';
+  }
+  
+  // Encode username for URL safety (though validation should catch most issues)
+  const safeUsername = encodeURIComponent(user.username);
+  
+  return isUserExpert(user) ? `/uzman/${safeUsername}` : `/profil/${safeUsername}`;
 }
