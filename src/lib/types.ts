@@ -620,7 +620,12 @@ export type ToolType =
   | 'solid_food_readiness' 
   | 'food_checker' 
   | 'allergen_planner' 
-  | 'food_trial_calendar';
+  | 'food_trial_calendar'
+  | 'bath_planner'
+  | 'hygiene_calculator'
+  | 'diaper_calculator'
+  | 'air_quality'
+  | 'stain_encyclopedia';
 
 export interface Tool {
   id: number;
@@ -631,6 +636,7 @@ export interface Tool {
   tool_type: ToolType;
   is_active: boolean;
   requires_auth: boolean;
+  is_sponsored?: boolean;
   seo?: SEOData;
 }
 
@@ -883,4 +889,99 @@ export interface FoodTrialSummary {
   new_this_week: number;
   reactions: FoodTrial[];
   latest_trials: FoodTrial[];
+}
+
+// ===============================
+// SPONSORLU ARAÇLAR TİPLERİ
+// ===============================
+
+export type SponsoredToolType = 
+  | 'bath_planner'
+  | 'hygiene_calculator'
+  | 'diaper_calculator'
+  | 'air_quality'
+  | 'stain_encyclopedia';
+
+export interface ToolSponsorData {
+  is_sponsored: boolean;
+  sponsor_name: string;
+  sponsor_logo: string | null;
+  sponsor_light_logo: string | null;
+  sponsor_tagline: string;
+  sponsor_cta_text: string;
+  sponsor_cta_url: string;
+  gam_impression_url: string | null;
+  gam_click_url: string | null;
+}
+
+// Banyo Planlayıcı
+export interface BathPlannerConfig {
+  skin_types: { id: string; label: string }[];
+  seasons: { id: string; label: string }[];
+  frequency_options: { id: string; label: string; description: string }[];
+  sponsor?: ToolSponsorData;
+}
+
+export interface BathPlannerResult {
+  recommended_frequency: string;
+  weekly_schedule: { day: string; bath: boolean; note?: string }[];
+  tips: string[];
+  warnings: string[];
+  product_recommendations: string[];
+  sponsor?: ToolSponsorData;
+}
+
+// Hijyen Hesaplayıcı
+export interface HygieneCalculatorResult {
+  daily_wipes_needed: number;
+  weekly_wipes_needed: number;
+  monthly_wipes_needed: number;
+  recommendations: string[];
+  carry_bag_essentials: string[];
+  sponsor?: ToolSponsorData;
+}
+
+// Bez Hesaplayıcı
+export interface DiaperCalculatorResult {
+  recommended_size: string;
+  size_range: string;
+  daily_count: number;
+  monthly_count: number;
+  monthly_packs: number;
+  pack_type: string;
+  size_change_alert?: string;
+  tips: string[];
+  sponsor?: ToolSponsorData;
+}
+
+export interface RashRiskResult {
+  risk_level: 'low' | 'medium' | 'high';
+  risk_score: number;
+  risk_factors: string[];
+  prevention_tips: string[];
+  sponsor?: ToolSponsorData;
+}
+
+// Hava Kalitesi
+export interface AirQualityResult {
+  risk_level: 'low' | 'medium' | 'high';
+  risk_score: number;
+  risk_factors: { factor: string; impact: string }[];
+  recommendations: string[];
+  seasonal_alerts: string[];
+  sponsor?: ToolSponsorData;
+}
+
+// Leke Ansiklopedisi
+export interface StainGuide {
+  id: number;
+  slug: string;
+  name: string;
+  emoji: string;
+  category: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  steps: { step: number; instruction: string; tip?: string }[];
+  warnings: string[];
+  related_ingredients: string[];
+  sponsor?: ToolSponsorData;
 }

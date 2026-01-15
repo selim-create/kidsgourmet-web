@@ -112,4 +112,14 @@ export const API_ENDPOINTS = {
   FOOD_TRIAL_ADD: `${KG_API_NAMESPACE}/tools/food-trials`,
   FOOD_TRIAL_SUMMARY: (childId: string, startDate: string, endDate: string) => 
     `${KG_API_NAMESPACE}/tools/food-trials/summary?child_id=${childId}&start_date=${startDate}&end_date=${endDate}`,
+  
+  // Sponsored Tools
+  BATH_PLANNER_CONFIG: `${KG_API_NAMESPACE}/tools/bath-planner/config`,
+  BATH_PLANNER_GENERATE: `${KG_API_NAMESPACE}/tools/bath-planner/generate`,
+  HYGIENE_CALCULATOR: `${KG_API_NAMESPACE}/tools/hygiene-calculator/calculate`,
+  DIAPER_CALCULATOR: `${KG_API_NAMESPACE}/tools/diaper-calculator/calculate`,
+  DIAPER_RASH_RISK: `${KG_API_NAMESPACE}/tools/diaper-calculator/rash-risk`,
+  AIR_QUALITY_ANALYZE: `${KG_API_NAMESPACE}/tools/air-quality/analyze`,
+  STAIN_SEARCH: `${KG_API_NAMESPACE}/tools/stain-encyclopedia/search`,
+  STAIN_BY_SLUG: (slug: string) => `${KG_API_NAMESPACE}/tools/stain-encyclopedia/${slug}`,
 } as const;
