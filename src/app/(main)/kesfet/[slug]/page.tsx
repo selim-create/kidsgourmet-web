@@ -115,13 +115,16 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveHeading(entry.target.id);
-          }
-        });
+        // Find the most visible (highest intersection ratio) heading
+        const visibleEntries = entries.filter(entry => entry.isIntersecting);
+        if (visibleEntries.length > 0) {
+          const mostVisible = visibleEntries.reduce((prev, current) => 
+            (current.intersectionRatio > prev.intersectionRatio) ? current : prev
+          );
+          setActiveHeading(mostVisible.target.id);
+        }
       },
-      { rootMargin: '-100px 0px -80% 0px' }
+      { rootMargin: '-100px 0px -80% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
 
     headings.forEach((heading) => {
@@ -154,6 +157,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
 
   // Helper functions for data extraction
   const stripHtml = (html: string) => {
+    if (typeof document !== 'undefined') {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      return div.textContent || div.innerText || '';
+    }
+    // Fallback for SSR
     return html.replace(/<[^>]*>/g, '');
   };
 
@@ -190,7 +199,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   // Social sharing functions
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : `https://kidsgourmet.com/kesfet/${slug}`;
   const shareTitle = post ? stripHtml(post.title.rendered) : '';
 
   const shareFacebook = () => {
@@ -206,8 +215,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast.success('Link kopyalandı!');
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      toast.success('Link kopyalandı!');
+    }).catch(() => {
+      toast.error('Link kopyalanamadı. Lütfen manuel olarak kopyalayın.');
+    });
   };
 
   const handleFavorite = async () => {
