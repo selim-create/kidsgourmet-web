@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
-import { RecipeCard, ShoppingListItem } from "@/lib/types";
+import { toolService } from "@/services/tool-service";
+import { RecipeCard, ShoppingListItem, BLWTestResult } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
@@ -15,6 +16,7 @@ export default function DashboardPage() {
   const { user, isAuthenticated, isLoading: userLoading } = useUser();
   const { activeChild, children, setActiveChild } = useActiveChild();
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
+  const [blwResults, setBlwResults] = useState<BLWTestResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,11 +45,13 @@ export default function DashboardPage() {
       
       try {
         // Fetch all data in parallel
-        const [shoppingListData] = await Promise.all([
+        const [shoppingListData, blwResultsData] = await Promise.all([
           userService.getShoppingList(),
+          toolService.getUserBLWResults().catch(() => []),
         ]);
         
         setShoppingList(shoppingListData);
+        setBlwResults(blwResultsData);
       } catch (err) {
         console.error('Dashboard data fetch error:', err);
         setError(err instanceof Error ? err.message : 'Veriler yüklenirken hata oluştu');
@@ -397,6 +401,45 @@ export default function DashboardPage() {
                             </Link>
                         </div>
                     </div>
+
+                    {/* BLW Test Results Widget */}
+                    {blwResults.length > 0 && (
+                      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <i className="fa-solid fa-baby text-green-500"></i>
+                            BLW Hazırlık Testi
+                          </h3>
+                          <Link href="/araclar/blw-testi" className="text-sm text-orange-500 hover:underline">
+                            Tekrar Test Et
+                          </Link>
+                        </div>
+                        
+                        {blwResults.slice(0, 3).map((result, index) => (
+                          <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                              result.score >= 80 ? 'bg-green-500' : 
+                              result.score >= 55 ? 'bg-amber-500' : 'bg-red-500'
+                            }`}>
+                              {result.score}
+                            </div>
+                            <div className="flex-1">
+                              <p className="font-medium text-slate-800">
+                                {result.score >= 80 ? 'Hazır' : result.score >= 55 ? 'Neredeyse Hazır' : 'Biraz Daha Zaman'}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(result.created_at).toLocaleDateString('tr-TR')}
+                              </p>
+                            </div>
+                            {result.red_flags && result.red_flags.length > 0 && (
+                              <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
+                                <i className="fa-solid fa-exclamation text-xs"></i>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
                 </div>
 
