@@ -33,9 +33,15 @@ export function decodeEntities(text: string | null | undefined): string {
   let decoded = text;
   
   // Replace HTML entities (run twice for double-encoded)
+  // Pre-compile regex patterns for better performance
+  const entityPatterns = Object.entries(htmlEntities).map(([entity, char]) => ({
+    pattern: new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+    replacement: char
+  }));
+  
   for (let i = 0; i < 2; i++) {
-    for (const [entity, char] of Object.entries(htmlEntities)) {
-      decoded = decoded.replace(new RegExp(entity, 'gi'), char);
+    for (const { pattern, replacement } of entityPatterns) {
+      decoded = decoded.replace(pattern, replacement);
     }
   }
   

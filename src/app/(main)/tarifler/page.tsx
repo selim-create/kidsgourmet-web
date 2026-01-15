@@ -701,9 +701,8 @@ function RecipeCardComponent({
           {decodeEntities(recipe.title)}
         </h3>
         
-        {/* Recipe Info - prep_time is shown on image badge, removed from here */}
-        <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3 flex-wrap gap-y-1">
-          {recipe.meal_type && (
+        {/* Recipe Info - prep_time badge shown on image above */}
+        <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3 flex-wrap gap-y-1">{recipe.meal_type && (
             <span><i className="fa-solid fa-utensils mr-1"></i> {decodeEntities(recipe.meal_type)}</span>
           )}
           
