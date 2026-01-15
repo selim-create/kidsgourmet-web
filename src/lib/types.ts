@@ -164,12 +164,29 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  username?: string;
   display_name: string;
   parent_role?: 'Anne' | 'Baba' | 'Bakıcı' | 'Diğer';
+  gender?: 'male' | 'female' | 'other';
+  birth_date?: string; // YYYY-MM-DD
   avatar_url?: string;
+  biography?: string;
+  social_links?: SocialLinks;
+  show_email?: boolean;
+  expertise?: string[];
   children: Child[];
   role?: string; // 'subscriber' | 'kg_expert' | 'editor' | 'administrator'
+  is_expert?: boolean;
   created_at: string;
+}
+
+// Sosyal medya linkleri
+export interface SocialLinks {
+  instagram?: string;
+  twitter?: string;
+  linkedin?: string;
+  youtube?: string;
+  website?: string;
 }
 
 export interface Child {
@@ -190,6 +207,8 @@ export interface Child {
 export interface AuthResponse {
   token: string;
   user: User;
+  redirect_url?: string;
+  is_expert?: boolean;
 }
 
 export interface LoginCredentials {
@@ -426,6 +445,51 @@ export interface PublicProfile {
     approved_comments: number;
   };
   recent_questions?: Discussion[];
+}
+
+// Blog yazısı kartı
+export interface BlogPostCard {
+  id: number;
+  title: string;
+  slug: string;
+  image: string;
+  category: string;
+  read_time: string;
+  published_at?: string;
+}
+
+// Cevaplanan soru
+export interface AnsweredQuestion {
+  id: number;
+  title: string;
+  slug: string;
+  answer_excerpt: string;
+  answered_at: string;
+}
+
+// Uzman Public Profil
+export interface ExpertPublicProfile {
+  id: number;
+  username: string;
+  display_name: string;
+  avatar_url?: string;
+  biography?: string;
+  expertise: string[];
+  social_links?: SocialLinks;
+  email?: string;
+  stats: {
+    total_recipes: number;
+    total_blog_posts: number;
+    total_answers: number;
+    total_questions: number;
+  };
+  content: {
+    recipes: RecipeCard[];
+    blog_posts: BlogPostCard[];
+    answered_questions: AnsweredQuestion[];
+    asked_questions: Discussion[];
+  };
+  role: string;
 }
 
 export interface ExpertDashboard {

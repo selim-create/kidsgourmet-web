@@ -33,8 +33,16 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await register(email, password, name);
-      router.push("/dashboard");
+      const response = await register(email, password, name);
+      
+      // Rol tabanlı yönlendirme
+      if (response.redirect_url) {
+        router.push(response.redirect_url);
+      } else if (response.is_expert) {
+        router.push("/dashboard/expert");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt başarısız oldu");
     } finally {

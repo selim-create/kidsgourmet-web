@@ -12,9 +12,9 @@ interface UserContextType {
   children: Child[];
   activeChild: Child | null;
   setActiveChild: (child: Child | null) => void;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ redirect_url?: string; is_expert?: boolean }>;
   logout: () => void;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<{ redirect_url?: string; is_expert?: boolean }>;
   refreshUser: () => Promise<void>;
 }
 
@@ -56,6 +56,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     if (userData?.children && userData.children.length > 0) {
       setActiveChild(userData.children[0]);
     }
+    return {
+      redirect_url: response.redirect_url,
+      is_expert: response.is_expert,
+    };
   };
 
   const logout = () => {
@@ -69,6 +73,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
     // Register sonrası tam profil al
     const userData = await userService.getFullProfile();
     setUser(userData);
+    return {
+      redirect_url: response.redirect_url,
+      is_expert: response.is_expert,
+    };
   };
 
   const refreshUser = async () => {

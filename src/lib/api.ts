@@ -5,7 +5,7 @@ interface FetchOptions extends RequestInit {
 }
 
 // Token yönetimi için yardımcı fonksiyonlar
-const getToken = (): string | null => {
+export const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('kg_token');
 };

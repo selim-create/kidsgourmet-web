@@ -13,6 +13,9 @@ export const authService = {
       user_id: number;
       email: string;
       name: string;
+      username?: string;
+      redirect_url?: string;
+      is_expert?: boolean;
     }>(API_ENDPOINTS.AUTH_LOGIN, {
       method: 'POST',
       body: JSON.stringify({
@@ -34,10 +37,13 @@ export const authService = {
         id: response.user_id,
         email: response.email,
         name: response.name,
+        username: response.username,
         display_name: response.name,
         children: [],
         created_at: new Date().toISOString(),
       },
+      redirect_url: response.redirect_url,
+      is_expert: response.is_expert,
     };
   },
 
@@ -50,6 +56,9 @@ export const authService = {
       user_id: number;
       email: string;
       name: string;
+      username?: string;
+      redirect_url?: string;
+      is_expert?: boolean;
     }>(API_ENDPOINTS.AUTH_REGISTER, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -68,10 +77,13 @@ export const authService = {
         id: response.user_id,
         email: response.email,
         name: response.name,
+        username: response.username,
         display_name: response.name,
         children: [],
         created_at: new Date().toISOString(),
       },
+      redirect_url: response.redirect_url,
+      is_expert: response.is_expert,
     };
   },
 
@@ -84,6 +96,8 @@ export const authService = {
       token: string;
       user: User;
       message: string;
+      redirect_url?: string;
+      is_expert?: boolean;
     }>(API_ENDPOINTS.AUTH_GOOGLE, {
       method: 'POST',
       body: JSON.stringify({ id_token: idToken }),
@@ -96,6 +110,8 @@ export const authService = {
     return {
       token: response.token,
       user: response.user,
+      redirect_url: response.redirect_url,
+      is_expert: response.is_expert,
     };
   },
 

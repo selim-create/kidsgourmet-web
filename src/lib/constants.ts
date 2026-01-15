@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
   // Expert & Public Profile Endpoints
   USER_ME: `${KG_API_NAMESPACE}/user/me`,
   USER_PUBLIC: (username: string) => `${KG_API_NAMESPACE}/user/public/${username}`,
+  EXPERT_PUBLIC: (username: string) => `${KG_API_NAMESPACE}/expert/public/${username}`,
   EXPERT_DASHBOARD: `${KG_API_NAMESPACE}/expert/dashboard`,
   
   // Meal Plans

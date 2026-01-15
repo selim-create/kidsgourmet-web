@@ -21,6 +21,8 @@ export default function LoginPage() {
     if (isScriptLoaded && googleButtonRef.current) {
       initializeGoogleButton('google-signin-button', async () => {
         await refreshUser();
+        // Google login sonrası da rol tabanlı yönlendirme yapılabilir
+        // Ancak authService.googleLogin'den response almamız gerekir
         router.push("/dashboard");
       });
     }
@@ -32,8 +34,16 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(username, password);
-      router.push("/dashboard");
+      const response = await login(username, password);
+      
+      // Rol tabanlı yönlendirme
+      if (response.redirect_url) {
+        router.push(response.redirect_url);
+      } else if (response.is_expert) {
+        router.push("/dashboard/expert");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Giriş başarısız oldu");
     } finally {
