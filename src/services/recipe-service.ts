@@ -7,8 +7,13 @@ export interface RecipeFilters {
   perPage?: number;
   ageGroup?: string;
   dietType?: string;
+  mealType?: string;           // YENİ
+  specialCondition?: string;   // YENİ
+  ingredient?: string;         // YENİ
   allergenFree?: string[];
   search?: string;
+  orderBy?: 'date' | 'popular' | 'prep_time';  // YENİ
+  order?: 'asc' | 'desc';      // YENİ
 }
 
 // Transform function for WordPress REST API format to RecipeCard
@@ -127,16 +132,38 @@ export const recipeService = {
   /**
    * Tüm tarifleri getir (sayfalama ve filtreleme ile)
    */
-  getAll: async (filters: RecipeFilters = {}): Promise<RecipeCard[]> => {
-    const { page = 1, perPage = 12, ageGroup, dietType, search } = filters;
+  getAll: async (filters: RecipeFilters = {}): Promise<{
+    recipes: RecipeCard[];
+    total: number;
+    page: number;
+    per_page: number;
+    total_pages: number;
+  }> => {
+    const { 
+      page = 1, 
+      perPage = 12, 
+      ageGroup, 
+      dietType, 
+      mealType,
+      specialCondition,
+      ingredient,
+      search,
+      orderBy = 'date',
+      order = 'desc'
+    } = filters;
     
     const params = new URLSearchParams({
       page: page.toString(),
       per_page: perPage.toString(),
+      orderby: orderBy,
+      order: order,
     });
     
     if (ageGroup) params.append('age-group', ageGroup);
     if (dietType) params.append('diet-type', dietType);
+    if (mealType) params.append('meal-type', mealType);
+    if (specialCondition) params.append('special-condition', specialCondition);
+    if (ingredient) params.append('ingredient', ingredient);
     if (search) params.append('search', search);
     
     try {
@@ -145,15 +172,39 @@ export const recipeService = {
       
       // Response format kontrolü
       if (Array.isArray(response)) {
-        return response.map(transformRecipe);
+        return {
+          recipes: response.map(transformRecipe),
+          total: response.length,
+          page: page,
+          per_page: perPage,
+          total_pages: 1,
+        };
       } else if (response && Array.isArray(response.data)) {
-        return response.data.map(transformRecipe);
+        return {
+          recipes: response.data.map(transformRecipe),
+          total: response.total || response.data.length,
+          page: response.page || page,
+          per_page: response.per_page || perPage,
+          total_pages: response.total_pages || 1,
+        };
       } else if (response && Array.isArray(response.recipes)) {
-        return response.recipes.map(transformRecipe);
+        return {
+          recipes: response.recipes.map(transformRecipe),
+          total: response.total || response.recipes.length,
+          page: response.page || page,
+          per_page: response.per_page || perPage,
+          total_pages: response.total_pages || 1,
+        };
       }
       
       console.warn('Unexpected API response format:', response);
-      return [];
+      return {
+        recipes: [],
+        total: 0,
+        page: page,
+        per_page: perPage,
+        total_pages: 0,
+      };
     } catch (error) {
       console.log('Falling back to WP REST API for recipes');
       try {
@@ -161,10 +212,22 @@ export const recipeService = {
         const response = await fetchAPI<any[]>(
           `${WP_API_NAMESPACE}/recipe?page=${page}&per_page=${perPage}&_embed`
         );
-        return (response || []).map(transformWPRecipeToCard);
+        return {
+          recipes: (response || []).map(transformWPRecipeToCard),
+          total: response?.length || 0,
+          page: page,
+          per_page: perPage,
+          total_pages: 1,
+        };
       } catch (fallbackError) {
         console.error('Both API calls failed:', fallbackError);
-        return [];
+        return {
+          recipes: [],
+          total: 0,
+          page: page,
+          per_page: perPage,
+          total_pages: 0,
+        };
       }
     }
   },
