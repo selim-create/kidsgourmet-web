@@ -52,7 +52,8 @@ export default function EkGidaRehberiPage() {
     const loadIngredients = async () => {
       setIsLoading(true);
       try {
-        const data = await ingredientService.getAll({ perPage: 100 });
+        const response = await ingredientService.getAll({ perPage: 100 });
+        const data = Array.isArray(response) ? response : response.ingredients;
         setIngredients(data);
         setFilteredIngredients(data);
       } catch (error) {

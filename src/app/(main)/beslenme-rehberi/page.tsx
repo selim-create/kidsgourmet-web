@@ -49,6 +49,8 @@ const categoryIcons: Record<string, string> = {
   'Özel Ürünler': 'fa-star',
 };
 
+const ITEMS_PER_PAGE = 12;
+
 export default function IngredientsGuidePage() {
   const [activeCategory, setActiveCategory] = useState("Tümü");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -65,6 +67,12 @@ export default function IngredientsGuidePage() {
   
   // Favori state
   const [favorites, setFavorites] = useState<number[]>([]);
+  
+  // Pagination state'leri
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalIngredients, setTotalIngredients] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // LocalStorage'dan favorileri yükle
   useEffect(() => {
@@ -90,14 +98,25 @@ export default function IngredientsGuidePage() {
         const cats = await ingredientService.getCategories();
         setCategories(["Tümü", ...cats]);
         
-        // Tüm malzemeleri çek
-        const data = await ingredientService.getAll();
-        setIngredients(data || []);
+        // İlk sayfa malzemeleri çek (pagination ile)
+        const response = await ingredientService.getAll({ page: 1, perPage: ITEMS_PER_PAGE });
+        
+        // Response'u parse et
+        let ingredientList: Ingredient[] = [];
+        if (Array.isArray(response)) {
+          ingredientList = response;
+        } else if (response && typeof response === 'object') {
+          ingredientList = (response as any).ingredients || (response as any).data || [];
+          setTotalPages((response as any).pages || 1);
+          setTotalIngredients((response as any).total || ingredientList.length);
+        }
+        
+        setIngredients(ingredientList);
         
         // Mevsimlik malzemeleri filtrele ve shuffle et
         const currentMonth = new Date().getMonth();
         const currentSeasons = monthToSeason[currentMonth];
-        const seasonalFiltered = (data || []).filter(ing => 
+        const seasonalFiltered = ingredientList.filter(ing => 
           ing.season && currentSeasons.some(season => ing.season?.includes(season))
         );
         const seasonal = shuffleArray(seasonalFiltered).slice(0, 6);
@@ -134,6 +153,31 @@ export default function IngredientsGuidePage() {
     
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Daha fazla malzeme yükle
+  const loadMoreIngredients = async () => {
+    if (isLoadingMore || currentPage >= totalPages) return;
+    
+    setIsLoadingMore(true);
+    try {
+      const nextPage = currentPage + 1;
+      const response = await ingredientService.getAll({ page: nextPage, perPage: ITEMS_PER_PAGE });
+      
+      let newIngredients: Ingredient[] = [];
+      if (Array.isArray(response)) {
+        newIngredients = response;
+      } else if (response && typeof response === 'object') {
+        newIngredients = (response as any).ingredients || (response as any).data || [];
+      }
+      
+      setIngredients(prev => [...prev, ...newIngredients]);
+      setCurrentPage(nextPage);
+    } catch (error) {
+      console.error("Daha fazla malzeme yüklenirken hata:", error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   // Toggle favori fonksiyonu
   const toggleFavorite = (e: React.MouseEvent, ingredientId: number) => {
@@ -347,12 +391,37 @@ export default function IngredientsGuidePage() {
 
           </div>
 
-          {/* Load More */}
-          <div className="mt-12 text-center">
-              <button className="bg-white border-2 border-gray-100 text-gray-600 hover:border-green-500 hover:text-green-500 font-bold py-3 px-8 rounded-full transition-all shadow-sm">
-                  Daha Fazla Göster
+          {/* Load More - Pagination */}
+          {!searchQuery && activeCategory === "Tümü" && currentPage < totalPages && (
+            <div className="mt-12 text-center">
+              <button 
+                onClick={loadMoreIngredients}
+                disabled={isLoadingMore}
+                className="bg-white border-2 border-gray-200 text-gray-600 hover:border-green-500 hover:text-green-500 font-bold py-3 px-8 rounded-full transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoadingMore ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    Yükleniyor...
+                  </span>
+                ) : (
+                  <span>
+                    Daha Fazla Göster ({ingredients.length} / {totalIngredients})
+                  </span>
+                )}
               </button>
-          </div>
+            </div>
+          )}
+
+          {/* Tümü yüklendi mesajı */}
+          {!searchQuery && activeCategory === "Tümü" && currentPage >= totalPages && ingredients.length > 0 && (
+            <div className="mt-12 text-center">
+              <p className="text-gray-500 text-sm">
+                <i className="fa-solid fa-check-circle text-green-500 mr-2"></i>
+                Tüm malzemeler gösteriliyor ({totalIngredients} adet)
+              </p>
+            </div>
+          )}
 
       </div>
     </div>
