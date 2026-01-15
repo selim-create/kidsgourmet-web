@@ -16,6 +16,11 @@ export interface IngredientsResponse {
   pages: number;
 }
 
+// Type guard to check if response is paginated
+function isIngredientsResponse(response: any): response is IngredientsResponse {
+  return response && typeof response === 'object' && 'ingredients' in response && 'total' in response && 'pages' in response;
+}
+
 // Transform function for WordPress REST API format to Ingredient - GÜNCELLENMİŞ
 const transformWPIngredient = (wp: any): Ingredient => ({
   id: wp.id,

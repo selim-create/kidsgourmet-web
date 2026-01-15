@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
-import { ingredientService } from '@/services/ingredient-service';
+import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 
 // Türkçe ay isimleri
@@ -105,10 +105,12 @@ export default function IngredientsGuidePage() {
         let ingredientList: Ingredient[] = [];
         if (Array.isArray(response)) {
           ingredientList = response;
-        } else if (response && typeof response === 'object') {
-          ingredientList = (response as any).ingredients || (response as any).data || [];
-          setTotalPages((response as any).pages || 1);
-          setTotalIngredients((response as any).total || ingredientList.length);
+        } else {
+          // IngredientsResponse format
+          const paginatedResponse = response as IngredientsResponse;
+          ingredientList = paginatedResponse.ingredients || [];
+          setTotalPages(paginatedResponse.pages || 1);
+          setTotalIngredients(paginatedResponse.total || ingredientList.length);
         }
         
         setIngredients(ingredientList);
@@ -166,8 +168,10 @@ export default function IngredientsGuidePage() {
       let newIngredients: Ingredient[] = [];
       if (Array.isArray(response)) {
         newIngredients = response;
-      } else if (response && typeof response === 'object') {
-        newIngredients = (response as any).ingredients || (response as any).data || [];
+      } else {
+        // IngredientsResponse format
+        const paginatedResponse = response as IngredientsResponse;
+        newIngredients = paginatedResponse.ingredients || [];
       }
       
       setIngredients(prev => [...prev, ...newIngredients]);
