@@ -36,9 +36,9 @@ export default function Footer() {
                     <h4 className="font-display font-bold text-slate-800 mb-5 text-base">Keşfet</h4>
                     <ul className="space-y-3 text-gray-600">
                         <li><Link href="/tarifler" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Tarifler</Link></li>
-                        <li><Link href="/malzeme-rehberi" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Beslenme Rehberi</Link></li>
-                        <li><Link href="/araclar" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Hesaplama Araçları</Link></li>
-                        <li><Link href="/blog" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Blog & Uzmanlar</Link></li>
+                        <li><Link href="/beslenme-rehberi" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Beslenme Rehberi</Link></li>
+                        <li><Link href="/akilli-asistan" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Akıllı Asistan</Link></li>
+                        <li><Link href="/kesfet" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Keşfet</Link></li>
                         <li><Link href="/topluluk" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Topluluk</Link></li>
                     </ul>
                 </div>

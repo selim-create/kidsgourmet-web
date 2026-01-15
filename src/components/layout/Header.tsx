@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from 'next/link'; 
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
@@ -8,29 +8,50 @@ import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker
 import UserDropdown from '@/components/ui/UserDropdown';
 import ChildSwitcher from '@/components/features/ChildSwitcher';
 import { getDashboardUrl, getPublicProfileUrl } from '@/utils/helpers';
+import { navigationItems } from '@/lib/navigation';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [expandedMobileItem, setExpandedMobileItem] = useState<string | null>(null);
   const { user, isAuthenticated, logout } = useUser();
   const router = useRouter();
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get role-based URLs using utility functions
   const dashboardLink = getDashboardUrl(user);
   const publicProfileUrl = getPublicProfileUrl(user);
 
-  // Handle escape key to close modal
+  // Handle escape key to close modal and dropdowns
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSearchModalOpen) {
-        setIsSearchModalOpen(false);
+      if (e.key === 'Escape') {
+        if (isSearchModalOpen) {
+          setIsSearchModalOpen(false);
+        }
+        if (activeDropdown) {
+          setActiveDropdown(null);
+        }
       }
     };
     
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isSearchModalOpen]);
+  }, [isSearchModalOpen, activeDropdown]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
 
   // Handle search submission
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -59,6 +80,71 @@ export default function Header() {
     setIsSearchModalOpen(false);
   };
 
+  // Handle dropdown hover with delay
+  const handleDropdownEnter = (label: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(label);
+    }, 200);
+  };
+
+  const handleDropdownLeave = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setActiveDropdown(null);
+    }, 200);
+  };
+
+  const handleDropdownStay = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+  };
+
+  // Toggle mobile accordion
+  const toggleMobileItem = (label: string) => {
+    setExpandedMobileItem(expandedMobileItem === label ? null : label);
+  };
+
+  // Color classes helper
+  const getColorClasses = (color?: string) => {
+    switch (color) {
+      case 'orange':
+        return 'hover:bg-orange-50 hover:text-orange-500';
+      case 'green':
+        return 'hover:bg-green-50 hover:text-green-600';
+      case 'blue':
+        return 'hover:bg-blue-50 hover:text-blue-500';
+      case 'purple':
+        return 'hover:bg-purple-50 hover:text-purple-500';
+      case 'pink':
+        return 'hover:bg-pink-50 hover:text-pink-500';
+      default:
+        return 'hover:bg-gray-50 hover:text-gray-700';
+    }
+  };
+
+  const getMobileColorClasses = (color?: string) => {
+    switch (color) {
+      case 'orange':
+        return 'bg-orange-100 text-orange-500';
+      case 'green':
+        return 'bg-green-100 text-green-600';
+      case 'blue':
+        return 'bg-blue-100 text-blue-500';
+      case 'purple':
+        return 'bg-purple-100 text-purple-500';
+      case 'pink':
+        return 'bg-pink-100 text-pink-500';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
+
   return (
     <>
     <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-white" id="main-header">
@@ -68,7 +154,6 @@ export default function Header() {
             <div className="max-w-7xl mx-auto flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                     <span className="font-bold text-green-700 hidden sm:inline">KidsGourmet Ailesi:</span>
-                    {/* Localde Link kullanın: <Link href="..."> */}
                     <Link href="https://rejimde.com" target="_blank" className="flex items-center hover:text-orange-500 transition-colors font-medium text-slate-600">
                         <i className="fa-solid fa-user-doctor mr-1.5"></i> Rejimde.com
                     </Link>
@@ -89,12 +174,10 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
                     
-                    {/* Logo (Original Design Restored) */}
-                    {/* Localde Link kullanın: <Link href="/"> */}
+                    {/* Logo */}
                     <Link href="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
                         <div className="relative">
                             <div className="absolute inset-0 bg-orange-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                            {/* FontAwesome ikonunu orijinal görsel yerine kullanarak kırılma riskini önlüyoruz, ama stil aynı */}
                             <div className="relative w-10 h-10 flex items-center justify-center transform group-hover:rotate-12 transition-transform">
                                 <i className="fa-solid fa-carrot text-orange-500 text-3xl"></i>
                             </div>
@@ -109,12 +192,61 @@ export default function Header() {
 
                     {/* Desktop Menu */}
                     <nav className="hidden lg:flex items-center space-x-1">
-                        <Link href="/tarifler" className="px-4 py-2 rounded-full text-slate-600 hover:bg-orange-50 hover:text-orange-500 font-bold text-sm transition-all font-display">Tarifler</Link>
-                        <Link href="/malzeme-rehberi" className="px-4 py-2 rounded-full text-slate-600 hover:bg-green-50 hover:text-green-600 font-bold text-sm transition-all font-display">Beslenme Rehberi</Link>
-                        <Link href="/araclar" className="px-4 py-2 rounded-full text-slate-600 hover:bg-blue-50 hover:text-blue-500 font-bold text-sm transition-all font-display">Araçlar</Link>
-                        <Link href="/blog" className="px-4 py-2 rounded-full text-slate-600 hover:bg-yellow-50 hover:text-yellow-600 font-bold text-sm transition-all font-display">Blog</Link>
-                        <Link href="/topluluk" className="px-4 py-2 rounded-full text-slate-600 hover:bg-purple-50 hover:text-purple-500 font-bold text-sm transition-all">Topluluk</Link>
+                        {navigationItems.map((item) => (
+                            <div
+                                key={item.label}
+                                className="relative"
+                                onMouseEnter={() => item.children && handleDropdownEnter(item.label)}
+                                onMouseLeave={handleDropdownLeave}
+                            >
+                                <Link
+                                    href={item.href}
+                                    className={`px-4 py-2 rounded-full text-slate-600 font-bold text-sm transition-all font-display ${getColorClasses(item.color)}`}
+                                >
+                                    {item.label}
+                                    {item.children && (
+                                        <i className={`fa-solid fa-chevron-down ml-2 text-xs transition-transform ${activeDropdown === item.label ? 'rotate-180' : ''}`}></i>
+                                    )}
+                                </Link>
 
+                                {/* Dropdown Menu */}
+                                {item.children && activeDropdown === item.label && (
+                                    <div
+                                        className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-4 animate-in fade-in slide-in-from-top-2 duration-200"
+                                        onMouseEnter={handleDropdownStay}
+                                        onMouseLeave={handleDropdownLeave}
+                                    >
+                                        <div className="px-2">
+                                            {item.children.map((subItem) => (
+                                                <Link
+                                                    key={subItem.href}
+                                                    href={subItem.href}
+                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                                                    onClick={() => setActiveDropdown(null)}
+                                                >
+                                                    {subItem.icon && (
+                                                        <div className={`w-10 h-10 rounded-lg ${getMobileColorClasses(item.color)} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                                            <i className={subItem.icon}></i>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-sm text-slate-700 group-hover:text-slate-900">
+                                                            {subItem.label}
+                                                        </div>
+                                                        {subItem.description && (
+                                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                                {subItem.description}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <i className="fa-solid fa-arrow-right text-gray-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </nav>
 
                     {/* Right Actions */}
@@ -177,22 +309,52 @@ export default function Header() {
                         </form>
 
                         <nav className="space-y-1">
-                            <Link href="/tarifler" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-orange-50 text-slate-700 font-bold transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center text-orange-500"><i className="fa-solid fa-utensils"></i></div>
-                                Tarifler
-                            </Link>
-                            <Link href="/malzeme-rehberi" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-green-50 text-slate-700 font-bold transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center text-green-600"><i className="fa-solid fa-apple-whole"></i></div>
-                                Beslenme Rehberi
-                            </Link>
-                            <Link href="/araclar" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-50 text-slate-700 font-bold transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-500"><i className="fa-solid fa-calculator"></i></div>
-                                Araçlar
-                            </Link>
-                            <Link href="/blog" className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-yellow-50 text-slate-700 font-bold transition-colors">
-                                <div className="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center text-yellow-600"><i className="fa-solid fa-book-open"></i></div>
-                                Blog
-                            </Link>
+                            {navigationItems.map((item) => (
+                                <div key={item.label}>
+                                    {item.children ? (
+                                        <>
+                                            <button
+                                                onClick={() => toggleMobileItem(item.label)}
+                                                className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-slate-700 font-bold transition-colors"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-8 h-8 rounded-lg ${getMobileColorClasses(item.color)} flex items-center justify-center`}>
+                                                        {item.icon && <i className={item.icon}></i>}
+                                                    </div>
+                                                    {item.label}
+                                                </div>
+                                                <i className={`fa-solid fa-chevron-down transition-transform ${expandedMobileItem === item.label ? 'rotate-180' : ''}`}></i>
+                                            </button>
+                                            {expandedMobileItem === item.label && (
+                                                <div className="ml-11 mt-1 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                                                    {item.children.map((subItem) => (
+                                                        <Link
+                                                            key={subItem.href}
+                                                            href={subItem.href}
+                                                            onClick={() => setIsMobileMenuOpen(false)}
+                                                            className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm text-slate-600 transition-colors"
+                                                        >
+                                                            {subItem.icon && <i className={`${subItem.icon} text-xs`}></i>}
+                                                            {subItem.label}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <Link
+                                            href={item.href}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                            className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 text-slate-700 font-bold transition-colors"
+                                        >
+                                            <div className={`w-8 h-8 rounded-lg ${getMobileColorClasses(item.color)} flex items-center justify-center`}>
+                                                {item.icon && <i className={item.icon}></i>}
+                                            </div>
+                                            {item.label}
+                                        </Link>
+                                    )}
+                                </div>
+                            ))}
                         </nav>
 
                         <div className="border-t border-gray-100 my-4"></div>
@@ -200,19 +362,20 @@ export default function Header() {
                         <div className="space-y-3">
                             {isAuthenticated && user ? (
                               <>
-                                <Link href={dashboardLink} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
+                                <Link href={dashboardLink} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
                                     <i className="fa-solid fa-gauge-high"></i> Dashboard
                                 </Link>
-                                <Link href="/profil" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
+                                <Link href="/profil" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
                                     <i className="fa-solid fa-user-pen"></i> Profili Düzenle
                                 </Link>
                                 <Link 
                                   href={publicProfileUrl}
+                                  onClick={() => setIsMobileMenuOpen(false)}
                                   className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
                                 >
                                     <i className="fa-solid fa-user"></i> Profili Görüntüle
                                 </Link>
-                                <Link href="/topluluk/soru-sor" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
+                                <Link href="/topluluk/soru-sor" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
                                     <i className="fa-solid fa-circle-question"></i> Soru Sor
                                 </Link>
                                 <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-bold hover:bg-red-100 transition-colors">
@@ -220,7 +383,7 @@ export default function Header() {
                                 </button>
                               </>
                             ) : (
-                              <Link href="/login" className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-colors">
+                              <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl bg-orange-500 text-white font-bold shadow-md hover:bg-orange-600 transition-colors">
                                   <i className="fa-solid fa-user mr-2"></i> Giriş Yap / Kayıt Ol
                               </Link>
                             )}
@@ -304,34 +467,34 @@ export default function Header() {
               </Link>
               
               <Link
-                href="/malzeme-rehberi"
+                href="/beslenme-rehberi"
                 onClick={() => setIsSearchModalOpen(false)}
                 className="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 transition-colors group"
               >
                 <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 group-hover:bg-green-600 group-hover:text-white transition-colors">
                   <i className="fa-solid fa-apple-whole"></i>
                 </div>
-                <span className="font-bold text-sm text-slate-700">Malzemeler</span>
+                <span className="font-bold text-sm text-slate-700">Beslenme Rehberi</span>
               </Link>
               
               <Link
-                href="/blog"
+                href="/kesfet"
                 onClick={() => setIsSearchModalOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-blue-50 transition-colors group"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-purple-50 transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                  <i className="fa-solid fa-newspaper"></i>
+                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                  <i className="fa-solid fa-compass"></i>
                 </div>
-                <span className="font-bold text-sm text-slate-700">Blog</span>
+                <span className="font-bold text-sm text-slate-700">Keşfet</span>
               </Link>
               
               <Link
                 href="/topluluk"
                 onClick={() => setIsSearchModalOpen(false)}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-purple-50 transition-colors group"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-pink-50 transition-colors group"
               >
-                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
-                  <i className="fa-solid fa-comments"></i>
+                <div className="w-10 h-10 rounded-lg bg-pink-100 flex items-center justify-center text-pink-500 group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                  <i className="fa-solid fa-users"></i>
                 </div>
                 <span className="font-bold text-sm text-slate-700">Topluluk</span>
               </Link>
