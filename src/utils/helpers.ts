@@ -136,3 +136,30 @@ export function formatRelativeTime(dateString: string): string {
   const years = Math.floor(days / 365);
   return `${years} yıl önce`;
 }
+
+/**
+ * Check if a user has expert role
+ * Expert roles: kg_expert, editor, author, administrator
+ * Also checks for is_expert flag
+ */
+export function isUserExpert(user: { is_expert?: boolean; role?: string } | null | undefined): boolean {
+  if (!user) return false;
+  return user.is_expert || ['administrator', 'editor', 'author', 'kg_expert'].includes(user.role || '');
+}
+
+/**
+ * Get dashboard URL based on user role
+ * Experts go to /dashboard/expert, parents go to /dashboard
+ */
+export function getDashboardUrl(user: { is_expert?: boolean; role?: string } | null | undefined): string {
+  return isUserExpert(user) ? '/dashboard/expert' : '/dashboard';
+}
+
+/**
+ * Get public profile URL based on user role
+ * Experts: /uzman/{username}, Parents: /profil/{username}
+ */
+export function getPublicProfileUrl(user: { is_expert?: boolean; role?: string; username?: string } | null | undefined): string {
+  if (!user?.username) return '/profil';
+  return isUserExpert(user) ? `/uzman/${user.username}` : `/profil/${user.username}`;
+}

@@ -3,22 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
+import { getDashboardUrl, getPublicProfileUrl } from "@/utils/helpers";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useUser();
 
-  // Check if user is an expert
-  const isExpert = user?.is_expert || ['administrator', 'editor', 'author', 'kg_expert'].includes(user?.role || '');
-  
-  // Dashboard link based on role
-  const dashboardLink = isExpert ? '/dashboard/expert' : '/dashboard';
-  
-  // Public profile link based on role and use username
-  const publicProfileUrl = isExpert 
-    ? `/uzman/${user?.username}` 
-    : `/profil/${user?.username}`;
+  // Get role-based URLs using utility functions
+  const dashboardLink = getDashboardUrl(user);
+  const publicProfileUrl = getPublicProfileUrl(user);
 
   // Close dropdown when clicking outside
   useEffect(() => {

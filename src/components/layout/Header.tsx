@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/use-user';
 import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker';
 import UserDropdown from '@/components/ui/UserDropdown';
 import ChildSwitcher from '@/components/features/ChildSwitcher';
+import { getDashboardUrl, getPublicProfileUrl } from '@/utils/helpers';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,16 +16,9 @@ export default function Header() {
   const { user, isAuthenticated, logout } = useUser();
   const router = useRouter();
 
-  // Check if user is an expert
-  const isExpert = user?.is_expert || ['administrator', 'editor', 'author', 'kg_expert'].includes(user?.role || '');
-  
-  // Dashboard link based on role
-  const dashboardLink = isExpert ? '/dashboard/expert' : '/dashboard';
-  
-  // Public profile link based on role
-  const publicProfileUrl = isExpert 
-    ? `/uzman/${user?.username}` 
-    : `/profil/${user?.username}`;
+  // Get role-based URLs using utility functions
+  const dashboardLink = getDashboardUrl(user);
+  const publicProfileUrl = getPublicProfileUrl(user);
 
   // Handle escape key to close modal
   useEffect(() => {
