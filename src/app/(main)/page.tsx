@@ -81,7 +81,9 @@ export default function Home() {
         const ids = featured.map((item) => item.id);
         setFeaturedIds(ids);
         
-        setLatestRecipes(latest || []);
+        // Handle new getAll response format
+        const latestRecipesArray = Array.isArray(latest) ? latest : (latest?.recipes || []);
+        setLatestRecipes(latestRecipesArray);
         setBlogPosts(posts || []);
       } catch (error) {
         console.error("Ana sayfa verileri yüklenirken hata:", error);

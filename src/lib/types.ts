@@ -85,7 +85,22 @@ export interface RecipeCard {
   slug: string;
   image: string;
   age_group: string;
+  age_group_color?: string;
   prep_time: string;
+  // YENİ ALANLAR
+  meal_type?: string;
+  diet_types?: string[];
+  author?: {
+    id: number;
+    name: string;
+    avatar?: string;
+  };
+  expert?: {
+    name: string;
+    title: string;
+    approved: boolean;
+  };
+  is_featured?: boolean;
 }
 
 // Yeni: Tariften Recipe (cross-sell önerileri için)
