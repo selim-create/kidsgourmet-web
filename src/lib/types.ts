@@ -202,6 +202,7 @@ export interface Child {
   kvkk_consent?: boolean;
   // Backward compatibility
   allergens?: string[];
+  blw_test_results?: BLWTestResult[];
 }
 
 export interface AuthResponse {
@@ -604,4 +605,94 @@ export interface GenerateShoppingListResponse {
   success: boolean;
   items: AggregatedShoppingItem[];
   total_count: number;
+}
+
+// ===============================
+// TOOL (ARAÇ) TİPLERİ
+// ===============================
+
+export type ToolType = 'blw_test' | 'percentile' | 'water_calculator' | 'meal_planner';
+
+export interface Tool {
+  id: number;
+  title: string;
+  slug: string;
+  description: string;
+  icon: string;
+  tool_type: ToolType;
+  is_active: boolean;
+  requires_auth: boolean;
+  seo?: SEOData;
+}
+
+// BLW Test Types
+export interface BLWTestQuestion {
+  id: string;
+  category: 'physical_readiness' | 'safety' | 'environment' | 'feeding_history';
+  question: string;
+  description?: string;
+  icon?: string;
+  options: BLWTestOption[];
+  weight: number;
+}
+
+export interface BLWTestOption {
+  id: string;
+  text: string;
+  value: number;
+  is_red_flag?: boolean;
+  red_flag_message?: string;
+}
+
+export interface BLWTestConfig {
+  id: number;
+  title: string;
+  description: string;
+  questions: BLWTestQuestion[];
+  result_buckets: BLWResultBucket[];
+  disclaimer_text: string;
+  emergency_text: string;
+  recommended_links: BLWRecommendedLink[];
+}
+
+export interface BLWResultBucket {
+  id: string;
+  min_score: number;
+  max_score: number;
+  title: string;
+  subtitle: string;
+  color: 'green' | 'yellow' | 'red';
+  icon: string;
+  description: string;
+  action_items: string[];
+  next_steps: string[];
+}
+
+export interface BLWRecommendedLink {
+  title: string;
+  url: string;
+  type: 'guide' | 'recipe' | 'ingredient';
+}
+
+export interface BLWTestResult {
+  id?: number;
+  user_id?: number;
+  child_id?: string;
+  score: number;
+  result_bucket_id: string;
+  red_flags: BLWRedFlag[];
+  answers: BLWTestAnswer[];
+  created_at: string;
+}
+
+export interface BLWTestAnswer {
+  question_id: string;
+  option_id: string;
+  score: number;
+}
+
+export interface BLWRedFlag {
+  question_id: string;
+  message: string;
+  severity: 'warning' | 'critical';
 }

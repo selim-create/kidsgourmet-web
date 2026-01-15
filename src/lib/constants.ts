@@ -81,4 +81,12 @@ export const API_ENDPOINTS = {
     `${KG_API_NAMESPACE}/meal-plans/${planId}/slots/${slotId}/assign`,
   MEAL_PLAN_SHOPPING_LIST: (planId: string) => 
     `${KG_API_NAMESPACE}/meal-plans/${planId}/shopping-list`,
+  
+  // Tools
+  TOOLS: `${KG_API_NAMESPACE}/tools`,
+  TOOL_BY_SLUG: (slug: string) => `${KG_API_NAMESPACE}/tools/${slug}`,
+  BLW_TEST_CONFIG: `${KG_API_NAMESPACE}/tools/blw-test/config`,
+  BLW_TEST_SUBMIT: `${KG_API_NAMESPACE}/tools/blw-test/submit`,
+  USER_BLW_RESULTS: `${KG_API_NAMESPACE}/user/blw-results`,
+  CHILD_BLW_RESULTS: (childId: string) => `${KG_API_NAMESPACE}/user/children/${childId}/blw-results`,
 } as const;
