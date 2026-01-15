@@ -7,6 +7,7 @@ import { useUser } from '@/hooks/use-user';
 import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker';
 import UserDropdown from '@/components/ui/UserDropdown';
 import ChildSwitcher from '@/components/features/ChildSwitcher';
+import { getDashboardUrl, getPublicProfileUrl } from '@/utils/helpers';
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,6 +15,10 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, isAuthenticated, logout } = useUser();
   const router = useRouter();
+
+  // Get role-based URLs using utility functions
+  const dashboardLink = getDashboardUrl(user);
+  const publicProfileUrl = getPublicProfileUrl(user);
 
   // Handle escape key to close modal
   useEffect(() => {
@@ -195,14 +200,14 @@ export default function Header() {
                         <div className="space-y-3">
                             {isAuthenticated && user ? (
                               <>
-                                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
+                                <Link href={dashboardLink} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
                                     <i className="fa-solid fa-gauge-high"></i> Dashboard
                                 </Link>
                                 <Link href="/profil" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
                                     <i className="fa-solid fa-user-pen"></i> Profili Düzenle
                                 </Link>
                                 <Link 
-                                  href={`/profil/${user.name ? user.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : 'profil'}`}
+                                  href={publicProfileUrl}
                                   className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
                                 >
                                     <i className="fa-solid fa-user"></i> Profili Görüntüle

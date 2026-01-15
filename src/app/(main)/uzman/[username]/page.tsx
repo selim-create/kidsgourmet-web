@@ -236,7 +236,7 @@ export default function ExpertPublicProfilePage() {
           {/* Recipes Tab */}
           {activeTab === 'recipes' && (
             <div>
-              {profile.content.recipes.length > 0 ? (
+              {profile.content?.recipes && profile.content.recipes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {profile.content.recipes.map((recipe) => (
                     <Link
@@ -280,7 +280,7 @@ export default function ExpertPublicProfilePage() {
           {/* Blog Posts Tab */}
           {activeTab === 'blog_posts' && (
             <div>
-              {profile.content.blog_posts.length > 0 ? (
+              {profile.content?.blog_posts && profile.content.blog_posts.length > 0 ? (
                 <div className="space-y-4">
                   {profile.content.blog_posts.map((post) => (
                     <Link
@@ -324,7 +324,7 @@ export default function ExpertPublicProfilePage() {
           {/* Answered Questions Tab */}
           {activeTab === 'answered_questions' && (
             <div>
-              {profile.content.answered_questions.length > 0 ? (
+              {profile.content?.answered_questions && profile.content.answered_questions.length > 0 ? (
                 <div className="space-y-4">
                   {profile.content.answered_questions.map((question) => (
                     <Link
@@ -355,7 +355,7 @@ export default function ExpertPublicProfilePage() {
           {/* Asked Questions Tab */}
           {activeTab === 'asked_questions' && (
             <div>
-              {profile.content.asked_questions.length > 0 ? (
+              {profile.content?.asked_questions && profile.content.asked_questions.length > 0 ? (
                 <div className="space-y-4">
                   {profile.content.asked_questions.map((question) => (
                     <Link
