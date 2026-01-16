@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import { toolService } from '@/services/tool-service';
@@ -607,7 +606,7 @@ export default function EkGidayaBaslamaPage() {
 
                 {/* Question Icon */}
                 <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
-                  <i className={currentQuestion.icon || 'fa-solid fa-question'}></i>
+                  <i className={currentQuestion.icon || 'fa-solid fa-circle-question'}></i>
                 </div>
 
                 {/* Question */}
@@ -871,7 +870,10 @@ export default function EkGidayaBaslamaPage() {
                   <div>
                     <div className="font-bold text-slate-800">{child.name}</div>
                     <div className="text-sm text-gray-500">
-                      {calculateAgeDisplay(child)} • {child.gender === 'male' ? 'Erkek' : child.gender === 'female' ? 'Kız' : ''}
+                      {calculateAgeDisplay(child)}
+                      {child.gender && child.gender !== 'unspecified' && (
+                        <> • {child.gender === 'male' ? 'Erkek' : 'Kız'}</>
+                      )}
                     </div>
                   </div>
                 </label>
