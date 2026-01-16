@@ -31,7 +31,7 @@ export default function GuideCard({ item }: GuideCardProps) {
 
   return (
     <Link
-      href={`/blog/${item.slug}`}
+      href={`/kesfet/${item.slug}`}
       data-type="guide"
       className="featured-card flex-shrink-0 w-[85vw] md:w-[420px] snap-center bg-white rounded-4xl shadow-md hover:shadow-xl overflow-hidden relative flex flex-col group cursor-pointer border border-gray-100 transition-all duration-300 hover:-translate-y-1"
     >

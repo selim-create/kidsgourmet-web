@@ -26,7 +26,7 @@ export default function IngredientCard({ item }: IngredientCardProps) {
 
   return (
     <Link
-      href={`/malzeme-rehberi/${item.slug}`}
+      href={`/beslenme-rehberi/${item.slug}`}
       data-type="ingredient"
       className="featured-card flex-shrink-0 w-[85vw] md:w-[420px] snap-center bg-white rounded-4xl shadow-md hover:shadow-xl overflow-hidden relative flex flex-col group cursor-pointer border border-green-100 transition-all duration-300 hover:-translate-y-1"
     >

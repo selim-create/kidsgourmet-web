@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import Link from "next/link";
+import { useSearchParams } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { RecipeCard } from '@/lib/types';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
@@ -65,7 +66,8 @@ interface AgeGroupWithLabel {
   displayLabel: string;
 }
 
-export default function RecipesPage() {
+function RecipesPageContent() {
+  const searchParams = useSearchParams();
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,6 +90,27 @@ export default function RecipesPage() {
     specialConditions: [],
     ingredientSearch: '',
   });
+
+  // Initialize filters from URL parameters
+  useEffect(() => {
+    const category = searchParams.get('category');
+    const dietType = searchParams.get('diet-type');
+    const mealType = searchParams.get('meal-type');
+    const ageGroup = searchParams.get('age-group');
+
+    const newFilters: FilterState = {
+      ageGroups: ageGroup ? [ageGroup] : [],
+      mealTypes: mealType ? [mealType] : [],
+      dietTypes: dietType ? [dietType] : [],
+      specialConditions: category ? [category] : [],
+      ingredientSearch: '',
+    };
+
+    // Only update if there are URL parameters
+    if (category || dietType || mealType || ageGroup) {
+      setFilters(newFilters);
+    }
+  }, [searchParams]);
   
   // Tarifleri getir
   const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, order: string) => {
@@ -744,5 +767,18 @@ function RecipeCardComponent({
         </div>
       </div>
     </Link>
+  );
+}
+
+// Wrap in Suspense for useSearchParams
+export default function RecipesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <RecipesPageContent />
+    </Suspense>
   );
 }

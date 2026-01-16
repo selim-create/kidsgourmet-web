@@ -60,12 +60,19 @@ export default function RecipeCard({ item }: RecipeCardProps) {
           {item.excerpt ? decodeEntities(item.excerpt) : 'Lezzetli ve sağlıklı bir tarif'}
         </p>
         <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-50">
-          <span
-            className="text-xs font-bold bg-green-50 px-2 py-1 rounded-lg"
-            style={{ color: item.meta?.age_group_color || '#22C55E' }}
-          >
-            {decodeEntities(item.meta?.age_group || '+6 Ay')}
-          </span>
+          <div className="flex items-center gap-2">
+            <span
+              className="text-xs font-bold bg-green-50 px-2 py-1 rounded-lg"
+              style={{ color: item.meta?.age_group_color || '#22C55E' }}
+            >
+              {decodeEntities(item.meta?.age_group || '+6 Ay')}
+            </span>
+            {item.meta?.meal_type && (
+              <span className="text-xs text-gray-500">
+                <i className="fa-solid fa-utensils mr-1"></i>{decodeEntities(item.meta.meal_type)}
+              </span>
+            )}
+          </div>
           {item.meta?.rating && item.meta?.rating_count && (
             <span className="text-xs text-gray-400">
               {item.meta.rating} <i className="fa-solid fa-star text-yellow-400"></i> ({item.meta.rating_count})
