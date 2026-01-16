@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
 import CommentSection from '@/components/features/CommentSection';
+import { EditButton } from '@/components/ui/EditButton';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -309,9 +310,17 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         )}
                     </div>
                     
-                    <h1 className="font-display font-bold text-3xl md:text-4xl text-slate-800 mb-4 leading-tight font-sans">
-                        {decodeHTMLEntities(recipe.title)}
-                    </h1>
+                    <div className="flex items-start justify-between gap-3 group">
+                      <h1 className="font-display font-bold text-3xl md:text-4xl text-slate-800 mb-4 leading-tight font-sans">
+                          {decodeHTMLEntities(recipe.title)}
+                      </h1>
+                      <EditButton 
+                        contentType="recipe" 
+                        contentId={recipe.id}
+                        authorId={recipe.author?.id}
+                        variant="icon"
+                      />
+                    </div>
                     
                     <p className="text-gray-600 mb-6 text-lg">
                         {decodeHTMLEntities(recipe.excerpt || recipe.content)}
