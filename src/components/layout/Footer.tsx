@@ -7,8 +7,8 @@ export default function Footer() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
                 
-                {/* Brand Column (Span 4) */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-4">
+                {/* Brand Column (Span 3) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-3">
                     <div className="flex items-center gap-2 mb-4">
                         <div className="w-10 h-10 flex items-center justify-center bg-orange-100 rounded-full text-orange-500">
                             <i className="fa-solid fa-carrot text-xl"></i>
@@ -47,16 +47,26 @@ export default function Footer() {
                 <div className="col-span-1 lg:col-span-2">
                     <h4 className="font-display font-bold text-slate-800 mb-5 text-base">Kurumsal</h4>
                     <ul className="space-y-3 text-gray-600">
-                        <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Hakkımızda</Link></li>
+                        <li><Link href="/hakkimizda" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Hakkımızda</Link></li>
+                        <li><Link href="/kunye" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Künye</Link></li>
                         <li><Link href="/uzmanlar" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Uzman Kadromuz</Link></li>
-                        <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Kullanım Koşulları</Link></li>
-                        <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Gizlilik Politikası</Link></li>
-                        <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Çerez Politikası</Link></li>
+                        <li><Link href="/iletisim" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">İletişim & Reklam</Link></li>
                     </ul>
                 </div>
 
-                {/* Newsletter & Contact (Span 4) */}
-                <div className="col-span-1 md:col-span-2 lg:col-span-4">
+                {/* Links: Legal (Span 2) - NEW SECTION */}
+                <div className="col-span-1 lg:col-span-2">
+                    <h4 className="font-display font-bold text-slate-800 mb-5 text-base">Yasal</h4>
+                    <ul className="space-y-3 text-gray-600">
+                        <li><Link href="/kullanim-kosullari" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Kullanım Koşulları</Link></li>
+                        <li><Link href="/gizlilik-politikasi" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Gizlilik Politikası</Link></li>
+                        <li><Link href="/cerez-politikasi" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Çerez Politikası</Link></li>
+                        <li><Link href="/yardim" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Yardım & Destek</Link></li>
+                    </ul>
+                </div>
+
+                {/* Newsletter & Contact (Span 3) */}
+                <div className="col-span-1 md:col-span-2 lg:col-span-3">
                     <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                         <h4 className="font-display font-bold text-slate-800 mb-2 text-base">Bültene Katıl</h4>
                         <p className="text-xs text-gray-500 mb-4">Haftalık menü önerileri ve gelişim notları e-postana gelsin.</p>
@@ -70,7 +80,7 @@ export default function Footer() {
                         <div className="border-t border-gray-100 pt-4">
                             <h4 className="font-display font-bold text-slate-800 mb-2 text-sm">Bizimle Çalışın</h4>
                             <p className="text-xs text-gray-500 mb-3">Markanız KidsGourmet anneleriyle buluşsun.</p>
-                            <Link href="#" className="inline-flex items-center justify-center w-full border-2 border-slate-200 text-slate-700 font-bold py-2 rounded-xl text-sm hover:border-slate-800 hover:text-slate-800 transition-colors">
+                            <Link href="/iletisim" className="inline-flex items-center justify-center w-full border-2 border-slate-200 text-slate-700 font-bold py-2 rounded-xl text-sm hover:border-slate-800 hover:text-slate-800 transition-colors">
                                 Kurumsal İletişim
                             </Link>
                         </div>
