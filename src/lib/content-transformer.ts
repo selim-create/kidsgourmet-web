@@ -6,22 +6,10 @@ const API_DOMAIN = 'api.kidsgourmet.com.tr';
 const OLD_DOMAIN = 'kidsgourmet.com.tr';
 const FRONTEND_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com';
 
-// Bilinen içerik türleri ve prefix'leri
-const CONTENT_TYPE_PREFIXES: Record<string, string> = {
-  recipe: '/tarifler',
-  post: '/kesfet',
-  ingredient: '/beslenme-rehberi',
-  discussion: '/topluluk/soru',
-};
-
-interface TransformOptions {
-  contentType?: 'recipe' | 'post' | 'ingredient' | 'discussion';
-}
-
 /**
  * HTML içeriğindeki tüm linkleri dönüştürür
  */
-export function transformContentLinks(html: string, options?: TransformOptions): string {
+export function transformContentLinks(html: string): string {
   if (!html) return html;
   
   let transformed = html;
