@@ -10,6 +10,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const query = searchParams.get('q') || "";
+  const ageParam = searchParams.get('age') || "";
   
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,13 @@ function SearchContent() {
   const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
   
   const { ageGroups } = useAgeGroups();
+
+  // Initialize age groups from URL parameter
+  useEffect(() => {
+    if (ageParam) {
+      setSelectedAgeGroups([ageParam]);
+    }
+  }, [ageParam]);
 
   // Perform search
   const performSearch = useCallback(async (searchQuery: string, ageGroup?: string) => {

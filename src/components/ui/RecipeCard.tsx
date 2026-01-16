@@ -12,6 +12,7 @@ interface RecipeCardProps {
     diet_types?: string[];
     meal_type?: string;
     rating?: number;
+    author?: string;
     expert?: {
       name: string;
       title: string;
@@ -47,6 +48,13 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           alt={decodeEntities(recipe.title)} 
         />
         
+        {/* Prep Time Badge - Top Left */}
+        {recipe.prep_time && (
+          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-700 shadow-sm">
+            <i className="fa-regular fa-clock text-orange-500 mr-1"></i> {recipe.prep_time}
+          </div>
+        )}
+        
         {/* Favorite Button */}
         <button 
           onClick={handleFavoriteClick}
@@ -81,11 +89,6 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         
         {/* Recipe Info */}
         <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3 flex-wrap">
-          {/* Prep Time */}
-          <span>
-            <i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}
-          </span>
-          
           {/* Diet Types */}
           {recipe.diet_types && recipe.diet_types.length > 0 && (
             <span>
@@ -117,12 +120,14 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
                 {recipe.expert.title} {recipe.expert.name} tarafından onaylandı
               </span>
             </div>
-          ) : (
+          ) : recipe.author ? (
             <div className="flex items-center">
-              <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-              <span className="text-xs text-gray-500 font-medium">Uzman Onaylı</span>
+              <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">✍️</span>
+              <span className="text-xs text-gray-500 font-medium">
+                {recipe.author}
+              </span>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </Link>
