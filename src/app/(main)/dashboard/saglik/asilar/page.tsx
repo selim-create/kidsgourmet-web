@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { vaccineService } from '@/services/vaccine-service';
-import { VaccineSchedule, VaccineRecord } from '@/lib/types';
+import { VaccineSchedule, VaccineRecord, VaccineSideEffects } from '@/lib/types';
 import VaccineTimeline from '@/components/features/vaccine/VaccineTimeline';
 import VaccineMarkDoneModal from '@/components/features/vaccine/VaccineMarkDoneModal';
 import SideEffectModal from '@/components/features/vaccine/SideEffectModal';
@@ -111,7 +111,7 @@ export default function VaccinePage() {
   };
 
   const handleSideEffectSubmit = async (
-    sideEffects: any,
+    sideEffects: VaccineSideEffects,
     severity: 'none' | 'mild' | 'moderate' | 'severe',
     notes: string
   ) => {

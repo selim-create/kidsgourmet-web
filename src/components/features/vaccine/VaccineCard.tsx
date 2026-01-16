@@ -131,7 +131,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
 
         {/* Timing info */}
         {vaccine.timing_rule && (
-          <p className="text-xs text-gray-500 ml-13">
+          <p className="text-xs text-gray-500 ml-12">
             {vaccine.timing_rule.type === 'month' && `${vaccine.timing_rule.value}. ayda yapılır`}
             {vaccine.timing_rule.type === 'birth' && 'Doğumda yapılır'}
             {vaccine.timing_rule.type === 'week' && `${vaccine.timing_rule.value}. haftada yapılır`}
