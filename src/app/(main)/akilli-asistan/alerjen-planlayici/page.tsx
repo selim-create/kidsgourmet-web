@@ -1,25 +1,34 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Allergen {
   id: string;
   name: string;
   emoji: string;
   startAge: string;
+  minAge: number; // Sayısal yaş (ay cinsinden)
   riskLevel: 'low' | 'medium' | 'high';
+  ingredientSlug?: string; // Beslenme rehberi linki için
 }
 
 const allergens: Allergen[] = [
-  { id: 'milk', name: 'İnek Sütü', emoji: '🥛', startAge: '6+ ay', riskLevel: 'high' },
-  { id: 'egg', name: 'Yumurta', emoji: '🥚', startAge: '6+ ay', riskLevel: 'high' },
-  { id: 'peanut', name: 'Fıstık', emoji: '🥜', startAge: '6+ ay', riskLevel: 'high' },
-  { id: 'gluten', name: 'Gluten', emoji: '🌾', startAge: '6+ ay', riskLevel: 'medium' },
-  { id: 'fish', name: 'Balık', emoji: '🐟', startAge: '8+ ay', riskLevel: 'medium' },
-  { id: 'shellfish', name: 'Kabuklu Deniz Ürünleri', emoji: '🦐', startAge: '12+ ay', riskLevel: 'high' },
-  { id: 'soy', name: 'Soya', emoji: '🌱', startAge: '6+ ay', riskLevel: 'low' },
-  { id: 'treenut', name: 'Tree Nuts', emoji: '🌰', startAge: '9+ ay', riskLevel: 'high' },
+  { id: 'milk', name: 'İnek Sütü', emoji: '🥛', startAge: '6+ ay', minAge: 6, riskLevel: 'high', ingredientSlug: 'inek-sutu' },
+  { id: 'egg', name: 'Yumurta', emoji: '🥚', startAge: '6+ ay', minAge: 6, riskLevel: 'high', ingredientSlug: 'yumurta' },
+  { id: 'peanut', name: 'Yer Fıstığı', emoji: '🥜', startAge: '6+ ay', minAge: 6, riskLevel: 'high', ingredientSlug: 'yer-fistigi' },
+  { id: 'sesame', name: 'Susam', emoji: '◾', startAge: '6+ ay', minAge: 6, riskLevel: 'medium', ingredientSlug: 'susam' },
+  { id: 'gluten', name: 'Gluten (Buğday)', emoji: '🌾', startAge: '6+ ay', minAge: 6, riskLevel: 'medium', ingredientSlug: 'bugday' },
+  { id: 'soy', name: 'Soya', emoji: '🌱', startAge: '6+ ay', minAge: 6, riskLevel: 'low', ingredientSlug: 'soya' },
+  { id: 'fish', name: 'Balık', emoji: '🐟', startAge: '8+ ay', minAge: 8, riskLevel: 'medium', ingredientSlug: 'balik' },
+  { id: 'walnut', name: 'Ceviz', emoji: '🌰', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'ceviz' },
+  { id: 'hazelnut', name: 'Fındık', emoji: '🌳', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'findik' },
+  { id: 'almond', name: 'Badem', emoji: '🫘', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'badem' },
+  { id: 'shellfish', name: 'Kabuklu Deniz Ürünleri', emoji: '🦐', startAge: '12+ ay', minAge: 12, riskLevel: 'high', ingredientSlug: 'karides' },
+  { id: 'honey', name: 'Bal', emoji: '🍯', startAge: '12+ ay', minAge: 12, riskLevel: 'high', ingredientSlug: 'bal' },
+  { id: 'celery', name: 'Kereviz', emoji: '🥬', startAge: '8+ ay', minAge: 8, riskLevel: 'low', ingredientSlug: 'kereviz' },
+  { id: 'mustard', name: 'Hardal', emoji: '🟡', startAge: '12+ ay', minAge: 12, riskLevel: 'low' },
 ];
 
 type Stage = 'select' | 'plan';
@@ -29,6 +38,11 @@ export default function AlerjenPlanlayiciPage() {
   const [stage, setStage] = useState<Stage>('select');
   const [selectedAllergen, setSelectedAllergen] = useState<Allergen | null>(null);
   const [babyAgeMonths, setBabyAgeMonths] = useState<number>(6);
+
+  // Filter allergens based on baby age (for future use or alternative display)
+  const filteredAllergens = useMemo(() => {
+    return allergens.filter(a => a.minAge <= babyAgeMonths);
+  }, [babyAgeMonths]);
 
   const handleSelectAllergen = (allergen: Allergen) => {
     setSelectedAllergen(allergen);
@@ -144,6 +158,90 @@ export default function AlerjenPlanlayiciPage() {
           'Her bir ceviz türü ayrı alerjendir'
         ]
       },
+      sesame: {
+        days: [
+          { day: 1, amount: '1/2 çay kaşığı tahin', tip: 'Püre veya yoğurtla karıştırın' },
+          { day: 2, amount: '1 çay kaşığı tahin', tip: 'Miktar arttırın' },
+          { day: 3, amount: '2 çay kaşığı', tip: 'Normal porsiyona yaklaşın' },
+        ],
+        notes: [
+          'Tahin en kolay susam deneme yöntemidir',
+          'Tam susam vermeyin, çok küçüktür',
+          'Ailede susam alerjisi varsa dikkatli olun'
+        ]
+      },
+      walnut: {
+        days: [
+          { day: 1, amount: '1/2 çay kaşığı ceviz ezmesi', tip: 'Çok az miktarla başlayın' },
+          { day: 2, amount: '1 çay kaşığı', tip: 'Miktar arttırın' },
+          { day: 3, amount: '2 çay kaşığı', tip: 'Normal porsiyona yaklaşın' },
+        ],
+        notes: [
+          'Tam ceviz vermeyin, boğulma riski',
+          'Ezme veya ince öğütülmüş halde verin',
+          'Ailede sert kabuklu meyve alerjisi varsa dikkatli olun'
+        ]
+      },
+      hazelnut: {
+        days: [
+          { day: 1, amount: '1/2 çay kaşığı fındık ezmesi', tip: 'Çok az miktarla başlayın' },
+          { day: 2, amount: '1 çay kaşığı', tip: 'Miktar arttırın' },
+          { day: 3, amount: '2 çay kaşığı', tip: 'Normal porsiyona yaklaşın' },
+        ],
+        notes: [
+          'Tam fındık vermeyin, boğulma riski',
+          'Ezme veya ince öğütülmüş halde verin',
+          'Ailede sert kabuklu meyve alerjisi varsa dikkatli olun'
+        ]
+      },
+      almond: {
+        days: [
+          { day: 1, amount: '1/2 çay kaşığı badem ezmesi', tip: 'Çok az miktarla başlayın' },
+          { day: 2, amount: '1 çay kaşığı', tip: 'Miktar arttırın' },
+          { day: 3, amount: '2 çay kaşığı', tip: 'Normal porsiyona yaklaşın' },
+        ],
+        notes: [
+          'Tam badem vermeyin, boğulma riski',
+          'Ezme veya ince öğütülmüş halde verin',
+          'Ailede sert kabuklu meyve alerjisi varsa dikkatli olun'
+        ]
+      },
+      honey: {
+        days: [
+          { day: 1, amount: '1/2 çay kaşığı bal', tip: '12 aydan önce kesinlikle vermeyin' },
+          { day: 2, amount: '1 çay kaşığı bal', tip: 'Miktar arttırın' },
+          { day: 3, amount: 'Normal porsiyon', tip: 'Problem yoksa devam edin' },
+        ],
+        notes: [
+          '12 aydan önce bal vermeyin - botulizm riski',
+          'İlk bal denemesi 12. aydan sonra yapılmalı',
+          'Pastörize bal tercih edin'
+        ]
+      },
+      celery: {
+        days: [
+          { day: 1, amount: '1 kaşık pişmiş kereviz', tip: 'İyi pişmiş ve püre halde verin' },
+          { day: 2, amount: '2 kaşık pişmiş kereviz', tip: 'Miktar arttırın' },
+          { day: 3, amount: 'Normal porsiyon', tip: 'Problem yoksa devam edin' },
+        ],
+        notes: [
+          'Kereviz genelde düşük risk taşır',
+          'İyi pişmiş halde verin',
+          'Çorbalarda kullanabilirsiniz'
+        ]
+      },
+      mustard: {
+        days: [
+          { day: 1, amount: 'Çok az hardal (yemekle)', tip: '12 aydan sonra deneyin' },
+          { day: 2, amount: 'Az miktarda hardal', tip: 'Miktar arttırın' },
+          { day: 3, amount: 'Normal kullanım', tip: 'Problem yoksa devam edin' },
+        ],
+        notes: [
+          '12 aydan önce hardal önerilmez',
+          'Baharatlı yiyecekleri dikkatli tanıtın',
+          'İlk deneme çok az miktarda olmalı'
+        ]
+      },
     };
 
     return plans[allergen.id] || plans.milk;
@@ -211,7 +309,7 @@ export default function AlerjenPlanlayiciPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
               <h2 className="font-bold text-slate-800 text-xl mb-4">Alerjen Seçin</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {allergens.map((allergen) => (
+                {filteredAllergens.map((allergen) => (
                   <button
                     key={allergen.id}
                     onClick={() => handleSelectAllergen(allergen)}
@@ -222,6 +320,15 @@ export default function AlerjenPlanlayiciPage() {
                     <div className={`text-xs px-2 py-1 rounded-full inline-block border ${getRiskColor(allergen.riskLevel)}`}>
                       {allergen.startAge}
                     </div>
+                    {allergen.ingredientSlug && (
+                      <Link 
+                        href={`/beslenme-rehberi/${allergen.ingredientSlug}`}
+                        className="inline-flex items-center text-xs text-purple-600 hover:text-purple-700 font-medium mt-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <i className="fa-solid fa-book-open mr-1"></i>
+                      </Link>
+                    )}
                   </button>
                 ))}
               </div>
@@ -234,16 +341,60 @@ export default function AlerjenPlanlayiciPage() {
                 <div>
                   <h4 className="font-bold text-blue-900 mb-2">Alerjen Deneme Nedir?</h4>
                   <p className="text-blue-800 text-sm leading-relaxed mb-3">
-                    Alerjen deneme, bebeğinize potansiyel alerjik gıdaları kontrollü bir şekilde tanıtma sürecidir. 
-                    Erken yaşta (4-6 ay arası) alerjenlere maruz kalmak, alerji riskini azaltabilir.
+                    Alerjen deneme; bebeğinize alerji yapma potansiyeli olan gıdaların, ek gıdaya geçildikten sonra 
+                    (genellikle 6. ay civarı) kontrollü ve bilinçli şekilde tanıtılmasıdır.
                   </p>
-                  <ul className="text-blue-800 text-sm space-y-1">
-                    <li>✓ Her seferinde tek alerjen deneyin</li>
-                    <li>✓ Evde, gündüz saatlerinde başlayın</li>
-                    <li>✓ İlk doz çok küçük olmalı</li>
-                    <li>✓ Ailede alerji varsa mutlaka doktora danışın</li>
+                  <p className="text-blue-800 text-sm leading-relaxed mb-3">
+                    Uygun zamanda ve doğru yöntemle yapılan alerjen denemeler, bazı bebeklerde ileride gelişebilecek 
+                    gıda alerjisi riskini azaltmaya yardımcı olabilir.
+                  </p>
+                  <h5 className="font-bold text-blue-900 mb-2 text-sm">Dikkat edilmesi gerekenler:</h5>
+                  <ul className="text-blue-800 text-sm space-y-1 mb-4">
+                    <li>✓ Aynı anda sadece tek bir alerjen deneyin</li>
+                    <li>✓ Denemeyi evde ve gündüz saatlerinde yapın</li>
+                    <li>✓ İlk deneme miktarı çok küçük olmalıdır</li>
+                    <li>✓ Aynı alerjeni en az 3 gün üst üste gözlemleyin</li>
+                    <li>✓ Şiddetli egzaması olan, daha önce reaksiyon geçirmiş veya ailesinde ciddi alerji öyküsü bulunan bebekler için doktorunuza danışın</li>
                   </ul>
+                  <p className="text-blue-700 text-xs italic">
+                    <i className="fa-solid fa-triangle-exclamation mr-1"></i>
+                    Bu araç tıbbi tanı koymaz. Şiddetli bir reaksiyon durumunda en yakın sağlık kuruluşuna başvurunuz.
+                  </p>
                 </div>
+              </div>
+            </div>
+
+            {/* İlgili Rehberler */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i className="fa-solid fa-link text-purple-500"></i>
+                İlgili Rehberler
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <Link 
+                  href="/beslenme-rehberi/3-gun-kurali"
+                  className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all group"
+                >
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i className="fa-solid fa-calendar-check text-green-600"></i>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors">3 Gün Kuralı</span>
+                    <p className="text-xs text-gray-500">Güvenli besin tanıtımı rehberi</p>
+                  </div>
+                </Link>
+                <Link 
+                  href="/beslenme-rehberi/alerji-belirtileri"
+                  className="flex items-center gap-3 p-4 bg-white rounded-xl border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all group"
+                >
+                  <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i className="fa-solid fa-heart-pulse text-red-600"></i>
+                  </div>
+                  <div>
+                    <span className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Alerji Belirtileri Rehberi</span>
+                    <p className="text-xs text-gray-500">Reaksiyonları tanıyın</p>
+                  </div>
+                </Link>
               </div>
             </div>
           </div>
@@ -279,6 +430,15 @@ export default function AlerjenPlanlayiciPage() {
                         {selectedAllergen.riskLevel === 'high' ? 'Yüksek' : selectedAllergen.riskLevel === 'medium' ? 'Orta' : 'Düşük'} Risk
                       </span>
                     </div>
+                    {selectedAllergen.ingredientSlug && (
+                      <Link 
+                        href={`/beslenme-rehberi/${selectedAllergen.ingredientSlug}`}
+                        className="inline-flex items-center text-sm text-purple-600 hover:text-purple-700 font-medium mt-3"
+                      >
+                        <i className="fa-solid fa-book-open mr-2"></i>
+                        Beslenme Rehberinde İncele
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -301,6 +461,25 @@ export default function AlerjenPlanlayiciPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* 3 Gün Kuralı Bilgisi */}
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <i className="fa-solid fa-lightbulb text-green-600 mt-0.5"></i>
+                  <div>
+                    <p className="text-sm text-green-800">
+                      <strong>3 Gün Kuralı:</strong> Her yeni besini en az 3 gün boyunca tek başına deneyin. 
+                      Bu sayede olası alerjik reaksiyonların kaynağını kolayca belirleyebilirsiniz.
+                    </p>
+                    <Link 
+                      href="/beslenme-rehberi/3-gun-kurali" 
+                      className="text-sm text-green-700 font-bold hover:text-green-800 inline-flex items-center mt-2"
+                    >
+                      3 Gün Kuralı hakkında detaylı bilgi <i className="fa-solid fa-arrow-right ml-1 text-xs"></i>
+                    </Link>
+                  </div>
                 </div>
               </div>
 
