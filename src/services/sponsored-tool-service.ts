@@ -102,6 +102,10 @@ export const sponsoredToolService = {
     has_smoker: boolean;
     heating_type: string;
     season: string;
+    child_age_months?: number;
+    respiratory_issues?: boolean;
+    ventilation_frequency?: string;
+    cooking_frequency?: string;
   }): Promise<AirQualityResult> => {
     return fetchAPI<AirQualityResult>(API_ENDPOINTS.AIR_QUALITY_ANALYZE, {
       method: 'POST',
