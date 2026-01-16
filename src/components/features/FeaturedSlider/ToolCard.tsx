@@ -29,10 +29,10 @@ const SMART_TOOLS = [
 ];
 
 export default function ToolCard({ item }: ToolCardProps) {
-  // Pick a random tool
-  const randomTool = React.useMemo(() => {
+  // Pick a random tool - use useState to ensure it stays consistent across renders
+  const [randomTool] = React.useState(() => {
     return SMART_TOOLS[Math.floor(Math.random() * SMART_TOOLS.length)];
-  }, []);
+  });
 
   return (
     <Link

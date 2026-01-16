@@ -68,12 +68,12 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
   // Build destination URL and final link
   const buildLinkUrl = () => {
     if (!isSponsored || !sponsorData) {
-      return `/blog/${post.slug}`;
+      return `/kesfet/${post.slug}`;
     }
 
     const destination = sponsorData.direct_redirect 
       ? sponsorData.sponsor_url 
-      : `/blog/${post.slug}`;
+      : `/kesfet/${post.slug}`;
 
     if (sponsorData.gam_click_url) {
       return `${sponsorData.gam_click_url}${encodeURIComponent(destination)}`;
