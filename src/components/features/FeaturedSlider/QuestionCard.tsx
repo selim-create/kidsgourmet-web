@@ -76,6 +76,13 @@ export default function QuestionCard({ item }: QuestionCardProps) {
           &quot;{decodeEntities(item.title)}&quot;
         </h3>
 
+        {/* Question Excerpt/Summary */}
+        {item.excerpt && (
+          <p className="text-sm text-gray-500 mb-3 line-clamp-2 leading-relaxed">
+            {decodeEntities(item.excerpt)}
+          </p>
+        )}
+
         <div className="mt-auto pt-4">
           <button className="w-full py-2 rounded-xl bg-purple-500 text-white text-sm font-bold shadow-sm group-hover:bg-purple-600 transition-colors flex items-center justify-center gap-2">
             <i className="fa-regular fa-comment-dots"></i>
