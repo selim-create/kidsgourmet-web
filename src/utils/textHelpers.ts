@@ -73,3 +73,30 @@ export function decodeHtmlEntities(text: string | null | undefined): string {
   // Fallback to manual replacement
   return decodeEntities(text);
 }
+
+/**
+ * Strip HTML tags and decode entities
+ * Perfect for extracting plain text from HTML content
+ */
+export function stripHtmlAndDecode(html: string | null | undefined): string {
+  if (!html) return '';
+  
+  // First strip HTML tags
+  const stripped = html.replace(/<[^>]*>/g, '');
+  
+  // Then decode entities
+  return decodeEntities(stripped);
+}
+
+/**
+ * Convert text to URL-friendly slug
+ * Used for generating anchor IDs from headings
+ */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+}

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import { useFavorites } from '@/hooks/use-favorites';
+import { decodeEntities, stripHtmlAndDecode } from '@/utils/textHelpers';
 
 interface SponsoredPostCardProps {
   post: BlogPost;
@@ -29,6 +30,24 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   const getAuthorName = (post: BlogPost) => {
     return post._embedded?.author?.[0]?.name || 'KidsGourmet Editörü';
   };
+  
+  const getAuthorAvatar = (post: BlogPost) => {
+    const avatarUrls = post._embedded?.author?.[0]?.avatar_urls;
+    // Try different sizes
+    const avatar = avatarUrls?.['96'] || avatarUrls?.['48'] || avatarUrls?.['24'];
+    
+    // Fix protocol if missing
+    if (avatar && avatar.startsWith('//')) {
+      return `https:${avatar}`;
+    }
+    
+    // Return null for invalid avatars (will show initials instead)
+    if (!avatar || avatar.includes('blank.gif') || avatar.includes('mystery-man')) {
+      return null;
+    }
+    
+    return avatar;
+  };
 
   const getCategoryName = (post: BlogPost) => {
     const catId = post._embedded?.['wp:term']?.[0]?.[0]?.id;
@@ -48,6 +67,26 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
     } catch (error) {
       console.error('Favori işlemi başarısız:', error);
     }
+  };
+  
+  // Get sponsor logo with validation
+  const getSponsorLogo = (sponsorData: typeof post.sponsor_data) => {
+    if (!sponsorData) return null;
+    
+    // Try sponsor_logo or sponsor_light_logo
+    const logo = sponsorData.sponsor_logo || sponsorData.sponsor_light_logo;
+    
+    // Validate URL
+    if (!logo || logo === '' || logo === 'null' || logo === 'undefined') {
+      return null;
+    }
+    
+    // Fix relative URLs
+    if (logo.startsWith('/')) {
+      return `${process.env.NEXT_PUBLIC_API_URL || ''}${logo}`;
+    }
+    
+    return logo;
   };
 
   // Build destination URL and final link
@@ -140,17 +179,27 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
           </span>
           <h2 
             className="font-display font-bold text-3xl md:text-5xl text-white mb-4 leading-tight group-hover:underline decoration-green-500 decoration-4 underline-offset-4 font-sans"
-            dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+            dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
           />
           <p className="text-gray-200 text-lg mb-6 line-clamp-2 hidden md:block">
-            {stripHtml(post.excerpt.rendered)}
+            {stripHtmlAndDecode(post.excerpt.rendered)}
           </p>
           
           {/* Meta Info - Only for non-sponsored */}
           {!isSponsored && (
             <div className="flex items-center text-white/80 text-sm gap-6">
               <div className="flex items-center gap-2">
-                <img src="https://placehold.co/50x50/AED581/ffffff?text=Dr" className="w-8 h-8 rounded-full border border-white/50" alt="Author" />
+                {(() => {
+                  const avatar = getAuthorAvatar(post);
+                  const name = getAuthorName(post);
+                  return avatar ? (
+                    <img src={avatar} className="w-8 h-8 rounded-full border border-white/50" alt={name} />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm border border-white/50">
+                      {name.charAt(0).toUpperCase()}
+                    </div>
+                  );
+                })()}
                 <span>{getAuthorName(post)}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -164,17 +213,16 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
           
           {/* Sponsor Logo - Only for sponsored */}
           {isSponsored && sponsorData && (() => {
-            const logoUrl = typeof sponsorData.sponsor_light_logo === 'string' 
-              ? sponsorData.sponsor_light_logo 
-              : (typeof sponsorData.sponsor_logo === 'string' 
-                  ? sponsorData.sponsor_logo 
-                  : null);
+            const logoUrl = getSponsorLogo(sponsorData);
             return logoUrl ? (
               <div className="mt-4 flex items-center gap-2">
                 <img 
                   src={logoUrl} 
                   alt={sponsorData.sponsor_name || 'Sponsor'}
                   className="h-6 object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
                 />
                 <span className="text-white/80 text-sm">{sponsorData.sponsor_name}</span>
               </div>
@@ -247,14 +295,17 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
         
         {/* Sponsor Logo - Bottom Left (for sponsored posts) */}
         {isSponsored && sponsorData && (() => {
-          const logoUrl = typeof sponsorData.sponsor_logo === 'string' 
-            ? sponsorData.sponsor_logo 
-            : (typeof sponsorData.sponsor_light_logo === 'string' 
-                ? sponsorData.sponsor_light_logo 
-                : null);
+          const logoUrl = getSponsorLogo(sponsorData);
           return logoUrl ? (
             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-2 rounded-lg">
-              <img src={logoUrl} alt={sponsorData.sponsor_name || 'Sponsor'} className="h-6 object-contain" />
+              <img 
+                src={logoUrl} 
+                alt={sponsorData.sponsor_name || 'Sponsor'} 
+                className="h-6 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).parentElement!.style.display = 'none';
+                }}
+              />
             </div>
           ) : null;
         })()}
@@ -294,7 +345,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
           {hasGamTracking ? (
             <a 
               href={finalUrl}
-              dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+              dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
               {...(isExternalLink && { 
                 target: '_blank', 
                 rel: 'noopener noreferrer sponsored' 
@@ -303,14 +354,14 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
           ) : (
             <Link 
               href={finalUrl}
-              dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+              dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
             />
           )}
         </h3>
         
         {/* Excerpt */}
         <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
-          {stripHtml(post.excerpt.rendered)}
+          {stripHtmlAndDecode(post.excerpt.rendered)}
         </p>
         
         {/* Footer */}
