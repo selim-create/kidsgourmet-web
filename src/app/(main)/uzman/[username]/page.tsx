@@ -109,10 +109,12 @@ export default function ExpertPublicProfilePage() {
               <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">{profile.display_name}</h1>
               <p className="text-purple-200 font-medium mb-4">@{profile.username}</p>
               
-              {/* Role Badge */}
-              <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
-                <span className="font-bold">{profile.role}</span>
-              </div>
+              {/* Profession Badge - Show first expertise if available */}
+              {profile.expertise && profile.expertise.length > 0 && (
+                <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
+                  <span className="font-bold">{profile.expertise[0]}</span>
+                </div>
+              )}
 
               {/* Expertise Tags */}
               {profile.expertise && profile.expertise.length > 0 && (
@@ -236,9 +238,9 @@ export default function ExpertPublicProfilePage() {
           {/* Recipes Tab */}
           {activeTab === 'recipes' && (
             <div>
-              {profile.content?.recipes && profile.content.recipes.length > 0 ? (
+              {profile.recipes && profile.recipes.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {profile.content.recipes.map((recipe) => (
+                  {profile.recipes.map((recipe) => (
                     <Link
                       key={recipe.id}
                       href={`/tarifler/${recipe.slug}`}
@@ -280,9 +282,9 @@ export default function ExpertPublicProfilePage() {
           {/* Blog Posts Tab */}
           {activeTab === 'blog_posts' && (
             <div>
-              {profile.content?.blog_posts && profile.content.blog_posts.length > 0 ? (
+              {profile.blog_posts && profile.blog_posts.length > 0 ? (
                 <div className="space-y-4">
-                  {profile.content.blog_posts.map((post) => (
+                  {profile.blog_posts.map((post) => (
                     <Link
                       key={post.id}
                       href={`/blog/${post.slug}`}
@@ -324,9 +326,9 @@ export default function ExpertPublicProfilePage() {
           {/* Answered Questions Tab */}
           {activeTab === 'answered_questions' && (
             <div>
-              {profile.content?.answered_questions && profile.content.answered_questions.length > 0 ? (
+              {profile.answered_questions && profile.answered_questions.length > 0 ? (
                 <div className="space-y-4">
-                  {profile.content.answered_questions.map((question) => (
+                  {profile.answered_questions.map((question) => (
                     <Link
                       key={question.id}
                       href={`/topluluk/${question.slug}`}
@@ -355,9 +357,9 @@ export default function ExpertPublicProfilePage() {
           {/* Asked Questions Tab */}
           {activeTab === 'asked_questions' && (
             <div>
-              {profile.content?.asked_questions && profile.content.asked_questions.length > 0 ? (
+              {profile.asked_questions && profile.asked_questions.length > 0 ? (
                 <div className="space-y-4">
-                  {profile.content.asked_questions.map((question) => (
+                  {profile.asked_questions.map((question) => (
                     <Link
                       key={question.id}
                       href={`/topluluk/${question.slug}`}

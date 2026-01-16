@@ -547,12 +547,11 @@ export interface ExpertPublicProfile {
     total_answers: number;
     total_questions: number;
   };
-  content: {
-    recipes: RecipeCard[];
-    blog_posts: BlogPostCard[];
-    answered_questions: AnsweredQuestion[];
-    asked_questions: Discussion[];
-  };
+  // Content fields are at the top level (not nested in a content object)
+  recipes: RecipeCard[];
+  blog_posts: BlogPostCard[];
+  answered_questions: AnsweredQuestion[];
+  asked_questions: Discussion[];
   role: string;
 }
 
