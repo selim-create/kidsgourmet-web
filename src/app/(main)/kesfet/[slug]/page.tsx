@@ -5,7 +5,6 @@ import Link from "next/link";
 import { blogService, BlogPost } from '@/services/blog-service';
 import { recipeService } from '@/services/recipe-service';
 import { ingredientService } from '@/services/ingredient-service';
-import { notFound } from 'next/navigation';
 import { useFavorites } from '@/hooks/use-favorites';
 import { toast } from 'sonner';
 import ClientHead from '@/components/seo/ClientHead';
@@ -25,8 +24,21 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
-  const [randomRecipes, setRandomRecipes] = useState<any[]>([]);
-  const [randomIngredients, setRandomIngredients] = useState<any[]>([]);
+  const [randomRecipes, setRandomRecipes] = useState<Array<{
+    id: number;
+    slug: string;
+    title: string;
+    image: string;
+    prep_time: string;
+    age_group?: string;
+  }>>([]);
+  const [randomIngredients, setRandomIngredients] = useState<Array<{
+    id: number;
+    slug: string;
+    name: string;
+    image: string;
+    start_age: string;
+  }>>([]);
   const [headings, setHeadings] = useState<{ level: number; id: string; text: string }[]>([]);
   const [activeHeading, setActiveHeading] = useState<string>('');
 
@@ -296,26 +308,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     window.open(`https://wa.me/?text=${encodeURIComponent(shareTitle + ' - ' + shareUrl)}`, '_blank');
   };
 
-  const copyLink = () => {
-    if (!navigator.clipboard) {
-      toast.error('Clipboard desteği mevcut değil. Lütfen URL\'yi manuel olarak kopyalayın.');
-      return;
-    }
-    
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      toast.success('Link kopyalandı!');
-    }).catch(() => {
-      toast.error('Link kopyalanamadı. Lütfen manuel olarak kopyalayın.');
-    });
-  };
-
   const handleFavorite = async () => {
     if (!post) return;
     const isFav = isFavorite(post.id, 'post');
     try {
       await toggleFavorite(post.id, 'post');
       toast.success(isFav ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi!');
-    } catch (error) {
+    } catch {
       toast.error('Giriş yapmanız gerekiyor');
     }
   };
