@@ -19,6 +19,10 @@ export default function AirQualityPage() {
   const [hasSmoker, setHasSmoker] = useState(false);
   const [heatingType, setHeatingType] = useState('central');
   const [season, setSeason] = useState('winter');
+  const [childAgeMonths, setChildAgeMonths] = useState<string>('');
+  const [hasRespiratoryIssues, setHasRespiratoryIssues] = useState(false);
+  const [ventilationFrequency, setVentilationFrequency] = useState('daily');
+  const [cookingFrequency, setCookingFrequency] = useState('medium');
 
   // Result state
   const [result, setResult] = useState<AirQualityResult | null>(null);
@@ -32,6 +36,10 @@ export default function AirQualityPage() {
         has_smoker: hasSmoker,
         heating_type: heatingType,
         season: season,
+        child_age_months: childAgeMonths ? parseInt(childAgeMonths) : undefined,
+        respiratory_issues: hasRespiratoryIssues,
+        ventilation_frequency: ventilationFrequency,
+        cooking_frequency: cookingFrequency,
       });
       setResult(analysisResult);
       setStage('result');
@@ -51,6 +59,10 @@ export default function AirQualityPage() {
     setHasSmoker(false);
     setHeatingType('central');
     setSeason('winter');
+    setChildAgeMonths('');
+    setHasRespiratoryIssues(false);
+    setVentilationFrequency('daily');
+    setCookingFrequency('medium');
   };
 
   const getRiskColor = (level: string) => {
@@ -110,25 +122,34 @@ export default function AirQualityPage() {
               <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-sky-100 text-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i className="fa-solid fa-check text-sm"></i>
+                    <i className="fa-solid fa-baby text-sm"></i>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-1">Risk Değerlendirmesi</h3>
-                    <p className="text-gray-600 text-sm">Evinizin hava kalitesi risk seviyesini öğrenin</p>
+                    <h3 className="font-bold text-slate-800 mb-1">Bebek/Çocuk Odaklı Analiz</h3>
+                    <p className="text-gray-600 text-sm">Çocuğunuzun yaşına göre özelleştirilmiş değerlendirme</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-sky-100 text-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i className="fa-solid fa-check text-sm"></i>
+                    <i className="fa-solid fa-home text-sm"></i>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 mb-1">Kişiselleştirilmiş Öneriler</h3>
-                    <p className="text-gray-600 text-sm">Hava kalitesini iyileştirmek için pratik çözümler</p>
+                    <h3 className="font-bold text-slate-800 mb-1">Ev Ortamı Değerlendirmesi</h3>
+                    <p className="text-gray-600 text-sm">Isıtma, havalandırma ve yaşam koşulları analizi</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-sky-100 text-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i className="fa-solid fa-check text-sm"></i>
+                    <i className="fa-solid fa-lightbulb text-sm"></i>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-slate-800 mb-1">Akıllı Öneriler</h3>
+                    <p className="text-gray-600 text-sm">Durumunuza özel pratik çözümler ve uyarılar</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-sky-100 text-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i className="fa-solid fa-calendar text-sm"></i>
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-800 mb-1">Mevsimsel Uyarılar</h3>
@@ -238,6 +259,72 @@ export default function AirQualityPage() {
                 </label>
               </div>
 
+              {/* Child Age */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">
+                  Çocuğunuzun Yaşı (Ay) <span className="text-gray-400 text-xs font-normal">(Opsiyonel)</span>
+                </label>
+                <select
+                  value={childAgeMonths}
+                  onChange={(e) => setChildAgeMonths(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                >
+                  <option value="">Seçiniz</option>
+                  <option value="0">0-3 Ay (Yenidoğan)</option>
+                  <option value="3">3-6 Ay</option>
+                  <option value="6">6-12 Ay</option>
+                  <option value="12">12-24 Ay</option>
+                  <option value="24">24-36 Ay</option>
+                  <option value="36">36+ Ay</option>
+                </select>
+              </div>
+
+              {/* Respiratory Issues */}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="hasRespiratoryIssues"
+                  checked={hasRespiratoryIssues}
+                  onChange={(e) => setHasRespiratoryIssues(e.target.checked)}
+                  className="w-5 h-5 text-sky-500 rounded focus:ring-2 focus:ring-sky-500"
+                />
+                <label htmlFor="hasRespiratoryIssues" className="text-sm font-medium text-slate-800">
+                  Çocuğumda solunum sistemi hassasiyeti/alerjisi var
+                </label>
+              </div>
+
+              {/* Ventilation Frequency */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">
+                  Havalandırma Sıklığı
+                </label>
+                <select
+                  value={ventilationFrequency}
+                  onChange={(e) => setVentilationFrequency(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                >
+                  <option value="rarely">Nadiren (Haftada 1-2 kez)</option>
+                  <option value="daily">Günlük (Günde 1-2 kez)</option>
+                  <option value="multiple_daily">Sık (Günde 3+ kez)</option>
+                </select>
+              </div>
+
+              {/* Cooking Frequency */}
+              <div>
+                <label className="block text-sm font-bold text-slate-800 mb-2">
+                  Mutfak Aktivitesi
+                </label>
+                <select
+                  value={cookingFrequency}
+                  onChange={(e) => setCookingFrequency(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                >
+                  <option value="low">Düşük (Günde 1 öğün veya daha az)</option>
+                  <option value="medium">Orta (Günde 2-3 öğün)</option>
+                  <option value="high">Yüksek (Sürekli pişirme, fırın kullanımı)</option>
+                </select>
+              </div>
+
               {/* Buttons */}
               <div className="flex gap-3 pt-4">
                 <button
@@ -276,9 +363,39 @@ export default function AirQualityPage() {
 
               {/* Risk Level */}
               <div className="p-6">
+                {/* Risk Score Gauge */}
+                <div className="relative mb-6">
+                  {/* Gauge Background */}
+                  <div className="h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-1000 ease-out ${
+                        result.risk_level === 'low' ? 'bg-gradient-to-r from-green-400 to-green-500' :
+                        result.risk_level === 'medium' ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
+                        'bg-gradient-to-r from-orange-500 to-red-500'
+                      }`}
+                      style={{ width: `${result.risk_score}%` }}
+                    />
+                  </div>
+                  
+                  {/* Score Labels */}
+                  <div className="flex justify-between mt-2 text-xs text-gray-500">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>75</span>
+                    <span>100</span>
+                  </div>
+                </div>
+                
+                {/* Risk Level Display */}
                 <div className={`rounded-xl p-6 text-center ${getRiskColor(result.risk_level)}`}>
-                  <div className="text-4xl font-bold mb-2">{getRiskLabel(result.risk_level)}</div>
-                  <div className="text-sm opacity-75">Risk Skoru: {result.risk_score}/100</div>
+                  <div className="text-5xl mb-2">
+                    {result.risk_level === 'low' && <i className="fa-solid fa-face-smile text-green-500"></i>}
+                    {result.risk_level === 'medium' && <i className="fa-solid fa-face-meh text-yellow-500"></i>}
+                    {result.risk_level === 'high' && <i className="fa-solid fa-face-frown text-red-500"></i>}
+                  </div>
+                  <div className="text-3xl font-bold mb-1">{getRiskLabel(result.risk_level)}</div>
+                  <div className="text-lg opacity-75">Risk Skoru: {result.risk_score}/100</div>
                 </div>
               </div>
             </div>
@@ -287,14 +404,37 @@ export default function AirQualityPage() {
             {result.risk_factors?.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
-                  <i className="fa-solid fa-exclamation-triangle text-amber-500"></i>
+                  <i className="fa-solid fa-triangle-exclamation text-amber-500"></i>
                   Risk Faktörleri
                 </h3>
                 <div className="space-y-3">
                   {result.risk_factors.map((item, index) => (
-                    <div key={index} className="bg-gray-50 rounded-xl p-4">
-                      <div className="font-semibold text-slate-800 mb-1">{item.factor}</div>
-                      <div className="text-sm text-gray-600">{item.impact}</div>
+                    <div key={index} className={`rounded-xl p-4 border-l-4 ${
+                      item.severity === 'high' ? 'bg-red-50 border-red-500' :
+                      item.severity === 'medium' ? 'bg-yellow-50 border-yellow-500' :
+                      'bg-gray-50 border-gray-300'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-2">
+                          {/* Category Icon */}
+                          {item.category === 'heating' && <i className="fa-solid fa-fire text-orange-500"></i>}
+                          {item.category === 'environment' && <i className="fa-solid fa-house text-blue-500"></i>}
+                          {item.category === 'lifestyle' && <i className="fa-solid fa-person text-purple-500"></i>}
+                          {item.category === 'external' && <i className="fa-solid fa-cloud text-gray-500"></i>}
+                          <span className="font-semibold text-slate-800">{item.factor}</span>
+                        </div>
+                        {/* Severity Badge */}
+                        {item.severity && (
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            item.severity === 'high' ? 'bg-red-100 text-red-700' :
+                            item.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {item.severity === 'high' ? 'Yüksek' : item.severity === 'medium' ? 'Orta' : 'Düşük'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-2">{item.impact}</div>
                     </div>
                   ))}
                 </div>
@@ -313,6 +453,24 @@ export default function AirQualityPage() {
                     <li key={index} className="flex items-start gap-2 text-gray-700">
                       <i className="fa-solid fa-check-circle text-green-500 mt-1 flex-shrink-0"></i>
                       <span className="text-sm">{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Indoor Tips */}
+            {result.indoor_tips && result.indoor_tips.length > 0 && (
+              <div className="bg-sky-50 border border-sky-200 rounded-2xl p-6">
+                <h3 className="font-bold text-lg text-sky-900 mb-4 flex items-center gap-2">
+                  <i className="fa-solid fa-house-chimney text-sky-500"></i>
+                  İç Mekan Hava Kalitesi İpuçları
+                </h3>
+                <ul className="space-y-2">
+                  {result.indoor_tips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sky-900">
+                      <i className="fa-solid fa-leaf text-sky-500 mt-1 flex-shrink-0"></i>
+                      <span className="text-sm">{tip}</span>
                     </li>
                   ))}
                 </ul>

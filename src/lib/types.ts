@@ -1087,9 +1087,24 @@ export interface RashRiskResult {
 export interface AirQualityResult {
   risk_level: 'low' | 'medium' | 'high';
   risk_score: number;
-  risk_factors: { factor: string; impact: string }[];
+  risk_factors: { 
+    factor: string; 
+    impact: string;
+    severity?: 'low' | 'medium' | 'high';
+    category?: 'heating' | 'environment' | 'lifestyle' | 'external';
+  }[];
   recommendations: string[];
   seasonal_alerts: string[];
+  indoor_tips?: string[];
+  external_aqi?: {
+    aqi: number;
+    quality_level: {
+      level: string;
+      color: string;
+      description: string;
+    };
+    is_safe_for_outdoor: boolean;
+  };
   sponsor?: ToolSponsorData;
 }
 
