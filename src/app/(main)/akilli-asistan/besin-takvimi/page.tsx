@@ -15,6 +15,7 @@ export default function BesinTakvimiPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(getWeekStart(new Date()));
+  const [error, setError] = useState<string | null>(null);
   
   // Form state
   const [newTrialDate, setNewTrialDate] = useState(new Date().toISOString().split('T')[0]);
@@ -28,6 +29,10 @@ export default function BesinTakvimiPage() {
   const [ingredientSuggestions, setIngredientSuggestions] = useState<Ingredient[]>([]);
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  
+  // Detail modal state
+  const [selectedTrial, setSelectedTrial] = useState<FoodTrial | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   function getWeekStart(date: Date): Date {
     const d = new Date(date);
@@ -50,6 +55,7 @@ export default function BesinTakvimiPage() {
     if (!activeChild) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       const weekEnd = new Date(currentWeekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
@@ -62,7 +68,7 @@ export default function BesinTakvimiPage() {
       setTrials(data);
     } catch (error) {
       console.error('Load trials error:', error);
-      toast.error('Besin denemeleri yüklenemedi');
+      setError('Besin denemeleri yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.');
     } finally {
       setIsLoading(false);
     }
@@ -146,6 +152,21 @@ export default function BesinTakvimiPage() {
     setShowSuggestions(false);
   };
 
+  const handleDeleteTrial = async (trialId: string) => {
+    if (!confirm('Bu denemeyi silmek istediğinizden emin misiniz?')) return;
+    
+    try {
+      await toolService.deleteFoodTrial(trialId);
+      toast.success('Deneme silindi');
+      setShowDetailModal(false);
+      setSelectedTrial(null);
+      loadTrials();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Deneme silinemedi');
+    }
+  };
+
   const getTrialsForDate = (date: Date): FoodTrial[] => {
     const dateStr = date.toISOString().split('T')[0];
     return trials.filter(trial => trial.trial_date === dateStr);
@@ -226,7 +247,7 @@ export default function BesinTakvimiPage() {
 
       <div className="p-4 md:p-8 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-green-400 to-cyan-500 rounded-[2rem] p-8 md:p-12 text-white mb-6">
+        <div className="bg-gradient-to-r from-orange-400 to-orange-500 rounded-[2rem] p-8 md:p-12 text-white mb-6 shadow-lg shadow-orange-200/50">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl">
@@ -247,19 +268,47 @@ export default function BesinTakvimiPage() {
           </div>
         </div>
 
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6 flex items-start gap-4">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <i className="fa-solid fa-triangle-exclamation text-red-500"></i>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-bold text-red-800 mb-1">Bir Hata Oluştu</h4>
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+            <button 
+              onClick={() => { setError(null); loadTrials(); }}
+              className="text-red-500 hover:text-red-700"
+            >
+              <i className="fa-solid fa-rotate-right"></i>
+            </button>
+          </div>
+        )}
+
         {/* Stats Summary */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div className="text-3xl font-bold text-green-600">{stats.total}</div>
-            <div className="text-sm text-gray-600">Bu Hafta</div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i className="fa-solid fa-utensils text-green-500 text-xl"></i>
+            </div>
+            <div className="text-3xl font-bold text-slate-800">{stats.total}</div>
+            <div className="text-sm text-gray-500 mt-1">Bu Hafta</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div className="text-3xl font-bold text-blue-600">{stats.newThisWeek}</div>
-            <div className="text-sm text-gray-600">Yeni Gıda</div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i className="fa-solid fa-sparkles text-blue-500 text-xl"></i>
+            </div>
+            <div className="text-3xl font-bold text-slate-800">{stats.newThisWeek}</div>
+            <div className="text-sm text-gray-500 mt-1">Yeni Gıda</div>
           </div>
-          <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-            <div className="text-3xl font-bold text-amber-600">{stats.reactions}</div>
-            <div className="text-sm text-gray-600">Reaksiyon</div>
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 text-center shadow-sm hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <i className="fa-solid fa-exclamation-triangle text-amber-500 text-xl"></i>
+            </div>
+            <div className="text-3xl font-bold text-slate-800">{stats.reactions}</div>
+            <div className="text-sm text-gray-500 mt-1">Reaksiyon</div>
           </div>
         </div>
 
@@ -294,9 +343,43 @@ export default function BesinTakvimiPage() {
 
         {/* Calendar Grid */}
         {isLoading ? (
+          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+            <div className="grid grid-cols-7 gap-px bg-gray-200">
+              {/* Header skeleton */}
+              {dayNames.map((day, idx) => (
+                <div key={idx} className="bg-gray-50 p-3 text-center">
+                  <div className="h-4 bg-gray-200 rounded animate-pulse w-8 mx-auto"></div>
+                </div>
+              ))}
+              {/* Date cells skeleton */}
+              {Array(7).fill(0).map((_, idx) => (
+                <div key={idx} className="bg-white p-4 min-h-[140px]">
+                  <div className="h-4 w-6 bg-gray-200 rounded animate-pulse mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : !error && trials.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-            <i className="fa-solid fa-spinner fa-spin text-3xl text-gray-400 mb-4"></i>
-            <p className="text-gray-500">Yükleniyor...</p>
+            <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fa-solid fa-seedling text-orange-500 text-3xl"></i>
+            </div>
+            <h3 className="font-display font-bold text-xl text-slate-800 mb-2">
+              Henüz Besin Denemesi Yok
+            </h3>
+            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+              Bu hafta için henüz besin denemesi eklenmemiş. Yeni bir deneme ekleyerek başlayın!
+            </p>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-orange-200/50"
+            >
+              <i className="fa-solid fa-plus mr-2"></i>
+              İlk Denemeyi Ekle
+            </button>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -316,10 +399,28 @@ export default function BesinTakvimiPage() {
                 return (
                   <div
                     key={idx}
-                    className={`bg-white p-3 min-h-[120px] ${isToday ? 'ring-2 ring-green-400' : ''}`}
+                    className={`bg-white p-4 min-h-[140px] hover:bg-gray-50 transition-colors cursor-pointer group ${
+                      isToday ? 'ring-2 ring-orange-400 ring-inset' : ''
+                    }`}
+                    onClick={() => {
+                      setNewTrialDate(date.toISOString().split('T')[0]);
+                      setShowAddModal(true);
+                    }}
                   >
-                    <div className={`text-sm font-bold mb-2 ${isToday ? 'text-green-600' : 'text-gray-700'}`}>
-                      {date.getDate()}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-sm font-bold ${isToday ? 'text-orange-500' : 'text-gray-700'}`}>
+                        {date.getDate()}
+                      </span>
+                      <button 
+                        className="w-6 h-6 rounded-full bg-gray-100 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-orange-100 hover:text-orange-500 flex items-center justify-center"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNewTrialDate(date.toISOString().split('T')[0]);
+                          setShowAddModal(true);
+                        }}
+                      >
+                        <i className="fa-solid fa-plus text-xs"></i>
+                      </button>
                     </div>
                     <div className="space-y-2">
                       {dayTrials.map((trial) => {
@@ -327,17 +428,34 @@ export default function BesinTakvimiPage() {
                         return (
                           <div
                             key={trial.id}
-                            className={`text-xs p-2 rounded-lg border ${
-                              trial.is_new ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTrial(trial);
+                              setShowDetailModal(true);
+                            }}
+                            className={`text-xs p-2.5 rounded-xl border cursor-pointer hover:shadow-sm transition-all ${
+                              trial.is_new 
+                                ? 'bg-blue-50 border-blue-200 hover:border-blue-300' 
+                                : 'bg-gray-50 border-gray-200 hover:border-gray-300'
                             }`}
                           >
-                            <div className="flex items-center gap-1 mb-1">
-                              <span>{getFormEmoji(trial.form)}</span>
-                              <span className="font-medium truncate">{trial.ingredient_name}</span>
+                            <div className="flex items-center gap-1.5 mb-1.5">
+                              <span className="text-base">{getFormEmoji(trial.form)}</span>
+                              <span className="font-semibold text-slate-700 truncate flex-1">{trial.ingredient_name}</span>
+                              {trial.is_new && (
+                                <span className="px-1.5 py-0.5 bg-blue-500 text-white text-[10px] rounded-full font-bold">YENİ</span>
+                              )}
                             </div>
-                            {trial.reaction && (
-                              <div className={`text-xs px-2 py-0.5 rounded-full ${reactionBadge.color}`}>
+                            {trial.reaction && trial.reaction !== 'none' && (
+                              <div className={`inline-flex items-center text-[10px] px-2 py-0.5 rounded-full ${reactionBadge.color}`}>
                                 {reactionBadge.text}
+                              </div>
+                            )}
+                            {trial.rating && (
+                              <div className="flex gap-0.5 mt-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <span key={star} className={`text-[10px] ${star <= trial.rating! ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                                ))}
                               </div>
                             )}
                           </div>
@@ -373,18 +491,23 @@ export default function BesinTakvimiPage() {
 
       {/* Add Trial Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-display font-bold text-xl text-slate-800">Yeni Besin Denemesi</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <i className="fa-solid fa-plus text-orange-500"></i>
+                </div>
+                <h3 className="font-display font-bold text-xl text-slate-800">Yeni Besin Denemesi</h3>
+              </div>
               <button
                 onClick={() => {
                   setShowAddModal(false);
                   resetForm();
                 }}
-                className="text-gray-400 hover:text-gray-600"
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
               >
-                <i className="fa-solid fa-times"></i>
+                <i className="fa-solid fa-times text-gray-500"></i>
               </button>
             </div>
 
@@ -556,25 +679,114 @@ export default function BesinTakvimiPage() {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-6">
                 <button
                   type="button"
                   onClick={() => {
                     setShowAddModal(false);
                     resetForm();
                   }}
-                  className="flex-1 bg-gray-200 text-slate-800 py-3 rounded-xl font-bold hover:bg-gray-300 transition-colors"
+                  className="flex-1 bg-gray-100 text-slate-700 py-3.5 rounded-xl font-bold hover:bg-gray-200 transition-colors"
                 >
                   İptal
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-600 hover:to-cyan-600 text-white py-3 rounded-xl font-bold transition-all"
+                  className="flex-1 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white py-3.5 rounded-xl font-bold transition-all shadow-lg shadow-orange-200/50"
                 >
+                  <i className="fa-solid fa-check mr-2"></i>
                   Kaydet
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
+      {showDetailModal && selectedTrial && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-display font-bold text-xl text-slate-800">Deneme Detayı</h3>
+              <button
+                onClick={() => { setShowDetailModal(false); setSelectedTrial(null); }}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              >
+                <i className="fa-solid fa-times text-gray-500"></i>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
+                <span className="text-3xl">{getFormEmoji(selectedTrial.form)}</span>
+                <div className="flex-1">
+                  <h4 className="font-bold text-lg text-slate-800">{selectedTrial.ingredient_name}</h4>
+                  <p className="text-sm text-gray-500">
+                    {new Date(selectedTrial.trial_date).toLocaleDateString('tr-TR', { 
+                      day: 'numeric', month: 'long', year: 'numeric' 
+                    })}
+                  </p>
+                </div>
+                {selectedTrial.is_new && (
+                  <span className="px-2 py-1 bg-blue-500 text-white text-xs rounded-full font-bold">YENİ</span>
+                )}
+              </div>
+              
+              {/* Reaksiyon */}
+              <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl">
+                <span className="text-sm text-gray-600">Reaksiyon</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getReactionBadge(selectedTrial.reaction).color}`}>
+                  {getReactionBadge(selectedTrial.reaction).text}
+                </span>
+              </div>
+              
+              {/* Form */}
+              <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl">
+                <span className="text-sm text-gray-600">Sunum Şekli</span>
+                <span className="text-sm font-medium text-slate-700">
+                  {selectedTrial.form === 'puree' && '🥄 Püre'}
+                  {selectedTrial.form === 'finger_food' && '✋ Parmak Yiyecek'}
+                  {selectedTrial.form === 'mixed' && '🍽️ Karma'}
+                </span>
+              </div>
+              
+              {/* Rating */}
+              {selectedTrial.rating && (
+                <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl">
+                  <span className="text-sm text-gray-600">Beğeni</span>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <span key={star} className={`text-lg ${star <= selectedTrial.rating! ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Notlar */}
+              {selectedTrial.reaction_notes && (
+                <div className="p-3 border border-gray-100 rounded-xl">
+                  <span className="text-sm text-gray-600 block mb-2">Notlar</span>
+                  <p className="text-sm text-slate-700">{selectedTrial.reaction_notes}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => handleDeleteTrial(selectedTrial.id)}
+                className="flex-1 bg-red-50 text-red-600 py-3 rounded-xl font-bold hover:bg-red-100 transition-colors"
+              >
+                <i className="fa-solid fa-trash mr-2"></i>
+                Sil
+              </button>
+              <button
+                onClick={() => { setShowDetailModal(false); setSelectedTrial(null); }}
+                className="flex-1 bg-gray-100 text-slate-700 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+              >
+                Kapat
+              </button>
+            </div>
           </div>
         </div>
       )}
