@@ -164,7 +164,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                         {/* Content */}
                         <div className="flex items-start justify-between gap-3 mb-4">
                           <h1 className="font-display font-bold text-2xl md:text-3xl text-slate-800 leading-tight font-sans">
-                              {discussion.title}
+                            {discussion.title}
                           </h1>
                           <EditButton 
                             contentType="discussion" 
