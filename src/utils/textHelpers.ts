@@ -108,7 +108,6 @@ export function slugify(text: string): string {
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')               // Replace spaces with hyphens
-    .replace(/[^\w\s-]/g, '')           // Remove special characters
     .replace(/[^\w-]+/g, '')            // Remove all non-word chars except hyphens
     .replace(/--+/g, '-')               // Replace multiple hyphens with single hyphen
     .replace(/^-+/, '')                 // Trim hyphens from start
