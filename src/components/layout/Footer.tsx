@@ -48,7 +48,7 @@ export default function Footer() {
                     <h4 className="font-display font-bold text-slate-800 mb-5 text-base">Kurumsal</h4>
                     <ul className="space-y-3 text-gray-600">
                         <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Hakkımızda</Link></li>
-                        <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Uzman Kadromuz</Link></li>
+                        <li><Link href="/uzmanlar" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Uzman Kadromuz</Link></li>
                         <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Kullanım Koşulları</Link></li>
                         <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Gizlilik Politikası</Link></li>
                         <li><Link href="#" className="hover:text-orange-500 hover:translate-x-1 transition-all inline-block">Çerez Politikası</Link></li>
