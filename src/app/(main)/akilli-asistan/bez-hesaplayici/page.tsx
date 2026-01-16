@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'tr_TR',
     siteName: 'KidsGourmet',
-    url: 'https://kidsgourmet.com/akilli-asistan/bez-hesaplayici',
+    url: 'https://kidsgourmet.com.tr/akilli-asistan/bez-hesaplayici',
   },
   twitter: {
     card: 'summary_large_image',
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     description: 'Bebeğinizin kilosuna göre doğru bez numarasını öğrenin.',
   },
   alternates: {
-    canonical: 'https://kidsgourmet.com/akilli-asistan/bez-hesaplayici',
+    canonical: 'https://kidsgourmet.com.tr/akilli-asistan/bez-hesaplayici',
   },
   robots: {
     index: true,
@@ -42,7 +42,7 @@ const jsonLd = {
   provider: {
     '@type': 'Organization',
     name: 'KidsGourmet',
-    url: 'https://kidsgourmet.com',
+    url: 'https://kidsgourmet.com.tr',
   },
 };
 
