@@ -1129,3 +1129,138 @@ export interface StainSearchResponse {
   categories: { id: string; label: string }[];
   sponsor: ToolSponsorData | null;
 }
+
+// ===============================
+// AŞI TAKVİMİ TİPLERİ
+// ===============================
+
+export type VaccineStatus = 'upcoming' | 'done' | 'skipped' | 'delayed' | 'overdue';
+
+export interface VaccineMaster {
+  id: number;
+  code: string;
+  name: string;
+  name_short: string;
+  description: string;
+  timing_rule: VaccineTimingRule;
+  min_age_days: number;
+  max_age_days: number | null;
+  is_mandatory: boolean;
+  depends_on: string | null;
+  brand_options: VaccineBrandOptions | null;
+  schedule_version: string;
+  source_url: string | null;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface VaccineTimingRule {
+  type: 'birth' | 'month' | 'week' | 'day' | 'custom';
+  value?: number;
+  offset_days?: number;
+  tolerance_days_before?: number;
+  tolerance_days_after?: number;
+  custom_logic?: string;
+}
+
+export interface VaccineBrandOptions {
+  brand?: string;
+  total_doses?: number;
+  dose_number?: number;
+  types?: string[];
+}
+
+export interface VaccineRecord {
+  id: number;
+  child_id: string;
+  vaccine_code: string;
+  vaccine: VaccineMaster;
+  status: VaccineStatus;
+  scheduled_date: string;
+  actual_date: string | null;
+  notes: string | null;
+  side_effects: VaccineSideEffects | null;
+  side_effect_severity: 'none' | 'mild' | 'moderate' | 'severe';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VaccineSideEffects {
+  fever: boolean;
+  irritability: boolean;
+  swelling: boolean;
+  rash: boolean;
+  loss_of_appetite: boolean;
+  other: string | null;
+}
+
+export interface VaccineSchedule {
+  child_id: string;
+  child_name: string;
+  birth_date: string;
+  is_premature: boolean;
+  schedule_version: string;
+  vaccines: VaccineRecord[];
+  stats: VaccineStats;
+}
+
+export interface VaccineStats {
+  total: number;
+  done: number;
+  upcoming: number;
+  overdue: number;
+  skipped: number;
+  completion_percentage: number;
+}
+
+export interface MarkVaccineDoneRequest {
+  child_id: string;
+  vaccine_code: string;
+  actual_date: string;
+  notes?: string;
+}
+
+export interface UpdateVaccineStatusRequest {
+  record_id: number;
+  status: VaccineStatus;
+  actual_date?: string;
+  notes?: string;
+}
+
+export interface AddPrivateVaccineRequest {
+  child_id: string;
+  vaccine_type: 'rotavirus' | 'meningococcal_acwy' | 'meningococcal_b' | 'varicella' | 'influenza';
+  brand?: string;
+  first_dose_date?: string;
+}
+
+export interface ReportSideEffectRequest {
+  record_id: number;
+  side_effects: VaccineSideEffects;
+  severity: 'none' | 'mild' | 'moderate' | 'severe';
+  notes?: string;
+}
+
+export interface UpcomingVaccine {
+  vaccine: VaccineMaster;
+  record: VaccineRecord;
+  days_until: number;
+  is_overdue: boolean;
+}
+
+export interface VaccineHistoryItem {
+  record: VaccineRecord;
+  vaccine: VaccineMaster;
+  age_at_vaccination: string;
+}
+
+// Notification Preferences
+export interface NotificationPreferences {
+  email_enabled: boolean;
+  push_enabled: boolean;
+  vaccine_reminder_3day: boolean;
+  vaccine_reminder_1day: boolean;
+  vaccine_overdue: boolean;
+  growth_tracking: boolean;
+  weekly_digest: boolean;
+}

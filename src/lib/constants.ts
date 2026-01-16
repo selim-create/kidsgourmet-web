@@ -130,4 +130,20 @@ export const API_ENDPOINTS = {
   AIR_QUALITY_ANALYZE: `${KG_API_NAMESPACE}/tools/air-quality/analyze`,
   STAIN_SEARCH: `${KG_API_NAMESPACE}/tools/stain-encyclopedia/search`,
   STAIN_BY_SLUG: (slug: string) => `${KG_API_NAMESPACE}/tools/stain-encyclopedia/${slug}`,
+  
+  // Vaccination Tracker Endpoints
+  VACCINES_MASTER: `${KG_API_NAMESPACE}/health/vaccines/master`,
+  VACCINES_SCHEDULE_VERSIONS: `${KG_API_NAMESPACE}/health/vaccines/schedule-versions`,
+  VACCINES_BY_CHILD: (childId: string) => `${KG_API_NAMESPACE}/health/vaccines?child_id=${childId}`,
+  VACCINES_MARK_DONE: `${KG_API_NAMESPACE}/health/vaccines/mark-done`,
+  VACCINES_UPDATE_STATUS: `${KG_API_NAMESPACE}/health/vaccines/update-status`,
+  VACCINES_ADD_PRIVATE: `${KG_API_NAMESPACE}/health/vaccines/add-private`,
+  VACCINES_SIDE_EFFECTS: `${KG_API_NAMESPACE}/health/vaccines/side-effects`,
+  VACCINES_UPCOMING: (childId: string) => `${KG_API_NAMESPACE}/health/vaccines/upcoming?child_id=${childId}`,
+  VACCINES_HISTORY: (childId: string) => `${KG_API_NAMESPACE}/health/vaccines/history?child_id=${childId}`,
+  
+  // Notification Preferences
+  NOTIFICATION_PREFERENCES: `${KG_API_NAMESPACE}/notifications/preferences`,
+  PUSH_SUBSCRIBE: `${KG_API_NAMESPACE}/notifications/push/subscribe`,
+  PUSH_UNSUBSCRIBE: `${KG_API_NAMESPACE}/notifications/push/unsubscribe`,
 } as const;

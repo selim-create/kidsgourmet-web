@@ -9,6 +9,7 @@ import { userService } from "@/services/user-service";
 import { toolService } from "@/services/tool-service";
 import { ShoppingListItem, BLWTestResult, PercentileResult, SolidFoodReadinessResult } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
+import DashboardVaccineWidget from "@/components/features/vaccine/DashboardVaccineWidget";
 import { formatAge } from "@/utils/ageFormatter";
 
 export default function DashboardPage() {
@@ -135,12 +136,22 @@ export default function DashboardPage() {
                 </Link>
                 
                 <div className="pt-6 pb-2">
+                    <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Sağlık</p>
+                </div>
+                <Link href="/dashboard/saglik/asilar" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                    <i className="fa-solid fa-syringe"></i> Aşı Takvimi
+                </Link>
+                <Link href="/akilli-asistan/persentil" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                    <i className="fa-solid fa-chart-line"></i> Büyüme Takibi
+                </Link>
+                
+                <div className="pt-6 pb-2">
                     <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Araçlar</p>
                 </div>
                 <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-chart-line"></i> Gelişim Takibi
+                    <i className="fa-solid fa-toolbox"></i> Akıllı Asistan
                 </Link>
-                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
+                <Link href="/akilli-asistan/blw-testi" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
                     <i className="fa-solid fa-check-double"></i> BLW Testi
                 </Link>
             </nav>
@@ -420,6 +431,14 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
+                    {/* Vaccine Widget */}
+                    {activeChild && (
+                      <DashboardVaccineWidget 
+                        childId={activeChild.id} 
+                        childName={activeChild.name}
+                      />
+                    )}
+
                     {/* BLW Test Results Widget */}
                     {blwResults.length > 0 && (
                       <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -697,7 +716,7 @@ export default function DashboardPage() {
                         <i className="fa-solid fa-bolt text-blue-500 mr-2"></i> Kısayollar
                       </h3>
                       <div className="space-y-2">
-                        <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
+                        <Link href="/akilli-asistan/persentil" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
                           <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                             <i className="fa-solid fa-chart-line text-blue-500"></i>
                           </div>
@@ -707,7 +726,7 @@ export default function DashboardPage() {
                           </div>
                           <i className="fa-solid fa-chevron-right text-gray-300"></i>
                         </Link>
-                        <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
+                        <Link href="/dashboard/saglik/asilar" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
                           <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                             <i className="fa-solid fa-syringe text-green-500"></i>
                           </div>
