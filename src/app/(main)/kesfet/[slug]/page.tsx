@@ -273,20 +273,31 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
   
   // Get sponsor logo with validation
-  const getSponsorLogo = (sponsorData: typeof post.sponsor_data) => {
+  const getSponsorLogo = (sponsorData: typeof post.sponsor_data): string | null => {
     if (!sponsorData) return null;
     
-    // Try sponsor_logo or sponsor_light_logo
-    const logo = sponsorData.sponsor_logo || sponsorData.sponsor_light_logo;
+    // sponsor_logo veya sponsor_light_logo'yu al
+    let logo = sponsorData.sponsor_logo || sponsorData.sponsor_light_logo;
     
-    // Validate URL
-    if (!logo || logo === '' || logo === 'null' || logo === 'undefined') {
+    // Logo yoksa null döndür
+    if (!logo) return null;
+    
+    // Logo bir object ise (WordPress media object olabilir)
+    if (typeof logo === 'object') {
+      // url, source_url veya src property'lerini dene
+      const mediaObject = logo as { url?: string; source_url?: string; src?: string };
+      logo = mediaObject.url || mediaObject.source_url || mediaObject.src || null;
+    }
+    
+    // Hala geçerli bir string değilse null döndür
+    if (typeof logo !== 'string' || !logo || logo === 'null' || logo === 'undefined' || logo.trim() === '') {
       return null;
     }
     
-    // Fix relative URLs
+    // Relative URL'i absolute yap
     if (logo.startsWith('/')) {
-      return `${process.env.NEXT_PUBLIC_API_URL || ''}${logo}`;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_WP_URL || '';
+      return `${apiUrl}${logo}`;
     }
     
     return logo;

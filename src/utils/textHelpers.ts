@@ -3,90 +3,97 @@
  * For HTML entity decoding and text manipulation
  */
 
-import DOMPurify from 'isomorphic-dompurify';
-
 /**
- * SSR-safe version of HTML entity decoder
- * Use this in components that render server-side
- * This is the recommended function to use throughout the application
+ * HTML entities'i decode eder (Server ve Client side uyumlu)
+ * Emojiler, &amp;, &#8217;, &#x1F60A; gibi tüm entity'leri çözer
  */
-export function decodeEntities(text: string | null | undefined): string {
-  if (!text) return '';
+export const decodeEntities = (text: string | undefined | null): string => {
+  if (!text || typeof text !== 'string') return '';
   
-  // First pass: decode HTML entities using a map
-  const htmlEntities: Record<string, string> = {
+  // Named entities
+  const namedEntities: Record<string, string> = {
     '&amp;': '&',
     '&lt;': '<',
     '&gt;': '>',
     '&quot;': '"',
-    '&#039;': "'",
     '&apos;': "'",
+    '&#039;': "'",
     '&nbsp;': ' ',
-    '&#8211;': '\u2013',
-    '&#8212;': '\u2014',
-    '&#8216;': '\u2018',
-    '&#8217;': '\u2019',
-    '&#8220;': '\u201C',
-    '&#8221;': '\u201D',
+    '&ndash;': '\u2013',
+    '&mdash;': '\u2014',
+    '&lsquo;': '\u2018',
+    '&rsquo;': '\u2019',
+    '&ldquo;': '\u201C',
+    '&rdquo;': '\u201D',
+    '&hellip;': '\u2026',
+    '&copy;': '\u00A9',
+    '&reg;': '\u00AE',
+    '&trade;': '\u2122',
+    '&euro;': '\u20AC',
+    '&pound;': '\u00A3',
+    '&yen;': '\u00A5',
+    '&cent;': '\u00A2',
+    '&deg;': '\u00B0',
+    '&plusmn;': '\u00B1',
+    '&times;': '\u00D7',
+    '&divide;': '\u00F7',
+    '&frac12;': '\u00BD',
+    '&frac14;': '\u00BC',
+    '&frac34;': '\u00BE',
   };
   
-  let decoded = text;
+  let result = text;
   
-  // Replace HTML entities (run twice for double-encoded)
-  // Pre-compile regex patterns for better performance
-  const entityPatterns = Object.entries(htmlEntities).map(([entity, char]) => ({
-    pattern: new RegExp(entity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
-    replacement: char
-  }));
-  
-  for (let i = 0; i < 2; i++) {
-    for (const { pattern, replacement } of entityPatterns) {
-      decoded = decoded.replace(pattern, replacement);
-    }
+  // Named entities'i replace et
+  for (const [entity, char] of Object.entries(namedEntities)) {
+    result = result.replace(new RegExp(entity, 'gi'), char);
   }
   
-  // Use DOMPurify for any remaining entities
-  decoded = DOMPurify.sanitize(decoded, { 
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true 
+  // Decimal numeric entities: &#8217; &#60; etc.
+  result = result.replace(/&#(\d+);/g, (_, code) => {
+    const num = parseInt(code, 10);
+    try {
+      return String.fromCodePoint(num);
+    } catch {
+      return '';
+    }
   });
   
-  return decoded;
-}
+  // Hexadecimal numeric entities: &#x1F60A; &#x27; etc.
+  result = result.replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => {
+    const num = parseInt(hex, 16);
+    try {
+      return String.fromCodePoint(num);
+    } catch {
+      return '';
+    }
+  });
+  
+  return result;
+};
 
 /**
- * Client-side HTML entity decoder using DOMParser (safer than innerHTML)
- * NOT SSR-safe - use decodeEntities for SSR
- * @deprecated Use decodeEntities instead for consistency
+ * HTML tag'lerini temizler ve entities'i decode eder
  */
-export function decodeHtmlEntities(text: string | null | undefined): string {
-  if (!text) return '';
+export const stripHtmlAndDecode = (html: string | undefined | null): string => {
+  if (!html || typeof html !== 'string') return '';
   
-  // Use DOMParser instead of innerHTML for safety
-  if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(text, 'text/html');
-    return doc.documentElement.textContent || '';
-  }
-  
-  // Fallback to manual replacement
-  return decodeEntities(text);
-}
-
-/**
- * Strip HTML tags and decode entities
- * Perfect for extracting plain text from HTML content
- */
-export function stripHtmlAndDecode(html: string | null | undefined): string {
-  if (!html) return '';
-  
-  // First strip HTML tags
+  // HTML tag'lerini kaldır
   const stripped = html.replace(/<[^>]*>/g, '');
   
-  // Then decode entities
+  // Entities'i decode et
   return decodeEntities(stripped);
-}
+};
+
+/**
+ * WordPress rendered content'ten text çıkarır
+ */
+export const getPlainText = (rendered: { rendered?: string } | string | undefined | null): string => {
+  if (!rendered) return '';
+  
+  const html = typeof rendered === 'string' ? rendered : rendered.rendered || '';
+  return stripHtmlAndDecode(html);
+};
 
 /**
  * Convert text to URL-friendly slug
