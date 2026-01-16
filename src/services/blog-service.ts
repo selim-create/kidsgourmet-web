@@ -1,6 +1,6 @@
 import { fetchAPI, fetchAPIWithHeaders } from '@/lib/api';
 import { WP_API_NAMESPACE } from '@/lib/constants';
-import { SponsorData } from '@/lib/types';
+import { SponsorData, SEOData } from '@/lib/types';
 
 // Blog Yazısı Tip Tanımı (Basitleştirilmiş)
 export interface BlogPost {
@@ -19,6 +19,7 @@ export interface BlogPost {
   featured_media: number;
   comment_count?: number;
   sponsor_data?: SponsorData | null;
+  seo?: SEOData;
   _embedded?: {
     'wp:featuredmedia'?: Array<{
       source_url: string;
@@ -26,6 +27,8 @@ export interface BlogPost {
     }>;
     author?: Array<{
       name: string;
+      slug?: string;
+      id?: number;
       avatar_urls?: {
         [key: string]: string;
       };
