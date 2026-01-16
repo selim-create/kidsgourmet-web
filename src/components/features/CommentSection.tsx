@@ -5,6 +5,7 @@ import { commentService, Comment } from '@/services/comment-service';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
+import { useRouter } from 'next/navigation';
 
 interface CommentSectionProps {
   postId: number;
@@ -18,6 +19,7 @@ export default function CommentSection({ postId, postType, initialCommentCount =
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { user, isAuthenticated } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchComments() {
@@ -41,7 +43,10 @@ export default function CommentSection({ postId, postType, initialCommentCount =
       toast.error('Yorum yapmak için giriş yapmalısınız', {
         action: {
           label: 'Giriş Yap',
-          onClick: () => window.location.href = '/giris?redirect=' + encodeURIComponent(window.location.pathname)
+          onClick: () => {
+            const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+            router.push('/giris?redirect=' + encodeURIComponent(currentPath));
+          }
         }
       });
       return;
