@@ -125,6 +125,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.instagram}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="w-8 h-8 bg-pink-50 text-pink-500 rounded-lg flex items-center justify-center hover:bg-pink-100 transition-colors"
                         >
                           <i className="fa-brands fa-instagram"></i>
@@ -135,6 +136,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.facebook}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100 transition-colors"
                         >
                           <i className="fa-brands fa-facebook-f"></i>
@@ -145,6 +147,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.twitter}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="w-8 h-8 bg-sky-50 text-sky-500 rounded-lg flex items-center justify-center hover:bg-sky-100 transition-colors"
                         >
                           <i className="fa-brands fa-twitter"></i>
@@ -155,6 +158,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.linkedin}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100 transition-colors"
                         >
                           <i className="fa-brands fa-linkedin-in"></i>
@@ -165,6 +169,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.youtube}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="w-8 h-8 bg-red-50 text-red-500 rounded-lg flex items-center justify-center hover:bg-red-100 transition-colors"
                         >
                           <i className="fa-brands fa-youtube"></i>
@@ -175,6 +180,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.website}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="w-8 h-8 bg-gray-50 text-gray-500 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
                         >
                           <i className="fa-solid fa-globe"></i>
