@@ -41,10 +41,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeChild, setActiveChild] = useState<Child | null>(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   const checkAuth = async () => {
     setIsLoading(true);
     if (authService.isAuthenticated()) {
@@ -63,6 +59,11 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = async (username: string, password: string) => {
     const response = await authService.login({ username, password });

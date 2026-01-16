@@ -7,7 +7,7 @@ interface AdminQuickMenuProps {
 }
 
 export function AdminQuickMenu({ className = '' }: AdminQuickMenuProps) {
-  const { hasEditorAccess, adminUrl, editUrls, isAdmin } = useUser();
+  const { hasEditorAccess, adminUrl, editUrls } = useUser();
   
   if (!hasEditorAccess || !editUrls) return null;
   
