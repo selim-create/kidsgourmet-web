@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
 
 export default function ExpertsListPage() {
+  const router = useRouter();
   const [experts, setExperts] = useState<ExpertPublicProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -74,10 +75,10 @@ export default function ExpertsListPage() {
         {experts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {experts.map((expert) => (
-              <Link
+              <div
                 key={expert.id}
-                href={`/uzman/${expert.username}`}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group cursor-pointer"
+                onClick={() => router.push(`/uzman/${expert.username}`)}
               >
                 {/* Header with Avatar */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 text-center border-b border-gray-100">
@@ -128,6 +129,17 @@ export default function ExpertsListPage() {
                           className="w-8 h-8 bg-pink-50 text-pink-500 rounded-lg flex items-center justify-center hover:bg-pink-100 transition-colors"
                         >
                           <i className="fa-brands fa-instagram"></i>
+                        </a>
+                      )}
+                      {expert.social_links.facebook && (
+                        <a
+                          href={expert.social_links.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100 transition-colors"
+                        >
+                          <i className="fa-brands fa-facebook-f"></i>
                         </a>
                       )}
                       {expert.social_links.twitter && (
@@ -211,7 +223,7 @@ export default function ExpertsListPage() {
                     </span>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

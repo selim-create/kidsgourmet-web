@@ -28,9 +28,9 @@ export default function ExpertPublicProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('recipes');
   // Pagination state'leri
   const [recipesLimit, setRecipesLimit] = useState(6);
-  const [postsLimit, setPostsLimit] = useState(5);
-  const [answersLimit, setAnswersLimit] = useState(5);
-  const [questionsLimit, setQuestionsLimit] = useState(5);
+  const [postsLimit, setPostsLimit] = useState(6);
+  const [answersLimit, setAnswersLimit] = useState(6);
+  const [questionsLimit, setQuestionsLimit] = useState(6);
 
   useEffect(() => {
     fetchProfile();
@@ -138,6 +138,11 @@ export default function ExpertPublicProfilePage() {
                   {profile.social_links.instagram && (
                     <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
                       <i className="fa-brands fa-instagram"></i>
+                    </a>
+                  )}
+                  {profile.social_links.facebook && (
+                    <a href={profile.social_links.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
+                      <i className="fa-brands fa-facebook-f"></i>
                     </a>
                   )}
                   {profile.social_links.twitter && (
@@ -335,7 +340,7 @@ export default function ExpertPublicProfilePage() {
                   {profile.blog_posts.length > postsLimit && (
                     <div className="text-center mt-8">
                       <button
-                        onClick={() => setPostsLimit(prev => prev + 5)}
+                        onClick={() => setPostsLimit(prev => prev + 6)}
                         className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
                       >
                         Daha Fazla Göster ({profile.blog_posts.length - postsLimit} yazı daha)
@@ -378,7 +383,7 @@ export default function ExpertPublicProfilePage() {
                   {profile.answered_questions.length > answersLimit && (
                     <div className="text-center mt-8">
                       <button
-                        onClick={() => setAnswersLimit(prev => prev + 5)}
+                        onClick={() => setAnswersLimit(prev => prev + 6)}
                         className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
                       >
                         Daha Fazla Göster ({profile.answered_questions.length - answersLimit} cevap daha)
@@ -440,7 +445,7 @@ export default function ExpertPublicProfilePage() {
                   {profile.asked_questions.length > questionsLimit && (
                     <div className="text-center mt-8">
                       <button
-                        onClick={() => setQuestionsLimit(prev => prev + 5)}
+                        onClick={() => setQuestionsLimit(prev => prev + 6)}
                         className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
                       >
                         Daha Fazla Göster ({profile.asked_questions.length - questionsLimit} soru daha)
