@@ -165,7 +165,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                 {decodeHTMLEntities(ingredient.category)}
                               </span>
                             )}
-                            <div className="flex items-start justify-center gap-3 mb-4 group">
+                            <div className="flex items-start justify-between gap-3 mb-4 group">
                               <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 font-sans">{decodeHTMLEntities(ingredient.name)}</h1>
                               <EditButton 
                                 contentType="ingredient" 

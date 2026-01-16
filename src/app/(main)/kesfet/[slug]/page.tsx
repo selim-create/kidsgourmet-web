@@ -379,7 +379,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 >
                   {decodeEntities(getCategoryName(post))}
                 </Link>
-                <div className="flex items-start justify-center gap-3 mb-6 group">
+                <div className="flex items-start justify-between gap-3 mb-6 group">
                   <h1 
                       className="font-display font-bold text-3xl md:text-5xl text-slate-800 leading-tight font-sans"
                       dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
