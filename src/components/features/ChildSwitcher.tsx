@@ -29,26 +29,54 @@ export default function ChildSwitcher() {
   // Calculate age display
   const getAgeDisplay = (child: typeof activeChild) => {
     if (!child) return '';
-    if (child.age_months !== undefined) {
-      const years = Math.floor(child.age_months / 12);
-      const months = child.age_months % 12;
-      if (years > 0) {
-        return months > 0 ? `${years}y ${months}m` : `${years}y`;
-      }
-      return `${months}m`;
-    }
-    // Fallback: calculate from birth_date if age_months not available
+    
+    // Birth date varsa hesapla (daha doğru)
     if (child.birth_date) {
       const birthDate = new Date(child.birth_date);
       const today = new Date();
-      const ageInMonths = Math.floor((today.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44));
-      const years = Math.floor(ageInMonths / 12);
-      const months = ageInMonths % 12;
-      if (years > 0) {
-        return months > 0 ? `${years}y ${months}m` : `${years}y`;
+      
+      // Toplam gün hesapla
+      const diffTime = Math.abs(today.getTime() - birthDate.getTime());
+      const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      // 30 günden küçükse gün olarak göster
+      if (totalDays < 30) {
+        return `${totalDays} gün`;
       }
-      return `${months}m`;
+      
+      // Yıl ve ay hesapla
+      let years = today.getFullYear() - birthDate.getFullYear();
+      let months = today.getMonth() - birthDate.getMonth();
+      const days = today.getDate() - birthDate.getDate();
+      
+      if (days < 0) {
+        months--;
+      }
+      
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+      
+      // Format: "2 yaş 3 ay", "1 yaş", "11 ay"
+      if (years >= 1) {
+        return months > 0 ? `${years} yaş ${months} ay` : `${years} yaş`;
+      }
+      
+      return `${months} ay`;
     }
+    
+    // Fallback: age_months varsa kullan
+    if (child.age_months !== undefined) {
+      const years = Math.floor(child.age_months / 12);
+      const months = child.age_months % 12;
+      
+      if (years >= 1) {
+        return months > 0 ? `${years} yaş ${months} ay` : `${years} yaş`;
+      }
+      return `${months} ay`;
+    }
+    
     return '';
   };
 

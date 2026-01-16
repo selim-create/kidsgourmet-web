@@ -1,5 +1,5 @@
 import { fetchAuthAPI, fetchAPI, getToken } from '@/lib/api';
-import { API_ENDPOINTS, API_URL } from '@/lib/constants';
+import { API_ENDPOINTS, API_URL, KG_API_NAMESPACE } from '@/lib/constants';
 import { 
   User, 
   Child, 
@@ -217,6 +217,11 @@ export const userService = {
   // Uzman public profil getir
   getExpertPublicProfile: async (username: string): Promise<ExpertPublicProfile> => {
     return await fetchAPI<ExpertPublicProfile>(API_ENDPOINTS.EXPERT_PUBLIC(username));
+  },
+
+  // Uzman listesini getir
+  getExperts: async (): Promise<ExpertPublicProfile[]> => {
+    return await fetchAPI<ExpertPublicProfile[]>(`${KG_API_NAMESPACE}/experts`);
   },
 
   // Avatar yükleme
