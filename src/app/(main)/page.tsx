@@ -76,16 +76,17 @@ export default function Home() {
         });
         
         // Add static tool card to featured content
+        const currentDate = new Date().toISOString();
         const toolItem = {
-          id: 999999, // Unique ID that won't conflict with API data
+          id: -1, // Negative ID to avoid conflicts with API data
           type: 'tool' as const,
-          date: new Date().toISOString(),
+          date: currentDate,
           data: {
-            id: 999999,
+            id: -1,
             title: 'Akıllı Asistan',
             slug: 'akilli-asistan',
             type: 'post',
-            date: new Date().toISOString(),
+            date: currentDate,
             excerpt: 'Bebeğinizin sağlığı için akıllı araçlar',
             image: '',
             meta: {}
