@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import { useFavorites } from '@/hooks/use-favorites';
+import { decodeEntities, stripHtmlAndDecode } from '@/utils/textHelpers';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -33,7 +34,20 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
 
   const getAuthorAvatar = (post: BlogPost) => {
     const avatarUrls = post._embedded?.author?.[0]?.avatar_urls;
-    return avatarUrls?.['96'] || avatarUrls?.['48'] || 'https://placehold.co/50x50/AED581/ffffff?text=Dr';
+    // Try different sizes
+    const avatar = avatarUrls?.['96'] || avatarUrls?.['48'] || avatarUrls?.['24'];
+    
+    // Fix protocol if missing
+    if (avatar && avatar.startsWith('//')) {
+      return `https:${avatar}`;
+    }
+    
+    // Return null for invalid avatars (will show initials instead)
+    if (!avatar || avatar.includes('blank.gif') || avatar.includes('mystery-man')) {
+      return null;
+    }
+    
+    return avatar;
   };
 
   const getCategoryName = (post: BlogPost) => {
@@ -44,8 +58,8 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
 
   const formattedDate = new Date(post.date).toLocaleDateString('tr-TR');
   const commentCount = post.comment_count || 0;
-  const title = post.title.rendered;
-  const excerpt = stripHtml(post.excerpt.rendered);
+  const title = decodeEntities(post.title.rendered);
+  const excerpt = stripHtmlAndDecode(post.excerpt.rendered);
   const imageUrl = getImageUrl(post);
   const authorName = getAuthorName(post);
   const authorAvatar = getAuthorAvatar(post);
@@ -148,7 +162,13 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           {!isSponsored && (
             <div className="flex items-center text-white/80 text-sm gap-6 flex-wrap">
               <div className="flex items-center gap-2">
-                <img src={authorAvatar} className="w-8 h-8 rounded-full border border-white/50" alt={authorName} />
+                {authorAvatar ? (
+                  <img src={authorAvatar} className="w-8 h-8 rounded-full border border-white/50" alt={authorName} />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm border border-white/50">
+                    {authorName.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <span>{authorName}</span>
               </div>
               <div className="flex items-center gap-2">
@@ -163,20 +183,36 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           )}
           
           {/* Sponsor Logo - Sponsorlu ise */}
-          {isSponsored && sponsorData && (
-            <div className="flex items-center gap-3 mt-4">
-              {(() => {
-                const logoUrl = typeof sponsorData.sponsor_light_logo === 'string' 
-                  ? sponsorData.sponsor_light_logo 
-                  : (typeof sponsorData.sponsor_logo === 'string' 
-                      ? sponsorData.sponsor_logo 
-                      : null);
-                return logoUrl ? (
-                  <img src={logoUrl} alt={sponsorData.sponsor_name || 'Sponsor'} className="h-8 object-contain" />
-                ) : null;
-              })()}
-              <span className="text-white/80 text-sm">{sponsorData.sponsor_name} katkılarıyla</span>
-            </div>
+          {isSponsored && sponsorData && (() => {
+            const logoUrl = typeof sponsorData.sponsor_light_logo === 'string' 
+              ? sponsorData.sponsor_light_logo 
+              : (typeof sponsorData.sponsor_logo === 'string' 
+                  ? sponsorData.sponsor_logo 
+                  : null);
+            
+            // Validate logo URL
+            if (!logoUrl || logoUrl === '' || logoUrl === 'null' || logoUrl === 'undefined') {
+              return null;
+            }
+            
+            // Fix relative URLs
+            const finalLogoUrl = logoUrl.startsWith('/') 
+              ? `${process.env.NEXT_PUBLIC_API_URL || ''}${logoUrl}`
+              : logoUrl;
+            
+            return logoUrl ? (
+              <img 
+                src={finalLogoUrl} 
+                alt={sponsorData.sponsor_name || 'Sponsor'} 
+                className="h-8 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : null;
+          })()}
+          {isSponsored && sponsorData?.sponsor_name && (
+            <span className="text-white/80 text-sm">{sponsorData.sponsor_name} katkılarıyla</span>
           )}
         </div>
       </>
@@ -257,9 +293,27 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             : (typeof sponsorData.sponsor_light_logo === 'string' 
                 ? sponsorData.sponsor_light_logo 
                 : null);
+          
+          // Validate logo URL
+          if (!logoUrl || logoUrl === '' || logoUrl === 'null' || logoUrl === 'undefined') {
+            return null;
+          }
+          
+          // Fix relative URLs
+          const finalLogoUrl = logoUrl.startsWith('/') 
+            ? `${process.env.NEXT_PUBLIC_API_URL || ''}${logoUrl}`
+            : logoUrl;
+          
           return logoUrl ? (
             <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-2 rounded-lg">
-              <img src={logoUrl} alt={sponsorData.sponsor_name || 'Sponsor'} className="h-6 object-contain" />
+              <img 
+                src={finalLogoUrl} 
+                alt={sponsorData.sponsor_name || 'Sponsor'} 
+                className="h-6 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).parentElement!.style.display = 'none';
+                }}
+              />
             </div>
           ) : null;
         })()}
