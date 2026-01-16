@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
@@ -66,7 +66,7 @@ interface AgeGroupWithLabel {
   displayLabel: string;
 }
 
-export default function RecipesPage() {
+function RecipesPageContent() {
   const searchParams = useSearchParams();
   const [recipes, setRecipes] = useState<RecipeCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -767,5 +767,18 @@ function RecipeCardComponent({
         </div>
       </div>
     </Link>
+  );
+}
+
+// Wrap in Suspense for useSearchParams
+export default function RecipesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <RecipesPageContent />
+    </Suspense>
   );
 }

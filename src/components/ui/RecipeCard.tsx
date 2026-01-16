@@ -12,7 +12,6 @@ interface RecipeCardProps {
     diet_types?: string[];
     meal_type?: string;
     rating?: number;
-    author?: string;
     expert?: {
       name: string;
       title: string;
@@ -25,6 +24,13 @@ interface RecipeCardProps {
 export default function RecipeCard({ recipe }: RecipeCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(recipe.id, 'recipe');
+
+  // Extract author name from author object or string
+  const authorName = typeof recipe.author === 'object' && recipe.author?.name 
+    ? recipe.author.name 
+    : typeof recipe.author === 'string' 
+    ? recipe.author 
+    : undefined;
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -120,11 +126,11 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
                 {recipe.expert.title} {recipe.expert.name} tarafından onaylandı
               </span>
             </div>
-          ) : recipe.author ? (
+          ) : authorName ? (
             <div className="flex items-center">
               <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">✍️</span>
               <span className="text-xs text-gray-500 font-medium">
-                {recipe.author}
+                {authorName}
               </span>
             </div>
           ) : null}
