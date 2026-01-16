@@ -3,7 +3,7 @@
 export const API_URL = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://api.kidsgourmet.com.tr/wp-json';
 
 // Site URL (Frontend)
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com';
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com.tr';
 
 // Özel Namespace'imiz (Backend'de tanımladığımız)
 export const KG_API_NAMESPACE = '/kg/v1';

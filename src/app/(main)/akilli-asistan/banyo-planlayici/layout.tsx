@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://kidsgourmet.com/akilli-asistan/banyo-planlayici',
+    canonical: 'https://kidsgourmet.com.tr/akilli-asistan/banyo-planlayici',
   },
 };
 

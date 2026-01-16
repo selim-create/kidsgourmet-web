@@ -4,7 +4,7 @@
 
 const API_DOMAIN = 'api.kidsgourmet.com.tr';
 const OLD_DOMAIN = 'kidsgourmet.com.tr';
-const FRONTEND_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com';
+const FRONTEND_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com.tr';
 
 /**
  * HTML içeriğindeki tüm linkleri dönüştürür

@@ -19,11 +19,11 @@ export const metadata: Metadata = {
     description: 'Uzman onaylı bebek beslenmesi ve çocuk sağlığı rehberleri',
     type: 'website',
     locale: 'tr_TR',
-    url: 'https://kidsgourmet.com/kesfet',
+    url: 'https://kidsgourmet.com.tr/kesfet',
     siteName: 'KidsGourmet',
     images: [
       {
-        url: 'https://kidsgourmet.com/og-kesfet.jpg',
+        url: 'https://kidsgourmet.com.tr/og-kesfet.jpg',
         width: 1200,
         height: 630,
         alt: 'KidsGourmet Keşfet',
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     description: 'Uzman onaylı bebek beslenmesi ve çocuk sağlığı rehberleri',
   },
   alternates: {
-    canonical: 'https://kidsgourmet.com/kesfet',
+    canonical: 'https://kidsgourmet.com.tr/kesfet',
   },
 };
 

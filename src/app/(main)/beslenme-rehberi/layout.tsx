@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: 'https://kidsgourmet.com/beslenme-rehberi',
+    canonical: 'https://kidsgourmet.com.tr/beslenme-rehberi',
   },
 };
 
