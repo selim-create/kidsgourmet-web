@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import ClientHead from '@/components/seo/ClientHead';
 import { SITE_URL } from '@/lib/constants';
 import { decodeEntities, stripHtmlAndDecode, slugify } from '@/utils/textHelpers';
+import CommentSection from '@/components/features/CommentSection';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -627,6 +628,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                           </div>
                         )}
                     </div>
+                    
+                    {/* YORUM BÖLÜMÜ */}
+                    <CommentSection postId={post.id} postType="post" initialCommentCount={post.comment_count || 0} />
                     
                     {/* ============ RELATED CONTENT SECTIONS ============ */}
                     <div className="mt-12 space-y-10">

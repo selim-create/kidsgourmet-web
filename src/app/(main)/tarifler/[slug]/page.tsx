@@ -12,6 +12,7 @@ import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
+import CommentSection from '@/components/features/CommentSection';
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -764,6 +765,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </div>
                       </Link>
                     )}
+
+                    {/* YORUM BÖLÜMÜ */}
+                    <CommentSection postId={recipe.id} postType="recipe" />
 
                 </div>
 
