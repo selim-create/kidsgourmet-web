@@ -767,7 +767,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                     )}
 
                     {/* YORUM BÖLÜMÜ */}
-                    <CommentSection postId={recipe.id} postType="recipe" initialCommentCount={recipe.comment_count || 0} />
+                    <CommentSection postId={recipe.id} postType="recipe" />
 
                 </div>
 
