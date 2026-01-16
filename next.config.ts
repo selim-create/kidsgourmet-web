@@ -35,6 +35,18 @@ const nextConfig: NextConfig = {
         destination: '/beslenme-rehberi/:path*',
         permanent: true,
       },
+      // Eski kategori linkleri
+      {
+        source: '/kategori/:slug',
+        destination: '/kesfet/kategori/:slug',
+        permanent: true,
+      },
+      // Sayfa numaralı eski kategori linkleri
+      {
+        source: '/kategori/:slug/page/:page',
+        destination: '/kesfet/kategori/:slug?page=:page',
+        permanent: true,
+      },
     ];
   },
 };
