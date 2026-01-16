@@ -97,13 +97,19 @@ export const getPlainText = (rendered: { rendered?: string } | string | undefine
 
 /**
  * Convert text to URL-friendly slug
- * Used for generating anchor IDs from headings
+ * Handles Turkish characters and diacritics
+ * Used for generating anchor IDs from headings and URL slugs
  */
 export function slugify(text: string): string {
   return text
+    .toString()
+    .normalize('NFD')                   // Normalize to decomposed form for diacritics
+    .replace(/[\u0300-\u036f]/g, '')    // Remove diacritics
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-'); // Replace multiple hyphens with single hyphen
+    .replace(/\s+/g, '-')               // Replace spaces with hyphens
+    .replace(/[^\w-]+/g, '')            // Remove all non-word chars except hyphens
+    .replace(/--+/g, '-')               // Replace multiple hyphens with single hyphen
+    .replace(/^-+/, '')                 // Trim hyphens from start
+    .replace(/-+$/, '');                // Trim hyphens from end
 }

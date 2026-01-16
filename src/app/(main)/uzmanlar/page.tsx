@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
+import { slugify } from '@/utils/textHelpers';
 
 export default function ExpertsListPage() {
   const router = useRouter();
@@ -78,7 +79,7 @@ export default function ExpertsListPage() {
               <div
                 key={expert.id}
                 className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group cursor-pointer"
-                onClick={() => router.push(`/uzman/${expert.username}`)}
+                onClick={() => router.push(`/uzman/${slugify(expert.display_name)}`)}
               >
                 {/* Header with Avatar */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 text-center border-b border-gray-100">

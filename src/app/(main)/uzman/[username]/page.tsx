@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
+import { decodeEntities } from '@/utils/textHelpers';
 
 type TabType = 'recipes' | 'blog_posts' | 'answered_questions' | 'asked_questions';
 
@@ -114,13 +115,6 @@ export default function ExpertPublicProfilePage() {
               <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">{profile.display_name}</h1>
               <p className="text-purple-200 font-medium mb-4">@{profile.username}</p>
               
-              {/* Profession Badge - Show first expertise if available */}
-              {profile.expertise && profile.expertise.length > 0 && (
-                <div className="inline-block bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4">
-                  <span className="font-bold">{profile.expertise[0]}</span>
-                </div>
-              )}
-
               {/* Expertise Tags */}
               {profile.expertise && profile.expertise.length > 0 && (
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
@@ -257,26 +251,33 @@ export default function ExpertPublicProfilePage() {
                         href={`/tarifler/${recipe.slug}`}
                         className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
                       >
-                        <div className="aspect-video overflow-hidden">
+                        {/* Image with Badges */}
+                        <div className="aspect-video overflow-hidden relative">
                           <img
                             src={recipe.image}
                             alt={recipe.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
+                          {/* Badges on Image */}
+                          <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                            {recipe.prep_time && (
+                              <span className="bg-white/90 backdrop-blur-sm text-slate-700 px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+                                <i className="fa-regular fa-clock text-purple-500"></i>
+                                {recipe.prep_time}
+                              </span>
+                            )}
+                            {recipe.age_group && (
+                              <span className="bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                {decodeEntities(recipe.age_group)}
+                              </span>
+                            )}
+                          </div>
                         </div>
+                        {/* Title Only */}
                         <div className="p-4">
-                          <h3 className="font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                          <h3 className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors line-clamp-2">
                             {recipe.title}
                           </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <i className="fa-regular fa-clock"></i>
-                              {recipe.prep_time}
-                            </span>
-                            <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-xs font-bold">
-                              {recipe.age_group}
-                            </span>
-                          </div>
                         </div>
                       </Link>
                     ))}
@@ -326,7 +327,7 @@ export default function ExpertPublicProfilePage() {
                           </h3>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg font-bold">
-                              {post.category}
+                              {decodeEntities(post.category || '')}
                             </span>
                             <span className="flex items-center gap-1">
                               <i className="fa-regular fa-clock"></i>
