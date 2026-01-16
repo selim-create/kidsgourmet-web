@@ -171,7 +171,6 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                 contentType="ingredient" 
                                 contentId={ingredient.id}
                                 variant="icon"
-                                className="top-0 right-0"
                               />
                             </div>
                             <div 

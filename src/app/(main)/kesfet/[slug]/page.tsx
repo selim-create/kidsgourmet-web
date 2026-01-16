@@ -389,7 +389,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                     contentId={post.id}
                     authorId={post._embedded?.author?.[0]?.id}
                     variant="icon"
-                    className="top-0 right-0"
                   />
                 </div>
                 

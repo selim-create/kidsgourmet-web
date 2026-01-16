@@ -319,7 +319,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         contentId={recipe.id}
                         authorId={recipe.author?.id}
                         variant="icon"
-                        className="top-0 right-0"
                       />
                     </div>
                     
