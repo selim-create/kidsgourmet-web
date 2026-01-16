@@ -22,9 +22,9 @@ const allergens: Allergen[] = [
   { id: 'gluten', name: 'Gluten (Buğday)', emoji: '🌾', startAge: '6+ ay', minAge: 6, riskLevel: 'medium', ingredientSlug: 'bugday' },
   { id: 'soy', name: 'Soya', emoji: '🌱', startAge: '6+ ay', minAge: 6, riskLevel: 'low', ingredientSlug: 'soya' },
   { id: 'fish', name: 'Balık', emoji: '🐟', startAge: '8+ ay', minAge: 8, riskLevel: 'medium', ingredientSlug: 'balik' },
-  { id: 'walnut', name: 'Ceviz', emoji: '🪵', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'ceviz' },
-  { id: 'hazelnut', name: 'Fındık', emoji: '🌰', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'findik' },
-  { id: 'almond', name: 'Badem', emoji: '🥜', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'badem' },
+  { id: 'walnut', name: 'Ceviz', emoji: '🌰', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'ceviz' },
+  { id: 'hazelnut', name: 'Fındık', emoji: '🌳', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'findik' },
+  { id: 'almond', name: 'Badem', emoji: '🫘', startAge: '9+ ay', minAge: 9, riskLevel: 'high', ingredientSlug: 'badem' },
   { id: 'shellfish', name: 'Kabuklu Deniz Ürünleri', emoji: '🦐', startAge: '12+ ay', minAge: 12, riskLevel: 'high', ingredientSlug: 'karides' },
   { id: 'honey', name: 'Bal', emoji: '🍯', startAge: '12+ ay', minAge: 12, riskLevel: 'high', ingredientSlug: 'bal' },
   { id: 'celery', name: 'Kereviz', emoji: '🥬', startAge: '8+ ay', minAge: 8, riskLevel: 'low', ingredientSlug: 'kereviz' },
@@ -39,7 +39,7 @@ export default function AlerjenPlanlayiciPage() {
   const [selectedAllergen, setSelectedAllergen] = useState<Allergen | null>(null);
   const [babyAgeMonths, setBabyAgeMonths] = useState<number>(6);
 
-  // Filter allergens based on baby age
+  // Filter allergens based on baby age (for future use or alternative display)
   const filteredAllergens = useMemo(() => {
     return allergens.filter(a => a.minAge <= babyAgeMonths);
   }, [babyAgeMonths]);
@@ -309,36 +309,28 @@ export default function AlerjenPlanlayiciPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
               <h2 className="font-bold text-slate-800 text-xl mb-4">Alerjen Seçin</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {allergens.map((allergen) => {
-                  const isAvailable = allergen.minAge <= babyAgeMonths;
-                  return (
-                    <button
-                      key={allergen.id}
-                      onClick={() => isAvailable && handleSelectAllergen(allergen)}
-                      disabled={!isAvailable}
-                      className={`border-2 rounded-xl p-4 text-center transition-all transform ${
-                        isAvailable
-                          ? 'bg-gray-50 hover:bg-purple-50 border-gray-200 hover:border-purple-400 hover:scale-105'
-                          : 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="text-4xl mb-2">{allergen.emoji}</div>
-                      <div className="font-bold text-sm text-slate-800 mb-1">{allergen.name}</div>
-                      <div className={`text-xs px-2 py-1 rounded-full inline-block border ${getRiskColor(allergen.riskLevel)}`}>
-                        {allergen.startAge}
-                      </div>
-                      {allergen.ingredientSlug && isAvailable && (
-                        <Link 
-                          href={`/beslenme-rehberi/${allergen.ingredientSlug}`}
-                          className="inline-flex items-center text-xs text-purple-600 hover:text-purple-700 font-medium mt-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <i className="fa-solid fa-book-open mr-1"></i>
-                        </Link>
-                      )}
-                    </button>
-                  );
-                })}
+                {filteredAllergens.map((allergen) => (
+                  <button
+                    key={allergen.id}
+                    onClick={() => handleSelectAllergen(allergen)}
+                    className="bg-gray-50 hover:bg-purple-50 border-2 border-gray-200 hover:border-purple-400 rounded-xl p-4 text-center transition-all transform hover:scale-105"
+                  >
+                    <div className="text-4xl mb-2">{allergen.emoji}</div>
+                    <div className="font-bold text-sm text-slate-800 mb-1">{allergen.name}</div>
+                    <div className={`text-xs px-2 py-1 rounded-full inline-block border ${getRiskColor(allergen.riskLevel)}`}>
+                      {allergen.startAge}
+                    </div>
+                    {allergen.ingredientSlug && (
+                      <Link 
+                        href={`/beslenme-rehberi/${allergen.ingredientSlug}`}
+                        className="inline-flex items-center text-xs text-purple-600 hover:text-purple-700 font-medium mt-2"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <i className="fa-solid fa-book-open mr-1"></i>
+                      </Link>
+                    )}
+                  </button>
+                ))}
               </div>
             </div>
 
