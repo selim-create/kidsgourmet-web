@@ -291,9 +291,9 @@ export default function ProfileSettingsPage() {
                             </div>
                             <div className="mt-4 pt-4 border-t border-gray-100">
                                 <p className="text-xs text-gray-400 mb-2 font-bold uppercase">Alerjenler</p>
-                                {child.allergens && child.allergens.length > 0 ? (
+                                {((child.allergies && child.allergies.length > 0) || (child.allergens && child.allergens.length > 0)) ? (
                                   <div className="flex flex-wrap gap-2">
-                                    {child.allergens.map((allergen) => (
+                                    {(child.allergies || child.allergens || []).map((allergen) => (
                                       <span key={allergen} className="px-2 py-1 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100">
                                         {allergen}
                                       </span>
@@ -481,9 +481,9 @@ export default function ProfileSettingsPage() {
                                 </div>
                             </div>
                             
-                            <button className="w-full bg-white text-purple-700 font-bold py-3 rounded-xl hover:bg-purple-50 transition-colors shadow-sm">
-                                Premium'a Yükselt (₺29.99/ay)
-                            </button>
+                            <div className="w-full bg-white/20 text-white font-medium py-3 rounded-xl text-center">
+                                Premium Hesap şu an aktif değil
+                            </div>
                         </div>
 
                         {/* Preferences */}
