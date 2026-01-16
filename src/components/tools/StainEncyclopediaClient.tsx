@@ -155,7 +155,25 @@ export default function StainEncyclopediaClient() {
             {/* Search Results */}
             {searchQuery.length >= 2 && (
               <div>
-                {searchResults.length > 0 ? (
+                {isSearching ? (
+                  // Loading Skeleton
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div
+                        key={i}
+                        className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-pulse"
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                          <div className="w-16 h-6 bg-gray-200 rounded-full"></div>
+                        </div>
+                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/2 mb-3"></div>
+                        <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : searchResults.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {searchResults.map((stain) => (
                       <button
@@ -232,10 +250,37 @@ export default function StainEncyclopediaClient() {
           /* Detail View */
           <div className="space-y-6">
             {isLoadingDetail ? (
-              <div className="bg-white rounded-2xl p-8 text-center">
-                <i className="fa-solid fa-spinner fa-spin text-4xl text-violet-500 mb-4"></i>
-                <p className="text-gray-600">Yükleniyor...</p>
-              </div>
+              // Loading Skeleton for Detail
+              <>
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                  <div className="bg-gradient-to-br from-violet-500 to-purple-500 p-6 animate-pulse">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-white/20 rounded-lg"></div>
+                        <div>
+                          <div className="h-8 bg-white/20 rounded w-48 mb-2"></div>
+                          <div className="h-4 bg-white/20 rounded w-32"></div>
+                        </div>
+                      </div>
+                      <div className="w-16 h-6 bg-white/20 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-2xl shadow-lg p-6 animate-pulse">
+                  <div className="h-6 bg-gray-200 rounded w-40 mb-4"></div>
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="flex gap-4">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0"></div>
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
             ) : (
               <>
                 {/* Header */}
