@@ -404,8 +404,8 @@ export interface SponsorData {
   is_sponsored: boolean;
   sponsor_name: string;
   sponsor_url: string;
-  sponsor_logo: string | null;
-  sponsor_light_logo: string | null;
+  sponsor_logo: string | null | { url?: string; source_url?: string; src?: string };
+  sponsor_light_logo: string | null | { url?: string; source_url?: string; src?: string };
   direct_redirect: boolean;
   gam_impression_url: string | null;
   gam_click_url: string | null;
