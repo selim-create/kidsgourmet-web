@@ -5,20 +5,9 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
+import { decodeEntities } from '@/utils/textHelpers';
 
 type TabType = 'recipes' | 'blog_posts' | 'answered_questions' | 'asked_questions';
-
-// SSR-safe HTML entity decoder
-function decodeHtmlEntities(text: string): string {
-  if (!text) return '';
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#039;/g, "'")
-    .replace(/&nbsp;/g, ' ');
-}
 
 // Helper function to validate and sanitize color codes
 function sanitizeColor(color: string): string {
@@ -279,7 +268,7 @@ export default function ExpertPublicProfilePage() {
                             )}
                             {recipe.age_group && (
                               <span className="bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-sm">
-                                {decodeHtmlEntities(recipe.age_group)}
+                                {decodeEntities(recipe.age_group)}
                               </span>
                             )}
                           </div>
@@ -338,7 +327,7 @@ export default function ExpertPublicProfilePage() {
                           </h3>
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg font-bold">
-                              {decodeHtmlEntities(post.category || '')}
+                              {decodeEntities(post.category || '')}
                             </span>
                             <span className="flex items-center gap-1">
                               <i className="fa-regular fa-clock"></i>

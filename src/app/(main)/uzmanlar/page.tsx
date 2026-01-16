@@ -4,21 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
-
-// Helper function to convert string to URL-safe slug
-function slugify(text: string): string {
-  return text
-    .toString()
-    .normalize('NFD')                   // Normalize to decomposed form
-    .replace(/[\u0300-\u036f]/g, '')    // Remove diacritics
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')               // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')           // Remove all non-word chars except -
-    .replace(/\-\-+/g, '-')             // Replace multiple - with single -
-    .replace(/^-+/, '')                 // Trim - from start
-    .replace(/-+$/, '');                // Trim - from end
-}
+import { slugify } from '@/utils/textHelpers';
 
 export default function ExpertsListPage() {
   const router = useRouter();
