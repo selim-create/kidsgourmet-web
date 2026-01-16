@@ -117,9 +117,9 @@ export default function ExpertsListPage() {
                     </p>
                   )}
 
-                  {/* Social Links - onClick stopPropagation to prevent card navigation */}
+                  {/* Social Links */}
                   {expert.social_links && Object.keys(expert.social_links).length > 0 && (
-                    <div className="flex gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2 mb-4">
                       {expert.social_links.instagram && (
                         <a
                           href={expert.social_links.instagram}
