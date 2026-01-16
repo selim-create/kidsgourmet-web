@@ -248,6 +248,7 @@ export interface SocialLinks {
   linkedin?: string;
   youtube?: string;
   website?: string;
+  facebook?: string;
 }
 
 export interface Child {
