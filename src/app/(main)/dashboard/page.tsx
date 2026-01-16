@@ -7,7 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
 import { toolService } from "@/services/tool-service";
-import { RecipeCard, ShoppingListItem, BLWTestResult, PercentileResult } from "@/lib/types";
+import { RecipeCard, ShoppingListItem, BLWTestResult, PercentileResult, SolidFoodReadinessResult, PercentileValue } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [blwResults, setBlwResults] = useState<BLWTestResult[]>([]);
   const [percentileResults, setPercentileResults] = useState<PercentileResult[]>([]);
+  const [solidFoodResults, setSolidFoodResults] = useState<SolidFoodReadinessResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,15 +47,17 @@ export default function DashboardPage() {
       
       try {
         // Fetch all data in parallel
-        const [shoppingListData, blwResultsData, percentileResultsData] = await Promise.all([
+        const [shoppingListData, blwResultsData, percentileResultsData, solidFoodResultsData] = await Promise.all([
           userService.getShoppingList(),
           toolService.getUserBLWResults().catch(() => []),
           toolService.getUserPercentileResults().catch(() => []),
+          toolService.getUserSolidFoodResults().catch(() => []),
         ]);
         
         setShoppingList(shoppingListData);
         setBlwResults(blwResultsData);
         setPercentileResults(percentileResultsData);
+        setSolidFoodResults(solidFoodResultsData);
       } catch (err) {
         console.error('Dashboard data fetch error:', err);
         setError(err instanceof Error ? err.message : 'Veriler yüklenirken hata oluştu');
@@ -418,29 +421,64 @@ export default function DashboardPage() {
                           </Link>
                         </div>
                         
-                        {blwResults.slice(0, 3).map((result, index) => (
-                          <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                              result.score >= 80 ? 'bg-green-500' : 
-                              result.score >= 55 ? 'bg-amber-500' : 'bg-red-500'
-                            }`}>
-                              {result.score}
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-slate-800">
-                                {result.score >= 80 ? 'Hazır' : result.score >= 55 ? 'Neredeyse Hazır' : 'Biraz Daha Zaman'}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {new Date(result.created_at).toLocaleDateString('tr-TR')}
-                              </p>
-                            </div>
-                            {result.red_flags && result.red_flags.length > 0 && (
-                              <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
-                                <i className="fa-solid fa-exclamation text-xs"></i>
+                        {blwResults.slice(0, 3).map((result, index) => {
+                          // Çocuk adını bul (children array'inden)
+                          const childName = result.child_id 
+                            ? children.find(c => c.id === result.child_id)?.name || result.child_name
+                            : null;
+                          
+                          // Tarih formatla (Invalid Date kontrolü)
+                          const formatDate = (dateStr: string) => {
+                            try {
+                              const date = new Date(dateStr);
+                              if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
+                              return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+                            } catch {
+                              return 'Tarih bilinmiyor';
+                            }
+                          };
+                          
+                          // Sonuç kategorisi
+                          const getResultCategory = (score: number) => {
+                            if (score >= 80) return { text: 'Hazır', color: 'green', emoji: '✅', bg: 'bg-green-500' };
+                            if (score >= 55) return { text: 'Neredeyse Hazır', color: 'amber', emoji: '⏳', bg: 'bg-amber-500' };
+                            return { text: 'Biraz Daha Zaman', color: 'red', emoji: '⏰', bg: 'bg-red-500' };
+                          };
+                          
+                          const category = getResultCategory(result.score);
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${category.bg}`}>
+                                {Math.round(result.score)}
                               </div>
-                            )}
-                          </div>
-                        ))}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-slate-800">{category.text}</p>
+                                  <span className="text-lg">{category.emoji}</span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                  {childName && <span className="font-medium text-slate-600">{childName} • </span>}
+                                  {formatDate(result.created_at)}
+                                </p>
+                              </div>
+                              {result.red_flags && result.red_flags.length > 0 && (
+                                <div className="relative group">
+                                  <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center cursor-help">
+                                    <i className="fa-solid fa-exclamation text-xs"></i>
+                                  </div>
+                                  {/* Tooltip */}
+                                  <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                    <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
+                                    {result.red_flags.slice(0, 2).map((flag, i) => (
+                                      <p key={i}>• {typeof flag === 'string' ? flag : flag.message}</p>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
@@ -458,30 +496,152 @@ export default function DashboardPage() {
                         </div>
                         
                         {percentileResults.slice(0, 3).map((result, index) => {
-                          // Get the first percentile for quick display
-                          const primaryPercentile = result.percentiles[0];
+                          // Çocuk adını bul
+                          const childName = result.child_id 
+                            ? children.find(c => c.id === result.child_id)?.name || result.child_name
+                            : null;
+                          
+                          // Tarih formatla
+                          const formatDate = (dateStr: string) => {
+                            try {
+                              const date = new Date(dateStr);
+                              if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
+                              return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+                            } catch {
+                              return 'Tarih bilinmiyor';
+                            }
+                          };
+                          
+                          // Ölçüm türlerini göster
+                          const getMeasurementSummary = (percentiles: PercentileValue[]) => {
+                            const items = [];
+                            const weight = percentiles.find(p => p.measurement_type === 'weight_for_age');
+                            const height = percentiles.find(p => p.measurement_type === 'height_for_age');
+                            const head = percentiles.find(p => p.measurement_type === 'head_for_age');
+                            
+                            if (weight) items.push(`Kilo: ${weight.percentile}p`);
+                            if (height) items.push(`Boy: ${height.percentile}p`);
+                            if (head) items.push(`Baş: ${head.percentile}p`);
+                            
+                            return items.join(' • ') || 'Ölçüm yok';
+                          };
+                          
+                          // Genel durum rengi
+                          const getOverallColor = (percentiles: PercentileValue[]) => {
+                            const hasVeryLow = percentiles.some(p => p.category === 'very_low');
+                            const hasVeryHigh = percentiles.some(p => p.category === 'very_high');
+                            const hasLowOrHigh = percentiles.some(p => p.category === 'low' || p.category === 'high');
+                            
+                            if (hasVeryLow || hasVeryHigh) return { color: 'red', bg: 'bg-red-500' };
+                            if (hasLowOrHigh) return { color: 'amber', bg: 'bg-amber-500' };
+                            return { color: 'green', bg: 'bg-green-500' };
+                          };
+                          
+                          const overallColor = getOverallColor(result.percentiles);
                           const hasWarnings = result.red_flags && result.red_flags.length > 0;
                           
                           return (
                             <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
-                                primaryPercentile.category === 'normal' ? 'bg-green-500' : 
-                                primaryPercentile.category === 'low' || primaryPercentile.category === 'high' ? 'bg-amber-500' : 
-                                'bg-red-500'
-                              }`}>
-                                {primaryPercentile.percentile}
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${overallColor.bg}`}>
+                                <i className="fa-solid fa-ruler-vertical text-lg"></i>
                               </div>
                               <div className="flex-1">
-                                <p className="font-medium text-slate-800">
-                                  {result.age_in_months} aylık - {result.percentiles.length} ölçüm
+                                <p className="font-medium text-slate-800 text-sm">
+                                  {getMeasurementSummary(result.percentiles)}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                  {new Date(result.created_at).toLocaleDateString('tr-TR')}
+                                  {childName && <span className="font-medium text-slate-600">{childName} • </span>}
+                                  {result.age_in_months > 0 ? `${result.age_in_months} aylık` : ''} 
+                                  {result.age_in_months > 0 && ' • '}
+                                  {formatDate(result.created_at)}
                                 </p>
                               </div>
                               {hasWarnings && (
-                                <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center">
-                                  <i className="fa-solid fa-exclamation text-xs"></i>
+                                <div className="relative group">
+                                  <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center cursor-help">
+                                    <i className="fa-solid fa-exclamation text-xs"></i>
+                                  </div>
+                                  {/* Tooltip */}
+                                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                    <p className="font-bold mb-1">Dikkat:</p>
+                                    {result.red_flags.slice(0, 2).map((flag, i) => (
+                                      <p key={i}>• {flag.message}</p>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Solid Food Readiness Results Widget */}
+                    {solidFoodResults.length > 0 && (
+                      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                            <i className="fa-solid fa-utensils text-orange-500"></i>
+                            Ek Gıda Hazırlık
+                          </h3>
+                          <Link href="/akilli-asistan/ek-gidaya-baslama" className="text-sm text-orange-500 hover:underline">
+                            Tekrar Test Et
+                          </Link>
+                        </div>
+                        
+                        {solidFoodResults.slice(0, 3).map((result, index) => {
+                          // Çocuk adını bul
+                          const childName = result.child_id 
+                            ? children.find(c => c.id === result.child_id)?.name || result.child_name
+                            : null;
+                          
+                          // Tarih formatla
+                          const formatDate = (dateStr: string) => {
+                            try {
+                              const date = new Date(dateStr);
+                              if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
+                              return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+                            } catch {
+                              return 'Tarih bilinmiyor';
+                            }
+                          };
+                          
+                          // Sonuç kategorisi
+                          const getResultCategory = (score: number) => {
+                            if (score >= 80) return { text: 'Hazır', color: 'green', emoji: '🎉', bg: 'bg-green-500' };
+                            if (score >= 50) return { text: 'Neredeyse Hazır', color: 'amber', emoji: '💪', bg: 'bg-amber-500' };
+                            return { text: 'Biraz Daha Zaman', color: 'red', emoji: '🕐', bg: 'bg-red-500' };
+                          };
+                          
+                          const category = getResultCategory(result.score);
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${category.bg}`}>
+                                {Math.round(result.score)}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-slate-800">{category.text}</p>
+                                  <span className="text-lg">{category.emoji}</span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                  {childName && <span className="font-medium text-slate-600">{childName} • </span>}
+                                  {formatDate(result.created_at)}
+                                </p>
+                              </div>
+                              {result.red_flags && result.red_flags.length > 0 && (
+                                <div className="relative group">
+                                  <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center cursor-help">
+                                    <i className="fa-solid fa-exclamation text-xs"></i>
+                                  </div>
+                                  {/* Tooltip */}
+                                  <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                    <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
+                                    {result.red_flags.slice(0, 2).map((flag, i) => (
+                                      <p key={i}>• {flag}</p>
+                                    ))}
+                                  </div>
                                 </div>
                               )}
                             </div>

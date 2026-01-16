@@ -278,6 +278,20 @@ export const toolService = {
     );
   },
 
+  /**
+   * Kullanıcının Ek Gıda test sonuçlarını getir
+   */
+  getUserSolidFoodResults: async (): Promise<SolidFoodReadinessResult[]> => {
+    return fetchAuthAPI<SolidFoodReadinessResult[]>(API_ENDPOINTS.USER_SOLID_FOOD_RESULTS);
+  },
+
+  /**
+   * Çocuğun Ek Gıda test sonuçlarını getir
+   */
+  getChildSolidFoodResults: async (childId: string): Promise<SolidFoodReadinessResult[]> => {
+    return fetchAuthAPI<SolidFoodReadinessResult[]>(API_ENDPOINTS.CHILD_SOLID_FOOD_RESULTS(childId));
+  },
+
   // ===============================
   // ALERJEN PLANLAYICI
   // ===============================
