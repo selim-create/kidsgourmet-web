@@ -34,11 +34,11 @@ const FALLBACK_CONFIG: BathPlannerConfig = {
 
 // Mevcut mevsimi otomatik olarak seç
 const getCurrentSeason = (): string => {
-  const month = new Date().getMonth();
-  if (month >= 2 && month <= 4) return 'spring';
-  if (month >= 5 && month <= 7) return 'summer';
-  if (month >= 8 && month <= 10) return 'autumn';
-  return 'winter';
+  const month = new Date().getMonth(); // 0-11 (0=January, 11=December)
+  if (month >= 2 && month <= 4) return 'spring';   // Mar-May
+  if (month >= 5 && month <= 7) return 'summer';   // Jun-Aug
+  if (month >= 8 && month <= 10) return 'autumn';  // Sep-Nov
+  return 'winter'; // Dec-Feb
 };
 
 export default function BathPlannerPage() {
@@ -92,7 +92,7 @@ export default function BathPlannerPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    const ageNum = parseInt(babyAgeMonths);
+    const ageNum = parseInt(babyAgeMonths, 10);
     if (isNaN(ageNum) || ageNum < 0 || ageNum > 36) {
       newErrors.age = 'Geçerli bir yaş değeri girin (0-36 ay)';
     }
@@ -117,7 +117,7 @@ export default function BathPlannerPage() {
     setIsLoading(true);
     try {
       const planResult = await sponsoredToolService.generateBathPlan({
-        baby_age_months: parseInt(babyAgeMonths),
+        baby_age_months: parseInt(babyAgeMonths, 10),
         skin_type: skinType,
         season: season,
         has_eczema: hasEczema,
