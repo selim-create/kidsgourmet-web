@@ -1121,3 +1121,11 @@ export interface StainGuide {
   related_ingredients: string[];
   sponsor?: ToolSponsorData;
 }
+
+// Leke arama response tipi
+export interface StainSearchResponse {
+  total: number;
+  stains: StainGuide[];
+  categories: { id: string; label: string }[];
+  sponsor: ToolSponsorData | null;
+}
