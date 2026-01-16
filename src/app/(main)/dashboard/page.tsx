@@ -7,7 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
 import { toolService } from "@/services/tool-service";
-import { ShoppingListItem, BLWTestResult, PercentileResult, SolidFoodReadinessResult, PercentileValue } from "@/lib/types";
+import { ShoppingListItem, BLWTestResult, PercentileResult, SolidFoodReadinessResult } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
