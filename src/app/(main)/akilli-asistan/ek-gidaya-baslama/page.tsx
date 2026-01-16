@@ -508,7 +508,7 @@ export default function EkGidayaBaslamaPage() {
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
       <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
-        <button onClick={() => router.push('/araclar')} className="text-gray-500">
+        <button onClick={() => router.push('/akilli-asistan')} className="text-gray-500">
           <i className="fa-solid fa-arrow-left"></i>
         </button>
         <span className="font-display font-bold text-lg text-slate-800">Ek Gıdaya Başlama</span>
@@ -751,7 +751,7 @@ export default function EkGidayaBaslamaPage() {
                 Testi Tekrarla
               </button>
               <button 
-                onClick={() => router.push('/araclar')}
+                onClick={() => router.push('/akilli-asistan')}
                 className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-xl font-bold transition-all"
               >
                 <i className="fa-solid fa-tools mr-2"></i>
