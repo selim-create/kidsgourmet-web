@@ -228,6 +228,10 @@ export default function ProfileSettingsPage() {
     return user?.is_expert || user?.role === 'kg_expert' || user?.role === 'editor' || user?.role === 'administrator';
   };
 
+  const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
+    setSocialLinks({...socialLinks, [platform]: value});
+  };
+
   return (
     <div className="flex min-h-screen relative">
 
@@ -572,7 +576,7 @@ export default function ProfileSettingsPage() {
                           {expertise.map((skill, index) => (
                             <span key={index} className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                               {skill}
-                              <button type="button" onClick={() => removeExpertise(index)} className="hover:text-purple-900" aria-label="Uzmanlık alanını kaldır">
+                              <button type="button" onClick={() => removeExpertise(index)} className="hover:text-purple-900" aria-label={`${skill} uzmanlık alanını kaldır`}>
                                 <i className="fa-solid fa-xmark"></i>
                               </button>
                             </span>
@@ -613,7 +617,7 @@ export default function ProfileSettingsPage() {
                             <input
                               type="url"
                               value={socialLinks.instagram || ''}
-                              onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
+                              onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
                               placeholder="https://instagram.com/kullaniciadi"
                               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
                             />
@@ -623,7 +627,7 @@ export default function ProfileSettingsPage() {
                             <input
                               type="url"
                               value={socialLinks.twitter || ''}
-                              onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
+                              onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
                               placeholder="https://twitter.com/kullaniciadi"
                               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
                             />
@@ -633,7 +637,7 @@ export default function ProfileSettingsPage() {
                             <input
                               type="url"
                               value={socialLinks.linkedin || ''}
-                              onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
+                              onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
                               placeholder="https://linkedin.com/in/kullaniciadi"
                               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
                             />
@@ -643,7 +647,7 @@ export default function ProfileSettingsPage() {
                             <input
                               type="url"
                               value={socialLinks.youtube || ''}
-                              onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
+                              onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
                               placeholder="https://youtube.com/@kullaniciadi"
                               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
                             />
@@ -653,7 +657,7 @@ export default function ProfileSettingsPage() {
                             <input
                               type="url"
                               value={socialLinks.website || ''}
-                              onChange={(e) => setSocialLinks({...socialLinks, website: e.target.value})}
+                              onChange={(e) => handleSocialLinkChange('website', e.target.value)}
                               placeholder="https://website.com"
                               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
                             />
