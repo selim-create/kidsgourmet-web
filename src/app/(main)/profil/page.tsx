@@ -213,14 +213,19 @@ export default function ProfileSettingsPage() {
   };
 
   const addExpertise = () => {
-    if (newExpertise.trim() && !expertise.includes(newExpertise.trim())) {
-      setExpertise([...expertise, newExpertise.trim()]);
+    const trimmedExpertise = newExpertise.trim();
+    if (trimmedExpertise && !expertise.includes(trimmedExpertise)) {
+      setExpertise([...expertise, trimmedExpertise]);
       setNewExpertise("");
     }
   };
 
   const removeExpertise = (index: number) => {
     setExpertise(expertise.filter((_, i) => i !== index));
+  };
+
+  const isExpertUser = (user: any) => {
+    return user?.is_expert || user?.role === 'kg_expert' || user?.role === 'editor' || user?.role === 'administrator';
   };
 
   return (
@@ -553,7 +558,7 @@ export default function ProfileSettingsPage() {
                 </div>
 
                 {/* Expert Profile Section - Only for experts */}
-                {(user?.is_expert || user?.role === 'kg_expert' || user?.role === 'editor' || user?.role === 'administrator') && (
+                {isExpertUser(user) && (
                   <section className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8 mt-6">
                     <h2 className="font-display font-bold text-xl text-slate-800 mb-6 flex items-center gap-2">
                       <i className="fa-solid fa-user-tie text-purple-500"></i> Uzman Profili
@@ -567,7 +572,7 @@ export default function ProfileSettingsPage() {
                           {expertise.map((skill, index) => (
                             <span key={index} className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                               {skill}
-                              <button type="button" onClick={() => removeExpertise(index)} className="hover:text-purple-900">
+                              <button type="button" onClick={() => removeExpertise(index)} className="hover:text-purple-900" aria-label="Uzmanlık alanını kaldır">
                                 <i className="fa-solid fa-xmark"></i>
                               </button>
                             </span>
@@ -581,7 +586,7 @@ export default function ProfileSettingsPage() {
                             placeholder="Yeni uzmanlık alanı ekle..."
                             className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm"
                           />
-                          <button type="button" onClick={addExpertise} className="px-4 py-2 bg-purple-500 text-white rounded-xl font-bold">
+                          <button type="button" onClick={addExpertise} className="px-4 py-2 bg-purple-500 text-white rounded-xl font-bold" aria-label="Uzmanlık alanı ekle">
                             Ekle
                           </button>
                         </div>
