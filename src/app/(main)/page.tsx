@@ -26,7 +26,7 @@ export default function Home() {
   // Prepare featured content for slider
   const [featuredContent, setFeaturedContent] = useState<Array<{
     id: number;
-    type: 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient';
+    type: 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient' | 'tool';
     date: string;
     data: FeaturedItem;
   }>>([]);
@@ -75,10 +75,29 @@ export default function Home() {
           };
         });
         
-        setFeaturedContent(featured);
+        // Add static tool card to featured content
+        const toolItem = {
+          id: 999999, // Unique ID that won't conflict with API data
+          type: 'tool' as const,
+          date: new Date().toISOString(),
+          data: {
+            id: 999999,
+            title: 'Akıllı Asistan',
+            slug: 'akilli-asistan',
+            type: 'post',
+            date: new Date().toISOString(),
+            excerpt: 'Bebeğinizin sağlığı için akıllı araçlar',
+            image: '',
+            meta: {}
+          } as FeaturedItem
+        };
+        
+        // Add tool card to the featured content list
+        const featuredWithTool = [...featured, toolItem];
+        setFeaturedContent(featuredWithTool);
         
         // Track featured IDs to exclude from lower sections
-        const ids = featured.map((item) => item.id);
+        const ids = featuredWithTool.map((item) => item.id);
         setFeaturedIds(ids);
         
         // Handle new getAll response format
