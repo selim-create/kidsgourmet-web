@@ -237,7 +237,17 @@ export interface User {
   expertise?: string[];
   children: Child[];
   role?: string; // 'subscriber' | 'kg_expert' | 'editor' | 'administrator'
+  roles?: string[];
   is_expert?: boolean;
+  is_admin?: boolean;
+  is_editor?: boolean;
+  is_author?: boolean;
+  has_editor_access?: boolean;
+  capabilities?: UserCapabilities;
+  can_edit?: UserCanEdit;
+  can_edit_others?: UserCanEdit;
+  admin_url?: string;
+  edit_urls?: UserEditUrls;
   created_at: string;
 }
 
@@ -249,6 +259,38 @@ export interface SocialLinks {
   youtube?: string;
   website?: string;
   facebook?: string;
+}
+
+// User capabilities for authorization
+export interface UserCapabilities {
+  edit_posts?: boolean;
+  edit_others_posts?: boolean;
+  edit_published_posts?: boolean;
+  publish_posts?: boolean;
+  edit_recipes?: boolean;
+  edit_others_recipes?: boolean;
+  edit_ingredients?: boolean;
+  edit_others_ingredients?: boolean;
+  manage_categories?: boolean;
+  moderate_comments?: boolean;
+  upload_files?: boolean;
+}
+
+export interface UserCanEdit {
+  posts: boolean;
+  recipes: boolean;
+  ingredients: boolean;
+  discussions: boolean;
+}
+
+export interface UserEditUrls {
+  new_post: string;
+  new_recipe: string;
+  new_ingredient: string;
+  new_discussion?: string;
+  edit_post: string;
+  edit_recipe: string;
+  edit_ingredient: string;
 }
 
 export interface Child {

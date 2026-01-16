@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities, stripHtmlAndDecode } from '@/utils/textHelpers';
+import { EditButton } from '@/components/ui/EditButton';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -30,6 +31,10 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
 
   const getAuthorName = (post: BlogPost) => {
     return post._embedded?.author?.[0]?.name || 'KidsGourmet Editörü';
+  };
+
+  const getAuthorId = (post: BlogPost) => {
+    return post._embedded?.author?.[0]?.id;
   };
 
   const getAuthorAvatar = (post: BlogPost) => {
@@ -62,6 +67,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
   const excerpt = stripHtmlAndDecode(post.excerpt.rendered);
   const imageUrl = getImageUrl(post);
   const authorName = getAuthorName(post);
+  const authorId = getAuthorId(post);
   const authorAvatar = getAuthorAvatar(post);
   const categoryName = getCategoryName(post);
 
@@ -132,6 +138,15 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        
+        {/* Edit Button - Hover'da görünür */}
+        <EditButton 
+          contentType="post" 
+          contentId={post.id}
+          authorId={authorId}
+          variant="text"
+          className="top-6 right-16"
+        />
         
         {/* Favori Butonu */}
         <button 
@@ -264,6 +279,15 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             <img src={imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={title} />
           </Link>
         )}
+        
+        {/* Edit Button - Hover'da görünür */}
+        <EditButton 
+          contentType="post" 
+          contentId={post.id}
+          authorId={authorId}
+          variant="text"
+          className="right-16"
+        />
         
         {/* Category Badge - Top Left (for non-sponsored) OR Sponsored Badge - Top Left (for sponsored) */}
         {isSponsored ? (
