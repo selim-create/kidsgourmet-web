@@ -255,6 +255,29 @@ export const toolService = {
     });
   },
 
+  /**
+   * Ek gıdaya başlama testi sonucunu kaydet ve kayıt ol (yeni kullanıcı)
+   */
+  submitSolidFoodReadinessTestWithRegistration: async (
+    answers: Record<string, string>,
+    registrationData: RegisterData & { child_name?: string; child_birth_date?: string }
+  ): Promise<{ result: SolidFoodReadinessResult; token: string }> => {
+    return fetchAPI<{ result: SolidFoodReadinessResult; token: string }>(
+      `${API_ENDPOINTS.SOLID_FOOD_SUBMIT}?register=true`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ 
+          answers, 
+          email: registrationData.email,
+          password: registrationData.password,
+          name: registrationData.name,
+          child_name: registrationData.child_name,
+          child_birth_date: registrationData.child_birth_date,
+        }),
+      }
+    );
+  },
+
   // ===============================
   // ALERJEN PLANLAYICI
   // ===============================
