@@ -4,11 +4,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from "next/link";
 import { blogService, BlogPost } from '@/services/blog-service';
 import { recipeService } from '@/services/recipe-service';
+import { ingredientService } from '@/services/ingredient-service';
 import { notFound } from 'next/navigation';
 import { useFavorites } from '@/hooks/use-favorites';
 import { toast } from 'sonner';
 import ClientHead from '@/components/seo/ClientHead';
 import { SITE_URL } from '@/lib/constants';
+import { decodeEntities, stripHtmlAndDecode, slugify } from '@/utils/textHelpers';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -24,6 +26,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const [error, setError] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [randomRecipes, setRandomRecipes] = useState<any[]>([]);
+  const [randomIngredients, setRandomIngredients] = useState<any[]>([]);
   const [headings, setHeadings] = useState<{ level: number; id: string; text: string }[]>([]);
   const [activeHeading, setActiveHeading] = useState<string>('');
 
@@ -71,12 +74,22 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     fetchRelatedPosts();
   }, [post]);
 
-  // Fetch random recipes
+  // Fetch random recipes and ingredients
   useEffect(() => {
     async function fetchRandomContent() {
       try {
-        const recipes = await recipeService.getAll({ perPage: 3, orderBy: 'date' });
-        setRandomRecipes(recipes.recipes || []);
+        const [recipesData, ingredientsData] = await Promise.all([
+          recipeService.getAll({ perPage: 3, orderBy: 'date' }),
+          ingredientService.getAll({ perPage: 6 })
+        ]);
+        
+        setRandomRecipes(recipesData.recipes || []);
+        
+        // Handle both array and object response formats
+        const ingredients = Array.isArray(ingredientsData) 
+          ? ingredientsData 
+          : ingredientsData.ingredients || [];
+        setRandomIngredients(ingredients);
       } catch (error) {
         console.error('Random content fetch error:', error);
       }
@@ -91,7 +104,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     
     const extractHeadings = (content: string) => {
       // Match H2 and H3 tags with optional id attribute
-      // Pattern: <h(2|3) [attributes] id="optional-id">heading text</h(2|3)>
       const headingRegex = /<h([2-3])[^>]*(?:id="([^"]*)")?[^>]*>(.*?)<\/h\1>/gi;
       const headings: { level: number; id: string; text: string }[] = [];
       let match;
@@ -99,9 +111,14 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       
       while ((match = headingRegex.exec(content)) !== null) {
         const level = parseInt(match[1]);
-        const id = match[2] || `heading-${index}`;
-        const text = match[3].replace(/<[^>]*>/g, ''); // Strip HTML tags
-        headings.push({ level, id, text });
+        // Strip HTML from heading text
+        const rawText = match[3].replace(/<[^>]*>/g, '');
+        // Decode HTML entities
+        const decodedText = decodeEntities(rawText);
+        // Generate ID from text if not present
+        const id = match[2] || `heading-${slugify(decodedText)}-${index}`;
+        
+        headings.push({ level, id, text: decodedText });
         index++;
       }
       
@@ -174,6 +191,26 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     // Fallback for SSR
     return html.replace(/<[^>]*>/g, '');
   };
+  
+  // Inject heading IDs into content for TOC navigation
+  const injectHeadingIds = (content: string, headings: { id: string; text: string }[]): string => {
+    let result = content;
+    headings.forEach((heading) => {
+      // Escape special regex characters in heading text
+      const escapedText = heading.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Match heading tags and inject ID if not already present
+      const regex = new RegExp(`(<h[2-3][^>]*)(>\\s*${escapedText}\\s*</h[2-3]>)`, 'gi');
+      result = result.replace(regex, (match, openTag, rest) => {
+        // Only add ID if not already present
+        if (openTag.includes('id=')) return match;
+        return `${openTag} id="${heading.id}"${rest}`;
+      });
+    });
+    return result;
+  };
+  
+  // Process content with heading IDs
+  const processedContent = post ? injectHeadingIds(post.content.rendered, headings) : '';
 
   const getImageUrl = (post: BlogPost) => {
     return post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://placehold.co/1200x600/E3F2FD/81D4FA?text=Gorsel+Yok';
@@ -184,7 +221,21 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
   
   const getAuthorImage = (post: BlogPost) => {
-      return post._embedded?.author?.[0]?.avatar_urls?.['96'] || 'https://placehold.co/100x100/AED581/ffffff?text=Yazar';
+    const avatarUrls = post._embedded?.author?.[0]?.avatar_urls;
+    // Try different sizes
+    const avatar = avatarUrls?.['96'] || avatarUrls?.['48'] || avatarUrls?.['24'];
+    
+    // Fix protocol if missing
+    if (avatar && avatar.startsWith('//')) {
+      return `https:${avatar}`;
+    }
+    
+    // Return null for invalid avatars (will show initials instead)
+    if (!avatar || avatar.includes('blank.gif') || avatar.includes('mystery-man')) {
+      return null;
+    }
+    
+    return avatar;
   };
 
   const getAuthorSlug = (post: BlogPost) => {
@@ -207,6 +258,26 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       const words = content.replace(/<[^>]*>?/gm, '').split(/\s+/).length;
       const minutes = Math.ceil(words / 200);
       return `${minutes} dk okuma`;
+  };
+  
+  // Get sponsor logo with validation
+  const getSponsorLogo = (sponsorData: typeof post.sponsor_data) => {
+    if (!sponsorData) return null;
+    
+    // Try sponsor_logo or sponsor_light_logo
+    const logo = sponsorData.sponsor_logo || sponsorData.sponsor_light_logo;
+    
+    // Validate URL
+    if (!logo || logo === '' || logo === 'null' || logo === 'undefined') {
+      return null;
+    }
+    
+    // Fix relative URLs
+    if (logo.startsWith('/')) {
+      return `${process.env.NEXT_PUBLIC_API_URL || ''}${logo}`;
+    }
+    
+    return logo;
   };
 
   // Social sharing functions
@@ -278,27 +349,27 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li>
                           <Link 
-                            href={`/kesfet?kategori=${getCategorySlug(post)}`} 
+                            href={`/kesfet/kategori/${getCategorySlug(post)}`} 
                             className="hover:text-orange-500"
                           >
-                            {getCategoryName(post)}
+                            {decodeEntities(getCategoryName(post))}
                           </Link>
                         </li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                        <li className="font-semibold text-orange-500 truncate max-w-[150px] md:max-w-xs" dangerouslySetInnerHTML={{ __html: post.title.rendered }} />
+                        <li className="font-semibold text-orange-500 truncate max-w-[150px] md:max-w-xs" dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }} />
                     </ol>
                 </nav>
 
                 {/* Title & Meta */}
                 <Link 
-                  href={`/kesfet?kategori=${getCategorySlug(post)}`}
+                  href={`/kesfet/kategori/${getCategorySlug(post)}`}
                   className="inline-block px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-bold uppercase tracking-wider mb-4 hover:bg-blue-100 transition-colors"
                 >
-                  {getCategoryName(post)}
+                  {decodeEntities(getCategoryName(post))}
                 </Link>
                 <h1 
                     className="font-display font-bold text-3xl md:text-5xl text-slate-800 mb-6 leading-tight font-sans"
-                    dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+                    dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
                 />
                 
                 {/* Sponsored or Normal Meta */}
@@ -309,16 +380,24 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                       Sponsorlu İçerik
                     </span>
                     {/* Sponsor Logo & Name */}
-                    {sponsorData.sponsor_logo && (
-                      <div className="flex items-center gap-2">
-                        <img 
-                          src={sponsorData.sponsor_logo} 
-                          alt={sponsorData.sponsor_name} 
-                          className="h-6 object-contain"
-                        />
+                    {(() => {
+                      const sponsorLogo = getSponsorLogo(sponsorData);
+                      return sponsorLogo ? (
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={sponsorLogo} 
+                            alt={sponsorData.sponsor_name} 
+                            className="h-6 object-contain"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                          <span className="text-gray-500">{sponsorData.sponsor_name} katkılarıyla</span>
+                        </div>
+                      ) : sponsorData.sponsor_name ? (
                         <span className="text-gray-500">{sponsorData.sponsor_name} katkılarıyla</span>
-                      </div>
-                    )}
+                      ) : null;
+                    })()}
                     {/* Reading Time - Show in sponsored posts too */}
                     <div className="flex items-center gap-2 text-gray-500">
                       <i className="fa-regular fa-clock"></i> {calculateReadTime(post.content.rendered)}
@@ -327,9 +406,19 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 ) : (
                   <div className="flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-gray-500">
                       <div className="flex items-center gap-2">
-                          <img src={getAuthorImage(post)} className="w-8 h-8 rounded-full border border-gray-200" alt={getAuthorName(post)} />
+                          {(() => {
+                            const authorAvatar = getAuthorImage(post);
+                            const authorName = getAuthorName(post);
+                            return authorAvatar ? (
+                              <img src={authorAvatar} className="w-8 h-8 rounded-full border border-gray-200" alt={authorName} />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-sm border border-gray-200">
+                                {authorName.charAt(0).toUpperCase()}
+                              </div>
+                            );
+                          })()}
                           <span>Yazar: <Link 
-                            href={`/yazar/${getAuthorSlug(post)}`}
+                            href={`/uzman/${getAuthorSlug(post)}`}
                             className="hover:text-orange-500 transition-colors"
                           >
                             <strong className="text-slate-800">{getAuthorName(post)}</strong>
@@ -403,21 +492,31 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         [&_.wp-block-embed]:my-8 [&_.wp-block-embed_iframe]:rounded-xl [&_.wp-block-embed_iframe]:shadow-lg
                         [&_.has-text-align-center]:text-center
                         [&_.has-large-font-size]:text-xl
-                        [&_.wp-block-separator]:my-10 [&_.wp-block-separator]:border-gray-200"
-                        dangerouslySetInnerHTML={{ __html: post.content.rendered }}
+                        [&_.wp-block-separator]:my-10 [&_.wp-block-separator]:border-gray-200
+                        [&_.wp-block-heading]:font-bold [&_.wp-block-heading]:text-slate-800 [&_.wp-block-heading]:font-sans
+                        [&_h2.wp-block-heading]:text-2xl [&_h2.wp-block-heading]:mt-10 [&_h2.wp-block-heading]:mb-4 [&_h2.wp-block-heading]:pb-2 [&_h2.wp-block-heading]:border-b [&_h2.wp-block-heading]:border-gray-100
+                        [&_h3.wp-block-heading]:text-xl [&_h3.wp-block-heading]:mt-8 [&_h3.wp-block-heading]:mb-3
+                        [&_h4.wp-block-heading]:text-lg [&_h4.wp-block-heading]:mt-6 [&_h4.wp-block-heading]:mb-2"
+                        dangerouslySetInnerHTML={{ __html: processedContent }}
                     />
 
                     {/* Sponsor CTA */}
                     {isSponsored && sponsorData?.sponsor_url && (
                       <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100">
                         <div className="flex items-center gap-4">
-                          {sponsorData.sponsor_logo && (
-                            <img 
-                              src={sponsorData.sponsor_logo} 
-                              alt={sponsorData.sponsor_name}
-                              className="h-10 object-contain"
-                            />
-                          )}
+                          {(() => {
+                            const sponsorLogo = getSponsorLogo(sponsorData);
+                            return sponsorLogo ? (
+                              <img 
+                                src={sponsorLogo} 
+                                alt={sponsorData.sponsor_name}
+                                className="h-10 object-contain"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).style.display = 'none';
+                                }}
+                              />
+                            ) : null;
+                          })()}
                           <div className="flex-1">
                             <p className="text-sm text-gray-600 mb-2">
                               Bu içerik <strong>{sponsorData.sponsor_name}</strong> tarafından desteklenmektedir.
@@ -457,25 +556,184 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             </div>
                         )}
                         
-                        {/* Author Box */}
-                        <div className="bg-orange-50/50 p-6 rounded-3xl flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left border border-orange-100 mt-8">
-                            <img src={getAuthorImage(post)} className="w-20 h-20 rounded-full border-4 border-white shadow-sm" alt={getAuthorName(post)} />
-                            <div className="flex-1">
-                                <Link 
-                                  href={`/yazar/${getAuthorSlug(post)}`}
-                                  className="font-bold text-slate-800 text-lg mb-1 hover:text-orange-500 transition-colors block"
-                                >
-                                  {getAuthorName(post)}
-                                </Link>
-                                <p className="text-sm text-gray-600 mb-3">Çocuk Sağlığı ve Gelişimi üzerine içerikler üretiyor.</p>
-                                <Link 
-                                  href={`/yazar/${getAuthorSlug(post)}`} 
-                                  className="text-orange-500 font-bold text-sm hover:underline"
-                                >
-                                  Tüm Yazıları
-                                </Link>
+                        {/* Author Box - Only for non-sponsored posts */}
+                        {!isSponsored && (
+                          <div className="bg-orange-50/50 p-6 rounded-3xl flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left border border-orange-100 mt-8">
+                              {(() => {
+                                const authorAvatar = getAuthorImage(post);
+                                const authorName = getAuthorName(post);
+                                return authorAvatar ? (
+                                  <img src={authorAvatar} className="w-20 h-20 rounded-full border-4 border-white shadow-sm" alt={authorName} />
+                                ) : (
+                                  <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-2xl border-4 border-white shadow-sm">
+                                    {authorName.charAt(0).toUpperCase()}
+                                  </div>
+                                );
+                              })()}
+                              <div className="flex-1">
+                                  <Link 
+                                    href={`/uzman/${getAuthorSlug(post)}`}
+                                    className="font-bold text-slate-800 text-lg mb-1 hover:text-orange-500 transition-colors block"
+                                  >
+                                    {getAuthorName(post)}
+                                  </Link>
+                                  <p className="text-sm text-gray-600 mb-3">Çocuk Sağlığı ve Gelişimi üzerine içerikler üretiyor.</p>
+                                  <Link 
+                                    href={`/uzman/${getAuthorSlug(post)}`} 
+                                    className="text-orange-500 font-bold text-sm hover:underline"
+                                  >
+                                    Tüm Yazıları
+                                  </Link>
+                              </div>
+                          </div>
+                        )}
+                        
+                        {/* Sponsor Info Box - Only for sponsored posts */}
+                        {isSponsored && sponsorData && (
+                          <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100 mt-8">
+                            <div className="flex items-center gap-4">
+                              {(() => {
+                                const sponsorLogo = getSponsorLogo(sponsorData);
+                                return sponsorLogo ? (
+                                  <img 
+                                    src={sponsorLogo} 
+                                    alt={sponsorData.sponsor_name}
+                                    className="h-12 object-contain"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).style.display = 'none';
+                                    }}
+                                  />
+                                ) : null;
+                              })()}
+                              <div className="flex-1">
+                                <h3 className="font-bold text-slate-800 text-lg mb-1">
+                                  {sponsorData.sponsor_name}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                  Bu içerik sponsorlu bir içeriktir.
+                                </p>
+                              </div>
                             </div>
+                          </div>
+                        )}
+                    </div>
+                    
+                    {/* ============ RELATED CONTENT SECTIONS ============ */}
+                    <div className="mt-12 space-y-10">
+                      
+                      {/* İlginizi Çekebilir */}
+                      {relatedPosts.length > 0 && (
+                        <div>
+                          <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
+                            <i className="fa-solid fa-newspaper text-orange-500 mr-3"></i>
+                            İlginizi Çekebilir
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {relatedPosts.map((relatedPost) => (
+                              <Link 
+                                key={relatedPost.id} 
+                                href={`/kesfet/${relatedPost.slug}`}
+                                className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all"
+                              >
+                                <div className="aspect-[4/3] overflow-hidden">
+                                  <img 
+                                    src={relatedPost._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://placehold.co/400x300'}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    alt={stripHtmlAndDecode(relatedPost.title.rendered)}
+                                  />
+                                </div>
+                                <div className="p-4">
+                                  <h4 
+                                    className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors line-clamp-2"
+                                    dangerouslySetInnerHTML={{ __html: decodeEntities(relatedPost.title.rendered) }}
+                                  />
+                                  <span className="text-xs text-gray-400 mt-2 block">
+                                    {decodeEntities(relatedPost._embedded?.['wp:term']?.[0]?.[0]?.name || 'Genel')}
+                                  </span>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
                         </div>
+                      )}
+
+                      {/* Önerilen Tarifler */}
+                      {randomRecipes.length > 0 && (
+                        <div>
+                          <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
+                            <i className="fa-solid fa-utensils text-orange-500 mr-3"></i>
+                            Önerilen Tarifler
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {randomRecipes.slice(0, 3).map((recipe) => (
+                              <Link 
+                                key={recipe.id}
+                                href={`/tarifler/${recipe.slug}`}
+                                className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all"
+                              >
+                                <div className="aspect-[4/3] overflow-hidden">
+                                  <img 
+                                    src={recipe.image || 'https://placehold.co/400x300'}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    alt={decodeEntities(recipe.title)}
+                                  />
+                                </div>
+                                <div className="p-4">
+                                  <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors line-clamp-2">
+                                    {decodeEntities(recipe.title)}
+                                  </h4>
+                                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                                    <span><i className="fa-regular fa-clock mr-1"></i>{recipe.prep_time}</span>
+                                    {recipe.age_group && <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded">{recipe.age_group}</span>}
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                          <div className="text-center mt-6">
+                            <Link href="/tarifler" className="text-orange-500 font-bold hover:underline">
+                              Tüm Tarifler →
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Önerilen Malzemeler */}
+                      {randomIngredients.length > 0 && (
+                        <div>
+                          <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
+                            <i className="fa-solid fa-carrot text-green-500 mr-3"></i>
+                            Keşfedilecek Malzemeler
+                          </h3>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                            {randomIngredients.slice(0, 6).map((ingredient) => (
+                              <Link
+                                key={ingredient.id}
+                                href={`/malzemeler/${ingredient.slug}`}
+                                className="group bg-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all text-center"
+                              >
+                                <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden bg-gray-50">
+                                  <img 
+                                    src={ingredient.image || 'https://placehold.co/100x100'}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    alt={decodeEntities(ingredient.name)}
+                                  />
+                                </div>
+                                <h4 className="font-medium text-slate-800 text-sm group-hover:text-orange-500 transition-colors">
+                                  {decodeEntities(ingredient.name)}
+                                </h4>
+                                <span className="text-xs text-gray-400">{ingredient.start_age}</span>
+                              </Link>
+                            ))}
+                          </div>
+                          <div className="text-center mt-6">
+                            <Link href="/malzemeler" className="text-green-500 font-bold hover:underline">
+                              Tüm Malzemeler →
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+
                     </div>
 
                 </article>
@@ -495,6 +753,15 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                 <li key={heading.id}>
                                   <a
                                     href={`#${heading.id}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      const element = document.getElementById(heading.id);
+                                      if (element) {
+                                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                        // Update URL without scrolling
+                                        window.history.pushState(null, '', `#${heading.id}`);
+                                      }
+                                    }}
                                     className={`block pl-4 py-1 border-l-2 -ml-[2px] transition-all ${
                                       activeHeading === heading.id
                                         ? 'border-orange-500 text-orange-500 font-medium'
@@ -549,77 +816,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             <input type="email" placeholder="E-posta adresin" className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-green-500" />
                             <button className="w-full bg-green-600 text-white font-bold py-2 rounded-xl text-sm hover:bg-green-700 transition-colors">Abone Ol</button>
                         </div>
-
-                        {/* Related Posts */}
-                        {relatedPosts.length > 0 && (
-                          <div>
-                            <h3 className="font-bold text-slate-800 mb-4 font-sans flex items-center">
-                              <i className="fa-solid fa-newspaper text-orange-500 mr-2"></i>İlginizi Çekebilir
-                            </h3>
-                            <div className="space-y-4">
-                              {relatedPosts.map((relatedPost) => (
-                                <Link 
-                                  key={relatedPost.id} 
-                                  href={`/kesfet/${relatedPost.slug}`} 
-                                  className="flex gap-4 group"
-                                >
-                                  <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
-                                    <img 
-                                      src={relatedPost._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://placehold.co/100x100'} 
-                                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
-                                      alt={stripHtml(relatedPost.title.rendered)} 
-                                    />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <h4 
-                                      className="font-bold text-slate-800 text-sm group-hover:text-orange-500 transition-colors line-clamp-2"
-                                      dangerouslySetInnerHTML={{ __html: relatedPost.title.rendered }}
-                                    />
-                                    <span className="text-xs text-gray-400">
-                                      {relatedPost._embedded?.['wp:term']?.[0]?.[0]?.name || 'Genel'}
-                                    </span>
-                                  </div>
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Random Recipes Widget */}
-                        {randomRecipes.length > 0 && (
-                          <div className="bg-orange-50/50 p-6 rounded-[2rem] border border-orange-100">
-                            <h3 className="font-bold text-slate-800 mb-4 font-sans flex items-center text-sm">
-                              <i className="fa-solid fa-utensils text-orange-500 mr-2"></i>Önerilen Tarifler
-                            </h3>
-                            <div className="space-y-3">
-                              {randomRecipes.slice(0, 3).map((recipe) => (
-                                <Link 
-                                  key={recipe.id} 
-                                  href={`/tarifler/${recipe.slug}`}
-                                  className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors group"
-                                >
-                                  <img 
-                                    src={recipe.image || 'https://placehold.co/60x60'} 
-                                    className="w-12 h-12 rounded-lg object-cover"
-                                    alt={recipe.title}
-                                  />
-                                  <div className="flex-1 min-w-0">
-                                    <h4 className="font-medium text-slate-800 text-sm group-hover:text-orange-500 transition-colors line-clamp-1">
-                                      {recipe.title}
-                                    </h4>
-                                    <span className="text-xs text-gray-400">{recipe.prep_time}</span>
-                                  </div>
-                                </Link>
-                              ))}
-                            </div>
-                            <Link 
-                              href="/tarifler" 
-                              className="block text-center text-orange-500 font-bold text-sm mt-4 hover:underline"
-                            >
-                              Tüm Tarifler →
-                            </Link>
-                          </div>
-                        )}
 
                     </div>
                 </aside>
