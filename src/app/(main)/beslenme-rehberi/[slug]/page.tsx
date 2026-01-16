@@ -9,6 +9,7 @@ import { sanitizeHTML, decodeHTMLEntities } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
+import { EditButton } from '@/components/ui/EditButton';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -164,7 +165,15 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                 {decodeHTMLEntities(ingredient.category)}
                               </span>
                             )}
-                            <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">{decodeHTMLEntities(ingredient.name)}</h1>
+                            <div className="flex items-start justify-center gap-3 mb-4 group">
+                              <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 font-sans">{decodeHTMLEntities(ingredient.name)}</h1>
+                              <EditButton 
+                                contentType="ingredient" 
+                                contentId={ingredient.id}
+                                variant="icon"
+                                className="top-0 right-0"
+                              />
+                            </div>
                             <div 
                               className="text-slate-600 text-lg leading-relaxed mb-6"
                               dangerouslySetInnerHTML={{ __html: sanitizeHTML(ingredient.description) }}

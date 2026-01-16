@@ -11,6 +11,7 @@ import ClientHead from '@/components/seo/ClientHead';
 import { SITE_URL } from '@/lib/constants';
 import { decodeEntities, stripHtmlAndDecode, slugify } from '@/utils/textHelpers';
 import CommentSection from '@/components/features/CommentSection';
+import { EditButton } from '@/components/ui/EditButton';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -378,10 +379,19 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 >
                   {decodeEntities(getCategoryName(post))}
                 </Link>
-                <h1 
-                    className="font-display font-bold text-3xl md:text-5xl text-slate-800 mb-6 leading-tight font-sans"
-                    dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
-                />
+                <div className="flex items-start justify-center gap-3 mb-6 group">
+                  <h1 
+                      className="font-display font-bold text-3xl md:text-5xl text-slate-800 leading-tight font-sans"
+                      dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
+                  />
+                  <EditButton 
+                    contentType="post" 
+                    contentId={post.id}
+                    authorId={post._embedded?.author?.[0]?.id}
+                    variant="icon"
+                    className="top-0 right-0"
+                  />
+                </div>
                 
                 {/* Sponsored or Normal Meta */}
                 {isSponsored && sponsorData ? (
