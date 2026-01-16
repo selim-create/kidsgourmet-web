@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { userService } from "@/services/user-service";
-import { Child } from "@/lib/types";
+import { Child, SocialLinks } from "@/lib/types";
 import ChildWizard from "@/components/features/ChildWizard";
 import { toast } from "sonner";
 
@@ -25,6 +25,13 @@ export default function ProfileSettingsPage() {
   const [avatarId, setAvatarId] = useState<number | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
 
+  // Expert profile states
+  const [biography, setBiography] = useState("");
+  const [expertise, setExpertise] = useState<string[]>([]);
+  const [newExpertise, setNewExpertise] = useState("");
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({});
+  const [showEmail, setShowEmail] = useState(false);
+
   // Auth guard - giriş yapmamış kullanıcıları yönlendir
   useEffect(() => {
     if (!userLoading && !isAuthenticated) {
@@ -40,6 +47,12 @@ export default function ProfileSettingsPage() {
       setGender(user.gender || "");
       setBirthDate(user.birth_date || "");
       setAvatarPreview(user.avatar_url || "");
+      
+      // Load expert fields
+      setBiography(user.biography || "");
+      setExpertise(user.expertise || []);
+      setSocialLinks(user.social_links || {});
+      setShowEmail(user.show_email || false);
     }
   }, [user]);
 
@@ -179,6 +192,35 @@ export default function ProfileSettingsPage() {
     } catch (error) {
       toast.error('Fotoğraf yüklenirken hata oluştu');
     }
+  };
+
+  const handleUpdateExpertProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      await userService.updateProfile({
+        biography,
+        expertise,
+        social_links: socialLinks,
+        show_email: showEmail,
+      });
+      toast.success('Uzman profili güncellendi');
+      await refreshUser();
+    } catch (error) {
+      console.error('Error updating expert profile:', error);
+      toast.error('Uzman profili güncellenirken hata oluştu');
+    }
+  };
+
+  const addExpertise = () => {
+    if (newExpertise.trim() && !expertise.includes(newExpertise.trim())) {
+      setExpertise([...expertise, newExpertise.trim()]);
+      setNewExpertise("");
+    }
+  };
+
+  const removeExpertise = (index: number) => {
+    setExpertise(expertise.filter((_, i) => i !== index));
   };
 
   return (
@@ -509,6 +551,132 @@ export default function ProfileSettingsPage() {
 
                     </section>
                 </div>
+
+                {/* Expert Profile Section - Only for experts */}
+                {(user?.is_expert || user?.role === 'kg_expert' || user?.role === 'editor' || user?.role === 'administrator') && (
+                  <section className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 md:p-8 mt-6">
+                    <h2 className="font-display font-bold text-xl text-slate-800 mb-6 flex items-center gap-2">
+                      <i className="fa-solid fa-user-tie text-purple-500"></i> Uzman Profili
+                    </h2>
+                    
+                    <form onSubmit={handleUpdateExpertProfile} className="space-y-5">
+                      {/* Meslek / Uzmanlık Alanları */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Uzmanlık Alanları</label>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {expertise.map((skill, index) => (
+                            <span key={index} className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                              {skill}
+                              <button type="button" onClick={() => removeExpertise(index)} className="hover:text-purple-900">
+                                <i className="fa-solid fa-xmark"></i>
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newExpertise}
+                            onChange={(e) => setNewExpertise(e.target.value)}
+                            placeholder="Yeni uzmanlık alanı ekle..."
+                            className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm"
+                          />
+                          <button type="button" onClick={addExpertise} className="px-4 py-2 bg-purple-500 text-white rounded-xl font-bold">
+                            Ekle
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Biyografi */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Biyografi</label>
+                        <textarea
+                          value={biography}
+                          onChange={(e) => setBiography(e.target.value)}
+                          rows={4}
+                          placeholder="Kendinizi tanıtın..."
+                          className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800"
+                        />
+                      </div>
+
+                      {/* Sosyal Medya Linkleri */}
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Sosyal Medya</label>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <i className="fa-brands fa-instagram text-pink-500 w-6"></i>
+                            <input
+                              type="url"
+                              value={socialLinks.instagram || ''}
+                              onChange={(e) => setSocialLinks({...socialLinks, instagram: e.target.value})}
+                              placeholder="https://instagram.com/kullaniciadi"
+                              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <i className="fa-brands fa-twitter text-blue-400 w-6"></i>
+                            <input
+                              type="url"
+                              value={socialLinks.twitter || ''}
+                              onChange={(e) => setSocialLinks({...socialLinks, twitter: e.target.value})}
+                              placeholder="https://twitter.com/kullaniciadi"
+                              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <i className="fa-brands fa-linkedin text-blue-600 w-6"></i>
+                            <input
+                              type="url"
+                              value={socialLinks.linkedin || ''}
+                              onChange={(e) => setSocialLinks({...socialLinks, linkedin: e.target.value})}
+                              placeholder="https://linkedin.com/in/kullaniciadi"
+                              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <i className="fa-brands fa-youtube text-red-500 w-6"></i>
+                            <input
+                              type="url"
+                              value={socialLinks.youtube || ''}
+                              onChange={(e) => setSocialLinks({...socialLinks, youtube: e.target.value})}
+                              placeholder="https://youtube.com/@kullaniciadi"
+                              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
+                            />
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <i className="fa-solid fa-globe text-green-500 w-6"></i>
+                            <input
+                              type="url"
+                              value={socialLinks.website || ''}
+                              onChange={(e) => setSocialLinks({...socialLinks, website: e.target.value})}
+                              placeholder="https://website.com"
+                              className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Herkese Açık Email */}
+                      <div>
+                        <label className="flex items-center gap-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={showEmail}
+                            onChange={(e) => setShowEmail(e.target.checked)}
+                            className="w-5 h-5 text-purple-500 border-gray-300 rounded"
+                          />
+                          <span className="text-sm text-gray-700">Email adresimi profilimde herkese göster</span>
+                        </label>
+                      </div>
+
+                      <div className="pt-2 flex justify-end">
+                        <button type="submit" className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:bg-purple-700 transition-colors">
+                          Uzman Profilini Güncelle
+                        </button>
+                      </div>
+                    </form>
+                  </section>
+                )}
 
             </div>
         </main>
