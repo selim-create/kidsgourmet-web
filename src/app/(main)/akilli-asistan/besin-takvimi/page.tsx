@@ -454,7 +454,7 @@ export default function BesinTakvimiPage() {
                             {trial.rating && (
                               <div className="flex gap-0.5 mt-1">
                                 {[1, 2, 3, 4, 5].map((star) => (
-                                  <span key={star} className={`text-[10px] ${star <= trial.rating! ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                                  <span key={star} className={`text-[10px] ${star <= (trial.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
                                 ))}
                               </div>
                             )}
@@ -757,7 +757,7 @@ export default function BesinTakvimiPage() {
                   <span className="text-sm text-gray-600">Beğeni</span>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star} className={`text-lg ${star <= selectedTrial.rating! ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                      <span key={star} className={`text-lg ${star <= (selectedTrial.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
                     ))}
                   </div>
                 </div>
