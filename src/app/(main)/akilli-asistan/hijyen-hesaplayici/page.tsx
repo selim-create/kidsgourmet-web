@@ -55,6 +55,35 @@ export default function HygieneCalculatorPage() {
     setMealCount('3');
   };
 
+  const calculatePackages = (monthlyWipes: number) => {
+    const wipesPerPack = 56; // Ortalama paket boyutu
+    const packsNeeded = Math.ceil(monthlyWipes / wipesPerPack);
+    return packsNeeded;
+  };
+
+  const shareResult = () => {
+    if (!result) return;
+    
+    const text = `Bebeğimin aylık mendil ihtiyacı: ${result.monthly_wipes_needed} adet! 🧴👶 @KidsGourmet ile hesapladım.`;
+    const url = 'https://kidsgourmet.com/akilli-asistan/hijyen-hesaplayici';
+    
+    if (navigator.share) {
+      navigator.share({
+        title: 'Günlük Hijyen Hesaplayıcı Sonucu',
+        text: text,
+        url: url,
+      }).catch(() => {
+        // If share fails, fallback to clipboard
+        navigator.clipboard.writeText(`${text}\n${url}`);
+        toast.success('Sonuç panoya kopyalandı!');
+      });
+    } else {
+      // Fallback: Copy to clipboard
+      navigator.clipboard.writeText(`${text}\n${url}`);
+      toast.success('Sonuç panoya kopyalandı!');
+    }
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
@@ -113,6 +142,28 @@ export default function HygieneCalculatorPage() {
                 </div>
               </div>
 
+              {/* Example Calculation Teaser */}
+              <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-6 mb-8">
+                <h3 className="font-bold text-slate-800 mb-3 text-center">Örnek Hesaplama</h3>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-teal-600">~24</div>
+                    <div className="text-xs text-gray-600 mt-1">Günlük</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-cyan-600">~168</div>
+                    <div className="text-xs text-gray-600 mt-1">Haftalık</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-blue-600">~720</div>
+                    <div className="text-xs text-gray-600 mt-1">Aylık</div>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center mt-3">
+                  6 aylık bebek, günde 6 bez değişimi örneği
+                </p>
+              </div>
+
               <button
                 onClick={() => setStage('input')}
                 className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white py-4 rounded-xl font-bold hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -148,6 +199,10 @@ export default function HygieneCalculatorPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="Örn: 6"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  <i className="fa-solid fa-circle-info mr-1"></i>
+                  0-36 ay arası bebekler için uygundur
+                </p>
               </div>
 
               {/* Daily Diaper Changes */}
@@ -164,6 +219,10 @@ export default function HygieneCalculatorPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="Örn: 6"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  <i className="fa-solid fa-lightbulb mr-1"></i>
+                  Önerilen: 0-3 ay → 8-10, 3-6 ay → 6-8, 6+ ay → 5-6 kez
+                </p>
               </div>
 
               {/* Outdoor Hours */}
@@ -181,6 +240,10 @@ export default function HygieneCalculatorPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="Örn: 2"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  <i className="fa-solid fa-circle-info mr-1"></i>
+                  Park, alışveriş, ziyaret gibi dışarı çıktığınız ortalama süre
+                </p>
               </div>
 
               {/* Meal Count */}
@@ -197,6 +260,10 @@ export default function HygieneCalculatorPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="Örn: 3"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  <i className="fa-solid fa-lightbulb mr-1"></i>
+                  Ara öğünler dahil tüm beslenme sayısı
+                </p>
               </div>
 
               {/* Buttons */}
@@ -250,6 +317,67 @@ export default function HygieneCalculatorPage() {
                   <div className="text-sm text-gray-600 mt-1">Aylık Mendil</div>
                 </div>
               </div>
+
+              {/* Package Calculation */}
+              <div className="px-6 pb-6">
+                <div className="bg-purple-50 rounded-xl p-4 text-center">
+                  <div className="text-3xl font-bold text-purple-600">
+                    ~{calculatePackages(result.monthly_wipes_needed)}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">Paket/Ay (56&apos;lık)</div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Ortalama paket boyutuna göre aylık ihtiyacınız
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Visual Progress Bars */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                <i className="fa-solid fa-chart-simple text-teal-500"></i>
+                İhtiyaç Dağılımı
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Günlük</span>
+                    <span className="font-bold text-teal-600">{result.daily_wipes_needed} adet</span>
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-teal-400 to-teal-600 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((result.daily_wipes_needed / 50) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Haftalık</span>
+                    <span className="font-bold text-cyan-600">{result.weekly_wipes_needed} adet</span>
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((result.weekly_wipes_needed / 350) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-600">Aylık</span>
+                    <span className="font-bold text-blue-600">{result.monthly_wipes_needed} adet</span>
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min((result.monthly_wipes_needed / 1500) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Recommendations */}
@@ -275,24 +403,72 @@ export default function HygieneCalculatorPage() {
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
                   <i className="fa-solid fa-bag-shopping text-teal-500"></i>
-                  Çantanda Bulundur
+                  Bebek Çantası Kontrol Listesi
                 </h3>
-                <ul className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {result.carry_bag_essentials.map((item, index) => (
-                    <li key={index} className="flex items-start gap-2 text-gray-700">
-                      <i className="fa-solid fa-arrow-right text-teal-500 mt-1 flex-shrink-0"></i>
-                      <span className="text-sm">{item}</span>
-                    </li>
+                    <label 
+                      key={index} 
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-teal-50 transition-colors"
+                    >
+                      <input 
+                        type="checkbox" 
+                        className="w-5 h-5 text-teal-500 rounded focus:ring-teal-500" 
+                      />
+                      <span className="text-sm text-gray-700">{item}</span>
+                    </label>
                   ))}
-                </ul>
+                </div>
+                <p className="mt-4 text-xs text-gray-500">
+                  <i className="fa-solid fa-circle-info mr-1"></i>
+                  Hazırladığınız öğeleri işaretleyebilirsiniz
+                </p>
               </div>
             )}
 
             {/* Sponsor CTA */}
             {result.sponsor && <SponsorCTA sponsor={result.sponsor} />}
 
+            {/* Enhanced Sponsor Product Recommendation (if sponsor exists) */}
+            {result.sponsor && result.sponsor.is_sponsored && (
+              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="bg-teal-100 text-teal-700 px-2 py-1 rounded-full text-xs font-semibold">
+                    Sponsor Önerisi
+                  </span>
+                </div>
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                  {result.sponsor.sponsor_logo && (
+                    <img 
+                      src={result.sponsor.sponsor_logo} 
+                      alt={result.sponsor.sponsor_name} 
+                      className="h-12 object-contain"
+                    />
+                  )}
+                  <div className="flex-1 text-center md:text-left">
+                    <p className="text-sm text-gray-700">{result.sponsor.sponsor_tagline}</p>
+                  </div>
+                  <a 
+                    href={result.sponsor.sponsor_cta_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-teal-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-teal-600 transition-colors"
+                  >
+                    {result.sponsor.sponsor_cta_text || 'İncele'}
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={shareResult}
+                className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-bold"
+              >
+                <i className="fa-solid fa-share-nodes"></i>
+                Paylaş
+              </button>
               <button
                 onClick={resetForm}
                 className="flex-1 px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors"
