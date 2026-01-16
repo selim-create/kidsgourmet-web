@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { getDiscussionBySlug, getDiscussionComments, addComment } from '@/lib/community';
 import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
 import type { Discussion, DiscussionComment } from '@/lib/types';
+import { EditButton } from '@/components/ui/EditButton';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -130,7 +131,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                     </nav>
 
                     {/* THE QUESTION POST */}
-                    <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative">
+                    <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-gray-100 shadow-sm relative group">
                         {/* User Info */}
                         <div className="flex justify-between items-start mb-6">
                             <div className="flex gap-4">
@@ -161,9 +162,17 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                         </div>
                         
                         {/* Content */}
-                        <h1 className="font-display font-bold text-2xl md:text-3xl text-slate-800 mb-4 leading-tight font-sans">
-                            {discussion.title}
-                        </h1>
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <h1 className="font-display font-bold text-2xl md:text-3xl text-slate-800 leading-tight font-sans">
+                              {discussion.title}
+                          </h1>
+                          <EditButton 
+                            contentType="discussion" 
+                            contentId={discussion.id}
+                            authorId={discussion.author.id}
+                            variant="icon"
+                          />
+                        </div>
                         <div 
                           className="text-gray-600 text-lg leading-relaxed mb-6 whitespace-pre-line"
                           dangerouslySetInnerHTML={{ __html: sanitizeHTML(discussion.content || discussion.excerpt) }}
