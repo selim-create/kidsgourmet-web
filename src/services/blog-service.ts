@@ -1,6 +1,7 @@
 import { fetchAPI, fetchAPIWithHeaders } from '@/lib/api';
 import { WP_API_NAMESPACE } from '@/lib/constants';
 import { SponsorData, SEOData } from '@/lib/types';
+import { sanitizeAndTransformContent, transformContentLinks } from '@/lib/content-transformer';
 
 // Blog Yazısı Tip Tanımı (Basitleştirilmiş)
 export interface BlogPost {
@@ -47,6 +48,19 @@ export interface BlogPostsResponse {
   totalPages: number;
 }
 
+// Helper function to transform post content
+function transformPost(post: BlogPost): BlogPost {
+  return {
+    ...post,
+    content: {
+      rendered: sanitizeAndTransformContent(post.content.rendered)
+    },
+    excerpt: {
+      rendered: transformContentLinks(post.excerpt.rendered)
+    }
+  };
+}
+
 export const blogService = {
   
   // Tüm blog yazılarını getir (Sayfalama ve Embed destekli)
@@ -60,7 +74,7 @@ export const blogService = {
     const response = await fetchAPIWithHeaders<BlogPost[]>(endpoint);
     
     return {
-      posts: response.data,
+      posts: response.data.map(transformPost),
       total: parseInt(response.headers['x-wp-total'] || '0'),
       totalPages: parseInt(response.headers['x-wp-totalpages'] || '1')
     };
@@ -69,14 +83,15 @@ export const blogService = {
   // Tekil blog yazısı detayı (Slug ile)
   getBySlug: async (slug: string) => {
     const posts = await fetchAPI<BlogPost[]>(`${WP_API_NAMESPACE}/posts?slug=${slug}&_embed`);
-    return posts.length > 0 ? posts[0] : null;
+    return posts.length > 0 ? transformPost(posts[0]) : null;
   },
 
   // Öne çıkan yazıları getir (Örn: 'sticky' olanlar veya belirli bir kategori)
   getFeatured: async (perPage = 3) => {
     // Sticky postları çekmek için 'sticky=true' parametresi kullanılabilir
     // Veya sadece son eklenenleri 'featured' olarak kabul edebiliriz
-    return await fetchAPI<BlogPost[]>(`${WP_API_NAMESPACE}/posts?per_page=${perPage}&_embed`);
+    const posts = await fetchAPI<BlogPost[]>(`${WP_API_NAMESPACE}/posts?per_page=${perPage}&_embed`);
+    return posts.map(transformPost);
   },
 
   // Kategorileri getir
