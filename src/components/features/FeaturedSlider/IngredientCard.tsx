@@ -39,6 +39,7 @@ export default function IngredientCard({ item }: IngredientCardProps) {
         />
         
         {/* Edit Button - Hover'da görünür */}
+        {/* Note: authorId not available in FeaturedItem, so only editors/admins can edit */}
         <EditButton 
           contentType="ingredient" 
           contentId={item.id}

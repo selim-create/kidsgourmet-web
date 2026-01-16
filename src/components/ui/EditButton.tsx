@@ -19,13 +19,36 @@ export function EditButton({
   size = 'sm',
   variant = 'icon'
 }: EditButtonProps) {
-  const { user, hasEditorAccess, canEditOthers, getEditUrl } = useUser();
+  const { 
+    user, 
+    hasEditorAccess, 
+    canEditPosts, 
+    canEditRecipes, 
+    canEditIngredients,
+    getEditUrl 
+  } = useUser();
   
-  // Yetki kontrolü
-  const canEdit = hasEditorAccess && (
-    canEditOthers || // Başkalarının içeriklerini düzenleyebilir
-    (authorId && user?.id === authorId) // Kendi içeriği
-  );
+  // Content-type specific permission check
+  const hasTypePermission = () => {
+    switch (contentType) {
+      case 'post':
+        return canEditPosts;
+      case 'recipe':
+        return canEditRecipes;
+      case 'ingredient':
+        return canEditIngredients;
+      case 'discussion':
+        return canEditPosts; // Using posts permission for discussions
+      default:
+        return false;
+    }
+  };
+  
+  // Check if user owns the content
+  const isOwner = authorId && user?.id === authorId;
+  
+  // Yetki kontrolü: Editor access AND (has type permission OR is owner)
+  const canEdit = hasEditorAccess && (hasTypePermission() || isOwner);
   
   if (!canEdit) return null;
   
