@@ -7,8 +7,9 @@ import QuestionCard from './QuestionCard';
 import GuideCard from './GuideCard';
 import SponsorCard from './SponsorCard';
 import IngredientCard from './IngredientCard';
+import ToolCard from './ToolCard';
 
-type FeaturedContentType = 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient';
+type FeaturedContentType = 'recipe' | 'blog' | 'question' | 'sponsored' | 'ingredient' | 'tool';
 
 interface FeaturedContent {
   id: number;
@@ -38,6 +39,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
     question: items.filter(item => item.type === 'question').length,
     sponsored: items.filter(item => item.type === 'sponsored').length,
     ingredient: items.filter(item => item.type === 'ingredient').length,
+    tool: items.filter(item => item.type === 'tool').length,
   };
 
   // Get last sponsor info for the sponsor filter button
@@ -95,6 +97,8 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
         return <SponsorCard key={`sponsored-${item.id}`} item={featuredItem} />;
       case 'ingredient':
         return <IngredientCard key={`ingredient-${item.id}`} item={featuredItem} />;
+      case 'tool':
+        return <ToolCard key={`tool-${item.id}`} item={featuredItem} />;
       default:
         return null;
     }
@@ -194,6 +198,19 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
                   }`}
                 >
                   <i className="fa-solid fa-seedling mr-2"></i>Malzeme
+                </button>
+              )}
+              
+              {typeCounts.tool > 0 && (
+                <button
+                  onClick={() => setFilter('tool')}
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                    filter === 'tool'
+                      ? 'border-indigo-200 bg-indigo-50 text-indigo-600'
+                      : 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                  }`}
+                >
+                  <i className="fa-solid fa-wand-magic-sparkles mr-2"></i>Araçlar
                 </button>
               )}
 

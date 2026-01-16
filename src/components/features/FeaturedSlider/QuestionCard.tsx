@@ -44,23 +44,24 @@ export default function QuestionCard({ item }: QuestionCardProps) {
 
   return (
     <Link
-      href={`/topluluk/sorular/${item.slug}`}
+      href={`/topluluk/${item.slug}`}
       data-type="question"
       className="featured-card flex-shrink-0 w-[85vw] md:w-[320px] snap-center bg-gradient-to-br from-purple-50 to-white rounded-4xl shadow-md hover:shadow-xl overflow-hidden relative flex flex-col border border-purple-100 group transition-all duration-300 hover:-translate-y-1"
     >
       <div className="p-6 flex flex-col h-full relative">
-        {/* Favorite Button */}
-        <button 
-          onClick={handleFavoriteClick}
-          className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-20"
-        >
-          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
-        </button>
-
         <div className="flex justify-between items-start mb-4">
-          <span className="bg-purple-100 text-purple-500 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-            <i className="fa-regular fa-comments"></i> Soru
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="bg-purple-100 text-purple-500 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+              <i className="fa-regular fa-comments"></i> Soru
+            </span>
+            {/* Favorite Button - next to badge */}
+            <button 
+              onClick={handleFavoriteClick}
+              className="w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
+            >
+              <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
+            </button>
+          </div>
           <i className="fa-solid fa-quote-right text-purple-200 text-4xl absolute top-6 right-6 z-10"></i>
         </div>
 

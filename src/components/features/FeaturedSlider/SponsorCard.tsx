@@ -3,12 +3,16 @@
 import React from 'react';
 import { FeaturedItem } from '@/services/featured-service';
 import { decodeEntities } from '@/utils/textHelpers';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface SponsorCardProps {
   item: FeaturedItem;
 }
 
 export default function SponsorCard({ item }: SponsorCardProps) {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const isFav = isFavorite(item.id, 'post');
+  
   const imageUrl = item.image || 'https://placehold.co/800x400/E8E8E8/666666?text=Sponsor';
   
   // Sponsor meta verileri
@@ -23,6 +27,16 @@ export default function SponsorCard({ item }: SponsorCardProps) {
   // URL - direct_redirect'e göre karar ver
   const href = directRedirect && sponsorUrl ? sponsorUrl : `/blog/${item.slug}`;
 
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await toggleFavorite(item.id, 'post');
+    } catch (error) {
+      console.error('Favori işlemi başarısız:', error);
+    }
+  };
+
   return (
     <a
       href={href}
@@ -35,6 +49,14 @@ export default function SponsorCard({ item }: SponsorCardProps) {
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           alt={sponsorName || 'Sponsorlu İçerik'}
         />
+        
+        {/* Favorite Button - Top Left */}
+        <button 
+          onClick={handleFavoriteClick}
+          className="absolute top-4 left-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
+        >
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
+        </button>
         
         {/* Sponsorlu Badge - Sağ Üst */}
         <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[10px] font-extrabold text-gray-500 shadow-sm uppercase tracking-wider flex items-center gap-1">
