@@ -42,7 +42,7 @@ const jsonLd = {
   provider: {
     '@type': 'Organization',
     name: 'KidsGourmet',
-    url: 'https://kidsgourmet.com.tr',
+    url: 'https://kidsgourmet.com',
   },
 };
 
