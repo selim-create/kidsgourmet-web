@@ -10,45 +10,114 @@ import type { BathPlannerConfig, BathPlannerResult } from '@/lib/types';
 
 type Stage = 'intro' | 'input' | 'result';
 
+// Fallback config data - API başarısız olursa kullan
+const FALLBACK_CONFIG: BathPlannerConfig = {
+  skin_types: [
+    { id: 'normal', label: 'Normal Cilt' },
+    { id: 'dry', label: 'Kuru Cilt' },
+    { id: 'sensitive', label: 'Hassas Cilt' },
+    { id: 'oily', label: 'Yağlı Cilt' },
+  ],
+  seasons: [
+    { id: 'spring', label: 'İlkbahar' },
+    { id: 'summer', label: 'Yaz' },
+    { id: 'autumn', label: 'Sonbahar' },
+    { id: 'winter', label: 'Kış' },
+  ],
+  frequency_options: [
+    { id: '2-3', label: 'Haftada 2-3 kez', description: 'Yenidoğanlar için önerilen' },
+    { id: '3-4', label: 'Haftada 3-4 kez', description: '3-6 aylık bebekler için' },
+    { id: '4-5', label: 'Haftada 4-5 kez', description: '6-12 aylık bebekler için' },
+    { id: 'daily', label: 'Her gün', description: '12 ay üzeri için' },
+  ],
+};
+
+// Mevcut mevsimi otomatik olarak seç
+const getCurrentSeason = (): string => {
+  const month = new Date().getMonth(); // 0-11 (0=January, 11=December)
+  if (month >= 2 && month <= 4) return 'spring';   // Mar-May
+  if (month >= 5 && month <= 7) return 'summer';   // Jun-Aug
+  if (month >= 8 && month <= 10) return 'autumn';  // Sep-Nov
+  return 'winter'; // Dec-Feb
+};
+
 export default function BathPlannerPage() {
   const [stage, setStage] = useState<Stage>('intro');
   const [isLoading, setIsLoading] = useState(false);
   const [config, setConfig] = useState<BathPlannerConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   // Form state
   const [babyAgeMonths, setBabyAgeMonths] = useState('6');
   const [skinType, setSkinType] = useState('');
   const [season, setSeason] = useState('');
   const [hasEczema, setHasEczema] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Result state
   const [result, setResult] = useState<BathPlannerResult | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
+      setConfigLoading(true);
+      setConfigError(null);
       try {
         const data = await sponsoredToolService.getBathPlannerConfig();
         setConfig(data);
         // Set defaults
-        if (data.skin_types.length > 0) setSkinType(data.skin_types[0].id);
-        if (data.seasons.length > 0) setSeason(data.seasons[0].id);
+        if (data.skin_types?.length > 0) setSkinType(data.skin_types[0].id);
+        if (data.seasons?.length > 0) {
+          const currentSeason = getCurrentSeason();
+          const hasCurrentSeason = data.seasons.some(s => s.id === currentSeason);
+          setSeason(hasCurrentSeason ? currentSeason : data.seasons[0].id);
+        }
       } catch (error) {
         console.error('Error fetching config:', error);
+        setConfigError('Yapılandırma yüklenirken bir hata oluştu');
+        // Fallback kullan
+        setConfig(FALLBACK_CONFIG);
+        setSkinType(FALLBACK_CONFIG.skin_types[0].id);
+        const currentSeason = getCurrentSeason();
+        const hasCurrentSeason = FALLBACK_CONFIG.seasons.some(s => s.id === currentSeason);
+        setSeason(hasCurrentSeason ? currentSeason : FALLBACK_CONFIG.seasons[0].id);
+        toast.warning('Konfigürasyon yüklenemedi, varsayılan ayarlar kullanılıyor');
+      } finally {
+        setConfigLoading(false);
       }
     };
     fetchConfig();
   }, []);
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    const ageNum = parseInt(babyAgeMonths, 10);
+    if (isNaN(ageNum) || ageNum < 0 || ageNum > 36) {
+      newErrors.age = 'Geçerli bir yaş değeri girin (0-36 ay)';
+    }
+    
+    if (!skinType) {
+      newErrors.skinType = 'Lütfen cilt tipi seçin';
+    }
+    
+    if (!season) {
+      newErrors.season = 'Lütfen mevsim seçin';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleGenerate = async () => {
-    if (!skinType || !season) {
-      toast.error('Lütfen tüm alanları doldurun');
+    if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
     try {
       const planResult = await sponsoredToolService.generateBathPlan({
-        baby_age_months: parseInt(babyAgeMonths),
+        baby_age_months: parseInt(babyAgeMonths, 10),
         skin_type: skinType,
         season: season,
         has_eczema: hasEczema,
@@ -67,9 +136,14 @@ export default function BathPlannerPage() {
     setStage('intro');
     setResult(null);
     setBabyAgeMonths('6');
+    setErrors({});
     if (config) {
-      if (config.skin_types.length > 0) setSkinType(config.skin_types[0].id);
-      if (config.seasons.length > 0) setSeason(config.seasons[0].id);
+      if (config.skin_types?.length > 0) setSkinType(config.skin_types[0].id);
+      if (config.seasons?.length > 0) {
+        const currentSeason = getCurrentSeason();
+        const hasCurrentSeason = config.seasons.some(s => s.id === currentSeason);
+        setSeason(hasCurrentSeason ? currentSeason : config.seasons[0].id);
+      }
     }
     setHasEczema(false);
   };
@@ -86,8 +160,20 @@ export default function BathPlannerPage() {
       </div>
 
       <div className="p-4 md:p-8 max-w-3xl mx-auto">
+        {/* Loading skeleton */}
+        {configLoading && (
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden animate-pulse">
+            <div className="bg-gradient-to-br from-blue-400 to-cyan-400 h-48"></div>
+            <div className="p-8 space-y-4">
+              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-full"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          </div>
+        )}
+
         {/* Intro Stage */}
-        {stage === 'intro' && (
+        {!configLoading && stage === 'intro' && (
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             {/* Header with gradient */}
             <div className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white p-8 text-center">
@@ -139,6 +225,7 @@ export default function BathPlannerPage() {
 
               <button
                 onClick={() => setStage('input')}
+                aria-label="Banyo planı oluşturmaya başla"
                 className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white py-4 rounded-xl font-bold hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 shadow-lg hover:shadow-xl"
               >
                 Hemen Başla
@@ -165,10 +252,11 @@ export default function BathPlannerPage() {
             <div className="p-6 space-y-6">
               {/* Baby Age */}
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">
+                <label htmlFor="babyAge" className="block text-sm font-bold text-slate-800 mb-2">
                   Bebeğinizin Yaşı (Ay) <span className="text-red-500">*</span>
                 </label>
                 <input
+                  id="babyAge"
                   type="number"
                   min="0"
                   max="36"
@@ -177,14 +265,18 @@ export default function BathPlannerPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Örn: 6"
                 />
+                {errors.age && (
+                  <p className="text-red-500 text-sm mt-1">{errors.age}</p>
+                )}
               </div>
 
               {/* Skin Type */}
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">
+                <label htmlFor="skinType" className="block text-sm font-bold text-slate-800 mb-2">
                   Cilt Tipi <span className="text-red-500">*</span>
                 </label>
                 <select
+                  id="skinType"
                   value={skinType}
                   onChange={(e) => setSkinType(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -195,14 +287,18 @@ export default function BathPlannerPage() {
                     </option>
                   ))}
                 </select>
+                {errors.skinType && (
+                  <p className="text-red-500 text-sm mt-1">{errors.skinType}</p>
+                )}
               </div>
 
               {/* Season */}
               <div>
-                <label className="block text-sm font-bold text-slate-800 mb-2">
+                <label htmlFor="season" className="block text-sm font-bold text-slate-800 mb-2">
                   Mevsim <span className="text-red-500">*</span>
                 </label>
                 <select
+                  id="season"
                   value={season}
                   onChange={(e) => setSeason(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -213,6 +309,9 @@ export default function BathPlannerPage() {
                     </option>
                   ))}
                 </select>
+                {errors.season && (
+                  <p className="text-red-500 text-sm mt-1">{errors.season}</p>
+                )}
               </div>
 
               {/* Eczema */}
@@ -334,6 +433,50 @@ export default function BathPlannerPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {/* Routine Steps */}
+            {result.routine && result.routine.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                  <i className="fa-solid fa-list-ol text-blue-500"></i>
+                  Banyo Adımları
+                </h3>
+                <ol className="space-y-4">
+                  {result.routine.map((step) => (
+                    <li key={step.step} className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center flex-shrink-0 font-bold">
+                        {step.step}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-slate-800">{step.title}</h4>
+                        <p className="text-sm text-gray-600">{step.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Products */}
+            {result.products && result.products.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h3 className="font-bold text-lg text-slate-800 mb-4 flex items-center gap-2">
+                  <i className="fa-solid fa-bottle-droplet text-purple-500"></i>
+                  Önerilen Ürün Tipleri
+                </h3>
+                <div className="grid gap-3">
+                  {result.products.map((product, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-purple-50 rounded-xl">
+                      <i className="fa-solid fa-check-circle text-purple-500 mt-1"></i>
+                      <div>
+                        <span className="font-semibold text-slate-800">{product.type}:</span>
+                        <span className="text-gray-600 ml-1">{product.recommendation}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 

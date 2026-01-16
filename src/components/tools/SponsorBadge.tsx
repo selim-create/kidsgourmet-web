@@ -27,11 +27,14 @@ export default function SponsorBadge({ sponsor, variant = 'header' }: SponsorBad
     );
   }
 
+  // Header variant için light logo kullan
+  const logoUrl = sponsor.sponsor_light_logo || sponsor.sponsor_logo;
+  
   return (
-    <div className="flex items-center gap-2 text-sm text-gray-600">
-      {sponsor.sponsor_logo && (
+    <div className="flex items-center gap-2 text-sm text-white/90">
+      {logoUrl && (
         <img
-          src={sponsor.sponsor_logo}
+          src={logoUrl}
           alt={sponsor.sponsor_name}
           className="h-6 object-contain"
         />

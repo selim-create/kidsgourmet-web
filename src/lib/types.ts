@@ -1027,9 +1027,17 @@ export interface ToolSponsorData {
 
 // Banyo Planlayıcı
 export interface BathPlannerConfig {
+  tool_info?: {
+    id: number;
+    title: string;
+    description: string;
+    icon: string;
+  };
   skin_types: { id: string; label: string }[];
   seasons: { id: string; label: string }[];
   frequency_options: { id: string; label: string; description: string }[];
+  age_groups?: { id: string; label: string; frequency: string }[];
+  bath_types?: { id: string; label: string; suitable_for: string }[];
   sponsor?: ToolSponsorData;
 }
 
@@ -1039,6 +1047,8 @@ export interface BathPlannerResult {
   tips: string[];
   warnings: string[];
   product_recommendations: string[];
+  products?: { type: string; recommendation: string }[];
+  routine?: { step: number; title: string; description: string }[];
   sponsor?: ToolSponsorData;
 }
 
