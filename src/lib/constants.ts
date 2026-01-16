@@ -108,6 +108,8 @@ export const API_ENDPOINTS = {
   // Solid Food Readiness
   SOLID_FOOD_CONFIG: `${KG_API_NAMESPACE}/tools/solid-food-readiness/config`,
   SOLID_FOOD_SUBMIT: `${KG_API_NAMESPACE}/tools/solid-food-readiness/submit`,
+  USER_SOLID_FOOD_RESULTS: `${KG_API_NAMESPACE}/user/solid-food-results`,
+  CHILD_SOLID_FOOD_RESULTS: (childId: string) => `${KG_API_NAMESPACE}/user/children/${childId}/solid-food-results`,
   
   // Allergen Planner
   ALLERGEN_LIST: `${KG_API_NAMESPACE}/tools/allergen-planner/allergens`,

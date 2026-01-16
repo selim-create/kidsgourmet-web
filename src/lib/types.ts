@@ -798,6 +798,7 @@ export interface BLWTestResult {
   id?: number;
   user_id?: number;
   child_id?: string;
+  child_name?: string;
   score: number;
   result_bucket_id: string;
   red_flags: BLWRedFlag[];
@@ -842,6 +843,7 @@ export interface PercentileValue {
 export interface PercentileResult {
   id?: string;
   child_id?: string;
+  child_name?: string;
   measurement: PercentileMeasurement;
   age_in_days: number;
   age_in_months: number;
@@ -925,6 +927,10 @@ export interface SolidFoodResultBucket {
 }
 
 export interface SolidFoodReadinessResult {
+  id?: string;
+  user_id?: number;
+  child_id?: string;
+  child_name?: string;
   score: number;
   result_bucket_id: string;
   red_flags: string[];
