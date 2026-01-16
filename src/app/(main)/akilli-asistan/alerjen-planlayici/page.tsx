@@ -18,7 +18,7 @@ const allergens: Allergen[] = [
   { id: 'milk', name: 'İnek Sütü', emoji: '🥛', startAge: '6+ ay', minAge: 6, riskLevel: 'high', ingredientSlug: 'inek-sutu' },
   { id: 'egg', name: 'Yumurta', emoji: '🥚', startAge: '6+ ay', minAge: 6, riskLevel: 'high', ingredientSlug: 'yumurta' },
   { id: 'peanut', name: 'Yer Fıstığı', emoji: '🥜', startAge: '6+ ay', minAge: 6, riskLevel: 'high', ingredientSlug: 'yer-fistigi' },
-  { id: 'sesame', name: 'Susam', emoji: '🫘', startAge: '6+ ay', minAge: 6, riskLevel: 'medium', ingredientSlug: 'susam' },
+  { id: 'sesame', name: 'Susam', emoji: '◾', startAge: '6+ ay', minAge: 6, riskLevel: 'medium', ingredientSlug: 'susam' },
   { id: 'gluten', name: 'Gluten (Buğday)', emoji: '🌾', startAge: '6+ ay', minAge: 6, riskLevel: 'medium', ingredientSlug: 'bugday' },
   { id: 'soy', name: 'Soya', emoji: '🌱', startAge: '6+ ay', minAge: 6, riskLevel: 'low', ingredientSlug: 'soya' },
   { id: 'fish', name: 'Balık', emoji: '🐟', startAge: '8+ ay', minAge: 8, riskLevel: 'medium', ingredientSlug: 'balik' },
