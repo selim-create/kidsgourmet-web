@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useFavorites } from '@/hooks/use-favorites';
+import { EditButton } from '@/components/ui/EditButton';
 
 interface RecipeCardProps {
   recipe: RecipeCardType & {
@@ -52,6 +53,14 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           src={recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif'} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
           alt={decodeEntities(recipe.title)} 
+        />
+        
+        {/* Edit Button - Hover'da görünür */}
+        <EditButton 
+          contentType="recipe" 
+          contentId={recipe.id}
+          authorId={recipe.author?.id}
+          variant="text"
         />
         
         {/* Prep Time Badge - Top Left */}

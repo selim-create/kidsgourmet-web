@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FeaturedItem } from '@/services/featured-service';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useFavorites } from '@/hooks/use-favorites';
+import { EditButton } from '@/components/ui/EditButton';
 
 interface IngredientCardProps {
   item: FeaturedItem;
@@ -36,6 +37,16 @@ export default function IngredientCard({ item }: IngredientCardProps) {
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
           alt={decodeEntities(item.title)}
         />
+        
+        {/* Edit Button - Hover'da görünür */}
+        {/* Note: authorId not available in FeaturedItem, so only editors/admins can edit */}
+        <EditButton 
+          contentType="ingredient" 
+          contentId={item.id}
+          variant="icon"
+          className="right-16"
+        />
+        
         <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm flex items-center gap-1">
           <i className="fa-solid fa-seedling"></i> Beslenme Rehberi
         </div>

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { getDashboardUrl, getPublicProfileUrl } from "@/utils/helpers";
+import { AdminQuickMenu } from "@/components/ui/AdminQuickMenu";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -101,6 +102,9 @@ export default function UserDropdown() {
               <span>Soru Sor</span>
             </Link>
           </div>
+
+          {/* Admin Quick Menu - Yetkili kullanıcılar için */}
+          <AdminQuickMenu />
 
           {/* Logout */}
           <div className="border-t border-gray-100 pt-1">
