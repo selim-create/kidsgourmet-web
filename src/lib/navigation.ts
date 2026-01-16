@@ -76,6 +76,11 @@ export const navigationItems: NavItem[] = [
         icon: 'fa-solid fa-clock-rotate-left' 
       },
       { 
+        label: 'Alerji Belirtileri Rehberi', 
+        href: '/beslenme-rehberi/alerji-belirtileri', 
+        icon: 'fa-solid fa-heart-pulse' 
+      },
+      { 
         label: 'Bu Gıda Verilir mi?', 
         href: '/akilli-asistan/bu-gida-verilir-mi', 
         icon: 'fa-solid fa-circle-question' 
