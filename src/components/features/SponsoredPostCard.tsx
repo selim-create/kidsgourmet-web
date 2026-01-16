@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
+import { useFavorites } from '@/hooks/use-favorites';
 
 interface SponsoredPostCardProps {
   post: BlogPost;
@@ -11,8 +12,10 @@ interface SponsoredPostCardProps {
 }
 
 export default function SponsoredPostCard({ post, categories, variant = 'default' }: SponsoredPostCardProps) {
+  const { isFavorite, toggleFavorite } = useFavorites();
   const sponsorData = post.sponsor_data;
   const isSponsored = sponsorData?.is_sponsored ?? false;
+  const isFav = isFavorite(post.id, 'post');
 
   // Helper functions
   const stripHtml = (html: string) => {
@@ -31,6 +34,20 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
     const catId = post._embedded?.['wp:term']?.[0]?.[0]?.id;
     const cat = categories?.find(c => c.id === catId);
     return cat ? cat.name : 'Genel';
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('tr-TR');
+  };
+
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await toggleFavorite(post.id, 'post');
+    } catch (error) {
+      console.error('Favori işlemi başarısız:', error);
+    }
   };
 
   // Build destination URL and final link
@@ -89,31 +106,6 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
     );
   };
 
-  // Render sponsor logo in footer
-  const renderSponsorLogo = () => {
-    if (!isSponsored || !sponsorData) return null;
-
-    // Logo URL'ini güvenli şekilde al
-    const logoUrl = typeof sponsorData.sponsor_logo === 'string' 
-      ? sponsorData.sponsor_logo 
-      : (typeof sponsorData.sponsor_light_logo === 'string' 
-          ? sponsorData.sponsor_light_logo 
-          : null);
-    
-    if (!logoUrl) return null;
-
-    return (
-      <div className="flex items-center gap-2 pt-3 border-t border-gray-100 mt-auto">
-        <span className="text-xs text-gray-400">Sponsor:</span>
-        <img 
-          src={logoUrl} 
-          alt={sponsorData.sponsor_name || 'Sponsor'}
-          className="h-4 object-contain"
-        />
-      </div>
-    );
-  };
-
   // Hero variant for featured posts
   if (variant === 'hero') {
     const anchorProps: React.AnchorHTMLAttributes<HTMLAnchorElement> = {
@@ -132,6 +124,16 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
         
         {renderSponsoredBadge()}
         
+        {/* Favorite Button - Top Right */}
+        <button 
+          onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
+          className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-10"
+        >
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart text-white"}></i>
+        </button>
+        
         <div className="absolute bottom-0 left-0 p-8 md:p-12 max-w-4xl">
           <span className="inline-block px-3 py-1 bg-orange-500 text-white rounded-lg text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
             {isSponsored ? 'Sponsorlu İçerik' : 'Editörün Seçimi'}
@@ -143,15 +145,24 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
           <p className="text-gray-200 text-lg mb-6 line-clamp-2 hidden md:block">
             {stripHtml(post.excerpt.rendered)}
           </p>
-          <div className="flex items-center text-white/80 text-sm gap-6">
-            <div className="flex items-center gap-2">
-              <img src="https://placehold.co/50x50/AED581/ffffff?text=Dr" className="w-8 h-8 rounded-full border border-white/50" alt="Author" />
-              <span>{getAuthorName(post)}</span>
+          
+          {/* Meta Info - Only for non-sponsored */}
+          {!isSponsored && (
+            <div className="flex items-center text-white/80 text-sm gap-6">
+              <div className="flex items-center gap-2">
+                <img src="https://placehold.co/50x50/AED581/ffffff?text=Dr" className="w-8 h-8 rounded-full border border-white/50" alt="Author" />
+                <span>{getAuthorName(post)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-regular fa-calendar"></i> {formatDate(post.date)}
+              </div>
+              <div className="flex items-center gap-2">
+                <i className="fa-regular fa-comment"></i> {post.comment_count || 0}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <i className="fa-regular fa-calendar"></i> {new Date(post.date).toLocaleDateString('tr-TR')}
-            </div>
-          </div>
+          )}
+          
+          {/* Sponsor Logo - Only for sponsored */}
           {isSponsored && sponsorData && (() => {
             const logoUrl = typeof sponsorData.sponsor_light_logo === 'string' 
               ? sponsorData.sponsor_light_logo 
@@ -165,6 +176,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
                   alt={sponsorData.sponsor_name || 'Sponsor'}
                   className="h-6 object-contain"
                 />
+                <span className="text-white/80 text-sm">{sponsorData.sponsor_name}</span>
               </div>
             ) : null;
           })()}
@@ -189,50 +201,96 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   }
 
   // Default card variant
-  const cardImageContent = (
-    <>
-      <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
-      {isSponsored ? (
-        renderSponsoredBadge()
-      ) : (
-        <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-500 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-          {getCategoryName(post)}
-        </span>
-      )}
-    </>
-  );
-
   return (
-    <article className="flex flex-col group h-full relative">
+    <article className="flex flex-col group h-full relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
       {renderImpressionPixel()}
       
-      {hasGamTracking ? (
-        <a 
-          href={finalUrl}
-          className="block overflow-hidden rounded-[2rem] mb-4 relative aspect-[4/3]"
-          {...(isExternalLink && { 
-            target: '_blank', 
-            rel: 'noopener noreferrer sponsored' 
-          })}
+      {/* Image Section */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        {hasGamTracking ? (
+          <a 
+            href={finalUrl}
+            className="block w-full h-full"
+            {...(isExternalLink && { 
+              target: '_blank', 
+              rel: 'noopener noreferrer sponsored' 
+            })}
+          >
+            <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
+          </a>
+        ) : (
+          <Link href={finalUrl} className="block w-full h-full">
+            <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
+          </Link>
+        )}
+        
+        {/* Category Badge - Top Left (for non-sponsored) OR Sponsored Badge - Top Left (for sponsored) */}
+        {isSponsored ? (
+          <span className="absolute top-4 left-4 bg-amber-500 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-md z-10">
+            Sponsorlu
+          </span>
+        ) : (
+          <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-500 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+            {getCategoryName(post)}
+          </span>
+        )}
+        
+        {/* Favorite Button - Top Right */}
+        <button 
+          onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
         >
-          {cardImageContent}
-        </a>
-      ) : (
-        <Link 
-          href={finalUrl}
-          className="block overflow-hidden rounded-[2rem] mb-4 relative aspect-[4/3]"
-        >
-          {cardImageContent}
-        </Link>
-      )}
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
+        </button>
+        
+        {/* Sponsor Logo - Bottom Left (for sponsored posts) */}
+        {isSponsored && sponsorData && (() => {
+          const logoUrl = typeof sponsorData.sponsor_logo === 'string' 
+            ? sponsorData.sponsor_logo 
+            : (typeof sponsorData.sponsor_light_logo === 'string' 
+                ? sponsorData.sponsor_light_logo 
+                : null);
+          return logoUrl ? (
+            <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-2 rounded-lg">
+              <img src={logoUrl} alt={sponsorData.sponsor_name || 'Sponsor'} className="h-6 object-contain" />
+            </div>
+          ) : null;
+        })()}
+      </div>
       
-      <div className="flex-1 flex flex-col">
-        <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
-          <span>{new Date(post.date).toLocaleDateString('tr-TR')}</span>
-          <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-          <span>{getAuthorName(post)}</span>
-        </div>
-        <h3 className="font-display font-bold text-xl text-slate-800 mb-3 leading-snug group-hover:text-orange-500 transition-colors font-sans">
+      {/* Content Section */}
+      <div className="p-5 flex-1 flex flex-col">
+        {/* Meta Info - Different for sponsored */}
+        {isSponsored ? (
+          <div className="flex items-center gap-2 mb-3">
+            <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold">
+              Sponsorlu
+            </span>
+            {sponsorData?.sponsor_name && (
+              <span className="text-xs text-gray-500">{sponsorData.sponsor_name}</span>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
+            <span>{formatDate(post.date)}</span>
+            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+            <span>{getAuthorName(post)}</span>
+          </div>
+        )}
+        
+        {/* Discount Badge - Only for sponsored with discount */}
+        {isSponsored && sponsorData?.discount_text && (
+          <div className="bg-green-50 border border-green-100 rounded-lg p-2 mb-3">
+            <span className="text-green-600 text-xs font-bold">
+              <i className="fa-solid fa-tag mr-1"></i> {sponsorData.discount_text}
+            </span>
+          </div>
+        )}
+        
+        {/* Title */}
+        <h3 className="font-sans font-bold text-xl text-slate-800 mb-3 leading-snug group-hover:text-orange-500 transition-colors">
           {hasGamTracking ? (
             <a 
               href={finalUrl}
@@ -249,10 +307,14 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
             />
           )}
         </h3>
+        
+        {/* Excerpt */}
         <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
           {stripHtml(post.excerpt.rendered)}
         </p>
-        <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
+        
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           {hasGamTracking ? (
             <a 
               href={finalUrl}
@@ -272,8 +334,12 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
               Devamını Oku <i className="fa-solid fa-arrow-right ml-1"></i>
             </Link>
           )}
+          
+          {/* Comment Count */}
+          <span className="text-xs text-gray-400">
+            <i className="fa-regular fa-comment mr-1"></i> {post.comment_count || 0}
+          </span>
         </div>
-        {renderSponsorLogo()}
       </div>
     </article>
   );

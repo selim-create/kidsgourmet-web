@@ -122,6 +122,8 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         {/* Favori Butonu */}
         <button 
           onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
           className="absolute top-6 right-6 w-10 h-10 bg-white/20 backdrop-blur rounded-full flex items-center justify-center hover:bg-white/30 transition-colors z-10"
         >
           <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart text-white"}></i>
@@ -205,18 +207,50 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
 
   // Default card variant
   return (
-    <article className={`group bg-white rounded-3xl border shadow-sm hover:shadow-xl transition-all ${isSponsored ? 'border-amber-200 bg-amber-50/30' : 'border-gray-100'}`}>
+    <article className="flex flex-col group h-full relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
       {renderImpressionPixel()}
       
-      {/* Image Container */}
-      <div className="h-56 relative overflow-hidden rounded-t-3xl bg-gray-50">
-        <img 
-          src={imageUrl} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-          alt={title}
-        />
+      {/* Image Section */}
+      <div className="relative aspect-[4/3] overflow-hidden">
+        {hasGamTracking ? (
+          <a 
+            href={finalUrl}
+            className="block w-full h-full"
+            {...(isExternalLink && { 
+              target: '_blank', 
+              rel: 'noopener noreferrer sponsored' 
+            })}
+          >
+            <img src={imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={title} />
+          </a>
+        ) : (
+          <Link href={finalUrl} className="block w-full h-full">
+            <img src={imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={title} />
+          </Link>
+        )}
         
-        {/* Sponsor Logo Overlay - Sol Alt */}
+        {/* Category Badge - Top Left (for non-sponsored) OR Sponsored Badge - Top Left (for sponsored) */}
+        {isSponsored ? (
+          <span className="absolute top-4 left-4 bg-amber-500 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-md z-10">
+            Sponsorlu
+          </span>
+        ) : (
+          <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-500 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+            {categoryName}
+          </span>
+        )}
+        
+        {/* Favorite Button - Top Right */}
+        <button 
+          onClick={handleFavoriteClick}
+          aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
+          aria-pressed={isFav}
+          className="absolute top-4 right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
+        >
+          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
+        </button>
+        
+        {/* Sponsor Logo - Bottom Left (for sponsored posts) */}
         {isSponsored && sponsorData && (() => {
           const logoUrl = typeof sponsorData.sponsor_logo === 'string' 
             ? sponsorData.sponsor_logo 
@@ -224,71 +258,63 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
                 ? sponsorData.sponsor_light_logo 
                 : null);
           return logoUrl ? (
-            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg flex items-center gap-2 shadow-sm">
-              <img src={logoUrl} alt={sponsorData.sponsor_name || 'Sponsor'} className="h-5 object-contain" />
+            <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-2 rounded-lg">
+              <img src={logoUrl} alt={sponsorData.sponsor_name || 'Sponsor'} className="h-6 object-contain" />
             </div>
           ) : null;
         })()}
-        
-        {/* Sponsorlu Badge - Sağ Üst (veya Normal Kategori Badge - Sol Üst) */}
-        {isSponsored ? (
-          <span className="absolute top-4 right-4 bg-amber-500 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-md">
-            Sponsorlu
-          </span>
-        ) : (
-          <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-blue-500 px-3 py-1 rounded-lg text-xs font-bold">
-            {categoryName}
-          </span>
-        )}
-        
-        {/* Favori Butonu - Sağ Üst (sponsorlu badge'in altında) */}
-        <button 
-          onClick={handleFavoriteClick}
-          className={`absolute ${isSponsored ? 'top-14' : 'top-4'} right-4 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10`}
-        >
-          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
-        </button>
       </div>
       
-      {/* Content */}
-      <div className="p-5">
-        {/* Meta - SPONSORLU İÇİN FARKLI */}
+      {/* Content Section */}
+      <div className="p-5 flex-1 flex flex-col">
+        {/* Meta Info - Different for sponsored */}
         {isSponsored ? (
-          <div className="flex items-center gap-3 text-xs text-amber-600 mb-3 flex-wrap">
-            <span className="flex items-center gap-1">
-              <i className="fa-solid fa-bullhorn"></i>
-              {sponsorData?.sponsor_name}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold">
+              Sponsorlu
             </span>
+            {sponsorData?.sponsor_name && (
+              <span className="text-xs text-gray-500">{sponsorData.sponsor_name}</span>
+            )}
           </div>
         ) : (
-          <div className="flex items-center gap-3 text-xs text-gray-400 mb-3 flex-wrap">
+          <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
             <span>{formattedDate}</span>
             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
             <span>{authorName}</span>
-            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-            <span><i className="fa-regular fa-comment mr-1"></i>{commentCount}</span>
+          </div>
+        )}
+        
+        {/* Discount Badge - Only for sponsored with discount */}
+        {isSponsored && sponsorData?.discount_text && (
+          <div className="bg-green-50 border border-green-100 rounded-lg p-2 mb-3">
+            <span className="text-green-600 text-xs font-bold">
+              <i className="fa-solid fa-tag mr-1"></i> {sponsorData.discount_text}
+            </span>
           </div>
         )}
         
         {/* Title */}
-        {hasGamTracking ? (
-          <a href={finalUrl} {...(isExternalLink && { target: '_blank', rel: 'noopener noreferrer sponsored' })}>
-            <h3 
-              className="font-bold text-xl text-slate-800 mb-3 leading-snug group-hover:text-orange-500 transition-colors"
+        <h3 className="font-sans font-bold text-xl text-slate-800 mb-3 leading-snug group-hover:text-orange-500 transition-colors">
+          {hasGamTracking ? (
+            <a 
+              href={finalUrl}
+              dangerouslySetInnerHTML={{ __html: title }}
+              {...(isExternalLink && { 
+                target: '_blank', 
+                rel: 'noopener noreferrer sponsored' 
+              })}
+            />
+          ) : (
+            <Link 
+              href={finalUrl}
               dangerouslySetInnerHTML={{ __html: title }}
             />
-          </a>
-        ) : (
-          <Link href={finalUrl}>
-            <h3 
-              className="font-bold text-xl text-slate-800 mb-3 leading-snug group-hover:text-orange-500 transition-colors"
-              dangerouslySetInnerHTML={{ __html: title }}
-            />
-          </Link>
-        )}
+          )}
+        </h3>
         
         {/* Excerpt */}
-        <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+        <p className="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">
           {excerpt}
         </p>
         
@@ -298,7 +324,10 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             <a 
               href={finalUrl}
               className="text-xs font-bold text-slate-700 hover:text-orange-500 transition-colors"
-              {...(isExternalLink && { target: '_blank', rel: 'noopener noreferrer sponsored' })}
+              {...(isExternalLink && { 
+                target: '_blank', 
+                rel: 'noopener noreferrer sponsored' 
+              })}
             >
               Devamını Oku <i className="fa-solid fa-arrow-right ml-1"></i>
             </a>
@@ -310,6 +339,11 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
               Devamını Oku <i className="fa-solid fa-arrow-right ml-1"></i>
             </Link>
           )}
+          
+          {/* Comment Count */}
+          <span className="text-xs text-gray-400">
+            <i className="fa-regular fa-comment mr-1"></i> {commentCount}
+          </span>
         </div>
       </div>
     </article>

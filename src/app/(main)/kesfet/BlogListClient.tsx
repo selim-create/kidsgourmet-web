@@ -54,10 +54,21 @@ export default function BlogListClient() {
     fetchData();
   }, [activeCategory, currentPage]);
 
-  // Kategori değiştiğinde sayfayı sıfırla
+  // Kategori değiştiğinde sayfayı sıfırla ve scroll to top
   const handleCategoryChange = (category: number | "Tümü") => {
     setActiveCategory(category);
     setCurrentPage(1);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Sayfa değiştiğinde scroll to top
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -75,31 +86,33 @@ export default function BlogListClient() {
           </div>
 
           {/* Categories (Horizontal Scroll) */}
-          <div className="flex gap-3 overflow-x-auto hide-scroll scrollbar-hide pb-2 px-4 -mx-4 sm:px-0 sm:mx-0 sm:justify-center scroll-pl-4 snap-x snap-mandatory">
-            <button 
-              onClick={() => handleCategoryChange("Tümü")}
-              className={`px-6 py-2 rounded-full font-medium text-sm shadow-sm whitespace-nowrap transition-all snap-start ${
-                activeCategory === "Tümü"
-                  ? "bg-slate-800 text-white shadow-md transform scale-105 font-bold" 
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-orange-500 hover:text-orange-500"
-              }`}
-            >
-              Tümü
-            </button>
-            
-            {categories.map((cat) => (
+          <div className="overflow-x-auto hide-scroll scrollbar-hide pb-2 -mx-4 px-4 scroll-pl-4">
+            <div className="flex gap-3 justify-start min-w-max">
               <button 
-                key={cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`px-6 py-2 rounded-full font-medium text-sm shadow-sm whitespace-nowrap transition-all snap-start ${
-                  activeCategory === cat.id 
+                onClick={() => handleCategoryChange("Tümü")}
+                className={`px-6 py-2 rounded-full font-medium text-sm shadow-sm whitespace-nowrap transition-all ${
+                  activeCategory === "Tümü"
                     ? "bg-slate-800 text-white shadow-md transform scale-105 font-bold" 
                     : "bg-white border border-gray-200 text-gray-600 hover:border-orange-500 hover:text-orange-500"
                 }`}
               >
-                {cat.name}
+                Tümü
               </button>
-            ))}
+              
+              {categories.map((cat) => (
+                <button 
+                  key={cat.id}
+                  onClick={() => handleCategoryChange(cat.id)}
+                  className={`px-6 py-2 rounded-full font-medium text-sm shadow-sm whitespace-nowrap transition-all ${
+                    activeCategory === cat.id 
+                      ? "bg-slate-800 text-white shadow-md transform scale-105 font-bold" 
+                      : "bg-white border border-gray-200 text-gray-600 hover:border-orange-500 hover:text-orange-500"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -148,7 +161,7 @@ export default function BlogListClient() {
             {!loading && posts.length > 0 && totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-8">
                 <button 
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
                   className="px-4 py-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-orange-500 transition-colors"
                 >
@@ -162,7 +175,7 @@ export default function BlogListClient() {
                   return (
                     <button
                       key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
+                      onClick={() => handlePageChange(pageNum)}
                       className={`w-10 h-10 rounded-lg transition-colors ${
                         currentPage === pageNum 
                           ? 'bg-orange-500 text-white' 
@@ -175,7 +188,7 @@ export default function BlogListClient() {
                 })}
                 
                 <button 
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:border-orange-500 transition-colors"
                 >
