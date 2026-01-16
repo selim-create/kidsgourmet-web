@@ -8,6 +8,7 @@ import type {
   RashRiskResult,
   AirQualityResult,
   StainGuide,
+  StainSearchResponse,
 } from '@/lib/types';
 
 export const sponsoredToolService = {
@@ -121,7 +122,8 @@ export const sponsoredToolService = {
    * Leke ara
    */
   searchStains: async (query: string): Promise<StainGuide[]> => {
-    return fetchAPI<StainGuide[]>(`${API_ENDPOINTS.STAIN_SEARCH}?q=${encodeURIComponent(query)}`);
+    const response = await fetchAPI<StainSearchResponse>(`${API_ENDPOINTS.STAIN_SEARCH}?q=${encodeURIComponent(query)}`);
+    return response.stains;
   },
 
   /**
