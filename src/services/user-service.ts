@@ -219,6 +219,11 @@ export const userService = {
     return await fetchAPI<ExpertPublicProfile>(API_ENDPOINTS.EXPERT_PUBLIC(username));
   },
 
+  // Uzman listesini getir
+  getExperts: async (): Promise<ExpertPublicProfile[]> => {
+    return await fetchAPI<ExpertPublicProfile[]>(API_ENDPOINTS.EXPERTS_LIST);
+  },
+
   // Avatar yükleme
   uploadAvatar: async (file: File): Promise<{ id: number; url: string }> => {
     const formData = new FormData();
