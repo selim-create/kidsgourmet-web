@@ -373,4 +373,13 @@ export const toolService = {
       API_ENDPOINTS.FOOD_TRIAL_SUMMARY(childId, startDate, endDate)
     );
   },
+
+  /**
+   * Besin denemesi sil
+   */
+  deleteFoodTrial: async (trialId: string): Promise<void> => {
+    await fetchAuthAPI(`${API_ENDPOINTS.FOOD_TRIALS}/${trialId}`, {
+      method: 'DELETE',
+    });
+  },
 };
