@@ -155,7 +155,7 @@ export default function ExpertsListPage() {
                           href={expert.social_links.linkedin}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-8 h-8 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center hover:bg-blue-100 transition-colors"
+                          className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-100 transition-colors"
                         >
                           <i className="fa-brands fa-linkedin-in"></i>
                         </a>
