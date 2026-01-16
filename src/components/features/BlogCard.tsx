@@ -20,6 +20,9 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
   const sponsorData = post.sponsor_data;
   const isSponsored = sponsorData?.is_sponsored ?? false;
 
+  // Position constant for edit button to avoid overlap with favorite button
+  const EDIT_BUTTON_OFFSET = 'right-16';
+
   // Helper functions
   const stripHtml = (html: string) => {
     return html.replace(/<[^>]*>?/gm, '');
@@ -33,7 +36,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
     return post._embedded?.author?.[0]?.name || 'KidsGourmet Editörü';
   };
 
-  const getAuthorId = (post: BlogPost) => {
+  const getAuthorId = (post: BlogPost): number | undefined => {
     return post._embedded?.author?.[0]?.id;
   };
 
@@ -145,7 +148,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           contentId={post.id}
           authorId={authorId}
           variant="text"
-          className="top-6 right-16"
+          className={`top-6 ${EDIT_BUTTON_OFFSET}`}
         />
         
         {/* Favori Butonu */}
@@ -286,7 +289,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           contentId={post.id}
           authorId={authorId}
           variant="text"
-          className="right-16"
+          className={EDIT_BUTTON_OFFSET}
         />
         
         {/* Category Badge - Top Left (for non-sponsored) OR Sponsored Badge - Top Left (for sponsored) */}

@@ -127,7 +127,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   const getEditUrl = (type: 'post' | 'recipe' | 'ingredient' | 'discussion', id: number): string | null => {
     if (!hasEditorAccess || !adminUrl) return null;
-    return `${adminUrl}post.php?post=${id}&action=edit`;
+    
+    // Use proper post_type parameter for custom post types
+    switch (type) {
+      case 'recipe':
+        return `${adminUrl}post.php?post=${id}&action=edit`;
+      case 'ingredient':
+        return `${adminUrl}post.php?post=${id}&action=edit`;
+      case 'discussion':
+        return `${adminUrl}post.php?post=${id}&action=edit`;
+      case 'post':
+      default:
+        return `${adminUrl}post.php?post=${id}&action=edit`;
+    }
   };
 
   const getNewContentUrl = (type: 'post' | 'recipe' | 'ingredient'): string | null => {

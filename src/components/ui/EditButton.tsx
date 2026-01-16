@@ -45,7 +45,7 @@ export function EditButton({
   };
   
   // Check if user owns the content
-  const isOwner = authorId && user?.id === authorId;
+  const isOwner = authorId !== undefined && authorId !== null && user?.id === authorId;
   
   // Yetki kontrolü: Editor access AND (has type permission OR is owner)
   const canEdit = hasEditorAccess && (hasTypePermission() || isOwner);
