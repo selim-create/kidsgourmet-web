@@ -18,6 +18,9 @@ export const removeToken = (): void => {
   localStorage.removeItem('kg_token');
 };
 
+// Default silent errors - don't log these to console
+const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoint might not exist yet
+
 /**
  * Merkezi API İstek Fonksiyonu
  */
@@ -25,7 +28,7 @@ export async function fetchAPI<T>(
   endpoint: string, 
   options: FetchOptions = {},
   requireAuth: boolean = false,
-  silentErrors: number[] = [] // Don't console.error for these status codes
+  silentErrors: number[] = [] // Additional silent error codes beyond defaults
 ): Promise<T> {
   const headers: Record<string, string> = { 
     'Content-Type': 'application/json', 
@@ -49,8 +52,11 @@ export async function fetchAPI<T>(
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     
+    // Combine default silent errors with additional ones
+    const allSilentErrors = [...defaultSilentErrors, ...silentErrors];
+    
     // Don't log errors for silent status codes
-    if (!silentErrors.includes(res.status)) {
+    if (!allSilentErrors.includes(res.status)) {
       console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
     }
     
@@ -107,8 +113,11 @@ export async function fetchAPIWithHeaders<T>(
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     
+    // Combine default silent errors with additional ones
+    const allSilentErrors = [...defaultSilentErrors, ...silentErrors];
+    
     // Don't log errors for silent status codes
-    if (!silentErrors.includes(res.status)) {
+    if (!allSilentErrors.includes(res.status)) {
       console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
     }
     

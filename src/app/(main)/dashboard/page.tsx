@@ -57,21 +57,22 @@ export default function DashboardPage() {
       setError(null);
       
       try {
-        // Fetch all data in parallel
+        // Fetch all data in parallel - hatalar sessizce handle edilir
         const [shoppingListData, blwResultsData, percentileResultsData, solidFoodResultsData] = await Promise.all([
-          userService.getShoppingList(),
+          userService.getShoppingList().catch(() => []),
           toolService.getUserBLWResults().catch(() => []),
           toolService.getUserPercentileResults().catch(() => []),
-          toolService.getUserSolidFoodResults().catch(() => []),
+          toolService.getUserSolidFoodResults().catch(() => []),  // 404 hatası sessizce handle edilir
         ]);
         
-        setShoppingList(shoppingListData);
-        setBlwResults(blwResultsData);
-        setPercentileResults(percentileResultsData);
-        setSolidFoodResults(solidFoodResultsData);
+        setShoppingList(shoppingListData || []);
+        setBlwResults(blwResultsData || []);
+        setPercentileResults(percentileResultsData || []);
+        setSolidFoodResults(solidFoodResultsData || []);
       } catch (err) {
+        // Sadece kritik hatalar için error state set et
         console.error('Dashboard data fetch error:', err);
-        setError(err instanceof Error ? err.message : 'Veriler yüklenirken hata oluştu');
+        // Error state'i set etme - widget'lar boş gösterilsin
       } finally {
         setIsLoading(false);
       }
@@ -482,7 +483,7 @@ export default function DashboardPage() {
                       </div>
                     )}
 
-                    {/* Percentile Results Widget */}
+                    {/* Percentile Results Widget - Büyüme Takibi */}
                     {percentileResults.length > 0 && (
                       <div className="bg-white rounded-2xl border border-gray-100 p-6">
                         <div className="flex items-center justify-between mb-4">
@@ -498,50 +499,55 @@ export default function DashboardPage() {
                         {percentileResults.slice(0, 3).map((result, index) => {
                           // Çocuk adını bul
                           const childName = result.child_id 
-                            ? children.find(c => c.id === result.child_id)?.name || result.child_name
+                            ? children.find(c => c.id === result.child_id)?.name 
                             : null;
                           
                           // Ölçüm türlerini göster
-                          const getMeasurementSummary = (percentiles: PercentileValue[]) => {
-                            const items = [];
-                            const weight = percentiles.find(p => p.measurement_type === 'weight_for_age');
-                            const height = percentiles.find(p => p.measurement_type === 'height_for_age');
-                            const head = percentiles.find(p => p.measurement_type === 'head_for_age');
+                          const getMeasurementSummary = () => {
+                            if (!result.percentiles || result.percentiles.length === 0) return 'Ölçüm yok';
                             
-                            if (weight) items.push(`Kilo: ${weight.percentile}p`);
-                            if (height) items.push(`Boy: ${height.percentile}p`);
-                            if (head) items.push(`Baş: ${head.percentile}p`);
+                            const items: string[] = [];
+                            const weight = result.percentiles.find(p => p.measurement_type === 'weight_for_age');
+                            const height = result.percentiles.find(p => p.measurement_type === 'height_for_age');
+                            const head = result.percentiles.find(p => p.measurement_type === 'head_for_age');
                             
-                            return items.join(' • ') || 'Ölçüm yok';
+                            if (weight) items.push(`Kilo: ${Math.round(weight.percentile)}p`);
+                            if (height) items.push(`Boy: ${Math.round(height.percentile)}p`);
+                            if (head) items.push(`Baş: ${Math.round(head.percentile)}p`);
+                            
+                            return items.length > 0 ? items.join(' • ') : 'Ölçüm yok';
                           };
                           
                           // Genel durum rengi
-                          const getOverallColor = (percentiles: PercentileValue[]) => {
-                            const hasVeryLow = percentiles.some(p => p.category === 'very_low');
-                            const hasVeryHigh = percentiles.some(p => p.category === 'very_high');
-                            const hasLowOrHigh = percentiles.some(p => p.category === 'low' || p.category === 'high');
+                          const getOverallStatus = () => {
+                            if (!result.percentiles || result.percentiles.length === 0) {
+                              return { bg: 'bg-gray-500', icon: 'fa-question' };
+                            }
                             
-                            if (hasVeryLow || hasVeryHigh) return { color: 'red', bg: 'bg-red-500' };
-                            if (hasLowOrHigh) return { color: 'amber', bg: 'bg-amber-500' };
-                            return { color: 'green', bg: 'bg-green-500' };
+                            const hasVeryLow = result.percentiles.some(p => p.category === 'very_low');
+                            const hasVeryHigh = result.percentiles.some(p => p.category === 'very_high');
+                            const hasLowOrHigh = result.percentiles.some(p => p.category === 'low' || p.category === 'high');
+                            
+                            if (hasVeryLow || hasVeryHigh) return { bg: 'bg-red-500', icon: 'fa-triangle-exclamation' };
+                            if (hasLowOrHigh) return { bg: 'bg-amber-500', icon: 'fa-circle-exclamation' };
+                            return { bg: 'bg-green-500', icon: 'fa-circle-check' };
                           };
                           
-                          const overallColor = getOverallColor(result.percentiles);
+                          const status = getOverallStatus();
                           const hasWarnings = result.red_flags && result.red_flags.length > 0;
                           
                           return (
                             <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${overallColor.bg}`}>
-                                <i className="fa-solid fa-ruler-vertical text-lg"></i>
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${status.bg}`}>
+                                <i className={`fa-solid ${status.icon} text-lg`}></i>
                               </div>
                               <div className="flex-1">
                                 <p className="font-medium text-slate-800 text-sm">
-                                  {getMeasurementSummary(result.percentiles)}
+                                  {getMeasurementSummary()}
                                 </p>
                                 <p className="text-xs text-gray-500">
                                   {childName && <span className="font-medium text-slate-600">{childName} • </span>}
-                                  {result.age_in_months > 0 ? `${result.age_in_months} aylık` : ''} 
-                                  {result.age_in_months > 0 && ' • '}
+                                  {result.age_in_months > 0 && `${result.age_in_months} aylık • `}
                                   {formatDate(result.created_at)}
                                 </p>
                               </div>
@@ -551,8 +557,8 @@ export default function DashboardPage() {
                                     <i className="fa-solid fa-exclamation text-xs"></i>
                                   </div>
                                   {/* Tooltip */}
-                                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                    <p className="font-bold mb-1">Dikkat:</p>
+                                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                                    <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
                                     {result.red_flags.slice(0, 2).map((flag, i) => (
                                       <p key={i}>• {flag.message}</p>
                                     ))}
