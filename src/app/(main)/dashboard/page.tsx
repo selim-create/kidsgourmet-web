@@ -22,6 +22,17 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Helper function: Format date with fallback for invalid dates
+  const formatDate = (dateStr: string): string => {
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
+      return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch {
+      return 'Tarih bilinmiyor';
+    }
+  };
+
   // Auth guard
   useEffect(() => {
     if (!userLoading && !isAuthenticated) {
@@ -427,25 +438,14 @@ export default function DashboardPage() {
                             ? children.find(c => c.id === result.child_id)?.name || result.child_name
                             : null;
                           
-                          // Tarih formatla (Invalid Date kontrolü)
-                          const formatDate = (dateStr: string) => {
-                            try {
-                              const date = new Date(dateStr);
-                              if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
-                              return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
-                            } catch {
-                              return 'Tarih bilinmiyor';
-                            }
-                          };
-                          
-                          // Sonuç kategorisi
-                          const getResultCategory = (score: number) => {
+                          // BLW sonuç kategorisi (threshold: 80 ve 55)
+                          const getBLWResultCategory = (score: number) => {
                             if (score >= 80) return { text: 'Hazır', color: 'green', emoji: '✅', bg: 'bg-green-500' };
                             if (score >= 55) return { text: 'Neredeyse Hazır', color: 'amber', emoji: '⏳', bg: 'bg-amber-500' };
                             return { text: 'Biraz Daha Zaman', color: 'red', emoji: '⏰', bg: 'bg-red-500' };
                           };
                           
-                          const category = getResultCategory(result.score);
+                          const category = getBLWResultCategory(result.score);
                           
                           return (
                             <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
@@ -471,7 +471,7 @@ export default function DashboardPage() {
                                   <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                                     <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
                                     {result.red_flags.slice(0, 2).map((flag, i) => (
-                                      <p key={i}>• {typeof flag === 'string' ? flag : flag.message}</p>
+                                      <p key={i}>• {flag.message}</p>
                                     ))}
                                   </div>
                                 </div>
@@ -500,17 +500,6 @@ export default function DashboardPage() {
                           const childName = result.child_id 
                             ? children.find(c => c.id === result.child_id)?.name || result.child_name
                             : null;
-                          
-                          // Tarih formatla
-                          const formatDate = (dateStr: string) => {
-                            try {
-                              const date = new Date(dateStr);
-                              if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
-                              return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
-                            } catch {
-                              return 'Tarih bilinmiyor';
-                            }
-                          };
                           
                           // Ölçüm türlerini göster
                           const getMeasurementSummary = (percentiles: PercentileValue[]) => {
@@ -595,25 +584,14 @@ export default function DashboardPage() {
                             ? children.find(c => c.id === result.child_id)?.name || result.child_name
                             : null;
                           
-                          // Tarih formatla
-                          const formatDate = (dateStr: string) => {
-                            try {
-                              const date = new Date(dateStr);
-                              if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
-                              return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
-                            } catch {
-                              return 'Tarih bilinmiyor';
-                            }
-                          };
-                          
-                          // Sonuç kategorisi
-                          const getResultCategory = (score: number) => {
+                          // Ek Gıda sonuç kategorisi (threshold: 80 ve 50)
+                          const getSolidFoodResultCategory = (score: number) => {
                             if (score >= 80) return { text: 'Hazır', color: 'green', emoji: '🎉', bg: 'bg-green-500' };
                             if (score >= 50) return { text: 'Neredeyse Hazır', color: 'amber', emoji: '💪', bg: 'bg-amber-500' };
                             return { text: 'Biraz Daha Zaman', color: 'red', emoji: '🕐', bg: 'bg-red-500' };
                           };
                           
-                          const category = getResultCategory(result.score);
+                          const category = getSolidFoodResultCategory(result.score);
                           
                           return (
                             <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl mb-2 last:mb-0">
