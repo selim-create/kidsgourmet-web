@@ -544,6 +544,7 @@ export interface ExpertPublicProfile {
   stats: {
     total_recipes: number;
     total_blog_posts: number;
+    total_posts?: number;  // Backend'den gelen alternatif field
     total_answers: number;
     total_questions: number;
   };

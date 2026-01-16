@@ -186,9 +186,12 @@ export default function ExpertsListPage() {
                           <div className="text-xs text-gray-500">Tarif</div>
                         </div>
                       )}
-                      {expert.stats.total_blog_posts !== undefined && expert.stats.total_blog_posts > 0 && (
+                      {((expert.stats.total_blog_posts !== undefined && expert.stats.total_blog_posts > 0) || 
+                        (expert.stats.total_posts !== undefined && expert.stats.total_posts > 0)) && (
                         <div className="text-center flex-1 border-l border-gray-100">
-                          <div className="font-bold text-slate-800">{expert.stats.total_blog_posts}</div>
+                          <div className="font-bold text-slate-800">
+                            {expert.stats.total_blog_posts || expert.stats.total_posts || 0}
+                          </div>
                           <div className="text-xs text-gray-500">Yazı</div>
                         </div>
                       )}

@@ -26,6 +26,11 @@ export default function ExpertPublicProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('recipes');
+  // Pagination state'leri
+  const [recipesLimit, setRecipesLimit] = useState(6);
+  const [postsLimit, setPostsLimit] = useState(5);
+  const [answersLimit, setAnswersLimit] = useState(5);
+  const [questionsLimit, setQuestionsLimit] = useState(5);
 
   useEffect(() => {
     fetchProfile();
@@ -239,37 +244,49 @@ export default function ExpertPublicProfilePage() {
           {activeTab === 'recipes' && (
             <div>
               {profile.recipes && profile.recipes.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {profile.recipes.map((recipe) => (
-                    <Link
-                      key={recipe.id}
-                      href={`/tarifler/${recipe.slug}`}
-                      className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
-                    >
-                      <div className="aspect-video overflow-hidden">
-                        <img
-                          src={recipe.image}
-                          alt={recipe.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
-                          {recipe.title}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <i className="fa-regular fa-clock"></i>
-                            {recipe.prep_time}
-                          </span>
-                          <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-xs font-bold">
-                            {recipe.age_group}
-                          </span>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {profile.recipes.slice(0, recipesLimit).map((recipe) => (
+                      <Link
+                        key={recipe.id}
+                        href={`/tarifler/${recipe.slug}`}
+                        className="group bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all"
+                      >
+                        <div className="aspect-video overflow-hidden">
+                          <img
+                            src={recipe.image}
+                            alt={recipe.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
                         </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                        <div className="p-4">
+                          <h3 className="font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                            {recipe.title}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <i className="fa-regular fa-clock"></i>
+                              {recipe.prep_time}
+                            </span>
+                            <span className="px-2 py-1 bg-orange-100 text-orange-600 rounded-lg text-xs font-bold">
+                              {recipe.age_group}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {profile.recipes.length > recipesLimit && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={() => setRecipesLimit(prev => prev + 6)}
+                        className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
+                      >
+                        Daha Fazla Göster ({profile.recipes.length - recipesLimit} tarif daha)
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
                   <i className="fa-solid fa-utensils text-5xl text-gray-300 mb-4"></i>
@@ -283,37 +300,49 @@ export default function ExpertPublicProfilePage() {
           {activeTab === 'blog_posts' && (
             <div>
               {profile.blog_posts && profile.blog_posts.length > 0 ? (
-                <div className="space-y-4">
-                  {profile.blog_posts.map((post) => (
-                    <Link
-                      key={post.id}
-                      href={`/blog/${post.slug}`}
-                      className="group flex gap-4 bg-white border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all"
-                    >
-                      <div className="w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden">
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
-                          {post.title}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg font-bold">
-                            {post.category}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <i className="fa-regular fa-clock"></i>
-                            {post.read_time}
-                          </span>
+                <>
+                  <div className="space-y-4">
+                    {profile.blog_posts.slice(0, postsLimit).map((post) => (
+                      <Link
+                        key={post.id}
+                        href={`/kesfet/${post.slug}`}
+                        className="group flex gap-4 bg-white border border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-all"
+                      >
+                        <div className="w-32 h-32 flex-shrink-0 rounded-xl overflow-hidden">
+                          <img
+                            src={post.image}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
                         </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                            {post.title}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="px-2 py-1 bg-purple-100 text-purple-600 rounded-lg font-bold">
+                              {post.category}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <i className="fa-regular fa-clock"></i>
+                              {post.read_time}
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {profile.blog_posts.length > postsLimit && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={() => setPostsLimit(prev => prev + 5)}
+                        className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
+                      >
+                        Daha Fazla Göster ({profile.blog_posts.length - postsLimit} yazı daha)
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
                   <i className="fa-solid fa-blog text-5xl text-gray-300 mb-4"></i>
@@ -327,24 +356,36 @@ export default function ExpertPublicProfilePage() {
           {activeTab === 'answered_questions' && (
             <div>
               {profile.answered_questions && profile.answered_questions.length > 0 ? (
-                <div className="space-y-4">
-                  {profile.answered_questions.map((question) => (
-                    <Link
-                      key={question.id}
-                      href={`/topluluk/${question.slug}`}
-                      className="group block bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all"
-                    >
-                      <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
-                        {question.title}
-                      </h3>
-                      <p className="text-gray-600 mb-3 line-clamp-2">{question.answer_excerpt}</p>
-                      <div className="text-sm text-gray-500">
-                        <i className="fa-regular fa-calendar mr-1"></i>
-                        Cevaplandı: {new Date(question.answered_at).toLocaleDateString('tr-TR')}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                <>
+                  <div className="space-y-4">
+                    {profile.answered_questions.slice(0, answersLimit).map((question) => (
+                      <Link
+                        key={question.id}
+                        href={`/topluluk/${question.slug}`}
+                        className="group block bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all"
+                      >
+                        <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                          {question.title}
+                        </h3>
+                        <p className="text-gray-600 mb-3 line-clamp-2">{question.answer_excerpt}</p>
+                        <div className="text-sm text-gray-500">
+                          <i className="fa-regular fa-calendar mr-1"></i>
+                          Cevaplandı: {new Date(question.answered_at).toLocaleDateString('tr-TR')}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {profile.answered_questions.length > answersLimit && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={() => setAnswersLimit(prev => prev + 5)}
+                        className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
+                      >
+                        Daha Fazla Göster ({profile.answered_questions.length - answersLimit} cevap daha)
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
                   <i className="fa-solid fa-comment-dots text-5xl text-gray-300 mb-4"></i>
@@ -358,43 +399,55 @@ export default function ExpertPublicProfilePage() {
           {activeTab === 'asked_questions' && (
             <div>
               {profile.asked_questions && profile.asked_questions.length > 0 ? (
-                <div className="space-y-4">
-                  {profile.asked_questions.map((question) => (
-                    <Link
-                      key={question.id}
-                      href={`/topluluk/${question.slug}`}
-                      className="group block bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        {question.circle && (
-                          <span 
-                            className="px-2 py-1 rounded-lg text-xs font-bold"
-                            style={{ 
-                              backgroundColor: `${sanitizeColor(question.circle.color_code)}20`, 
-                              color: sanitizeColor(question.circle.color_code) 
-                            }}
-                          >
-                            {question.circle.icon} {question.circle.name}
+                <>
+                  <div className="space-y-4">
+                    {profile.asked_questions.slice(0, questionsLimit).map((question) => (
+                      <Link
+                        key={question.id}
+                        href={`/topluluk/${question.slug}`}
+                        className="group block bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-lg transition-all"
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          {question.circle && (
+                            <span 
+                              className="px-2 py-1 rounded-lg text-xs font-bold"
+                              style={{ 
+                                backgroundColor: `${sanitizeColor(question.circle.color_code)}20`, 
+                                color: sanitizeColor(question.circle.color_code) 
+                              }}
+                            >
+                              {question.circle.icon} {question.circle.name}
+                            </span>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                          {question.title}
+                        </h3>
+                        <p className="text-gray-600 mb-3 line-clamp-2">{question.excerpt}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <i className="fa-regular fa-comment"></i>
+                            {question.comment_count} cevap
                           </span>
-                        )}
-                      </div>
-                      <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
-                        {question.title}
-                      </h3>
-                      <p className="text-gray-600 mb-3 line-clamp-2">{question.excerpt}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <i className="fa-regular fa-comment"></i>
-                          {question.comment_count} cevap
-                        </span>
-                        <span>
-                          <i className="fa-regular fa-calendar mr-1"></i>
-                          {new Date(question.created_at).toLocaleDateString('tr-TR')}
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
+                          <span>
+                            <i className="fa-regular fa-calendar mr-1"></i>
+                            {new Date(question.created_at).toLocaleDateString('tr-TR')}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                  {profile.asked_questions.length > questionsLimit && (
+                    <div className="text-center mt-8">
+                      <button
+                        onClick={() => setQuestionsLimit(prev => prev + 5)}
+                        className="bg-purple-100 text-purple-600 px-6 py-3 rounded-xl font-bold hover:bg-purple-200 transition-colors"
+                      >
+                        Daha Fazla Göster ({profile.asked_questions.length - questionsLimit} soru daha)
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
                   <i className="fa-solid fa-question text-5xl text-gray-300 mb-4"></i>
