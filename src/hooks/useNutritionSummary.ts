@@ -60,9 +60,6 @@ export function useNutritionSummary(childId: string | undefined) {
       // Dashboard endpoint'inden nutrition_summary al
       const dashboardData = await recommendationService.getDashboardRecommendations(childId);
       
-      console.log('Dashboard data:', dashboardData); // Debug için
-      console.log('Nutrition summary:', dashboardData?.nutrition_summary); // Debug için
-      
       if (dashboardData?.nutrition_summary) {
         setSummary({
           ...DEFAULT_SUMMARY,

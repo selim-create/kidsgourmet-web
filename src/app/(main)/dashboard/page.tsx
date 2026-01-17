@@ -800,7 +800,10 @@ export default function DashboardPage() {
           }}
           onSave={async (childData) => {
             try {
-              if ('id' in childData && childData.id) {
+              // Type guard: check if this is an update (has id) or create (no id)
+              const isUpdate = childData && typeof childData === 'object' && 'id' in childData && childData.id;
+              
+              if (isUpdate) {
                 // Update existing child
                 await userService.updateChild(childData.id, childData);
               } else {
