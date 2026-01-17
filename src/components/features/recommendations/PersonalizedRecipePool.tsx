@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRecommendations } from '@/hooks/useRecommendations';
-import { PersonalizedRecipe } from '@/services/recommendation-service';
+import { useDashboardRecommendations } from '@/hooks/useDashboardRecommendations';
 import { useUser } from '@/hooks/use-user';
 
 interface PersonalizedRecipePoolProps {
@@ -17,16 +16,10 @@ export default function PersonalizedRecipePool({
   limit = 12 
 }: PersonalizedRecipePoolProps) {
   const { isAuthenticated } = useUser();
-  const { recommendations, isLoading, error } = useRecommendations(childId, { 
-    limit,
-    meal_type: mealType,
-    include_scores: false 
-  });
+  // useDashboardRecommendations kullan - bu doğru response mapping yapıyor
+  const { recommendations, isLoading, error } = useDashboardRecommendations(childId);
   
-  // Safe array check - API response can come in different structure
-  const recipeList: PersonalizedRecipe[] = Array.isArray(recommendations) 
-    ? recommendations 
-    : (recommendations as any)?.recommendations || [];
+  const recipeList = Array.isArray(recommendations) ? recommendations : [];
 
   // Auth yoksa bilgilendirme göster
   if (!isAuthenticated) {
@@ -53,10 +46,9 @@ export default function PersonalizedRecipePool({
   // API hatası durumunda bilgilendirme
   if (error) {
     return (
-      <div className="text-center py-4 text-amber-600 bg-amber-50 rounded-lg">
-        <i className="fa-solid fa-triangle-exclamation text-xl mb-2"></i>
-        <p className="text-xs">Öneriler şu an yüklenemiyor</p>
-        <p className="text-xs text-amber-500 mt-1">Lütfen daha sonra tekrar deneyin</p>
+      <div className="text-center py-3 text-amber-600 bg-amber-50 rounded-lg">
+        <i className="fa-solid fa-triangle-exclamation text-sm"></i>
+        <p className="text-xs mt-1">Öneriler yüklenemedi</p>
       </div>
     );
   }
@@ -65,8 +57,7 @@ export default function PersonalizedRecipePool({
     return (
       <div className="text-center py-4 text-gray-500">
         <i className="fa-solid fa-utensils text-gray-400 text-xl mb-2"></i>
-        <p className="text-xs">Henüz öneri oluşturulmadı</p>
-        <p className="text-xs text-gray-400 mt-1">Çocuk profilinizi güncelleyin</p>
+        <p className="text-xs">Henüz öneri yok</p>
       </div>
     );
   }
@@ -75,16 +66,15 @@ export default function PersonalizedRecipePool({
     <div className="space-y-2">
       <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
         <i className="fa-solid fa-wand-magic-sparkles text-purple-500 mr-1"></i>
-        Kişiselleştirilmiş Öneriler
+        Önerilen Tarifler
       </h4>
       
       {recipeList.slice(0, 5).map((recipe) => (
         <Link
-          key={recipe?.id || Math.random()}
+          key={(recipe as any)?.recipe_id || recipe?.id || Math.random()}
           href={`/tarifler/${recipe?.slug || ''}`}
           className="flex items-center gap-3 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
         >
-          {/* Use img tag - no next/image hostname issues */}
           {recipe?.image && (
             <img
               src={recipe.image}
@@ -92,8 +82,7 @@ export default function PersonalizedRecipePool({
               className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
               loading="lazy"
               onError={(e) => {
-                // Show placeholder if image fails to load
-                (e.target as HTMLImageElement).src = '/images/placeholder-recipe.png';
+                (e.target as HTMLImageElement).style.display = 'none';
               }}
             />
           )}
@@ -101,16 +90,10 @@ export default function PersonalizedRecipePool({
             <p className="text-sm font-medium text-gray-800 truncate">
               {recipe?.title || 'Tarif'}
             </p>
-            {recipe?.prep_time && (
-              <p className="text-xs text-gray-500">
-                <i className="fa-regular fa-clock mr-1"></i>
-                {recipe.prep_time}
-              </p>
-            )}
           </div>
-          {recipe?.score && (
-            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
-              {Math.round(recipe.score)}%
+          {(recipe as any)?.score && (
+            <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">
+              %{Math.round((recipe as any).score)}
             </span>
           )}
         </Link>

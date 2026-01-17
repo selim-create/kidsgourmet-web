@@ -11,7 +11,7 @@ import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { EditButton } from '@/components/ui/EditButton';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
-import IngredientSafetyBadge from '@/components/features/safety/IngredientSafetyBadge';
+import IngredientSafetyAlert from '@/components/features/safety/IngredientSafetyAlert';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -181,12 +181,17 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                               dangerouslySetInnerHTML={{ __html: sanitizeHTML(ingredient.description) }}
                             />
                             
-                            {/* Safety Badge for Child */}
+                            {/* Safety Alert for Child */}
                             {activeChild && (
                               <div className="mb-6">
-                                <IngredientSafetyBadge 
+                                <IngredientSafetyAlert 
+                                  ingredientSlug={ingredient.slug}
                                   ingredientId={ingredient.id}
-                                  childId={activeChild.id}
+                                  ingredientData={{
+                                    min_age_months: ingredient.min_age_months,
+                                    allergen_info: ingredient.allergen_info,
+                                    name: ingredient.name,
+                                  }}
                                 />
                               </div>
                             )}

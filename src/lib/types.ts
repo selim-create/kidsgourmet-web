@@ -140,6 +140,7 @@ export interface Ingredient {
   image: string;
   category?: string; // 🆕 "Meyveler", "Sebzeler", "Proteinler", "Tahıllar", "Süt Ürünleri"
   start_age: string;
+  min_age_months?: number; // 🆕 API'den gelen minimum yaş (ay olarak)
   benefits: string;
   prep_methods: string[];
   allergy_risk: 'Düşük' | 'Orta' | 'Yüksek';
