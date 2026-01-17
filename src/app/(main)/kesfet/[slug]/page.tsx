@@ -13,6 +13,8 @@ import { decodeEntities, stripHtmlAndDecode, slugify } from '@/utils/textHelpers
 import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
 import NewsletterForm from '@/components/common/NewsletterForm';
+import RecipeCard from '@/components/ui/RecipeCard';
+import { RecipeCard as RecipeCardType } from '@/lib/types';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -27,14 +29,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
-  const [randomRecipes, setRandomRecipes] = useState<Array<{
-    id: number;
-    slug: string;
-    title: string;
-    image: string;
-    prep_time: string;
-    age_group?: string;
-  }>>([]);
+  const [randomRecipes, setRandomRecipes] = useState<RecipeCardType[]>([]);
   const [randomIngredients, setRandomIngredients] = useState<Array<{
     id: number;
     slug: string;
@@ -144,6 +139,33 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     setHeadings(extracted);
   }, [post]);
 
+  // Inject heading IDs directly into DOM for reliable TOC navigation
+  useEffect(() => {
+    if (headings.length === 0) return;
+
+    // Wait for DOM to be ready
+    const injectIds = () => {
+      headings.forEach((heading) => {
+        const element = document.getElementById(heading.id);
+        if (!element) {
+          // Try to find the heading by text content
+          const allHeadings = document.querySelectorAll('article h2, article h3');
+          allHeadings.forEach((el) => {
+            const text = el.textContent?.trim() || '';
+            const decodedText = decodeEntities(text);
+            if (decodedText === heading.text && !el.id) {
+              el.id = heading.id;
+            }
+          });
+        }
+      });
+    };
+
+    // Run after a short delay to ensure content is rendered
+    const timer = setTimeout(injectIds, 100);
+    return () => clearTimeout(timer);
+  }, [headings]);
+
   // Intersection Observer for active heading
   // Configuration constants for TOC visibility tracking
   const OBSERVER_ROOT_MARGIN = '-100px 0px -80% 0px'; // Top and bottom margins for visibility
@@ -213,13 +235,29 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     headings.forEach((heading) => {
       // Escape special regex characters in heading text
       const escapedText = heading.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      // Match heading tags and inject ID if not already present
-      const regex = new RegExp(`(<h[2-3][^>]*)(>\\s*${escapedText}\\s*</h[2-3]>)`, 'gi');
-      result = result.replace(regex, (match, openTag, rest) => {
-        // Only add ID if not already present
-        if (openTag.includes('id=')) return match;
-        return `${openTag} id="${heading.id}"${rest}`;
-      });
+      
+      // More flexible regex that handles various HTML patterns
+      // Matches h2 or h3 tags with any attributes, followed by the heading text (with possible whitespace and inline elements)
+      const patterns = [
+        // Pattern 1: Exact text match with flexible whitespace
+        new RegExp(`(<h[2-3]\\b[^>]*?)(>)([^<]*${escapedText}[^<]*)(</h[2-3]>)`, 'i'),
+        // Pattern 2: Text with inline elements (like <strong>, <em>, etc.)
+        new RegExp(`(<h[2-3]\\b[^>]*?)(>)((?:(?!<h[2-3]).)*?${escapedText}(?:(?!<h[2-3]).)*?)(</h[2-3]>)`, 'is'),
+      ];
+      
+      for (const regex of patterns) {
+        const newResult = result.replace(regex, (match, openTag, closeBracket, content, closeTag) => {
+          // Only add ID if not already present
+          if (openTag.includes('id=')) return match;
+          return `${openTag} id="${heading.id}"${closeBracket}${content}${closeTag}`;
+        });
+        
+        // If replacement was successful, use it and break
+        if (newResult !== result) {
+          result = newResult;
+          break;
+        }
+      }
     });
     return result;
   };
@@ -640,7 +678,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                     </div>
                     
                     {/* YORUM BÖLÜMÜ */}
-                    <CommentSection postId={post.id} postType="post" initialCommentCount={post.comment_count || 0} />
+                    <div className="mt-8">
+                      <CommentSection postId={post.id} postType="post" initialCommentCount={post.comment_count || 0} />
+                    </div>
                     
                     {/* ============ RELATED CONTENT SECTIONS ============ */}
                     <div className="mt-12 space-y-10">
@@ -690,28 +730,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                           </h3>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {randomRecipes.slice(0, 3).map((recipe) => (
-                              <Link 
-                                key={recipe.id}
-                                href={`/tarifler/${recipe.slug}`}
-                                className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all"
-                              >
-                                <div className="aspect-[4/3] overflow-hidden">
-                                  <img 
-                                    src={recipe.image || 'https://placehold.co/400x300'}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                    alt={decodeEntities(recipe.title)}
-                                  />
-                                </div>
-                                <div className="p-4">
-                                  <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors line-clamp-2">
-                                    {decodeEntities(recipe.title)}
-                                  </h4>
-                                  <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                                    <span><i className="fa-regular fa-clock mr-1"></i>{recipe.prep_time}</span>
-                                    {recipe.age_group && <span className="bg-green-100 text-green-600 px-2 py-0.5 rounded">{recipe.age_group}</span>}
-                                  </div>
-                                </div>
-                              </Link>
+                              <RecipeCard key={recipe.id} recipe={recipe} />
                             ))}
                           </div>
                           <div className="text-center mt-6">
