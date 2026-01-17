@@ -24,6 +24,44 @@ interface RecipeCardProps {
   };
 }
 
+// Age group color mapping (pastel colors)
+const AGE_GROUP_COLORS: { [key: string]: string } = {
+  '0-6': '#E1BEE7',   // Lila - 0-6 Ay / Hazırlık
+  '6-8': '#FFCCBC',   // Şeftali - 6-8 Ay / Tadım
+  '9-11': '#C8E6C9',  // Nane Yeşili - 9-11 Ay / Keşif
+  '12-24': '#B3E5FC', // Gökyüzü Mavisi - 12-24 Ay / Aile
+  '2+': '#FFF9C4',    // Limon Sarısı - 2+ Yaş / Gurme
+};
+
+// Get shadow color based on age group
+const getAgeGroupShadow = (ageGroup?: string): string => {
+  if (!ageGroup) return 'rgba(0, 0, 0, 0.1)';
+  
+  // Extract age range from string like "Aile Sofrasına Geçiş (12-24 Ay)"
+  if (ageGroup.includes('0-6')) return 'rgba(225, 190, 231, 0.4)';
+  if (ageGroup.includes('6-8')) return 'rgba(255, 204, 188, 0.4)';
+  if (ageGroup.includes('9-11')) return 'rgba(200, 230, 201, 0.4)';
+  if (ageGroup.includes('12-24')) return 'rgba(179, 229, 252, 0.4)';
+  if (ageGroup.includes('2+') || ageGroup.includes('24')) return 'rgba(255, 249, 196, 0.4)';
+  
+  return 'rgba(0, 0, 0, 0.1)';
+};
+
+// Get background color for age group badge
+const getAgeGroupColor = (ageGroup?: string, providedColor?: string): string => {
+  if (providedColor) return providedColor;
+  if (!ageGroup) return '#22C55E';
+  
+  // Extract age range from string
+  if (ageGroup.includes('0-6')) return AGE_GROUP_COLORS['0-6'];
+  if (ageGroup.includes('6-8')) return AGE_GROUP_COLORS['6-8'];
+  if (ageGroup.includes('9-11')) return AGE_GROUP_COLORS['9-11'];
+  if (ageGroup.includes('12-24')) return AGE_GROUP_COLORS['12-24'];
+  if (ageGroup.includes('2+') || ageGroup.includes('24')) return AGE_GROUP_COLORS['2+'];
+  
+  return '#22C55E';
+};
+
 export default function RecipeCard({ recipe }: RecipeCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(recipe.id, 'recipe');
@@ -34,6 +72,26 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     : typeof recipe.author === 'string' 
     ? recipe.author 
     : undefined;
+
+  // Get author avatar URL with fallback to ui-avatars.com
+  const getAuthorAvatar = () => {
+    // Try to get real avatar from author object
+    if (typeof recipe.author === 'object' && recipe.author?.avatar) {
+      return recipe.author.avatar;
+    }
+    
+    // Fallback to ui-avatars.com with age group color
+    if (authorName) {
+      const bgColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color).replace('#', '');
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=${bgColor}&color=fff&size=128&bold=true`;
+    }
+    
+    return null;
+  };
+
+  const authorAvatar = getAuthorAvatar();
+  const ageGroupColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color);
+  const shadowColor = getAgeGroupShadow(recipe.age_group);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -48,14 +106,29 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   return (
     <Link 
       href={`/tarifler/${recipe.slug}`} 
-      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col min-h-[420px]"
+      className="group relative bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-visible flex flex-col"
+      style={{
+        transform: 'translateY(0)',
+        transition: 'all 0.3s ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-10px)';
+        e.currentTarget.style.boxShadow = `0 20px 40px ${shadowColor}`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+      }}
     >
-      <div className="h-56 relative overflow-hidden bg-gray-50 flex-shrink-0">
-        <img 
-          src={recipe.image || '/placeholder-recipe.jpg'} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-          alt={decodeEntities(recipe.title)} 
-        />
+      {/* Image Container - Floating inside card */}
+      <div className="relative h-48 overflow-hidden rounded-t-[24px] mx-3 mt-3">
+        <div className="absolute inset-0 overflow-hidden rounded-[20px]">
+          <img 
+            src={recipe.image || '/placeholder-recipe.jpg'} 
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+            alt={decodeEntities(recipe.title)} 
+          />
+        </div>
         
         {/* Edit Button - Hover'da görünür */}
         <EditButton 
@@ -65,90 +138,84 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           variant="text"
         />
         
-        {/* Prep Time Badge - Top Left */}
-        {recipe.prep_time && (
-          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-700 shadow-sm">
-            <i className="fa-regular fa-clock text-orange-500 mr-1"></i> {recipe.prep_time}
-          </div>
-        )}
+        {/* Age Group Badge - Top Left with asymmetric corners */}
+        <div 
+          className="absolute top-3 left-3 px-3 py-1.5 text-white text-xs font-bold shadow-lg"
+          style={{
+            backgroundColor: ageGroupColor,
+            borderRadius: '12px 4px 12px 4px',
+          }}
+        >
+          {decodeEntities(recipe.age_group)}
+        </div>
         
-        {/* Favorite Button */}
+        {/* Favorite Button - Top Right */}
         <button 
           onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
+          className="absolute top-3 right-3 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10 shadow-md"
         >
           <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
         </button>
         
-        {/* Badges */}
-        <div className="absolute bottom-3 left-3 flex gap-2 flex-wrap">
-          {/* Age Group Badge with dynamic color */}
-          <span 
-            className="text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm"
-            style={{ backgroundColor: recipe.age_group_color || '#22C55E' }}
-          >
-            {decodeEntities(recipe.age_group)}
-          </span>
-          
-          {/* Featured Badge */}
-          {recipe.is_featured && (
-            <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-              Haftanın Tarifi
-            </span>
-          )}
-        </div>
+        {/* Prep Time Badge - Bottom Right with glassmorphism */}
+        {recipe.prep_time && (
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-white text-xs font-semibold shadow-lg">
+            <i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}
+          </div>
+        )}
       </div>
       
-      <div className="p-5 flex flex-col flex-grow">
-        <h3 className="font-sans font-bold text-lg text-slate-800 mb-2 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 min-h-[3.5rem]">
+      {/* Author Avatar - Overlapping between image and content */}
+      {authorAvatar && authorName && (
+        <div className="relative -mt-7 mx-auto z-10">
+          <div 
+            className="w-14 h-14 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100"
+            style={{ borderWidth: '4px' }}
+          >
+            <img 
+              src={authorAvatar}
+              alt={authorName}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // If image fails to load, use fallback
+                const bgColor = ageGroupColor.replace('#', '');
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=${bgColor}&color=fff&size=128&bold=true`;
+              }}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Content Area */}
+      <div className="p-5 pt-3 flex flex-col flex-grow">
+        {/* Author Name - Small, above title */}
+        {authorName && (
+          <div className="text-center mb-2">
+            <span className="text-xs text-gray-500 font-medium">
+              {recipe.expert?.approved && <i className="fa-solid fa-circle-check text-green-500 mr-1"></i>}
+              {authorName}
+            </span>
+          </div>
+        )}
+        
+        {/* Recipe Title */}
+        <h3 className="font-sans font-bold text-base text-slate-800 mb-3 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 text-center min-h-[2.5rem]">
           {decodeEntities(recipe.title)}
         </h3>
         
-        {/* Recipe Info - Diet Type (RIGHT) and Meal Type (LEFT) */}
-        <div className="flex items-center justify-between text-xs text-gray-400 mb-3 gap-2">
-          {/* Meal Type - LEFT */}
-          {recipe.meal_type && (
-            <span className="flex items-center gap-1">
-              <i className="fa-solid fa-utensils"></i> {decodeEntities(recipe.meal_type)}
-            </span>
-          )}
-          
-          {/* Diet Types - RIGHT */}
+        {/* Meta Info - Diet Type and Meal Type */}
+        <div className="flex items-center justify-center gap-3 text-xs text-gray-500 mt-auto">
+          {/* Diet Types */}
           {recipe.diet_types && recipe.diet_types.length > 0 && (
-            <span className="flex items-center gap-1">
-              <i className="fa-solid fa-leaf"></i> {decodeEntities(recipe.diet_types[0])}
+            <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+              <i className="fa-solid fa-leaf text-green-500"></i> {decodeEntities(recipe.diet_types[0])}
             </span>
           )}
-        </div>
-        
-        {/* Expert Approval or Author - Redesigned */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
-          {recipe.expert?.approved ? (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                <i className="fa-solid fa-check text-green-600 text-xs"></i>
-              </div>
-              <span className="text-xs text-gray-600 font-medium truncate">
-                {recipe.expert.title} {recipe.expert.name}
-              </span>
-            </div>
-          ) : authorName ? (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                <i className="fa-solid fa-user text-gray-500 text-xs"></i>
-              </div>
-              <span className="text-xs text-gray-600 font-medium truncate">
-                {authorName}
-              </span>
-            </div>
-          ) : (
-            <div className="flex-1"></div>
-          )}
           
-          {/* Comment Count - RIGHT */}
-          {recipe.comment_count !== undefined && recipe.comment_count > 0 && (
-            <span className="text-xs text-gray-400 flex items-center gap-1 ml-2 flex-shrink-0">
-              <i className="fa-regular fa-comment"></i> {recipe.comment_count}
+          {/* Meal Type */}
+          {recipe.meal_type && (
+            <span className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-lg">
+              <i className="fa-solid fa-utensils text-orange-500"></i> {decodeEntities(recipe.meal_type)}
             </span>
           )}
         </div>
