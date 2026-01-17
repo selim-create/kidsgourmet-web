@@ -237,6 +237,35 @@ function RecipesPageContent() {
         description="Uzman onaylı, yaşa uygun bebek ve çocuk tarifleri. 6 aydan 2+ yaşa kadar sağlıklı ve lezzetli tarifler keşfedin."
         keywords={['bebek tarifleri', 'ek gıda tarifleri', 'çocuk yemekleri', 'BLW tarifleri', 'bebek yemekleri']}
         url="https://kidsgourmet.com/tarifler"
+        ogImage="https://kidsgourmet.com/images/og-recipes.jpg"
+      />
+      
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            'name': 'Bebek ve Çocuk Tarifleri',
+            'description': 'Uzman onaylı, yaşa uygun bebek ve çocuk tarifleri koleksiyonu',
+            'url': 'https://kidsgourmet.com/tarifler',
+            'numberOfItems': totalRecipes,
+            'itemListElement': recipes.slice(0, 10).map((recipe, index) => ({
+              '@type': 'ListItem',
+              'position': index + 1,
+              'item': {
+                '@type': 'Recipe',
+                'name': recipe.title,
+                'url': `https://kidsgourmet.com/tarifler/${recipe.slug}`,
+                'image': recipe.image,
+                'prepTime': recipe.prep_time,
+                ...(recipe.meal_type && { 'recipeCategory': recipe.meal_type }),
+                ...(recipe.diet_types && recipe.diet_types.length > 0 && { 'suitableForDiet': recipe.diet_types }),
+              }
+            }))
+          })
+        }}
       />
       
       {/* PAGE HEADER */}
