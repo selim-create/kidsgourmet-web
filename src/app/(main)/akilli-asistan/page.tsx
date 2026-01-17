@@ -172,6 +172,35 @@ const toolIconColors: Record<string, string> = {
   vaccine_calendar: 'bg-rose-50 text-rose-500',
 };
 
+// Backend slug -> Frontend klasör adı mapping
+const slugMapping: Record<string, string> = {
+  // Sponsorlu araçlar (Backend İngilizce slug -> Frontend Türkçe slug)
+  'bath-planner': 'banyo-planlayici',
+  'hygiene-calculator': 'hijyen-hesaplayici',
+  'diaper-calculator': 'bez-hesaplayici',
+  'air-quality': 'hava-kalitesi',
+  'stain-encyclopedia': 'leke-rehberi',
+  // Diğer araçlar (eğer backend'den farklı geliyorsa)
+  'blw-test': 'blw-testi',
+  'percentile': 'persentil',
+  'water-calculator': 'su-ihtiyaci',
+  'food-guide': 'ek-gida-rehberi',
+  'solid-food-readiness': 'ek-gidaya-baslama',
+  'food-checker': 'bu-gida-verilir-mi',
+  'allergen-planner': 'alerjen-planlayici',
+  'food-trial-calendar': 'besin-takvimi',
+};
+
+// Slug'ı frontend klasör adına dönüştür
+const getToolPath = (tool: Tool): string => {
+  if (tool.tool_type === 'vaccine_calendar') {
+    return '/dashboard/saglik/asi-takvimi';
+  }
+  // Önce mapping'e bak, yoksa orijinal slug'ı kullan
+  const mappedSlug = slugMapping[tool.slug] || tool.slug;
+  return `/akilli-asistan/${mappedSlug}`;
+};
+
 export default function ToolsPage() {
   const [tools, setTools] = useState<Tool[]>(defaultTools);
   const [isLoading, setIsLoading] = useState(true);
@@ -228,7 +257,7 @@ export default function ToolsPage() {
             {tools.filter(tool => tool.is_active !== false).map((tool) => (
               <Link
                 key={tool.id}
-                href={tool.tool_type === 'vaccine_calendar' ? '/dashboard/saglik/asi-takvimi' : `/akilli-asistan/${tool.slug}`}
+                href={getToolPath(tool)}
                 className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative"
               >
                 <div className="p-6">
