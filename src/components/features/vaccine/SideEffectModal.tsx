@@ -2,12 +2,13 @@
 
 import React, { useState } from 'react';
 import { VaccineRecord, VaccineSideEffects } from '@/lib/types';
+import VaccineContentLink from './VaccineContentLink';
 
 interface SideEffectModalProps {
   isOpen: boolean;
   record: VaccineRecord | null;
   onClose: () => void;
-  onSubmit: (sideEffects: VaccineSideEffects, severity: 'none' | 'mild' | 'moderate' | 'severe', notes: string) => void;
+  onSubmit: (sideEffects: VaccineSideEffects, severity: 'none' | 'mild' | 'moderate' | 'severe', notes: string, feverTemp?: number) => void;
 }
 
 export default function SideEffectModal({ 
@@ -28,6 +29,7 @@ export default function SideEffectModal({
   const [notes, setNotes] = useState('');
   const [otherText, setOtherText] = useState('');
   const [consentGiven, setConsentGiven] = useState(false);
+  const [feverTemp, setFeverTemp] = useState<number | undefined>(undefined);
 
   // Reset form when modal opens/closes
   React.useEffect(() => {
@@ -44,6 +46,7 @@ export default function SideEffectModal({
       setNotes('');
       setOtherText('');
       setConsentGiven(false);
+      setFeverTemp(undefined);
     }
   }, [isOpen, record]);
 
@@ -58,7 +61,7 @@ export default function SideEffectModal({
       other: otherText.trim() || null,
     };
     
-    onSubmit(finalSideEffects, severity, notes);
+    onSubmit(finalSideEffects, severity, notes, feverTemp);
   };
 
   const toggleSideEffect = (key: keyof Omit<VaccineSideEffects, 'other'>) => {
@@ -179,6 +182,35 @@ export default function SideEffectModal({
             </div>
           </div>
 
+          {/* Fever Temperature Tracking */}
+          {sideEffects.fever && (
+            <div className="mb-6 bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <label className="block text-sm font-bold text-slate-800 mb-2">
+                <i className="fa-solid fa-temperature-half text-orange-500 mr-1"></i>
+                Ateş Ölçümü (°C)
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="36"
+                  max="42"
+                  value={feverTemp || ''}
+                  onChange={(e) => setFeverTemp(e.target.value ? parseFloat(e.target.value) : undefined)}
+                  placeholder="37.5"
+                  className="flex-1 px-4 py-2 border border-orange-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+                <span className="text-sm font-medium text-slate-700">°C</span>
+              </div>
+              {feverTemp && feverTemp > 38.5 && (
+                <p className="text-xs text-orange-700 mt-2">
+                  <i className="fa-solid fa-exclamation-circle mr-1"></i>
+                  Yüksek ateş. Doktorunuzla iletişime geçmeniz önerilir.
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Severity */}
           <div className="mb-6">
             <p className="text-sm font-bold text-slate-800 mb-3">Şiddet:</p>
@@ -255,6 +287,14 @@ export default function SideEffectModal({
               </p>
             </div>
           )}
+
+          {/* Helpful Content Links */}
+          <div className="mb-6 space-y-2">
+            {sideEffects.fever && (
+              <VaccineContentLink type="fever_guide" />
+            )}
+            <VaccineContentLink type="side_effects" />
+          </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3">

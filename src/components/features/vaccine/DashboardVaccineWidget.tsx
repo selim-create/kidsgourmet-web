@@ -12,6 +12,7 @@ interface DashboardVaccineWidgetProps {
 
 export default function DashboardVaccineWidget({ childId, childName }: DashboardVaccineWidgetProps) {
   const [upcomingVaccines, setUpcomingVaccines] = useState<UpcomingVaccine[]>([]);
+  const [overdueCount, setOverdueCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +28,10 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
         setError(null);
         const vaccines = await vaccineService.getUpcomingVaccines(childId);
         setUpcomingVaccines(vaccines.slice(0, 3)); // Show max 3
+        
+        // Count overdue vaccines
+        const overdue = vaccines.filter(v => v.is_overdue).length;
+        setOverdueCount(overdue);
       } catch (err) {
         console.error('Failed to fetch upcoming vaccines:', err);
         setError('Aşı bilgileri yüklenemedi');
@@ -118,7 +123,14 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
               <i className="fa-solid fa-syringe text-green-500"></i>
             </div>
-            <h3 className="font-bold text-slate-800">Sıradaki Aşı</h3>
+            <div>
+              <h3 className="font-bold text-slate-800">Sıradaki Aşı</h3>
+              {overdueCount > 0 && (
+                <p className="text-xs text-red-600 font-bold">
+                  {overdueCount} gecikmiş!
+                </p>
+              )}
+            </div>
           </div>
           <Link
             href="/dashboard/saglik/asilar"

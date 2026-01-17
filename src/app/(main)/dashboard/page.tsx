@@ -10,6 +10,7 @@ import { toolService } from "@/services/tool-service";
 import { ShoppingListItem, BLWTestResult, PercentileResult, SolidFoodReadinessResult } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import DashboardVaccineWidget from "@/components/features/vaccine/DashboardVaccineWidget";
+import OverdueVaccineBanner from "@/components/features/vaccine/OverdueVaccineBanner";
 import { formatAge } from "@/utils/ageFormatter";
 
 export default function DashboardPage() {
@@ -290,6 +291,14 @@ export default function DashboardPage() {
                 {/* Allergy Warning Banner */}
                 {activeChild && (
                   <AllergyBanner child={activeChild} />
+                )}
+
+                {/* Overdue Vaccine Warning Banner */}
+                {activeChild && (
+                  <OverdueVaccineBanner 
+                    childId={activeChild.id} 
+                    childName={activeChild.name}
+                  />
                 )}
 
                 {/* 2. WEEKLY PLAN (Scrollable) */}

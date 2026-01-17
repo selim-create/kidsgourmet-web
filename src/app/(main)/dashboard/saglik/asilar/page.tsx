@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { useUser } from '@/hooks/use-user';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { vaccineService } from '@/services/vaccine-service';
-import { VaccineSchedule, VaccineRecord, VaccineSideEffects } from '@/lib/types';
+import { VaccineSchedule, VaccineRecord, VaccineSideEffects, AddPrivateVaccineRequest } from '@/lib/types';
 import VaccineTimeline from '@/components/features/vaccine/VaccineTimeline';
 import VaccineMarkDoneModal from '@/components/features/vaccine/VaccineMarkDoneModal';
 import SideEffectModal from '@/components/features/vaccine/SideEffectModal';
 import PrematureWarning from '@/components/features/vaccine/PrematureWarning';
+import PrivateVaccineWizard from '@/components/features/vaccine/PrivateVaccineWizard';
+import OverdueVaccineBanner from '@/components/features/vaccine/OverdueVaccineBanner';
 import { toast } from 'sonner';
 
 export default function VaccinePage() {
@@ -32,6 +34,8 @@ export default function VaccinePage() {
     record: VaccineRecord | null;
     fromMarkDone: boolean;
   }>({ isOpen: false, record: null, fromMarkDone: false });
+
+  const [privateVaccineWizard, setPrivateVaccineWizard] = useState(false);
 
   // Auth guard
   useEffect(() => {
@@ -113,7 +117,8 @@ export default function VaccinePage() {
   const handleSideEffectSubmit = async (
     sideEffects: VaccineSideEffects,
     severity: 'none' | 'mild' | 'moderate' | 'severe',
-    notes: string
+    notes: string,
+    feverTemp?: number
   ) => {
     if (!sideEffectModal.record) return;
 
@@ -136,6 +141,21 @@ export default function VaccinePage() {
     } catch (err) {
       console.error('Failed to report side effect:', err);
       toast.error('Yan etki bildirimi kaydedilemedi. Lütfen tekrar deneyin.');
+    }
+  };
+
+  // Handle private vaccine wizard
+  const handlePrivateVaccineSubmit = async (request: AddPrivateVaccineRequest) => {
+    if (!activeChild) return;
+
+    try {
+      const updatedSchedule = await vaccineService.addPrivateVaccine(request);
+      setSchedule(updatedSchedule);
+      setPrivateVaccineWizard(false);
+      toast.success('Özel aşı takvime eklendi!');
+    } catch (err) {
+      console.error('Failed to add private vaccine:', err);
+      toast.error('Özel aşı eklenemedi. Lütfen tekrar deneyin.');
     }
   };
 
@@ -214,13 +234,13 @@ export default function VaccinePage() {
               <i className="fa-solid fa-syringe text-green-500"></i>
               Aşı Takvimi
             </h1>
-            <Link
-              href="/dashboard/saglik/asilar/ozel-ekle"
+            <button
+              onClick={() => setPrivateVaccineWizard(true)}
               className="hidden md:flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-xl font-bold hover:bg-purple-600 transition-colors"
             >
               <i className="fa-solid fa-plus"></i>
               Özel Aşı Ekle
-            </Link>
+            </button>
           </div>
           
           {schedule && (
@@ -261,6 +281,16 @@ export default function VaccinePage() {
         {/* Premature Warning */}
         {schedule && <PrematureWarning isPremature={schedule.is_premature} />}
 
+        {/* Overdue Vaccine Banner */}
+        {schedule && schedule.stats.overdue > 0 && (
+          <div className="mb-6">
+            <OverdueVaccineBanner 
+              childId={activeChild.id} 
+              childName={activeChild.name}
+            />
+          </div>
+        )}
+
         {/* Timeline */}
         {schedule && (
           <VaccineTimeline
@@ -272,12 +302,12 @@ export default function VaccinePage() {
 
         {/* Mobile: Özel Aşı Ekle Button */}
         <div className="md:hidden fixed bottom-20 right-4 z-30">
-          <Link
-            href="/dashboard/saglik/asilar/ozel-ekle"
+          <button
+            onClick={() => setPrivateVaccineWizard(true)}
             className="flex items-center justify-center w-14 h-14 bg-purple-500 text-white rounded-full shadow-lg hover:bg-purple-600 transition-all hover:scale-105"
           >
             <i className="fa-solid fa-plus text-xl"></i>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -294,6 +324,13 @@ export default function VaccinePage() {
         record={sideEffectModal.record}
         onClose={() => setSideEffectModal({ isOpen: false, record: null, fromMarkDone: false })}
         onSubmit={handleSideEffectSubmit}
+      />
+
+      <PrivateVaccineWizard
+        isOpen={privateVaccineWizard}
+        childId={activeChild?.id || ''}
+        onClose={() => setPrivateVaccineWizard(false)}
+        onSubmit={handlePrivateVaccineSubmit}
       />
     </div>
   );
