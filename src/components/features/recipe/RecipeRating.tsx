@@ -14,6 +14,18 @@ interface RecipeRatingProps {
   currentUserRating?: number;
 }
 
+// Fake rating hesaplama (4.0 - 4.9 arası, recipe ID'ye göre deterministik)
+const generateFakeRating = (recipeId: number): number => {
+  // Recipe ID'ye göre deterministik fake rating (4.0 - 4.9 arası)
+  const seed = recipeId % 10;
+  return 4.0 + (seed / 10); // 4.0, 4.1, 4.2, ... 4.9
+};
+
+const generateFakeCount = (recipeId: number): number => {
+  // Recipe ID'ye göre deterministik fake count (10-150 arası)
+  return 10 + (recipeId % 141);
+};
+
 export default function RecipeRating({
   recipeId,
   recipeTitle = '',
@@ -21,8 +33,16 @@ export default function RecipeRating({
   initialRatingCount = 0,
   currentUserRating = 0,
 }: RecipeRatingProps) {
-  const [rating, setRating] = useState(initialRating);
-  const [ratingCount, setRatingCount] = useState(initialRatingCount);
+  const [rating, setRating] = useState(() => {
+    if (initialRating && initialRating > 0) return initialRating;
+    return generateFakeRating(recipeId);
+  });
+  
+  const [ratingCount, setRatingCount] = useState(() => {
+    if (initialRatingCount && initialRatingCount > 0) return initialRatingCount;
+    return generateFakeCount(recipeId);
+  });
+  
   const [userRating, setUserRating] = useState(currentUserRating);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);

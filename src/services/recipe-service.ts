@@ -430,7 +430,12 @@ export const recipeService = {
     rating_count: number;
     user_rating: number;
   }> => {
-    const response = await fetchAPI(`/kg/v1/recipes/${recipeId}/rate`, {
+    const response = await fetchAPI<{
+      success: boolean;
+      rating: number;
+      rating_count: number;
+      user_rating: number;
+    }>(`/kg/v1/recipes/${recipeId}/rate`, {
       method: 'POST',
       body: JSON.stringify({ rating }),
     });
