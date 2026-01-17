@@ -331,7 +331,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
         />
         
         {/* BREADCRUMB - Header altında kalmayacak şekilde padding ekle */}
-        <div className="bg-white border-b border-gray-100 pt-[calc(var(--header-height,80px)+5px)]">
+        <div className="bg-white border-b border-gray-100 pt-5">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
@@ -389,6 +389,15 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                           </span>
                         )}
                     </div>
+
+                    {/* Edit Button - Hover'da görünür, sadece yetkili kullanıcılara */}
+                    <EditButton 
+                      contentType="recipe" 
+                      contentId={recipe.id}
+                      authorId={recipe.author?.id}
+                      variant="text"
+                      className="top-4 right-4"
+                    />
 
                     {/* Video Button */}
                     {recipe.video_url && (

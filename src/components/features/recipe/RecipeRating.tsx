@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { recipeService } from '@/services/recipe-service';
 
 interface RecipeRatingProps {
   recipeId: number;
@@ -45,23 +46,19 @@ export default function RecipeRating({
     try {
       setIsSubmitting(true);
       
-      // TODO: API call to save rating
-      // const response = await ratingService.saveRating(recipeId, starValue);
+      // API call to save rating
+      const response = await recipeService.rateRecipe(recipeId, starValue);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Update local state
-      const oldUserRating = userRating;
-      const newTotalRating = (rating * ratingCount - oldUserRating + starValue) / (oldUserRating === 0 ? ratingCount + 1 : ratingCount);
-      
-      setUserRating(starValue);
-      setRating(newTotalRating);
-      if (oldUserRating === 0) {
-        setRatingCount(ratingCount + 1);
+      if (response.success) {
+        // Update local state with API response
+        setUserRating(response.user_rating);
+        setRating(response.rating);
+        setRatingCount(response.rating_count);
+        
+        toast.success('Puanınız kaydedildi! Teşekkürler 🌟');
+      } else {
+        toast.error('Puan kaydedilirken bir hata oluştu');
       }
-      
-      toast.success('Puanınız kaydedildi! Teşekkürler 🌟');
     } catch (error) {
       console.error('Rating error:', error);
       toast.error('Puan kaydedilirken bir hata oluştu');
