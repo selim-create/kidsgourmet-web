@@ -11,6 +11,8 @@ import { useMealTypes } from '@/hooks/useMealTypes';
 import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
+import { useActiveChild } from '@/contexts/ActiveChildContext';
+import { useBatchSafety } from '@/hooks/useSafetyCheck';
 
 // Yaş Grubu Sıralaması
 const AGE_GROUPS_ORDER = [
@@ -81,6 +83,11 @@ function RecipesPageContent() {
   const { profile } = useChildProfile();
   const { ageGroups } = useAgeGroups();
   const { mealTypes } = useMealTypes();
+  const { activeChild } = useActiveChild();
+  
+  // Batch safety check for recipes
+  const recipeIds = useMemo(() => recipes.map(r => r.id), [recipes]);
+  const { safetyResults } = useBatchSafety(recipeIds, activeChild?.id);
   
   // Filtre state
   const [filters, setFilters] = useState<FilterState>({
@@ -422,6 +429,7 @@ function RecipesPageContent() {
                           recipe={recipe} 
                           getAgeGroupColor={getAgeGroupColor}
                           showWarning={false}
+                          safetyStatus={safetyResults?.[recipe.id] || null}
                         />
                       ))}
                     </div>
@@ -439,6 +447,7 @@ function RecipesPageContent() {
                           recipe={recipe} 
                           getAgeGroupColor={getAgeGroupColor}
                           showWarning={true}
+                          safetyStatus={safetyResults?.[recipe.id] || null}
                         />
                       ))}
                     </div>
@@ -454,6 +463,7 @@ function RecipesPageContent() {
                         recipe={recipe} 
                         getAgeGroupColor={getAgeGroupColor}
                         showWarning={false}
+                        safetyStatus={safetyResults?.[recipe.id] || null}
                       />
                     ))}
                   </div>
@@ -654,17 +664,29 @@ interface RecipeCardComponentProps {
   recipe: RecipeCard;
   getAgeGroupColor: (ageGroupName: string) => string;
   showWarning: boolean;
+  safetyStatus?: {
+    is_safe: boolean;
+    safety_score: number;
+    critical_alerts_count: number;
+    warning_alerts_count: number;
+  } | null;
 }
 
 function RecipeCardComponent({ 
   recipe, 
   getAgeGroupColor,
-  showWarning 
+  showWarning,
+  safetyStatus
 }: RecipeCardComponentProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const isFav = isFavorite(recipe.id, 'recipe');
   
   const ageGroupColor = getAgeGroupColor(recipe.age_group);
+  
+  // Determine safety indicator
+  const hasSafetyConcerns = safetyStatus && !safetyStatus.is_safe;
+  const hasCriticalAlert = safetyStatus && safetyStatus.critical_alerts_count > 0;
+  const hasWarningAlert = safetyStatus && safetyStatus.warning_alerts_count > 0;
   
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -713,6 +735,16 @@ function RecipeCardComponent({
           {showWarning && (
             <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
               ⚠️
+            </span>
+          )}
+          {hasCriticalAlert && (
+            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
+              <i className="fa-solid fa-exclamation-circle"></i> Uygun Değil
+            </span>
+          )}
+          {!hasCriticalAlert && hasWarningAlert && (
+            <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
+              <i className="fa-solid fa-triangle-exclamation"></i> Dikkat
             </span>
           )}
         </div>
