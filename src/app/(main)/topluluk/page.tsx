@@ -59,6 +59,12 @@ export default function CommunityPage() {
   }
 
   const myCircles = circles.filter(c => c.is_following);
+  
+  // Helper function to get placeholder avatar colors for top contributors
+  const getContributorAvatarColor = (index: number): string => {
+    const colors = ['FFAB91', '80CBC4', 'CE93D8'];
+    return colors[index] || 'CE93D8';
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -325,7 +331,7 @@ export default function CommunityPage() {
                         {topContributors.map((contributor, index) => (
                           <div key={contributor.id} className="flex items-center gap-3">
                             <img 
-                              src={contributor.avatar || `https://placehold.co/100x100/${index === 0 ? 'FFAB91' : index === 1 ? '80CBC4' : 'CE93D8'}/ffffff?text=${contributor.name.charAt(0)}`} 
+                              src={contributor.avatar || `https://placehold.co/100x100/${getContributorAvatarColor(index)}/ffffff?text=${contributor.name.charAt(0)}`} 
                               className="w-8 h-8 rounded-full" 
                               alt={contributor.name} 
                             />
