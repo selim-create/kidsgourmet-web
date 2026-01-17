@@ -5,36 +5,6 @@ import Link from "next/link";
 import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 
-// Türkçe ay isimleri
-const turkishMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-                       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-
-// Ay -> Mevsim mapping
-const monthToSeason: Record<number, string[]> = {
-  0: ['Kış'],        // Ocak
-  1: ['Kış'],        // Şubat
-  2: ['İlkbahar'],   // Mart
-  3: ['İlkbahar'],   // Nisan
-  4: ['İlkbahar'],   // Mayıs
-  5: ['Yaz'],        // Haziran
-  6: ['Yaz'],        // Temmuz
-  7: ['Yaz'],        // Ağustos
-  8: ['Sonbahar'],   // Eylül
-  9: ['Sonbahar'],   // Ekim
-  10: ['Sonbahar'],  // Kasım
-  11: ['Kış'],       // Aralık
-};
-
-// Fisher-Yates shuffle algoritması
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
-
 // Kategori icon mapping'i genişlet
 const categoryIcons: Record<string, string> = {
   'Sebzeler': 'fa-carrot',
@@ -49,10 +19,29 @@ const categoryIcons: Record<string, string> = {
   'Özel Ürünler': 'fa-star',
 };
 
+// Yaş grubu renkleri (Tarifler sayfasındaki gibi)
+const AGE_GROUP_COLORS: { [key: string]: { bg: string; text: string } } = {
+  '6': { bg: 'bg-[#FFCCBC]', text: 'text-[#BF360C]' },   // 6 ay - Şeftali
+  '8': { bg: 'bg-[#C8E6C9]', text: 'text-[#2E7D32]' },   // 8 ay - Nane Yeşili
+  '9': { bg: 'bg-[#B3E5FC]', text: 'text-[#0277BD]' },   // 9 ay - Gökyüzü Mavisi
+  '12': { bg: 'bg-[#FFF9C4]', text: 'text-[#F57F17]' },  // 12 ay - Limon Sarısı
+  '24': { bg: 'bg-[#E1BEE7]', text: 'text-[#7B1FA2]' },  // 24 ay - Lila
+};
+
+// Mevsim ikonları ve renkleri
+const SEASON_CONFIG: { [key: string]: { icon: string; bg: string; text: string } } = {
+  'Kış': { icon: 'fa-snowflake', bg: 'bg-blue-100/90', text: 'text-blue-600' },
+  'İlkbahar': { icon: 'fa-seedling', bg: 'bg-green-100/90', text: 'text-green-600' },
+  'Yaz': { icon: 'fa-sun', bg: 'bg-yellow-100/90', text: 'text-yellow-600' },
+  'Sonbahar': { icon: 'fa-leaf', bg: 'bg-orange-100/90', text: 'text-orange-600' },
+  'Tüm Yıl': { icon: 'fa-calendar-check', bg: 'bg-purple-100/90', text: 'text-purple-600' },
+};
+
 const ITEMS_PER_PAGE = 12;
 
 export default function IngredientsGuidePage() {
   const [activeCategory, setActiveCategory] = useState("Tümü");
+  const [activeSeason, setActiveSeason] = useState("Tümü");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [categories, setCategories] = useState<string[]>(["Tümü"]);
   const [loading, setLoading] = useState(true);
@@ -61,9 +50,6 @@ export default function IngredientsGuidePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Ingredient[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
-  // Mevsimlik malzemeler
-  const [seasonalIngredients, setSeasonalIngredients] = useState<Ingredient[]>([]);
   
   // Favori state
   const [favorites, setFavorites] = useState<number[]>([]);
@@ -114,15 +100,6 @@ export default function IngredientsGuidePage() {
         }
         
         setIngredients(ingredientList);
-        
-        // Mevsimlik malzemeleri filtrele ve shuffle et
-        const currentMonth = new Date().getMonth();
-        const currentSeasons = monthToSeason[currentMonth];
-        const seasonalFiltered = ingredientList.filter(ing => 
-          ing.season && currentSeasons.some(season => ing.season?.includes(season))
-        );
-        const seasonal = shuffleArray(seasonalFiltered).slice(0, 6);
-        setSeasonalIngredients(seasonal);
         
       } catch (error) {
         console.error("Veri yüklenirken hata:", error);
@@ -203,15 +180,42 @@ export default function IngredientsGuidePage() {
     });
   };
 
+  // Yaş grubuna göre renk belirle
+  const getAgeGroupColor = (startAge: string | undefined) => {
+    if (!startAge) return AGE_GROUP_COLORS['6']; // Default
+    const ageNum = startAge.toString().match(/\d+/)?.[0];
+    if (!ageNum) return AGE_GROUP_COLORS['6'];
+    
+    const age = parseInt(ageNum);
+    const ageGroupKeys = Object.keys(AGE_GROUP_COLORS).map(Number).sort((a, b) => b - a);
+    
+    // En yakın yaş grubunu bul (büyükten küçüğe sıralı)
+    for (const threshold of ageGroupKeys) {
+      if (age >= threshold) {
+        return AGE_GROUP_COLORS[threshold.toString()];
+      }
+    }
+    
+    // Hiçbiri uymazsa en düşük yaş grubunu döndür
+    return AGE_GROUP_COLORS['6'];
+  };
+
+  // Mevsim badge bilgisi
+  const getSeasonBadge = (season: string | undefined) => {
+    if (!season) return null;
+    // Birden fazla mevsim varsa ilkini al
+    const seasonKey = season.split(',')[0].trim();
+    return SEASON_CONFIG[seasonKey] || SEASON_CONFIG['Tüm Yıl'];
+  };
+
   // Filtreleme logic
   const displayedIngredients = searchQuery.trim().length >= 2 
     ? searchResults
-    : activeCategory === "Tümü" 
-      ? ingredients 
-      : ingredients.filter(ing => ing.category === activeCategory);
-
-  // Şu anki ay
-  const currentMonth = turkishMonths[new Date().getMonth()];
+    : ingredients.filter(ing => {
+        const categoryMatch = activeCategory === "Tümü" || ing.category === activeCategory;
+        const seasonMatch = activeSeason === "Tümü" || ing.season?.includes(activeSeason);
+        return categoryMatch && seasonMatch;
+      });
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -224,7 +228,7 @@ export default function IngredientsGuidePage() {
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-100/50 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
 
           <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-              <h1 className="font-display font-bold text-3xl md:text-5xl text-slate-800 mb-4 font-sans">Malzeme Rehberi</h1>
+              <h1 className="font-display font-bold text-3xl md:text-5xl text-slate-800 mb-4 font-sans">Beslenme Rehberi</h1>
               <p className="text-gray-600 text-lg mb-8">
                   "Bebeğim neyi, ne zaman yiyebilir?" sorusunun cevabını uzman onaylı sözlüğümüzde arayın.
               </p>
@@ -257,62 +261,48 @@ export default function IngredientsGuidePage() {
           </div>
       </div>
 
-      {/* SEASONAL SPOTLIGHT (Overlap Effect) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20 mb-12">
-          <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-xl border border-gray-100">
-              <div className="flex items-center justify-between mb-6">
-                  <h2 className="font-display font-bold text-xl md:text-2xl text-slate-800 flex items-center font-sans">
-                      <i className="fa-solid fa-calendar-day text-orange-500 mr-3"></i> Bu Ayın Yıldızları ({currentMonth})
-                  </h2>
-                  <span className="text-xs font-bold text-orange-500 bg-orange-50 px-3 py-1 rounded-full uppercase tracking-wider">Mevsiminde Güzel</span>
-              </div>
-
-              {/* Horizontal Scroll Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-                  {seasonalIngredients.length > 0 ? (
-                    seasonalIngredients.map((ingredient) => (
-                      <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="group text-center">
-                          <div className="relative">
-                            <div className="w-16 h-16 md:w-20 md:h-20 mx-auto rounded-full bg-orange-100 mb-2 overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-all">
-                                <img src={ingredient.image || `https://placehold.co/150x150/FF8A65/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover" alt={ingredient.name} />
-                            </div>
-                            {/* Başlangıç Ayı Badge */}
-                            <div className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
-                              {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : `${ingredient.start_age}+`}
-                            </div>
-                          </div>
-                          <span className="text-sm font-bold text-slate-700 group-hover:text-orange-500 transition-colors">{ingredient.name}</span>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="col-span-2 sm:col-span-3 md:col-span-6 text-center text-gray-500 py-4">
-                      <p className="text-sm">Bu ay için mevsimlik malzeme bulunamadı.</p>
-                    </div>
-                  )}
-              </div>
-          </div>
-      </div>
-
       {/* MAIN CONTENT */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           
-          {/* Category Tabs */}
-          <div className="mb-8 -mx-4 px-4 overflow-x-auto scrollbar-hide">
-              <div className="flex gap-3 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
-                  {categories.map((cat) => (
-                      <button 
-                          key={cat}
-                          onClick={() => setActiveCategory(cat)}
-                          className={`px-5 py-2.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap ${
-                              activeCategory === cat 
-                              ? "bg-slate-800 text-white shadow-md transform scale-105" 
-                              : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
-                          }`}
-                      >
-                          {categoryIcons[cat] && <i className={`fa-solid ${categoryIcons[cat]}`}></i>}
-                          {cat}
-                      </button>
-                  ))}
+          {/* Category and Season Tabs */}
+          <div className="mb-8 space-y-4">
+              {/* Category Filters */}
+              <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
+                  <div className="flex gap-2 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
+                      {categories.map((cat) => (
+                          <button 
+                              key={cat}
+                              onClick={() => setActiveCategory(cat)}
+                              className={`px-3 py-1.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap text-sm ${
+                                  activeCategory === cat 
+                                  ? "bg-slate-800 text-white shadow-md transform scale-105" 
+                                  : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
+                              }`}
+                          >
+                              {categoryIcons[cat] && <i className={`fa-solid ${categoryIcons[cat]}`}></i>}
+                              {cat}
+                          </button>
+                      ))}
+                  </div>
+              </div>
+              
+              {/* Season Filter */}
+              <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
+                  <div className="flex gap-2 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
+                      {["Tümü", "Kış", "İlkbahar", "Yaz", "Sonbahar", "Tüm Yıl"].map((season) => (
+                          <button 
+                              key={season}
+                              onClick={() => setActiveSeason(season)}
+                              className={`px-3 py-1.5 rounded-full font-bold shadow-sm transition-all whitespace-nowrap text-sm ${
+                                  activeSeason === season 
+                                  ? "bg-green-500 text-white shadow-md transform scale-105" 
+                                  : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
+                              }`}
+                          >
+                              {season}
+                          </button>
+                      ))}
+                  </div>
               </div>
           </div>
 
@@ -324,66 +314,62 @@ export default function IngredientsGuidePage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
                 </div>
               ) : displayedIngredients.length > 0 ? (
-                displayedIngredients.map((ingredient) => (
-                  <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
-                      <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
-                          <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={ingredient.name} />
-                          
-                          {/* Başlangıç Yaşı Badge - Sol Üst */}
-                          <div className="absolute top-2 left-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
-                              <i className="fa-solid fa-baby text-green-500 mr-1"></i> 
-                              {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : ingredient.start_age ? `${ingredient.start_age} ay` : '6 ay'}
-                          </div>
-                          
-                          {/* Favori Butonu - Sağ Üst */}
-                          <button 
-                            onClick={(e) => toggleFavorite(e, ingredient.id)}
-                            className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
-                            aria-label={favorites.includes(ingredient.id) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
-                          >
-                            <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart ${favorites.includes(ingredient.id) ? 'text-red-500' : 'text-gray-400'}`}></i>
-                          </button>
-                          
-                          {/* Mevsim Badge - Sağ Alt (eğer mevsim varsa) */}
-                          {ingredient.season && ingredient.season !== 'Tüm Yıl' && (
-                            <div className="absolute bottom-2 right-2 bg-yellow-100/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-yellow-700 shadow-sm">
-                              <i className="fa-solid fa-sun mr-1"></i> {ingredient.season}
+                displayedIngredients.map((ingredient) => {
+                  const ageGroupColor = getAgeGroupColor(ingredient.start_age);
+                  const seasonBadge = getSeasonBadge(ingredient.season);
+                  
+                  return (
+                    <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
+                        <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
+                            <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={ingredient.name} />
+                            
+                            {/* Başlangıç Yaşı Badge - Sol Üst (Renkli) */}
+                            <div className={`absolute top-2 left-2 ${ageGroupColor.bg} backdrop-blur px-2 py-1 rounded-lg text-xs font-bold ${ageGroupColor.text} shadow-sm`}>
+                                {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : ingredient.start_age ? `${ingredient.start_age} ay` : '6 ay'}
                             </div>
-                          )}
-                      </div>
-                      
-                      {/* Kategori */}
-                      {ingredient.category && (
-                        <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1 block">
-                          {ingredient.category}
-                        </span>
-                      )}
-                      
-                      <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">{ingredient.name}</h3>
-                      <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ingredient.description}</p>
-                      
-                      {/* Alt badges - Alerjen ve Mevsim */}
-                      <div className="mt-auto flex items-center gap-2 flex-wrap">
-                        {/* Alerji Risk Badge */}
-                        <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
-                          ingredient.allergy_risk === 'Düşük' ? 'bg-green-100 text-green-700 border-green-200' :
-                          ingredient.allergy_risk === 'Orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                          'bg-red-100 text-red-700 border-red-200'
-                        }`}>
-                          {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
-                          {ingredient.allergy_risk || 'Düşük'} Alerjen
-                        </span>
+                            
+                            {/* Mevsim Badge - Sağ Alt (İkonlu) */}
+                            {seasonBadge && (
+                              <div className={`absolute bottom-2 right-2 ${seasonBadge.bg} backdrop-blur px-2 py-1 rounded-lg text-xs font-bold ${seasonBadge.text} shadow-sm flex items-center gap-1`}>
+                                <i className={`fa-solid ${seasonBadge.icon}`}></i>
+                                {ingredient.season?.split(',')[0].trim()}
+                              </div>
+                            )}
+                            
+                            {/* Favori Butonu - Sağ Üst (Konum sabit) */}
+                            <button 
+                              onClick={(e) => toggleFavorite(e, ingredient.id)}
+                              className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
+                              aria-label={favorites.includes(ingredient.id) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+                            >
+                              <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart ${favorites.includes(ingredient.id) ? 'text-red-500' : 'text-gray-400'}`}></i>
+                            </button>
+                        </div>
                         
-                        {/* Mevsim Badge (kart altında da göster) */}
-                        {ingredient.season && (
-                          <span className="text-[10px] font-bold px-2 py-1 rounded bg-blue-50 text-blue-600 border border-blue-100">
-                            <i className="fa-solid fa-leaf mr-1"></i>
-                            {ingredient.season}
+                        {/* Kategori - Card altına taşındı */}
+                        {ingredient.category && (
+                          <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1 block">
+                            {ingredient.category}
                           </span>
                         )}
-                      </div>
-                  </Link>
-                ))
+                        
+                        <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">{ingredient.name}</h3>
+                        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ingredient.description}</p>
+                        
+                        {/* Alt badge - Sadece Alerjen */}
+                        <div className="mt-auto">
+                          <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
+                            ingredient.allergy_risk === 'Düşük' ? 'bg-green-100 text-green-700 border-green-200' :
+                            ingredient.allergy_risk === 'Orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                            'bg-red-100 text-red-700 border-red-200'
+                          }`}>
+                            {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
+                            {ingredient.allergy_risk || 'Düşük'} Alerjen
+                          </span>
+                        </div>
+                    </Link>
+                  );
+                })
               ) : (
                 <div className="col-span-full text-center py-12">
                   <i className="fa-solid fa-search text-4xl text-gray-300 mb-4"></i>
