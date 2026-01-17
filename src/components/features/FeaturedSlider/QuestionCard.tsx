@@ -41,7 +41,8 @@ export default function QuestionCard({ item }: QuestionCardProps) {
     try {
       await toggleFavorite(item.id, 'discussion');
     } catch (error) {
-      console.error('Favori işlemi başarısız:', error);
+      // Error is already handled by the favorites context with a toast
+      // No need to log or handle it here
     }
   };
 

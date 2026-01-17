@@ -29,7 +29,7 @@ export default function AuthRequiredBanner({
           <p className="text-sm text-gray-600">{description}</p>
         </div>
         <Link 
-          href={`/giris?redirect=${redirectUrl}`}
+          href={`/login?redirect=${redirectUrl}`}
           className="px-4 py-2 bg-orange-500 text-white text-sm font-bold rounded-lg hover:bg-orange-600 transition-colors"
         >
           Giriş Yap
@@ -47,13 +47,13 @@ export default function AuthRequiredBanner({
         <p className="text-gray-600 text-sm mb-4">{description}</p>
         <div className="flex gap-2 justify-center">
           <Link 
-            href={`/giris?redirect=${redirectUrl}`}
+            href={`/login?redirect=${redirectUrl}`}
             className="px-4 py-2 bg-orange-500 text-white text-sm font-bold rounded-lg hover:bg-orange-600 transition-colors"
           >
             Giriş Yap
           </Link>
           <Link 
-            href={`/kayit-ol?redirect=${redirectUrl}`}
+            href={`/register?redirect=${redirectUrl}`}
             className="px-4 py-2 bg-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-300 transition-colors"
           >
             Kayıt Ol
@@ -73,14 +73,14 @@ export default function AuthRequiredBanner({
       <p className="text-gray-600 mb-6 max-w-md mx-auto">{description}</p>
       <div className="flex gap-3 justify-center">
         <Link 
-          href={`/giris?redirect=${redirectUrl}`}
+          href={`/login?redirect=${redirectUrl}`}
           className="px-6 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition-colors shadow-md"
         >
           <i className="fa-solid fa-right-to-bracket mr-2"></i>
           Giriş Yap
         </Link>
         <Link 
-          href={`/kayit-ol?redirect=${redirectUrl}`}
+          href={`/register?redirect=${redirectUrl}`}
           className="px-6 py-3 bg-white text-orange-500 font-bold rounded-xl hover:bg-gray-50 transition-colors border border-orange-200"
         >
           Kayıt Ol

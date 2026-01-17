@@ -74,7 +74,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
       toast.error('Bu özelliği kullanmak için giriş yapmalısınız', {
         action: {
           label: 'Giriş Yap',
-          onClick: () => router.push('/giris?redirect=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : ''))
+          onClick: () => router.push('/login?redirect=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : ''))
         }
       });
       return;

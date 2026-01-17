@@ -69,6 +69,10 @@ export const API_ENDPOINTS = {
   USER_DISCUSSIONS: `${KG_API_NAMESPACE}/user/discussions`,
   FEED: `${KG_API_NAMESPACE}/feed`,
   
+  // Comments (using custom endpoint for JWT auth compatibility)
+  COMMENTS: `${KG_API_NAMESPACE}/comments`,
+  COMMENTS_BY_POST: (postId: number) => `${KG_API_NAMESPACE}/comments?post=${postId}`,
+  
   // Expert & Public Profile Endpoints
   USER_ME: `${KG_API_NAMESPACE}/user/me`,
   USER_PUBLIC: (username: string) => `${KG_API_NAMESPACE}/user/public/${username}`,

@@ -95,7 +95,7 @@ export default function ShoppingListPage() {
           <i className="fa-solid fa-lock text-4xl text-gray-400 mb-4"></i>
           <h2 className="text-xl font-bold text-slate-800 mb-2">Giriş Yapmanız Gerekiyor</h2>
           <p className="text-gray-600 mb-4">Alışveriş listenizi görüntülemek için giriş yapın</p>
-          <Link href="/giris" className="bg-orange-500 text-white px-6 py-2 rounded-xl font-bold">
+          <Link href="/login" className="bg-orange-500 text-white px-6 py-2 rounded-xl font-bold">
             Giriş Yap
           </Link>
         </div>
