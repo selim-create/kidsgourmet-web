@@ -67,9 +67,9 @@ export default function RecipeCard({ item }: RecipeCardProps) {
             >
               {decodeEntities(item.meta?.age_group || '+6 Ay')}
             </span>
-            {item.meta?.diet_type && (
+            {item.meta?.diet_types && item.meta.diet_types.length > 0 && (
               <span className="text-xs text-gray-500">
-                <i className="fa-solid fa-leaf mr-1"></i>{decodeEntities(item.meta.diet_type)}
+                <i className="fa-solid fa-leaf mr-1"></i>{decodeEntities(item.meta.diet_types[0])}
               </span>
             )}
           </div>
