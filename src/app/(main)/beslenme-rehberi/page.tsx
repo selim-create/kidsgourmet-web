@@ -5,36 +5,6 @@ import Link from "next/link";
 import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 
-// Türkçe ay isimleri (not used but kept for future use)
-// const turkishMonths = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
-//                        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-
-// Ay -> Mevsim mapping (not used but kept for future use)
-// const monthToSeason: Record<number, string[]> = {
-//   0: ['Kış'],        // Ocak
-//   1: ['Kış'],        // Şubat
-//   2: ['İlkbahar'],   // Mart
-//   3: ['İlkbahar'],   // Nisan
-//   4: ['İlkbahar'],   // Mayıs
-//   5: ['Yaz'],        // Haziran
-//   6: ['Yaz'],        // Temmuz
-//   7: ['Yaz'],        // Ağustos
-//   8: ['Sonbahar'],   // Eylül
-//   9: ['Sonbahar'],   // Ekim
-//   10: ['Sonbahar'],  // Kasım
-//   11: ['Kış'],       // Aralık
-// };
-
-// Fisher-Yates shuffle algoritması (not used but kept for future use)
-// const shuffleArray = <T,>(array: T[]): T[] => {
-//   const shuffled = [...array];
-//   for (let i = shuffled.length - 1; i > 0; i--) {
-//     const j = Math.floor(Math.random() * (i + 1));
-//     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-//   }
-//   return shuffled;
-// };
-
 // Kategori icon mapping'i genişlet
 const categoryIcons: Record<string, string> = {
   'Sebzeler': 'fa-carrot',
@@ -216,11 +186,17 @@ export default function IngredientsGuidePage() {
     const ageNum = startAge.toString().match(/\d+/)?.[0];
     if (!ageNum) return AGE_GROUP_COLORS['6'];
     
-    // En yakın yaş grubunu bul
-    if (parseInt(ageNum) >= 24) return AGE_GROUP_COLORS['24'];
-    if (parseInt(ageNum) >= 12) return AGE_GROUP_COLORS['12'];
-    if (parseInt(ageNum) >= 9) return AGE_GROUP_COLORS['9'];
-    if (parseInt(ageNum) >= 8) return AGE_GROUP_COLORS['8'];
+    const age = parseInt(ageNum);
+    const ageGroupKeys = Object.keys(AGE_GROUP_COLORS).map(Number).sort((a, b) => b - a);
+    
+    // En yakın yaş grubunu bul (büyükten küçüğe sıralı)
+    for (const threshold of ageGroupKeys) {
+      if (age >= threshold) {
+        return AGE_GROUP_COLORS[threshold.toString()];
+      }
+    }
+    
+    // Hiçbiri uymazsa en düşük yaş grubunu döndür
     return AGE_GROUP_COLORS['6'];
   };
 
