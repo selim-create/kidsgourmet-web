@@ -11,6 +11,7 @@ import { mealPlanService } from '@/services/meal-plan-service';
 import { recipeService } from '@/services/recipe-service';
 import { toast } from 'sonner';
 import PersonalizedRecipePool from '@/components/features/recommendations/PersonalizedRecipePool';
+import DashboardSidebar from '@/components/layout/DashboardSidebar';
 
 // Constants
 const SEARCH_DEBOUNCE_MS = 300;
@@ -400,43 +401,7 @@ export default function WeeklyPlanPage() {
     <div className="flex min-h-screen relative">
 
         {/* DESKTOP SIDEBAR */}
-        <aside className="hidden lg:flex w-64 bg-white border-r border-gray-100 flex-col sticky top-20 h-[calc(100vh-5rem)] z-10 overflow-y-auto">
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-house"></i> Genel Bakış
-                </Link>
-                <Link href="/dashboard/haftalik-plan" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-100 text-orange-500 font-bold">
-                    <i className="fa-solid fa-calendar-days"></i> Haftalık Plan
-                </Link>
-                <Link href="/favoriler" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-heart"></i> Favorilerim
-                </Link>
-                <Link href="/alisveris-listesi" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-basket-shopping"></i> Alışveriş Listesi
-                </Link>
-                
-                <div className="pt-6 pb-2">
-                    <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Araçlar</p>
-                </div>
-                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-chart-line"></i> Gelişim Takibi
-                </Link>
-                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-check-double"></i> BLW Testi
-                </Link>
-            </nav>
-
-            <div className="p-4 border-t border-gray-50 mt-auto">
-                <Link href="/profil" className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors">
-                    <img src={user?.avatar_url || 'https://placehold.co/100x100/FFCC80/ffffff?text=U'} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User" />
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 truncate">{user?.display_name}</p>
-                        <p className="text-xs text-gray-400 truncate">Hesabım</p>
-                    </div>
-                    <i className="fa-solid fa-chevron-right text-xs text-gray-300"></i>
-                </Link>
-            </div>
-        </aside>
+        <DashboardSidebar activePage="haftalik-plan" />
 
         {/* MAIN CONTENT */}
         <main className="flex-1 w-full min-w-0 flex flex-col h-screen overflow-hidden">

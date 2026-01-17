@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { UpcomingVaccine } from '@/lib/types';
 import { vaccineService } from '@/services/vaccine-service';
@@ -16,37 +16,37 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUpcomingVaccines = async () => {
-      if (!childId) {
-        setIsLoading(false);
-        return;
-      }
+  const fetchUpcomingVaccines = useCallback(async () => {
+    if (!childId) {
+      setIsLoading(false);
+      return;
+    }
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        const vaccines = await vaccineService.getUpcomingVaccines(childId);
-        
-        // Defense in depth: ensure array even though service guarantees it
-        const vaccineArray = Array.isArray(vaccines) ? vaccines : [];
-        setUpcomingVaccines(vaccineArray.slice(0, 3)); // Show max 3
-        
-        // Safe filter operation
-        const overdue = vaccineArray.filter(v => v?.is_overdue).length;
-        setOverdueCount(overdue);
-      } catch (err) {
-        console.error('Failed to fetch upcoming vaccines:', err);
-        setError('Aşı bilgileri yüklenemedi');
-        setUpcomingVaccines([]);
-        setOverdueCount(0);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUpcomingVaccines();
+    try {
+      setIsLoading(true);
+      setError(null);
+      const vaccines = await vaccineService.getUpcomingVaccines(childId);
+      
+      // Defense in depth: ensure array even though service guarantees it
+      const vaccineArray = Array.isArray(vaccines) ? vaccines : [];
+      setUpcomingVaccines(vaccineArray.slice(0, 3)); // Show max 3
+      
+      // Safe filter operation
+      const overdue = vaccineArray.filter(v => v?.is_overdue).length;
+      setOverdueCount(overdue);
+    } catch (err) {
+      console.error('Failed to fetch upcoming vaccines:', err);
+      setError('Aşı bilgileri yüklenemedi');
+      setUpcomingVaccines([]);
+      setOverdueCount(0);
+    } finally {
+      setIsLoading(false);
+    }
   }, [childId]);
+
+  useEffect(() => {
+    fetchUpcomingVaccines();
+  }, [fetchUpcomingVaccines]);
 
   if (!childId) {
     return null;
@@ -72,9 +72,21 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <i className="fa-solid fa-syringe text-green-500"></i>
-          <h3 className="font-bold text-slate-800">Sıradaki Aşı</h3>
+          <h3 className="font-bold text-slate-800">Aşı Takvimi</h3>
         </div>
-        <p className="text-sm text-gray-500">{error}</p>
+        <div className="text-center py-4">
+          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i className="fa-solid fa-exclamation-triangle text-red-500 text-lg"></i>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchUpcomingVaccines}
+            className="bg-green-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors"
+          >
+            <i className="fa-solid fa-rotate-right mr-2"></i>
+            Tekrar Dene
+          </button>
+        </div>
       </div>
     );
   }
@@ -84,17 +96,22 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
       <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <i className="fa-solid fa-syringe text-green-500"></i>
-          <h3 className="font-bold text-slate-800">Sıradaki Aşı</h3>
+          <h3 className="font-bold text-slate-800">Aşı Takvimi</h3>
         </div>
-        <p className="text-sm text-gray-600 mb-4">
-          {childName || 'Çocuk'} için yakında planlanmış aşı bulunmuyor.
-        </p>
-        <Link
-          href="/dashboard/saglik/asilar"
-          className="block w-full bg-green-500 text-white text-center py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors"
-        >
-          Aşı Takvimini Gör
-        </Link>
+        <div className="text-center py-4">
+          <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i className="fa-solid fa-check-circle text-green-500 text-lg"></i>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            {childName || 'Çocuk'} için yakında planlanmış aşı bulunmuyor.
+          </p>
+          <Link
+            href="/dashboard/saglik/asilar"
+            className="block w-full bg-green-500 text-white text-center py-2 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors"
+          >
+            Aşı Takvimini Gör
+          </Link>
+        </div>
       </div>
     );
   }

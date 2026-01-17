@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
@@ -16,6 +16,7 @@ import DailyRecommendations from "@/components/features/recommendations/DailyRec
 import NutritionSummaryCard from "@/components/features/nutrition/NutritionSummaryCard";
 import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrientsAlert";
 import FoodIntroductionCard from "@/components/features/food-introduction/FoodIntroductionCard";
+import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -27,6 +28,25 @@ export default function DashboardPage() {
   const [solidFoodResults, setSolidFoodResults] = useState<SolidFoodReadinessResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Calculate week days dynamically
+  const weekDays = useMemo(() => {
+    const today = new Date();
+    const daysOfWeek = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    
+    return Array.from({ length: 5 }, (_, i) => {
+      const dayDate = new Date(today);
+      dayDate.setDate(today.getDate() + i);
+      const dayOfWeek = dayDate.getDay();
+      const isToday = i === 0;
+      
+      return {
+        dayName: daysOfWeek[dayOfWeek],
+        dayNumber: dayDate.getDate(),
+        isToday
+      };
+    });
+  }, []);
 
   // Helper function: Format date with fallback for invalid dates
   const formatDate = (dateStr: string): string => {
@@ -124,61 +144,7 @@ export default function DashboardPage() {
     <div className="flex min-h-screen relative">
 
         {/* DESKTOP SIDEBAR */}
-        <aside className="hidden lg:flex w-64 bg-white border-r border-gray-100 flex-col sticky top-20 h-[calc(100vh-5rem)] z-10 overflow-y-auto">
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                {/* Localde Link kullanın */}
-                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-100 text-orange-500 font-bold">
-                    <i className="fa-solid fa-house"></i> Genel Bakış
-                </Link>
-                <Link href="/dashboard/haftalik-plan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-calendar-days"></i> Haftalık Plan
-                </Link>
-                <Link href="/favoriler" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-heart"></i> Favorilerim
-                </Link>
-                <Link href="/alisveris-listesi" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-basket-shopping"></i> Alışveriş Listesi
-                </Link>
-                
-                <div className="pt-6 pb-2">
-                    <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Sağlık</p>
-                </div>
-                <Link href="/dashboard/saglik/asilar" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-syringe"></i> Aşı Takvimi
-                </Link>
-                <Link href="/akilli-asistan/persentil" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-chart-line"></i> Büyüme Takibi
-                </Link>
-                
-                <div className="pt-6 pb-2">
-                    <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Araçlar</p>
-                </div>
-                <Link href="/akilli-asistan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-toolbox"></i> Akıllı Asistan
-                </Link>
-                <Link href="/akilli-asistan/blw-testi" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-check-double"></i> BLW Testi
-                </Link>
-            </nav>
-
-            {/* User Profile (Bottom) */}
-            <div className="p-4 border-t border-gray-50 mt-auto">
-                <Link href="/profil" className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors">
-                    {user?.avatar_url ? (
-                      <img src={user.avatar_url} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User" />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold">
-                        {user?.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?'}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 truncate">{user?.display_name || user?.name}</p>
-                        <p className="text-xs text-gray-400 truncate">Hesabım</p>
-                    </div>
-                    <i className="fa-solid fa-chevron-right text-xs text-gray-300"></i>
-                </Link>
-            </div>
-        </aside>
+        <DashboardSidebar activePage="dashboard" />
 
         {/* MAIN CONTENT AREA */}
         <main className="flex-1 w-full min-w-0">
@@ -333,19 +299,22 @@ export default function DashboardPage() {
                           <Link href="/dashboard/haftalik-plan" className="text-sm font-bold text-orange-500 hover:underline">Tümünü Gör</Link>
                       </div>
 
-                      {/* Days Navigation */}
+                      {/* Days Navigation - Dynamic */}
                       <div className="flex gap-2 overflow-x-auto pb-4 hide-scroll scrollbar-hide">
-                          {/* Active Day */}
-                          <button className="flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 bg-orange-500 text-white rounded-2xl shadow-md transition-transform transform scale-105">
-                              <span className="text-xs font-medium opacity-80">Pzt</span>
-                              <span className="text-lg font-bold">12</span>
-                          </button>
-                          {/* Other Days */}
-                          {['Sal', 'Çar', 'Per', 'Cum'].map((day, index) => (
-                              <button key={day} className="flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 bg-white border border-gray-100 text-gray-400 rounded-2xl hover:border-orange-500/50 hover:text-orange-500 transition-all">
-                                  <span className="text-xs font-medium">{day}</span>
-                                  <span className="text-lg font-bold">{13 + index}</span>
-                              </button>
+                          {weekDays.map((day, index) => (
+                            <button 
+                              key={index}
+                              className={`flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 rounded-2xl transition-all ${
+                                day.isToday 
+                                  ? 'bg-orange-500 text-white shadow-md transform scale-105' 
+                                  : 'bg-white border border-gray-100 text-gray-400 hover:border-orange-500/50 hover:text-orange-500'
+                              }`}
+                            >
+                              <span className={`text-xs font-medium ${day.isToday ? 'opacity-80' : ''}`}>
+                                {day.dayName}
+                              </span>
+                              <span className="text-lg font-bold">{day.dayNumber}</span>
+                            </button>
                           ))}
                       </div>
 

@@ -8,6 +8,7 @@ import { userService } from "@/services/user-service";
 import { Child, SocialLinks } from "@/lib/types";
 import ChildWizard from "@/components/features/ChildWizard";
 import { toast } from "sonner";
+import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
@@ -236,35 +237,7 @@ export default function ProfileSettingsPage() {
     <div className="flex min-h-screen relative">
 
         {/* DESKTOP SIDEBAR */}
-        <aside className="hidden lg:flex w-64 bg-white border-r border-gray-100 flex-col sticky top-20 h-[calc(100vh-5rem)] z-10 overflow-y-auto">
-            <nav className="flex-1 px-4 py-6 space-y-2">
-                {/* Localde Link kullanın */}
-                <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-house"></i> Genel Bakış
-                </Link>
-                <Link href="/dashboard/haftalik-plan" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-calendar-days"></i> Haftalık Plan
-                </Link>
-                <Link href="/favoriler" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-heart"></i> Favorilerim
-                </Link>
-                <div className="pt-6 pb-2">
-                    <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Hesap</p>
-                </div>
-                <Link href="/profil" className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-100 text-orange-500 font-bold">
-                    <i className="fa-solid fa-user"></i> Profilim
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-slate-800 font-medium transition-colors">
-                    <i className="fa-solid fa-credit-card"></i> Abonelik
-                </Link>
-            </nav>
-
-            <div className="p-4 border-t border-gray-50 mt-auto">
-                <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold">
-                    <i className="fa-solid fa-arrow-right-from-bracket"></i> Çıkış Yap
-                </button>
-            </div>
-        </aside>
+        <DashboardSidebar activePage="profil" />
 
         {/* MAIN CONTENT */}
         <main className="flex-1 w-full min-w-0">
