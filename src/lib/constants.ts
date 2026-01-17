@@ -68,6 +68,7 @@ export const API_ENDPOINTS = {
   DISCUSSION_COMMENTS: (id: number) => `${KG_API_NAMESPACE}/discussions/${id}/comments`,
   USER_DISCUSSIONS: `${KG_API_NAMESPACE}/user/discussions`,
   FEED: `${KG_API_NAMESPACE}/feed`,
+  TOP_CONTRIBUTORS: `${KG_API_NAMESPACE}/community/top-contributors`,
   
   // Comments (using custom endpoint for JWT auth compatibility)
   // WordPress standard /wp/v2/comments endpoint doesn't accept JWT tokens for authentication

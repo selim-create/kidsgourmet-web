@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
-import { getDiscussionBySlug, getDiscussionComments, addComment } from '@/lib/community';
+import { getDiscussionBySlug, getDiscussionComments, addComment, getDiscussions } from '@/lib/community';
 import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
 import type { Discussion, DiscussionComment } from '@/lib/types';
 import { EditButton } from '@/components/ui/EditButton';
@@ -14,6 +14,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   
   const [discussion, setDiscussion] = useState<Discussion | null>(null);
   const [comments, setComments] = useState<DiscussionComment[]>([]);
+  const [relatedDiscussions, setRelatedDiscussions] = useState<Discussion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
@@ -32,6 +33,24 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         // Then fetch comments with the discussion ID
         const fetchedComments = await getDiscussionComments(discussionData.id);
         setComments(fetchedComments);
+        
+        // Fetch related discussions from the same circle
+        if (discussionData.circle) {
+          try {
+            const relatedData = await getDiscussions({
+              circle_id: discussionData.circle.id,
+              per_page: 4 // Get 4 so we can exclude current and show 3
+            });
+            // Filter out current discussion and limit to 3
+            const filtered = relatedData.discussions
+              .filter(d => d.id !== discussionData.id)
+              .slice(0, 3);
+            setRelatedDiscussions(filtered);
+          } catch (relErr) {
+            console.error('Error fetching related discussions:', relErr);
+            // Don't set error state, just leave related empty
+          }
+        }
       } catch (err) {
         console.error('Error fetching discussion:', err);
         setError('Tartışma yüklenirken bir hata oluştu.');
@@ -267,22 +286,53 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                     {/* Related Discussions */}
                     <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                         <h3 className="font-bold text-slate-800 text-sm mb-4">Benzer Konular</h3>
-                        <div className="space-y-4">
-                            <Link href="#" className="block group">
-                                <h4 className="text-sm font-medium text-slate-700 group-hover:text-orange-500 transition-colors line-clamp-2">Süt alerjisi olan bebekler için yoğurt alternatifi?</h4>
-                                <p className="text-xs text-gray-400 mt-1">12 Cevap</p>
-                            </Link>
-                            <hr className="border-gray-50" />
-                            <Link href="#" className="block group">
-                                <h4 className="text-sm font-medium text-slate-700 group-hover:text-orange-500 transition-colors line-clamp-2">Alerji testi kaçıncı ayda yapılmalı?</h4>
-                                <p className="text-xs text-gray-400 mt-1">5 Cevap</p>
-                            </Link>
-                            <hr className="border-gray-50" />
-                            <Link href="#" className="block group">
-                                <h4 className="text-sm font-medium text-slate-700 group-hover:text-orange-500 transition-colors line-clamp-2">Ek gıdada kuruyemiş ne zaman verilir?</h4>
-                                <p className="text-xs text-gray-400 mt-1">28 Cevap</p>
-                            </Link>
-                        </div>
+                        {relatedDiscussions.length === 0 ? (
+                          <p className="text-xs text-gray-400">Benzer konu bulunamadı</p>
+                        ) : (
+                          <div className="space-y-4">
+                            {relatedDiscussions.map((related, index) => (
+                              <React.Fragment key={related.id}>
+                                {index > 0 && <hr className="border-gray-50" />}
+                                <Link href={`/topluluk/${related.slug}`} className="block group">
+                                  <h4 className="text-sm font-medium text-slate-700 group-hover:text-orange-500 transition-colors line-clamp-2">
+                                    {related.title}
+                                  </h4>
+                                  <p className="text-xs text-gray-400 mt-1">{related.comment_count} Cevap</p>
+                                </Link>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        )}
+                    </div>
+
+                    {/* Faydalı Araçlar Widget */}
+                    <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
+                      <h3 className="font-bold text-slate-800 mb-4 flex items-center text-sm uppercase tracking-wider">
+                        <i className="fa-solid fa-wand-magic-sparkles text-orange-500 mr-2"></i> 
+                        Faydalı Araçlar
+                      </h3>
+                      <div className="space-y-2">
+                        {[
+                          { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: 'fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
+                          { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: 'fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
+                          { name: 'Su İhtiyacı', slug: 'su-ihtiyaci', icon: 'fa-droplet', color: 'text-cyan-500', bg: 'bg-cyan-50' },
+                          { name: 'Bu Gıda Verilir mi?', slug: 'bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'text-amber-500', bg: 'bg-amber-50' },
+                        ].map((tool) => (
+                          <Link
+                            key={tool.slug}
+                            href={`/akilli-asistan/${tool.slug}`}
+                            className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                          >
+                            <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center`}>
+                              <i className={`fa-solid ${tool.icon} ${tool.color}`}></i>
+                            </div>
+                            <span className="font-medium text-slate-700 group-hover:text-orange-500 transition-colors text-sm">
+                              {tool.name}
+                            </span>
+                            <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                          </Link>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Guidelines Widget */}

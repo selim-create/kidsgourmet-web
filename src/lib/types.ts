@@ -544,6 +544,14 @@ export interface CreateDiscussionResponse {
   status: 'pending';
 }
 
+export interface TopContributor {
+  id: number;
+  name: string;
+  avatar: string | null;
+  contribution_count: number;
+  rank: number;
+}
+
 // ==================== PUBLIC PROFILE & EXPERT DASHBOARD ====================
 
 export interface PublicProfile {

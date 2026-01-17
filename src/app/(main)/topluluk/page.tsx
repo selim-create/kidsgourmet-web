@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
-import { getCircles, getDiscussions } from '@/lib/community';
+import { getCircles, getDiscussions, getTopContributors } from '@/lib/community';
 import { formatRelativeTime } from '@/utils/helpers';
-import type { Circle, Discussion } from '@/lib/types';
+import type { Circle, Discussion, TopContributor } from '@/lib/types';
 
 export default function CommunityPage() {
   const [circles, setCircles] = useState<Circle[]>([]);
   const [discussions, setDiscussions] = useState<Discussion[]>([]);
+  const [topContributors, setTopContributors] = useState<TopContributor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCircleId, setSelectedCircleId] = useState<number | null>(null);
@@ -19,13 +20,15 @@ export default function CommunityPage() {
         setLoading(true);
         setError(null);
         
-        const [circlesData, discussionsData] = await Promise.all([
+        const [circlesData, discussionsData, contributorsData] = await Promise.all([
           getCircles(),
-          getDiscussions({ per_page: 20 })
+          getDiscussions({ per_page: 20 }),
+          getTopContributors(3)
         ]);
         
         setCircles(circlesData);
         setDiscussions(discussionsData.discussions);
+        setTopContributors(contributorsData);
       } catch (err) {
         console.error('Error fetching community data:', err);
         setError('Veriler yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.');
@@ -313,30 +316,28 @@ export default function CommunityPage() {
                 {/* Top Contributors */}
                 <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
                     <h3 className="font-bold text-slate-800 text-sm mb-4">Haftanın Anneleri 👑</h3>
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                            <img src="https://placehold.co/100x100/FFAB91/ffffff?text=1" className="w-8 h-8 rounded-full" alt="User 1" />
+                    {loading ? (
+                      <div className="text-xs text-gray-400">Yükleniyor...</div>
+                    ) : topContributors.length === 0 ? (
+                      <div className="text-xs text-gray-400">Henüz veri yok</div>
+                    ) : (
+                      <div className="space-y-4">
+                        {topContributors.map((contributor, index) => (
+                          <div key={contributor.id} className="flex items-center gap-3">
+                            <img 
+                              src={contributor.avatar || `https://placehold.co/100x100/${index === 0 ? 'FFAB91' : index === 1 ? '80CBC4' : 'CE93D8'}/ffffff?text=${contributor.name.charAt(0)}`} 
+                              className="w-8 h-8 rounded-full" 
+                              alt={contributor.name} 
+                            />
                             <div className="flex-1">
-                                <p className="text-xs font-bold text-slate-700">Selin K.</p>
-                                <p className="text-[10px] text-gray-400">150+ Katkı</p>
+                              <p className="text-xs font-bold text-slate-700">{contributor.name}</p>
+                              <p className="text-[10px] text-gray-400">{contributor.contribution_count}+ Katkı</p>
                             </div>
-                            <i className="fa-solid fa-award text-yellow-400"></i>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <img src="https://placehold.co/100x100/80CBC4/ffffff?text=2" className="w-8 h-8 rounded-full" alt="User 2" />
-                            <div className="flex-1">
-                                <p className="text-xs font-bold text-slate-700">Zeynep A.</p>
-                                <p className="text-[10px] text-gray-400">120+ Katkı</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <img src="https://placehold.co/100x100/CE93D8/ffffff?text=3" className="w-8 h-8 rounded-full" alt="User 3" />
-                            <div className="flex-1">
-                                <p className="text-xs font-bold text-slate-700">Berna T.</p>
-                                <p className="text-[10px] text-gray-400">95+ Katkı</p>
-                            </div>
-                        </div>
-                    </div>
+                            {index === 0 && <i className="fa-solid fa-award text-yellow-400"></i>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                 </div>
 
             </aside>
