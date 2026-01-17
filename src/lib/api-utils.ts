@@ -46,7 +46,8 @@ export function ensureArray<T>(value: unknown): T[] {
   if (value === null || value === undefined) {
     return [];
   }
-  // Convert single item to array
+  // Convert single item to array - log warning about unexpected structure
+  console.warn('ensureArray: Converting non-array value to array. This may indicate an API structure mismatch.', value);
   return [value as T];
 }
 

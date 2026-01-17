@@ -125,6 +125,6 @@ export const vaccineService = {
   async getOverdueVaccines(childId: string): Promise<UpcomingVaccine[]> {
     const vaccines = await this.getUpcomingVaccines(childId);
     // getUpcomingVaccines guarantees array return after processing
-    return vaccines.filter((v: UpcomingVaccine) => v?.is_overdue === true);
+    return vaccines.filter((v: UpcomingVaccine) => v?.is_overdue);
   },
 };

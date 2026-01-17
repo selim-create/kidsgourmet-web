@@ -33,7 +33,7 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
         setUpcomingVaccines(vaccineArray.slice(0, 3)); // Show max 3
         
         // Safe filter operation
-        const overdue = vaccineArray.filter(v => v?.is_overdue === true).length;
+        const overdue = vaccineArray.filter(v => v?.is_overdue).length;
         setOverdueCount(overdue);
       } catch (err) {
         console.error('Failed to fetch upcoming vaccines:', err);
