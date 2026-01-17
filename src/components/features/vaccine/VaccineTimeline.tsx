@@ -22,10 +22,13 @@ export default function VaccineTimeline({
     const groups: { [key: string]: VaccineRecord[] } = {};
     
     vaccines.forEach(record => {
-      const timing = record.vaccine.timing_rule;
+      const timing = record.vaccine?.timing_rule;
       let period = 'Diğer';
       
-      if (timing.type === 'birth') {
+      // Null/undefined check ekle
+      if (!timing) {
+        period = '📋 Özel Aşılar';
+      } else if (timing.type === 'birth') {
         period = '🍼 Yenidoğan (0-1 ay)';
       } else if (timing.type === 'month' && timing.value !== undefined) {
         const month = timing.value;
@@ -41,6 +44,8 @@ export default function VaccineTimeline({
         else period = `📅 ${month}. Ay`;
       } else if (timing.type === 'week' && timing.value !== undefined) {
         period = `📆 ${timing.value}. Hafta`;
+      } else if (timing.type === 'custom') {
+        period = '📋 Özel Aşılar';
       }
       
       if (!groups[period]) {
@@ -66,6 +71,7 @@ export default function VaccineTimeline({
     '🌈 2-4 Yaş',
     '🎓 4-6 Yaş',
     '📚 6+ Yaş',
+    '📋 Özel Aşılar',
   ];
   
   // Sort periods chronologically using the predefined order

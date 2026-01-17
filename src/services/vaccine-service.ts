@@ -40,8 +40,8 @@ export const vaccineService = {
   /**
    * Mark a vaccine as done
    */
-  async markVaccineDone(request: MarkVaccineDoneRequest): Promise<VaccineSchedule> {
-    return fetchAuthAPI<VaccineSchedule>(API_ENDPOINTS.VACCINES_MARK_DONE, {
+  async markVaccineDone(request: MarkVaccineDoneRequest): Promise<void> {
+    await fetchAuthAPI<unknown>(API_ENDPOINTS.VACCINES_MARK_DONE, {
       method: 'POST',
       body: JSON.stringify(request),
     });
@@ -60,8 +60,8 @@ export const vaccineService = {
   /**
    * Add a private vaccine (Rotavirus, Meningococcal, etc.)
    */
-  async addPrivateVaccine(request: AddPrivateVaccineRequest): Promise<VaccineSchedule> {
-    return fetchAuthAPI<VaccineSchedule>(API_ENDPOINTS.VACCINES_ADD_PRIVATE, {
+  async addPrivateVaccine(request: AddPrivateVaccineRequest): Promise<void> {
+    await fetchAuthAPI<unknown>(API_ENDPOINTS.VACCINES_ADD_PRIVATE, {
       method: 'POST',
       body: JSON.stringify(request),
     });
