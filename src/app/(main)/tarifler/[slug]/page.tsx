@@ -14,6 +14,7 @@ import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { useSimilarSafeRecipes } from '@/hooks/useRecommendations';
 import { toast } from 'sonner';
 import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
+import { slugify } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
 import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
@@ -65,19 +66,6 @@ const generateUIAvatarURL = (name: string, backgroundColor: string = '#FF8A65'):
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bgColor}&color=fff&size=128&bold=true`;
 };
 
-// Helper function to convert Turkish characters to ASCII and create URL-friendly slug
-const toSlug = (text: string): string => {
-  return text
-    .toLowerCase()
-    .replace(/ş/g, 's')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c')
-    .replace(/ı/g, 'i')
-    .replace(/\s+/g, '-');
-};
-
 // Helper function to convert age group display name to slug
 const getAgeGroupSlug = (ageGroupName: string): string => {
   const ageGroupMap: { [key: string]: string } = {
@@ -93,25 +81,18 @@ const getAgeGroupSlug = (ageGroupName: string): string => {
     return ageGroupMap[ageGroupName];
   }
   
-  // Fallback to simple slug conversion
-  return ageGroupName
-    .replace(/[()&+]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .split('-')
-    .map(toSlug)
-    .join('-')
-    .replace(/-+/g, '-');
+  // Fallback to slugify utility
+  return slugify(ageGroupName);
 };
 
 // Helper function to convert diet type display name to slug
 const getDietTypeSlug = (dietTypeName: string): string => {
-  return toSlug(dietTypeName);
+  return slugify(dietTypeName);
 };
 
 // Helper function to convert meal type display name to slug
 const getMealTypeSlug = (mealTypeName: string): string => {
-  return toSlug(mealTypeName);
+  return slugify(mealTypeName);
 };
 
 // Get author avatar with fallback
