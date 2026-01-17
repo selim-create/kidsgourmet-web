@@ -95,8 +95,7 @@ export default function IngredientSafetyAlert({
 
     // 2b. start_age string'inden de kontrol et (örn: "+6 Ay", "6 ay", "6+ Ay")
     if (ingredientData?.start_age) {
-      const startAgeStr = ingredientData.start_age.toString();
-      const startAgeMatch = startAgeStr.match(/\d+/);
+      const startAgeMatch = ingredientData.start_age.match(/\d+/);
       const startAgeMonths = startAgeMatch ? parseInt(startAgeMatch[0], 10) : 0;
       
       if (startAgeMonths > 0 && ageInMonths < startAgeMonths) {
