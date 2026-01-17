@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { safetyService, SafetyCheckResult, BatchSafetyResult } from '@/services/safety-service';
+import { FetchErrorInfo } from '@/lib/api';
 
 const SAFE_RESULT: SafetyCheckResult = {
   is_safe: true,
@@ -12,12 +13,14 @@ const SAFE_RESULT: SafetyCheckResult = {
 
 /**
  * Tarif güvenlik kontrolü için hook
+ * Enhanced with better error handling and retry functionality
  */
 export function useSafetyCheck(recipeId: number | undefined, childId: string | undefined) {
   const [safetyResult, setSafetyResult] = useState<SafetyCheckResult>(SAFE_RESULT);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isApiError, setIsApiError] = useState(false); // NEW: API error flag
+  const [errorInfo, setErrorInfo] = useState<FetchErrorInfo | null>(null);
+  const [isApiError, setIsApiError] = useState(false);
   
   // CRITICAL: Prevent duplicate calls
   const checkedRef = useRef<string | null>(null);
@@ -27,6 +30,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
       setSafetyResult(SAFE_RESULT);
       setIsChecking(false);
       setIsApiError(false);
+      setErrorInfo(null);
       return;
     }
     
@@ -38,6 +42,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     
     setIsChecking(true);
     setError(null);
+    setErrorInfo(null);
     setIsApiError(false);
     checkedRef.current = cacheKey;
     
@@ -48,15 +53,21 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
       if (result && typeof result.is_safe === 'boolean') {
         setSafetyResult(result);
         setIsApiError(false);
+        setErrorInfo(null);
       } else {
         // API succeeded but returned invalid response
         setIsApiError(true);
         setSafetyResult(SAFE_RESULT);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to check recipe safety:', err);
-      setError(err instanceof Error ? err.message : 'Failed to check safety');
-      setIsApiError(true); // Mark that an API error occurred
+      
+      // Extract error info if available
+      const errInfo: FetchErrorInfo | undefined = err?.errorInfo;
+      
+      setError(errInfo?.userMessage || err?.message || 'Failed to check safety');
+      setErrorInfo(errInfo || null);
+      setIsApiError(true);
       setSafetyResult(SAFE_RESULT);
     } finally {
       setIsChecking(false);
@@ -72,7 +83,15 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     checkSafety();
   };
   
-  return { safetyResult, isChecking, error, isApiError, recheckSafety };
+  return { 
+    safetyResult, 
+    isChecking, 
+    error, 
+    errorInfo,
+    isApiError, 
+    recheckSafety,
+    canRetry: errorInfo?.canRetry ?? true
+  };
 }
 
 /**

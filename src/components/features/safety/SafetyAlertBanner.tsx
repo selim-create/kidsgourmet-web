@@ -37,7 +37,7 @@ function AlertItem({ alert }: { alert: SafetyAlert }) {
 }
 
 export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBannerProps) {
-  const { safetyResult, isChecking, error, isApiError, recheckSafety } = useSafetyCheck(recipeId, childId);
+  const { safetyResult, isChecking, error, errorInfo, isApiError, recheckSafety, canRetry } = useSafetyCheck(recipeId, childId);
   
   // Don't show if no child profile
   if (!childId) return null;
@@ -56,8 +56,7 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
 
   // API hatası durumunda bilgilendirme göster (güvenli varsaymak yerine)
   if (error || isApiError) {
-    const errorMessage = error && typeof error === 'string' ? error : 
-      'Bu tarifin çocuğunuz için uygunluğunu şu an kontrol edemiyoruz.';
+    const errorMessage = error || 'Bu tarifin çocuğunuz için uygunluğunu şu an kontrol edemiyoruz.';
     
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
@@ -66,15 +65,25 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
           <div className="flex-1">
             <p className="font-medium text-blue-800">Güvenlik Kontrolü Yapılamadı</p>
             <p className="text-sm text-blue-600 mt-1">
-              {decodeEntities(errorMessage)} Lütfen malzemeleri kendiniz kontrol edin.
+              {decodeEntities(errorMessage)}
             </p>
-            <button
-              onClick={recheckSafety}
-              className="mt-3 px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              <i className="fa-solid fa-rotate-right mr-2"></i>
-              Tekrar Dene
-            </button>
+            {errorInfo?.type && (
+              <p className="text-xs text-blue-500 mt-1">
+                {errorInfo.type === 'network' && '🌐 İnternet bağlantısı sorunu'}
+                {errorInfo.type === 'timeout' && '⏱️ Zaman aşımı'}
+                {errorInfo.type === 'cors' && '🔒 Güvenlik hatası'}
+                {errorInfo.type === 'server' && '🖥️ Sunucu hatası'}
+              </p>
+            )}
+            {canRetry && (
+              <button
+                onClick={recheckSafety}
+                className="mt-3 px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                <i className="fa-solid fa-rotate-right mr-2"></i>
+                Tekrar Dene
+              </button>
+            )}
           </div>
         </div>
       </div>
