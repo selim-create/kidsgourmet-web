@@ -39,23 +39,45 @@ export const nutritionService = {
   getWeeklySummary: async (
     childId: string, 
     weekStart?: string
-  ): Promise<WeeklyNutritionSummary> => {
-    const params = weekStart 
-      ? `?child_id=${childId}&week_start=${weekStart}` 
-      : `?child_id=${childId}`;
-    
-    return await fetchAuthAPI<WeeklyNutritionSummary>(
-      `${API_ENDPOINTS.NUTRITION_WEEKLY_SUMMARY}${params}`
-    );
+  ): Promise<WeeklyNutritionSummary | null> => {
+    try {
+      if (!childId) return null;
+      
+      const params = weekStart 
+        ? `?child_id=${childId}&week_start=${weekStart}` 
+        : `?child_id=${childId}`;
+      
+      const response = await fetchAuthAPI<WeeklyNutritionSummary>(
+        `${API_ENDPOINTS.NUTRITION_WEEKLY_SUMMARY}${params}`
+      );
+      return response || null;
+    } catch (error) {
+      console.error('getWeeklySummary failed:', error);
+      return null;
+    }
   },
   
   /**
    * Eksik besinler
    */
   getMissingNutrients: async (childId: string): Promise<MissingNutrient[]> => {
-    return await fetchAuthAPI<MissingNutrient[]>(
-      `${API_ENDPOINTS.NUTRITION_MISSING_NUTRIENTS}?child_id=${childId}`
-    );
+    try {
+      if (!childId) return [];
+      
+      const response = await fetchAuthAPI<MissingNutrient[] | { missing_nutrients?: MissingNutrient[]; data?: MissingNutrient[] }>(
+        `${API_ENDPOINTS.NUTRITION_MISSING_NUTRIENTS}?child_id=${childId}`
+      );
+      
+      // CRITICAL: Always return array
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response?.missing_nutrients)) return response.missing_nutrients;
+      if (Array.isArray(response?.data)) return response.data;
+      
+      return [];
+    } catch (error) {
+      console.error('getMissingNutrients failed:', error);
+      return []; // CRITICAL: Always return array on error
+    }
   },
   
   /**
@@ -64,10 +86,18 @@ export const nutritionService = {
   getVarietyAnalysis: async (
     childId: string, 
     days?: number
-  ): Promise<VarietyAnalysis> => {
-    const daysParam = days || 7;
-    return await fetchAuthAPI<VarietyAnalysis>(
-      `${API_ENDPOINTS.NUTRITION_VARIETY_ANALYSIS}?child_id=${childId}&days=${daysParam}`
-    );
+  ): Promise<VarietyAnalysis | null> => {
+    try {
+      if (!childId) return null;
+      
+      const daysParam = days || 7;
+      const response = await fetchAuthAPI<VarietyAnalysis>(
+        `${API_ENDPOINTS.NUTRITION_VARIETY_ANALYSIS}?child_id=${childId}&days=${daysParam}`
+      );
+      return response || null;
+    } catch (error) {
+      console.error('getVarietyAnalysis failed:', error);
+      return null;
+    }
   }
 };

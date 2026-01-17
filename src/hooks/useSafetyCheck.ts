@@ -1,33 +1,50 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { safetyService, SafetyCheckResult, BatchSafetyResult } from '@/services/safety-service';
+
+const SAFE_RESULT: SafetyCheckResult = {
+  is_safe: true,
+  safety_score: 100,
+  alerts: [],
+  alternatives: [],
+};
 
 /**
  * Tarif güvenlik kontrolü için hook
  */
 export function useSafetyCheck(recipeId: number | undefined, childId: string | undefined) {
-  const [safetyResult, setSafetyResult] = useState<SafetyCheckResult | null>(null);
+  const [safetyResult, setSafetyResult] = useState<SafetyCheckResult>(SAFE_RESULT);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // CRITICAL: Prevent duplicate calls
+  const checkedRef = useRef<string | null>(null);
+  
   const checkSafety = useCallback(async () => {
     if (!recipeId || !childId) {
-      setSafetyResult(null);
+      setSafetyResult(SAFE_RESULT);
+      setIsChecking(false);
+      return;
+    }
+    
+    // Prevent duplicate calls
+    const cacheKey = `${recipeId}-${childId}`;
+    if (checkedRef.current === cacheKey) {
       return;
     }
     
     setIsChecking(true);
     setError(null);
+    checkedRef.current = cacheKey;
     
     try {
       const result = await safetyService.checkRecipeSafety(recipeId, childId);
-      setSafetyResult(result || { is_safe: true, safety_score: 100, alerts: [] });
+      setSafetyResult(result);
     } catch (err) {
       console.error('Failed to check recipe safety:', err);
       setError(err instanceof Error ? err.message : 'Failed to check safety');
-      // In case of error, assume safe (don't block the user)
-      setSafetyResult({ is_safe: true, safety_score: 100, alerts: [] });
+      setSafetyResult(SAFE_RESULT);
     } finally {
       setIsChecking(false);
     }
@@ -38,6 +55,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
   }, [checkSafety]);
   
   const recheckSafety = () => {
+    checkedRef.current = null; // Clear cache
     checkSafety();
   };
   

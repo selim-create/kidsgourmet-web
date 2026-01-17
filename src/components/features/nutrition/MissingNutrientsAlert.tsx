@@ -10,18 +10,22 @@ interface MissingNutrientsAlertProps {
 export default function MissingNutrientsAlert({ childId }: MissingNutrientsAlertProps) {
   const { missingNutrients, isLoading, error } = useNutritionSummary(childId);
   
-  if (isLoading) {
-    return null; // Don't show loading for alerts
+  // CRITICAL: Array guarantee
+  const nutrientsList = Array.isArray(missingNutrients) ? missingNutrients : [];
+  
+  if (isLoading || error || nutrientsList.length === 0) {
+    return null;
   }
   
-  if (error || !missingNutrients || missingNutrients.length === 0) {
-    return null; // Silently fail or no missing nutrients
-  }
-  
-  // Show only top 3 most deficient nutrients
-  const topMissing = missingNutrients
-    .sort((a, b) => b.deficit_percentage - a.deficit_percentage)
+  // Show only top 3 most deficient nutrients - safe filtering and sorting
+  const topMissing = [...nutrientsList]
+    .filter(n => n && typeof n.deficit_percentage === 'number')
+    .sort((a, b) => (b.deficit_percentage || 0) - (a.deficit_percentage || 0))
     .slice(0, 3);
+  
+  if (topMissing.length === 0) {
+    return null;
+  }
   
   return (
     <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg mb-6">
@@ -42,14 +46,19 @@ export default function MissingNutrientsAlert({ childId }: MissingNutrientsAlert
                 100
               );
               
+              // Safe array check for suggested_foods
+              const suggestedFoods = Array.isArray(nutrient?.suggested_foods) 
+                ? nutrient.suggested_foods 
+                : [];
+              
               return (
-                <div key={index} className="text-sm">
+                <div key={nutrient?.nutrient || index} className="text-sm">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-amber-900">
-                      {nutrient.nutrient}
+                      {nutrient?.nutrient || 'Bilinmeyen'}
                     </span>
                     <span className="text-xs text-amber-700">
-                      {nutrient.current_servings}/{nutrient.recommended_servings} porsiyon
+                      {nutrient?.current_servings || 0}/{nutrient?.recommended_servings || 0} porsiyon
                     </span>
                   </div>
                   
@@ -61,9 +70,9 @@ export default function MissingNutrientsAlert({ childId }: MissingNutrientsAlert
                     ></div>
                   </div>
                   
-                  {nutrient.suggested_foods.length > 0 && (
+                  {suggestedFoods.length > 0 && (
                     <p className="text-xs text-amber-700">
-                      <strong>Öneriler:</strong> {nutrient.suggested_foods.join(', ')}
+                      <strong>Öneriler:</strong> {suggestedFoods.join(', ')}
                     </p>
                   )}
                 </div>
