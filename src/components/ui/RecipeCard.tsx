@@ -73,15 +73,15 @@ const getAgeGroupColor = (ageGroup?: string, providedColor?: string): string => 
 const getAgeGroupTextColor = (ageGroup?: string): string => {
   if (!ageGroup) return '#FFFFFF';
   
-  // Açık arka plan renkleri için koyu yazı
+  // Light backgrounds need dark text for readability
   if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i) || ageGroup.toLowerCase().includes('gurme')) {
-    return '#92400E'; // Amber-800 - Sarı için koyu kahverengi
+    return '#92400E'; // Amber-800 - Dark brown for yellow background
   }
   if (ageGroup.includes('9-11') || ageGroup.toLowerCase().includes('keşif')) {
-    return '#166534'; // Green-800 - Açık yeşil için koyu yeşil
+    return '#166534'; // Green-800 - Dark green for light green background
   }
   
-  // Koyu arka plan renkleri için beyaz yazı
+  // Dark backgrounds use white text
   return '#FFFFFF';
 };
 
@@ -105,10 +105,10 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   // Get author avatar URL with fallback to ui-avatars.com
   const getAuthorAvatar = () => {
     // Try multiple possible avatar fields
-    if (typeof recipe.author === 'object') {
-      const avatar = recipe.author?.avatar 
-        || (recipe.author as any)?.avatar_url 
-        || (recipe.author as any)?.avatarUrl;
+    if (typeof recipe.author === 'object' && recipe.author) {
+      // Check all possible avatar field variants
+      const authorObj = recipe.author as { avatar?: string; avatar_url?: string; avatarUrl?: string };
+      const avatar = authorObj.avatar || authorObj.avatar_url || authorObj.avatarUrl;
       if (avatar) return avatar;
     }
     
