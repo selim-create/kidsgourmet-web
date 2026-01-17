@@ -24,6 +24,14 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
     return null; // Silently fail
   }
   
+  // CRITICAL: preparation_tips array guarantee
+  const preparationTips = Array.isArray(nextSuggestion?.preparation_tips) 
+    ? nextSuggestion.preparation_tips 
+    : [];
+  
+  // Safe array check for recipes
+  const recipes = Array.isArray(nextSuggestion?.recipes) ? nextSuggestion.recipes : [];
+  
   return (
     <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-md p-6 border border-green-200">
       <div className="flex items-start gap-4">
@@ -32,21 +40,23 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900 mb-2">
-            Bu Hafta Denenebilir: {nextSuggestion.ingredient_name}
+            Bu Hafta Denenebilir: {nextSuggestion.ingredient_name || 'Yeni Besin'}
           </h3>
           
-          <p className="text-sm text-gray-700 mb-3">
-            {nextSuggestion.introduction_week} tarihinden itibaren denemeye başlayabilirsiniz.
-          </p>
+          {nextSuggestion.introduction_week && (
+            <p className="text-sm text-gray-700 mb-3">
+              {nextSuggestion.introduction_week} tarihinden itibaren denemeye başlayabilirsiniz.
+            </p>
+          )}
           
-          {nextSuggestion?.preparation_tips?.length > 0 && (
+          {preparationTips.length > 0 && (
             <div className="mb-4">
               <p className="text-xs font-semibold text-gray-900 mb-2">
                 <i className="fa-solid fa-lightbulb text-yellow-500 mr-1"></i>
                 Hazırlama İpuçları:
               </p>
               <ul className="space-y-1">
-                {nextSuggestion.preparation_tips.slice(0, 3).map((tip, index) => (
+                {preparationTips.slice(0, 3).map((tip, index) => (
                   <li key={index} className="text-xs text-gray-700 flex items-start">
                     <span className="text-green-500 mr-2">✓</span>
                     <span>{tip}</span>
@@ -65,19 +75,19 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
             </div>
           )}
           
-          {nextSuggestion?.recipes?.length > 0 && (
+          {recipes.length > 0 && (
             <div className="mb-3">
               <p className="text-xs font-semibold text-gray-900 mb-2">
                 Tarifler:
               </p>
               <div className="flex flex-wrap gap-2">
-                {nextSuggestion.recipes.slice(0, 3).map((recipe) => (
+                {recipes.slice(0, 3).map((recipe) => (
                   <Link
-                    key={recipe.id}
-                    href={`/tarifler/${recipe.slug}`}
+                    key={recipe?.id || Math.random()}
+                    href={`/tarifler/${recipe?.slug || ''}`}
                     className="inline-flex items-center px-3 py-1 rounded-full bg-white border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-colors text-xs font-medium text-gray-700 hover:text-green-700"
                   >
-                    {recipe.title}
+                    {recipe?.title || 'Tarif'}
                     <i className="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
                   </Link>
                 ))}
@@ -85,13 +95,15 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
             </div>
           )}
           
-          <Link
-            href={`/beslenme-rehberi/${nextSuggestion.ingredient_slug}`}
-            className="inline-flex items-center text-green-700 hover:text-green-800 font-medium text-sm"
-          >
-            Detaylı Bilgi
-            <i className="fa-solid fa-arrow-right ml-2"></i>
-          </Link>
+          {nextSuggestion.ingredient_slug && (
+            <Link
+              href={`/beslenme-rehberi/${nextSuggestion.ingredient_slug}`}
+              className="inline-flex items-center text-green-700 hover:text-green-800 font-medium text-sm"
+            >
+              Detaylı Bilgi
+              <i className="fa-solid fa-arrow-right ml-2"></i>
+            </Link>
+          )}
         </div>
       </div>
     </div>

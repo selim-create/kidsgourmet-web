@@ -33,9 +33,20 @@ export const recommendationService = {
    */
   getDashboardRecommendations: async (childId: string): Promise<DashboardRecommendations> => {
     try {
-      return await fetchAuthAPI<DashboardRecommendations>(
+      if (!childId) {
+        return { daily_picks: [], trending: [] };
+      }
+      
+      const response = await fetchAuthAPI<DashboardRecommendations>(
         `${API_ENDPOINTS.RECOMMENDATIONS_DASHBOARD}?child_id=${childId}`
       );
+      
+      return {
+        daily_picks: Array.isArray(response?.daily_picks) ? response.daily_picks : [],
+        trending: Array.isArray(response?.trending) ? response.trending : [],
+        try_new_food: response?.try_new_food,
+        safety_alerts: response?.safety_alerts,
+      };
     } catch (error) {
       console.error('getDashboardRecommendations error:', error);
       return {
@@ -53,6 +64,8 @@ export const recommendationService = {
     options?: PersonalizedRecipesOptions
   ): Promise<PersonalizedRecipe[]> => {
     try {
+      if (!childId) return [];
+      
       const params = new URLSearchParams({ child_id: childId });
       
       if (options?.limit) {
@@ -70,7 +83,11 @@ export const recommendationService = {
       );
       
       // Normalize API response structure - can be array or {recommendations: []}
-      return Array.isArray(response) ? response : (response as any)?.recommendations || [];
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response?.recommendations)) return response.recommendations;
+      if (Array.isArray((response as any)?.data)) return (response as any).data;
+      
+      return [];
     } catch (error) {
       console.error('getPersonalizedRecipes error:', error);
       return [];
@@ -82,15 +99,21 @@ export const recommendationService = {
    */
   getSimilarSafeRecipes: async (recipeId: number, childId: string): Promise<RecipeCard[]> => {
     try {
-      const response = await fetchAuthAPI<RecipeCard[] | { alternatives?: RecipeCard[]; recipes?: RecipeCard[] }>(
+      if (!recipeId || !childId) return [];
+      
+      const response = await fetchAuthAPI<RecipeCard[] | { alternatives?: RecipeCard[]; recipes?: RecipeCard[]; data?: RecipeCard[] }>(
         `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
       );
       
-      // Normalize API response structure
-      return Array.isArray(response) 
-        ? response 
-        : (response as any)?.alternatives || (response as any)?.recipes || [];
+      // CRITICAL: Handle all possible response structures
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response?.alternatives)) return response.alternatives;
+      if (Array.isArray(response?.recipes)) return response.recipes;
+      if (Array.isArray(response?.data)) return response.data;
+      
+      return [];
     } catch (error) {
+      // CRITICAL: Silent fail with empty array
       console.error('getSimilarSafeRecipes error:', error);
       return [];
     }

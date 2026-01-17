@@ -30,6 +30,14 @@ export interface BatchSafetyResult {
   };
 }
 
+// Default safe result
+const SAFE_RESULT: SafetyCheckResult = {
+  is_safe: true,
+  safety_score: 100,
+  alerts: [],
+  alternatives: [],
+};
+
 export const safetyService = {
   /**
    * Tarif güvenlik kontrolü
@@ -39,22 +47,26 @@ export const safetyService = {
     childId: string
   ): Promise<SafetyCheckResult> => {
     try {
-      return await fetchAuthAPI<SafetyCheckResult>(
+      if (!recipeId || !childId) return SAFE_RESULT;
+      
+      const response = await fetchAuthAPI<SafetyCheckResult>(
         API_ENDPOINTS.SAFETY_CHECK_RECIPE,
         {
           method: 'POST',
           body: JSON.stringify({ recipe_id: recipeId, child_id: childId })
         }
       );
+      
+      return {
+        is_safe: response?.is_safe ?? true,
+        safety_score: response?.safety_score ?? 100,
+        alerts: Array.isArray(response?.alerts) ? response.alerts : [],
+        alternatives: Array.isArray(response?.alternatives) ? response.alternatives : [],
+        ingredient_checks: response?.ingredient_checks,
+      };
     } catch (error) {
       console.error('checkRecipeSafety error:', error);
-      // In case of error, assume safe (don't block the user)
-      return { 
-        is_safe: true, 
-        safety_score: 100, 
-        alerts: [], 
-        alternatives: [] 
-      };
+      return SAFE_RESULT;
     }
   },
   
@@ -66,21 +78,25 @@ export const safetyService = {
     childId: string
   ): Promise<SafetyCheckResult> => {
     try {
-      return await fetchAuthAPI<SafetyCheckResult>(
+      if (!ingredientId || !childId) return SAFE_RESULT;
+      
+      const response = await fetchAuthAPI<SafetyCheckResult>(
         API_ENDPOINTS.SAFETY_CHECK_INGREDIENT,
         {
           method: 'POST',
           body: JSON.stringify({ ingredient_id: ingredientId, child_id: childId })
         }
       );
+      
+      return {
+        is_safe: response?.is_safe ?? true,
+        safety_score: response?.safety_score ?? 100,
+        alerts: Array.isArray(response?.alerts) ? response.alerts : [],
+        alternatives: Array.isArray(response?.alternatives) ? response.alternatives : [],
+      };
     } catch (error) {
       console.error('checkIngredientSafety error:', error);
-      return { 
-        is_safe: true, 
-        safety_score: 100, 
-        alerts: [], 
-        alternatives: [] 
-      };
+      return SAFE_RESULT;
     }
   },
   
@@ -92,15 +108,20 @@ export const safetyService = {
     childId: string
   ): Promise<BatchSafetyResult> => {
     try {
-      if (!recipeIds?.length) return {};
+      if (!Array.isArray(recipeIds) || recipeIds.length === 0 || !childId) {
+        return {};
+      }
       
-      return await fetchAuthAPI<BatchSafetyResult>(
+      const response = await fetchAuthAPI<BatchSafetyResult | { results?: BatchSafetyResult }>(
         API_ENDPOINTS.SAFETY_BATCH_CHECK,
         {
           method: 'POST',
           body: JSON.stringify({ recipe_ids: recipeIds, child_id: childId })
         }
       );
+      
+      const data = response as any;
+      return data?.results || data || {};
     } catch (error) {
       console.error('batchSafetyCheck error:', error);
       return {};

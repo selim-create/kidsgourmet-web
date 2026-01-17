@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { recommendationService, DashboardRecommendations, PersonalizedRecipe, PersonalizedRecipesOptions } from '@/services/recommendation-service';
 import { RecipeCard } from '@/lib/types';
 
@@ -90,20 +90,32 @@ export function useSimilarSafeRecipes(recipeId: number | undefined, childId: str
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // CRITICAL: Prevent duplicate calls with ref
+  const fetchedRef = useRef<string | null>(null);
+  
   useEffect(() => {
+    // CRITICAL: Both params required
     if (!recipeId || !childId) {
       setRecipes([]);
+      return;
+    }
+    
+    // Prevent duplicate calls
+    const cacheKey = `${recipeId}-${childId}`;
+    if (fetchedRef.current === cacheKey) {
       return;
     }
     
     const fetchSimilarRecipes = async () => {
       setIsLoading(true);
       setError(null);
+      fetchedRef.current = cacheKey;
       
       try {
         const data = await recommendationService.getSimilarSafeRecipes(recipeId, childId);
-        setRecipes(data);
+        setRecipes(Array.isArray(data) ? data : []);
       } catch (err) {
+        // CRITICAL: Silent fail with empty array
         console.error('Failed to fetch similar safe recipes:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch similar recipes');
         setRecipes([]);

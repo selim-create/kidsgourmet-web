@@ -59,8 +59,17 @@ export function useFoodIntroduction(childId: string | undefined) {
       
       try {
         const data = await foodIntroductionService.getNextSuggestion(childId);
-        // Normalize API response structure
-        setNextSuggestion((data as any)?.suggestion || data || null);
+        
+        // Normalize and ensure preparation_tips is array
+        if (data) {
+          const normalizedData = {
+            ...data,
+            preparation_tips: Array.isArray(data.preparation_tips) ? data.preparation_tips : [],
+          };
+          setNextSuggestion(normalizedData);
+        } else {
+          setNextSuggestion(null);
+        }
       } catch (err) {
         console.error('Failed to fetch next food suggestion:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch suggestion');
