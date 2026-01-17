@@ -26,7 +26,6 @@ export function useFavorites() {
     try {
       const data = await userService.getAllFavorites();
       setFavorites(data);
-      setIsLoaded(true);
     } catch (err) {
       console.error('Failed to load favorites:', err);
       setError('Favoriler yüklenirken hata oluştu');
@@ -41,7 +40,6 @@ export function useFavorites() {
     try {
       const data = await userService.getCollections();
       setCollections(data);
-      setIsLoaded(true);
     } catch (err) {
       console.error('Failed to load collections:', err);
     }
