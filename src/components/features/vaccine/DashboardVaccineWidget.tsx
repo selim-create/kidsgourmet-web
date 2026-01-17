@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { UpcomingVaccine } from '@/lib/types';
 import { vaccineService } from '@/services/vaccine-service';
@@ -16,7 +16,7 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchUpcomingVaccines = async () => {
+  const fetchUpcomingVaccines = useCallback(async () => {
     if (!childId) {
       setIsLoading(false);
       return;
@@ -42,11 +42,11 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [childId]);
 
   useEffect(() => {
     fetchUpcomingVaccines();
-  }, [childId]);
+  }, [fetchUpcomingVaccines]);
 
   if (!childId) {
     return null;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
@@ -28,6 +28,25 @@ export default function DashboardPage() {
   const [solidFoodResults, setSolidFoodResults] = useState<SolidFoodReadinessResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Calculate week days dynamically
+  const weekDays = useMemo(() => {
+    const today = new Date();
+    const daysOfWeek = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+    
+    return Array.from({ length: 5 }, (_, i) => {
+      const dayDate = new Date(today);
+      dayDate.setDate(today.getDate() + i);
+      const dayOfWeek = dayDate.getDay();
+      const isToday = i === 0;
+      
+      return {
+        dayName: daysOfWeek[dayOfWeek],
+        dayNumber: dayDate.getDate(),
+        isToday
+      };
+    });
+  }, []);
 
   // Helper function: Format date with fallback for invalid dates
   const formatDate = (dateStr: string): string => {
@@ -282,34 +301,21 @@ export default function DashboardPage() {
 
                       {/* Days Navigation - Dynamic */}
                       <div className="flex gap-2 overflow-x-auto pb-4 hide-scroll scrollbar-hide">
-                          {(() => {
-                            const today = new Date();
-                            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-                            const daysOfWeek = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
-                            
-                            return Array.from({ length: 5 }, (_, i) => {
-                              const dayDate = new Date(today);
-                              dayDate.setDate(today.getDate() + i);
-                              const dayOfWeek = dayDate.getDay();
-                              const isToday = i === 0;
-                              
-                              return (
-                                <button 
-                                  key={i}
-                                  className={`flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 rounded-2xl transition-all ${
-                                    isToday 
-                                      ? 'bg-orange-500 text-white shadow-md transform scale-105' 
-                                      : 'bg-white border border-gray-100 text-gray-400 hover:border-orange-500/50 hover:text-orange-500'
-                                  }`}
-                                >
-                                  <span className={`text-xs font-medium ${isToday ? 'opacity-80' : ''}`}>
-                                    {daysOfWeek[dayOfWeek]}
-                                  </span>
-                                  <span className="text-lg font-bold">{dayDate.getDate()}</span>
-                                </button>
-                              );
-                            });
-                          })()}
+                          {weekDays.map((day, index) => (
+                            <button 
+                              key={index}
+                              className={`flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 rounded-2xl transition-all ${
+                                day.isToday 
+                                  ? 'bg-orange-500 text-white shadow-md transform scale-105' 
+                                  : 'bg-white border border-gray-100 text-gray-400 hover:border-orange-500/50 hover:text-orange-500'
+                              }`}
+                            >
+                              <span className={`text-xs font-medium ${day.isToday ? 'opacity-80' : ''}`}>
+                                {day.dayName}
+                              </span>
+                              <span className="text-lg font-bold">{day.dayNumber}</span>
+                            </button>
+                          ))}
                       </div>
 
                       {/* Meals Grid */}

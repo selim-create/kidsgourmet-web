@@ -72,7 +72,11 @@ export default function DashboardSidebar({ activePage }: DashboardSidebarProps) 
           isActive('profil') ? 'bg-orange-50' : 'hover:bg-gray-50'
         }`}>
           {user?.avatar_url ? (
-            <img src={user.avatar_url} className="w-10 h-10 rounded-full border-2 border-white shadow-sm" alt="User" />
+            <img 
+              src={user.avatar_url} 
+              className="w-10 h-10 rounded-full border-2 border-white shadow-sm" 
+              alt={user?.name ? `${user.name} profil fotoğrafı` : 'Kullanıcı profil fotoğrafı'} 
+            />
           ) : (
             <div className="w-10 h-10 rounded-full bg-orange-200 flex items-center justify-center text-sm font-bold">
               {user?.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?'}
