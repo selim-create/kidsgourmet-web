@@ -22,6 +22,17 @@ export const removeToken = (): void => {
 const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoint might not exist yet
 
 /**
+ * Handle 401 Unauthorized errors
+ */
+function handle401Error(token: string | null): void {
+  // Only logout if token exists and is invalid
+  if (token) {
+    // If token exists but 401 is returned, token is invalid
+    removeToken();
+  }
+}
+
+/**
  * Merkezi API İstek Fonksiyonu
  */
 export async function fetchAPI<T>(
@@ -61,7 +72,7 @@ export async function fetchAPI<T>(
     }
     
     if (res.status === 401) {
-      removeToken();
+      handle401Error(token);
       throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
     
@@ -122,7 +133,7 @@ export async function fetchAPIWithHeaders<T>(
     }
     
     if (res.status === 401) {
-      removeToken();
+      handle401Error(token);
       throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
     

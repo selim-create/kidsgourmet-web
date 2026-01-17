@@ -224,19 +224,19 @@ export const userService = {
     return await fetchAPI<ExpertPublicProfile[]>(API_ENDPOINTS.EXPERTS_LIST);
   },
 
-  // Avatar yükleme
+  // Avatar upload - Uses custom KG endpoint
   uploadAvatar: async (file: File): Promise<{ id: number; url: string }> => {
     const formData = new FormData();
     formData.append('file', file);
     
-    // WordPress media endpoint kullan
     const token = getToken();
     
     if (!token) {
       throw new Error('Authentication required');
     }
     
-    const response = await fetch(`${API_URL}/wp/v2/media`, {
+    // Use custom KG endpoint (supports JWT)
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.USER_AVATAR}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -245,13 +245,14 @@ export const userService = {
     });
     
     if (!response.ok) {
-      throw new Error('Avatar yüklenemedi');
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Avatar yüklenemedi');
     }
     
     const data = await response.json();
     return {
       id: data.id,
-      url: data.source_url,
+      url: data.source_url || data.url,
     };
   },
 };
