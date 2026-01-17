@@ -61,7 +61,12 @@ export async function fetchAPI<T>(
     }
     
     if (res.status === 401) {
-      removeToken();
+      // Sadece token varsa ve geçersizse çıkış yap
+      const token = getToken();
+      if (token) {
+        // Token varsa ama 401 dönüyorsa, token geçersizdir
+        removeToken();
+      }
       throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
     
@@ -122,7 +127,12 @@ export async function fetchAPIWithHeaders<T>(
     }
     
     if (res.status === 401) {
-      removeToken();
+      // Sadece token varsa ve geçersizse çıkış yap
+      const token = getToken();
+      if (token) {
+        // Token varsa ama 401 dönüyorsa, token geçersizdir
+        removeToken();
+      }
       throw new Error('Oturum süresi doldu. Lütfen tekrar giriş yapın.');
     }
     

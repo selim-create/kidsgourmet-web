@@ -6,6 +6,7 @@ import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
 import { useRouter } from 'next/navigation';
+import AuthRequiredBanner from '@/components/ui/AuthRequiredBanner';
 
 interface CommentSectionProps {
   postId: number;
@@ -40,15 +41,6 @@ export default function CommentSection({ postId, postType, initialCommentCount =
     e.preventDefault();
     
     if (!isAuthenticated) {
-      toast.error('Yorum yapmak için giriş yapmalısınız', {
-        action: {
-          label: 'Giriş Yap',
-          onClick: () => {
-            const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-            router.push('/giris?redirect=' + encodeURIComponent(currentPath));
-          }
-        }
-      });
       return;
     }
 
@@ -84,48 +76,58 @@ export default function CommentSection({ postId, postType, initialCommentCount =
       </h3>
 
       {/* Yorum Formu */}
-      <form onSubmit={handleSubmit} className="mb-8">
-        <div className="flex gap-3">
-          {isAuthenticated && user ? (
-            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold flex-shrink-0">
-              {user.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
-            </div>
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 flex-shrink-0">
-              <i className="fa-regular fa-user"></i>
-            </div>
-          )}
-          <div className="flex-1">
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder={isAuthenticated ? "Yorumunuzu yazın..." : "Yorum yapmak için giriş yapın..."}
-              disabled={!isAuthenticated || submitting}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-              rows={3}
-            />
-            <div className="flex justify-end mt-2">
-              <button
-                type="submit"
-                disabled={!isAuthenticated || submitting || !commentText.trim()}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Gönderiliyor...
-                  </>
-                ) : (
-                  <>
-                    <i className="fa-solid fa-paper-plane"></i>
-                    Yorum Yap
-                  </>
-                )}
-              </button>
+      {!isAuthenticated ? (
+        <div className="mb-8">
+          <AuthRequiredBanner 
+            variant="inline"
+            description="Yorum yapmak için giriş yapın"
+            icon="fa-regular fa-comment"
+          />
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="mb-8">
+          <div className="flex gap-3">
+            {user ? (
+              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold flex-shrink-0">
+                {user.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+              </div>
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 flex-shrink-0">
+                <i className="fa-regular fa-user"></i>
+              </div>
+            )}
+            <div className="flex-1">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Yorumunuzu yazın..."
+                disabled={submitting}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                rows={3}
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  type="submit"
+                  disabled={submitting || !commentText.trim()}
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {submitting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Gönderiliyor...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-paper-plane"></i>
+                      Yorum Yap
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
+      )}
 
       {/* Yorum Listesi */}
       {loading ? (
