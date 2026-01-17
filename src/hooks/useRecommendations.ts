@@ -19,11 +19,11 @@ export function useDashboardRecommendations(childId: string | undefined) {
       return;
     }
 
-    // Auth token kontrolü
+    // Auth token check
     const token = getToken();
     if (!token) {
       setRecommendations(null);
-      setError('Oturum açılmamış');
+      setError('Not authenticated');
       return;
     }
     
@@ -63,11 +63,11 @@ export function useRecommendations(childId: string | undefined, options?: Person
       return;
     }
 
-    // Auth token kontrolü
+    // Auth token check
     const token = getToken();
     if (!token) {
       setRecommendations([]);
-      setError('Oturum açılmamış');
+      setError('Not authenticated');
       return;
     }
     

@@ -84,7 +84,7 @@ export default function PersonalizedRecipePool({
           href={`/tarifler/${recipe?.slug || ''}`}
           className="flex items-center gap-3 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
         >
-          {/* img kullan - next/image hostname sorunu olmaz */}
+          {/* Use img tag - no next/image hostname issues */}
           {recipe?.image && (
             <img
               src={recipe.image}
@@ -92,7 +92,7 @@ export default function PersonalizedRecipePool({
               className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
               loading="lazy"
               onError={(e) => {
-                // Resim yüklenemezse placeholder göster
+                // Show placeholder if image fails to load
                 (e.target as HTMLImageElement).src = '/images/placeholder-recipe.png';
               }}
             />
