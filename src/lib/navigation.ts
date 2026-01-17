@@ -23,28 +23,28 @@ export const navigationItems: NavItem[] = [
     color: 'orange',
     children: [
       { 
-        label: 'Hazırlık Evresi (0-6 Ay)', 
-        href: '/tarifler?age-group=0-6-ay', 
+        label: '0-6 Ay (Hazırlık Evresi)', 
+        href: '/tarifler?age-group=0-6-ay-sadece-sut', 
         icon: 'fa-solid fa-baby' 
       },
       { 
-        label: 'Başlangıç & Tadım (6-8 Ay)', 
-        href: '/tarifler?age-group=6-8-ay', 
+        label: '6-8 Ay (Başlangıç & Tadım)', 
+        href: '/tarifler?age-group=6-8-ay-baslangic', 
         icon: 'fa-solid fa-spoon' 
       },
       { 
-        label: 'Keşif & Pütürlüye Geçiş (9-11 Ay)', 
-        href: '/tarifler?age-group=9-11-ay', 
+        label: '9-11 Ay (Keşif & Pütürlü)', 
+        href: '/tarifler?age-group=9-11-ay-kesif', 
         icon: 'fa-solid fa-bowl-food' 
       },
       { 
-        label: 'Aile Sofrasına Geçiş (12-24 Ay)', 
-        href: '/tarifler?age-group=12-24-ay', 
+        label: '12-24 Ay (Aile Sofrası)', 
+        href: '/tarifler?age-group=12-24-ay-gecis', 
         icon: 'fa-solid fa-users' 
       },
       { 
-        label: 'Çocuk Gurme (2+ Yaş)', 
-        href: '/tarifler?age-group=2-yas-uzeri', 
+        label: '2+ Yaş (Çocuk Gurme)', 
+        href: '/tarifler?age-group=2-yas-ve-uzeri', 
         icon: 'fa-solid fa-child' 
       },
     ],
