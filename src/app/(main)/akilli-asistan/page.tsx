@@ -214,7 +214,7 @@ export default function ToolsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tools.filter(tool => tool.is_active).map((tool) => (
+            {tools.filter(tool => tool.is_active !== false).map((tool) => (
               <Link
                 key={tool.id}
                 href={`/araclar/${tool.slug}`}
