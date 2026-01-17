@@ -71,7 +71,7 @@ export default function PersonalizedRecipePool({
       
       {recipeList.slice(0, 5).map((recipe) => (
         <Link
-          key={recipe?.recipe_id || recipe?.id || Math.random()}
+          key={(recipe as any)?.recipe_id || recipe?.id || Math.random()}
           href={`/tarifler/${recipe?.slug || ''}`}
           className="flex items-center gap-3 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
         >

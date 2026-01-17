@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { nutritionService, MissingNutrient } from '@/services/nutrition-service';
+import { nutritionService } from '@/services/nutrition-service';
 import { recommendationService } from '@/services/recommendation-service';
 
 interface WeeklyNutritionSummary {

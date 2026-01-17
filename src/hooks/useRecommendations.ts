@@ -1,53 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { recommendationService, DashboardRecommendations, PersonalizedRecipe, PersonalizedRecipesOptions } from '@/services/recommendation-service';
-import { RecipeCard } from '@/lib/types';
+import { recommendationService, PersonalizedRecipe, PersonalizedRecipesOptions } from '@/services/recommendation-service';
+import { Recipe } from '@/lib/types';
 import { getToken } from '@/lib/api';
-
-/**
- * Dashboard önerileri için hook
- */
-export function useDashboardRecommendations(childId: string | undefined) {
-  const [recommendations, setRecommendations] = useState<DashboardRecommendations | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  useEffect(() => {
-    if (!childId) {
-      setRecommendations(null);
-      return;
-    }
-
-    // Auth token check
-    const token = getToken();
-    if (!token) {
-      setRecommendations(null);
-      setError('Not authenticated');
-      return;
-    }
-    
-    const fetchRecommendations = async () => {
-      setIsLoading(true);
-      setError(null);
-      
-      try {
-        const data = await recommendationService.getDashboardRecommendations(childId);
-        setRecommendations(data);
-      } catch (err) {
-        console.error('Failed to fetch dashboard recommendations:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch recommendations');
-        setRecommendations(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchRecommendations();
-  }, [childId]);
-  
-  return { recommendations, isLoading, error };
-}
 
 /**
  * Kişiselleştirilmiş tarifler için hook
@@ -103,7 +59,7 @@ export function useRecommendations(childId: string | undefined, options?: Person
  * Benzer güvenli tarifler için hook
  */
 export function useSimilarSafeRecipes(recipeId: number | undefined, childId: string | undefined) {
-  const [recipes, setRecipes] = useState<RecipeCard[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   

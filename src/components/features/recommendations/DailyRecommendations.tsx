@@ -44,7 +44,7 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {recipeList.slice(0, 6).map((recipe) => (
           <Link 
-            key={recipe?.recipe_id || recipe?.id || Math.random()}
+            key={(recipe as any)?.recipe_id || recipe?.id || Math.random()}
             href={`/tarifler/${recipe?.slug || ''}`}
             className="group block"
           >
@@ -58,12 +58,12 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               )}
-              {recipe?.age_group && (
+              {(recipe as any)?.age_group && (
                 <div 
                   className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-xs font-medium"
-                  style={{ backgroundColor: recipe.age_group_color || '#FF8A65' }}
+                  style={{ backgroundColor: (recipe as any).age_group_color || '#FF8A65' }}
                 >
-                  {recipe.age_group}
+                  {(recipe as any).age_group}
                 </div>
               )}
             </div>
@@ -72,7 +72,7 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
             </h3>
             <div className="flex items-center text-sm text-gray-600">
               <i className="fa-solid fa-clock mr-1"></i>
-              {recipe?.prep_time}
+              {(recipe as any)?.prep_time}
             </div>
             {(recipe as any)?.score && (
               <div className="flex items-center gap-1 mt-1">

@@ -9,7 +9,7 @@ interface IngredientSafetyAlertProps {
   ingredientData?: {
     min_age_months?: number;
     allergen_info?: {
-      is_common_allergen: boolean;
+      is_allergen: boolean;
       allergen_type?: string;
     };
     name?: string;
@@ -47,7 +47,7 @@ export default function IngredientSafetyAlert({
       : [];
     
     // Malzemenin alerjen bilgisini kontrol et
-    if (ingredientData?.allergen_info?.is_common_allergen) {
+    if (ingredientData?.allergen_info?.is_allergen) {
       const allergenType = ingredientData.allergen_info.allergen_type?.toLowerCase();
       if (allergenType && childAllergies.some(a => 
         a.includes(allergenType) || allergenType.includes(a)

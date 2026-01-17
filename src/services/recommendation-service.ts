@@ -61,7 +61,7 @@ export const recommendationService = {
         return { today: [], weekly_plan_status: null, nutrition_summary: null, alerts: [] };
       }
       
-      const response = await fetchAuthAPI(
+      const response = await fetchAuthAPI<any>(
         `${API_ENDPOINTS.RECOMMENDATIONS_DASHBOARD}?child_id=${childId}`
       );
       
@@ -100,7 +100,7 @@ export const recommendationService = {
         params.append('include_scores', options.include_scores.toString());
       }
       
-      const response = await fetchAuthAPI(
+      const response = await fetchAuthAPI<any>(
         `${API_ENDPOINTS.RECOMMENDATIONS_RECIPES}?${params.toString()}`
       );
       
@@ -125,7 +125,7 @@ export const recommendationService = {
       if (!recipeId || !childId) return [];
       
       // Endpoint'in doğru olduğundan emin ol
-      const response = await fetchAuthAPI(
+      const response = await fetchAuthAPI<any>(
         `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
       );
       
