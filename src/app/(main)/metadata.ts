@@ -1,5 +1,3 @@
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -71,19 +69,3 @@ export const metadata: Metadata = {
     google: 'your-google-verification-code',
   },
 };
-
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-grow pt-24 w-full">
-        {children}
-      </main>
-      <Footer />
-    </div>
-  );
-}

@@ -6,7 +6,8 @@ import Link from 'next/link';
 import { recipeService } from '@/services/recipe-service';
 import { blogService, BlogPost } from '@/services/blog-service';
 import { featuredService, FeaturedItem } from '@/services/featured-service';
-import { RecipeCard } from '@/lib/types';
+import { tariftenService } from '@/services/tariften-service';
+import { RecipeCard, TariftenRecipe } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import FeaturedSlider from '@/components/features/FeaturedSlider';
@@ -22,6 +23,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAge, setSelectedAge] = useState('');
+  const [tariftenRecipe, setTariftenRecipe] = useState<TariftenRecipe | null>(null);
 
   // Prepare featured content for slider
   const [featuredContent, setFeaturedContent] = useState<Array<{
@@ -36,11 +38,15 @@ export default function Home() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [featuredData, latest, posts] = await Promise.all([
+        const [featuredData, latest, posts, randomRecipe] = await Promise.all([
           featuredService.getAll(5),
           recipeService.getAll({ perPage: 8 }),
-          blogService.getAll(1, 12)
+          blogService.getAll(1, 12),
+          tariftenService.getRandom()
         ]);
+        
+        // Set Tariften recipe
+        setTariftenRecipe(randomRecipe);
         
         // Prepare featured content - map FeaturedItem to content types
         const featured = (featuredData || []).map((item: FeaturedItem) => {
@@ -132,10 +138,78 @@ export default function Home() {
   // Dalgalı arka plan görseli (SVG)
   const waveBgImage = "data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.184 20c.357-.13.72-.264 1.088-.402l1.768-.661C33.64 15.347 39.647 14 50 14c10.271 0 15.362 1.222 24.629 4.928.955.383 1.869.74 2.75 1.072h6.225c-2.51-.73-5.139-1.691-8.233-2.928C65.888 12.878 58.749 10 50 10c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h6.225zM0 20c2.51-.73 5.139-1.691 8.233-2.928C18.749 12.878 24.889 10 35 10c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928H0zM50 0c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928C74.638 6.253 68.647 5 50 5c-10.271 0-15.362 1.222-24.629 4.928C14.112 14.122 6.973 17 0 17v3h100v-3s-2.51-.73-5.139-1.691C84.362 10.928 77.223 8 68.474 8c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928C24.362 14.072 17.223 11 11.526 11c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h11.474z' fill='%23FFF8E1' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E";
 
+  // JSON-LD Structured Data
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://kidsgourmet.com.tr/#organization",
+        "name": "KidsGourmet",
+        "url": "https://kidsgourmet.com.tr",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://kidsgourmet.com.tr/logo.png"
+        },
+        "sameAs": [
+          "https://facebook.com/kidsgourmet",
+          "https://instagram.com/kidsgourmet",
+          "https://twitter.com/kidsgourmet"
+        ]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://kidsgourmet.com.tr/#website",
+        "url": "https://kidsgourmet.com.tr",
+        "name": "KidsGourmet",
+        "description": "Bebek ve çocuk beslenmesinde güvenilir rehberiniz",
+        "publisher": {
+          "@id": "https://kidsgourmet.com.tr/#organization"
+        },
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://kidsgourmet.com.tr/arama?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://kidsgourmet.com.tr/#webpage",
+        "url": "https://kidsgourmet.com.tr",
+        "name": "KidsGourmet - Bebek ve Çocuk Beslenme Rehberi",
+        "isPartOf": {
+          "@id": "https://kidsgourmet.com.tr/#website"
+        },
+        "description": "Uzman onaylı bebek ve çocuk tarifleri, beslenme rehberleri ve akıllı araçlar",
+        "breadcrumb": {
+          "@id": "https://kidsgourmet.com.tr/#breadcrumb"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "@id": "https://kidsgourmet.com.tr/#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Ana Sayfa",
+            "item": "https://kidsgourmet.com.tr"
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <>
       {/* FontAwesome CDN Link */}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+      
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       
       {/* FEATURED SLIDER */}
       {loading ? (
@@ -245,124 +319,14 @@ export default function Home() {
                     })}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* Card 1 */}
-                  <div className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <div className="h-56 relative overflow-hidden bg-orange-50">
-                          <img src="https://placehold.co/600x400/FFF8E1/FF8A65?text=Pankek" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Pankek" />
-                          <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                              <i className="fa-regular fa-heart"></i>
-                          </button>
-                          <div className="absolute bottom-3 left-3 flex gap-2">
-                               <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                  +8 Ay
-                              </span>
-                          </div>
-                      </div>
-                      <div className="p-5">
-                          <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">Muzlu Bebek Pankeki</h3>
-                          <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3">
-                              <span><i className="fa-regular fa-clock mr-1"></i> 15 dk</span>
-                              <span><i className="fa-solid fa-fire mr-1"></i> Şekersiz</span>
-                          </div>
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                               <div className="flex items-center">
-                                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-                                  <span className="text-xs text-gray-500 font-medium">Dyt. Onaylı</span>
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Card 2 */}
-                  <div className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <div className="h-56 relative overflow-hidden bg-green-50">
-                          <img src="https://placehold.co/600x400/E8F5E9/AED581?text=Sebze+Puresi" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Sebze Püresi" />
-                           <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                              <i className="fa-regular fa-heart"></i>
-                          </button>
-                          <div className="absolute bottom-3 left-3 flex gap-2">
-                               <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                  +6 Ay
-                              </span>
-                          </div>
-                      </div>
-                      <div className="p-5">
-                          <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">3 Renkli Sebze Püresi</h3>
-                          <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3">
-                              <span><i className="fa-regular fa-clock mr-1"></i> 20 dk</span>
-                              <span><i className="fa-solid fa-leaf mr-1"></i> Vegan</span>
-                          </div>
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                               <div className="flex items-center">
-                                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-                                  <span className="text-xs text-gray-500 font-medium">Dyt. Onaylı</span>
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Card 3 */}
-                  <div className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <div className="h-56 relative overflow-hidden bg-orange-50">
-                          <img src="https://placehold.co/600x400/FFF3E0/FF8A65?text=Kofte" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Köfte" />
-                           <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                              <i className="fa-regular fa-heart"></i>
-                          </button>
-                          <div className="absolute bottom-3 left-3 flex gap-2">
-                               <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                  +12 Ay
-                               </span>
-                          </div>
-                      </div>
-                      <div className="p-5">
-                          <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">Yumuşak Tavuk Köftesi</h3>
-                          <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3">
-                              <span><i className="fa-regular fa-clock mr-1"></i> 35 dk</span>
-                              <span><i className="fa-solid fa-drumstick-bite mr-1"></i> Protein</span>
-                          </div>
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                               <div className="flex items-center">
-                                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-                                  <span className="text-xs text-gray-500 font-medium">Dyt. Onaylı</span>
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-
-                  {/* Card 4 */}
-                  <div className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-                      <div className="h-56 relative overflow-hidden bg-blue-50">
-                          <img src="https://placehold.co/600x400/E3F2FD/81D4FA?text=Salata" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Salata" />
-                           <button className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors">
-                              <i className="fa-regular fa-heart"></i>
-                          </button>
-                          <div className="absolute bottom-3 left-3 flex gap-2">
-                               <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-                                  +12 Ay
-                              </span>
-                          </div>
-                      </div>
-                      <div className="p-5">
-                          <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">Renkli Kinoa Salatası</h3>
-                          <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3">
-                              <span><i className="fa-regular fa-clock mr-1"></i> 10 dk</span>
-                              <span><i className="fa-solid fa-carrot mr-1"></i> Vitamin</span>
-                          </div>
-                          <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                               <div className="flex items-center">
-                                  <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-                                  <span className="text-xs text-gray-500 font-medium">Dyt. Onaylı</span>
-                               </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
+                <div className="text-center py-12">
+                  <p className="text-gray-500">Henüz tarif yüklenmedi. Lütfen daha sonra tekrar kontrol edin.</p>
+                </div>
               )}
           </div>
       </div>
 
-      {/* CROSS-SELL SECTION: Bizimkiler Ne Yiyecek? */}
+      {/* CROSS-SELL SECTION: Bizimkiler Ne Yiyecek? - Tariften.com */}
       <div className="py-12 bg-white relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="bg-purple-50 border border-purple-100 rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
@@ -373,13 +337,21 @@ export default function Home() {
                   <div className="relative z-10 max-w-2xl">
                       <span className="text-purple-500 font-bold tracking-widest text-xs uppercase mb-2 block">Ebeveynlere Özel</span>
                       <h2 className="font-sans font-bold text-3xl md:text-4xl text-slate-800 mb-4">Bizimkiler Ne Yiyecek?</h2>
-                      <p className="text-lg text-gray-600">
-                          Bebeğine <span className="font-bold text-orange-500">Kabak Mücveri</span> yaparken artan malzemelerle kendine harika bir 
-                          <Link href="#" className="text-purple-500 font-bold underline decoration-dotted underline-offset-4 hover:text-purple-700 ml-1">Fırında Kabak Sandal</Link> yapabilirsin.
-                      </p>
+                      {tariftenRecipe ? (
+                        <p className="text-lg text-gray-600">
+                            Bebeğine tarif hazırlarken kendine de lezzetli bir yemek yap! 
+                            <Link href={tariftenRecipe.url} target="_blank" rel="noopener noreferrer" className="text-purple-500 font-bold underline decoration-dotted underline-offset-4 hover:text-purple-700 ml-1">
+                              {decodeEntities(tariftenRecipe.title)}
+                            </Link> tarifini dene.
+                        </p>
+                      ) : (
+                        <p className="text-lg text-gray-600">
+                            Bebeğine tarif hazırlarken artan malzemelerle kendine harika yemekler yapabilirsin.
+                        </p>
+                      )}
                   </div>
                   <div className="relative z-10 flex-shrink-0">
-                      <Link href="#" className="inline-flex items-center justify-center bg-purple-500 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-purple-600 transition-all hover:-translate-y-1">
+                      <Link href="https://tariften.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center bg-purple-500 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-purple-600 transition-all hover:-translate-y-1">
                           Tariften.com'da Keşfet
                           <i className="fa-solid fa-arrow-up-right-from-square ml-3"></i>
                       </Link>
@@ -428,7 +400,7 @@ export default function Home() {
                       </div>
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Çocuğum Profili</h3>
                       <p className="text-gray-600 text-sm mb-6 flex-grow">Ayına özel haftalık planlar ve alerjen filtreli öneriler için profil oluşturun.</p>
-                      <Link href="/dashboard/profil" className="text-green-500 font-bold flex items-center hover:underline">
+                      <Link href="/profil" className="text-green-500 font-bold flex items-center hover:underline">
                           Profil Oluştur <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>
@@ -490,8 +462,13 @@ export default function Home() {
                   {/* Image Side */}
                   <div className="w-full lg:w-1/2 relative">
                       <div className="absolute inset-0 bg-green-50 rounded-[3rem] transform rotate-3 scale-95"></div>
-                      {/* Placeholder Image */}
-                      <img src="https://placehold.co/800x600/E8F5E9/455A64?text=Doktor+ve+Bebek" className="relative rounded-[3rem] shadow-xl w-full object-cover h-80 lg:h-96" alt="Doktor ve Bebek" />
+                      {/* Expert Trust Image - Will be replaced with actual photo */}
+                      <div className="relative rounded-[3rem] shadow-xl w-full h-80 lg:h-96 bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="text-6xl mb-4">👩‍⚕️👶</div>
+                          <p className="text-green-600 font-bold">Uzman & Bebek</p>
+                        </div>
+                      </div>
                   </div>
                   
                   {/* Content Side */}

@@ -67,13 +67,20 @@ export default function RecipeCard({ item }: RecipeCardProps) {
             >
               {decodeEntities(item.meta?.age_group || '+6 Ay')}
             </span>
-            {item.meta?.meal_type && (
+            {item.meta?.diet_type && (
               <span className="text-xs text-gray-500">
-                <i className="fa-solid fa-utensils mr-1"></i>{decodeEntities(item.meta.meal_type)}
+                <i className="fa-solid fa-leaf mr-1"></i>{decodeEntities(item.meta.diet_type)}
               </span>
             )}
           </div>
-          {item.meta?.rating && item.meta?.rating_count && (
+          {/* Meal type moved to right corner */}
+          {item.meta?.meal_type && (
+            <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-lg">
+              <i className="fa-solid fa-utensils mr-1"></i>{decodeEntities(item.meta.meal_type)}
+            </span>
+          )}
+          {/* Only show rating if both rating and rating_count exist and are > 0 */}
+          {item.meta?.rating && item.meta?.rating_count && item.meta.rating_count > 0 && (
             <span className="text-xs text-gray-400">
               {item.meta.rating} <i className="fa-solid fa-star text-yellow-400"></i> ({item.meta.rating_count})
             </span>
