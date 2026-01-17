@@ -104,8 +104,20 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
     );
   }
   
-  // Don't show banner if recipe is safe or no result yet
-  if (!safetyResult || safetyResult.is_safe) return null;
+  // Show green success message if recipe is safe
+  if (!safetyResult || safetyResult.is_safe) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 animate-fade-in">
+        <div className="flex items-center gap-3">
+          <i className="fa-solid fa-shield-check text-green-500 text-xl"></i>
+          <div>
+            <p className="font-medium text-green-800">Güvenlik Kontrolü Tamamlandı</p>
+            <p className="text-sm text-green-600">Bu tarif çocuğunuz için güvenli görünüyor.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   // Alerts check - can be undefined
   const alerts = safetyResult.alerts || [];

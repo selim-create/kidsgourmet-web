@@ -420,4 +420,20 @@ export const recipeService = {
       return [];
     }
   },
+
+  /**
+   * Tarif değerlendirme (rating) - API entegrasyonu
+   */
+  rateRecipe: async (recipeId: number, rating: number): Promise<{
+    success: boolean;
+    rating: number;
+    rating_count: number;
+    user_rating: number;
+  }> => {
+    const response = await fetchAPI(`/kg/v1/recipes/${recipeId}/rate`, {
+      method: 'POST',
+      body: JSON.stringify({ rating }),
+    });
+    return response;
+  },
 };
