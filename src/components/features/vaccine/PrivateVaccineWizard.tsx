@@ -104,7 +104,7 @@ export default function PrivateVaccineWizard({
   onClose, 
   onSubmit 
 }: PrivateVaccineWizardProps) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number | 'schedule'>(1);
   const [selectedVaccine, setSelectedVaccine] = useState<VaccineType | null>(null);
   const [doctorRecommended, setDoctorRecommended] = useState<boolean | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -154,8 +154,8 @@ export default function PrivateVaccineWizard({
       : null;
     
     if (currentBrand?.hasSchedules && currentBrand.schedules && currentBrand.schedules.length > 0) {
-      // Go to schedule selection step (3.5)
-      setStep(3.5);
+      // Go to schedule selection step
+      setStep('schedule');
     } else {
       // Go directly to date selection step
       setStep(4);
@@ -215,7 +215,7 @@ export default function PrivateVaccineWizard({
             {step === 1 && 'Özel Aşı Ekle'}
             {step === 2 && 'Doktor Önerisi'}
             {step === 3 && 'Marka Seçimi'}
-            {step === 3.5 && 'Şema Seçimi'}
+            {step === 'schedule' && 'Şema Seçimi'}
             {step === 4 && 'İlk Doz Tarihi'}
             {step === 5 && 'Bilgilendirme'}
           </h3>
@@ -347,7 +347,7 @@ export default function PrivateVaccineWizard({
           )}
 
           {/* Step 3.5: Schedule Selection (for Bexsero) */}
-          {step === 3.5 && currentVaccineOption && selectedBrand && (
+          {step === 'schedule' && currentVaccineOption && selectedBrand && (
             <div className="space-y-4">
               <div className="bg-blue-50 rounded-xl p-4 mb-4">
                 <div className="flex items-center gap-3">
@@ -395,14 +395,18 @@ export default function PrivateVaccineWizard({
                   <span className="text-3xl">{currentVaccineOption.icon}</span>
                   <div className="flex-1">
                     <h4 className="font-bold text-slate-800">{currentVaccineOption.name}</h4>
-                    {selectedBrand && (
-                      <p className="text-xs text-gray-600">
-                        {currentBrandOptions.find(b => b.id === selectedBrand)?.name}
-                        {selectedSchedule && currentBrandOptions.find(b => b.id === selectedBrand)?.schedules && (
-                          <span> - {currentBrandOptions.find(b => b.id === selectedBrand)?.schedules?.find(s => s.key === selectedSchedule)?.name}</span>
-                        )}
-                      </p>
-                    )}
+                    {selectedBrand && (() => {
+                      const currentBrand = currentBrandOptions.find(b => b.id === selectedBrand);
+                      const currentSchedule = currentBrand?.schedules?.find(s => s.key === selectedSchedule);
+                      return (
+                        <p className="text-xs text-gray-600">
+                          {currentBrand?.name}
+                          {selectedSchedule && currentSchedule && (
+                            <span> - {currentSchedule.name}</span>
+                          )}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -437,7 +441,7 @@ export default function PrivateVaccineWizard({
                   onClick={() => {
                     // Navigate back to schedule selection if we came from there, otherwise to brand selection
                     if (selectedSchedule) {
-                      setStep(3.5);
+                      setStep('schedule');
                     } else if (selectedBrand) {
                       setStep(3);
                     } else {
