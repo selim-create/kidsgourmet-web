@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
@@ -77,7 +78,7 @@ export default function ChildBirthDatePicker() {
 
   // Modal for selecting birth date
   if (showModal) {
-    return (
+    return createPortal(
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200] p-4">
         <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
           <div className="text-center mb-6">
@@ -129,7 +130,8 @@ export default function ChildBirthDatePicker() {
             Bu bilgi sadece cihazınızda saklanır ve yaşa uygun tarifler göstermek için kullanılır.
           </p>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
