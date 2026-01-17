@@ -24,21 +24,6 @@ export interface DashboardRecommendationsResponse {
   alerts: any[];
 }
 
-// Legacy interface for backward compatibility
-export interface DashboardRecommendations {
-  daily_picks: Recipe[];
-  trending: Recipe[];
-  try_new_food?: {
-    ingredient_name: string;
-    ingredient_slug: string;
-    recipes: Recipe[];
-  };
-  safety_alerts?: {
-    count: number;
-    recipes: Recipe[];
-  };
-}
-
 export interface PersonalizedRecipesOptions {
   limit?: number;
   meal_type?: string;
@@ -48,7 +33,7 @@ export interface PersonalizedRecipesOptions {
 export interface PersonalizedRecipe extends Recipe {
   score?: number;
   reasons?: string[];
-  recipe_id?: number;
+  recipe_id?: number; // Some API responses use recipe_id instead of id
 }
 
 export const recommendationService = {

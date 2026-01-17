@@ -98,11 +98,11 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-lg">
-            {Math.round((summary?.variety_score ?? 0) / 10)}
+            {(summary?.variety_score ?? 0)}
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900">Çeşitlilik Skoru</div>
-            <div className="text-xs text-gray-600">10 üzerinden</div>
+            <div className="text-xs text-gray-600">100 üzerinden</div>
           </div>
         </div>
         <div className="text-right text-xs text-gray-500">
