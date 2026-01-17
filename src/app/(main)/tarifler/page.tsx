@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'reac
 import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
-import { RecipeCard } from '@/lib/types';
+import { RecipeCard as RecipeCardType } from '@/lib/types';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import { useMealTypes } from '@/hooks/useMealTypes';
@@ -13,6 +13,7 @@ import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { useBatchSafety } from '@/hooks/useSafetyCheck';
+import RecipeCard from '@/components/ui/RecipeCard';
 
 // Yaş Grubu Sıralaması
 const AGE_GROUPS_ORDER = [
@@ -70,7 +71,7 @@ interface AgeGroupWithLabel {
 
 function RecipesPageContent() {
   const searchParams = useSearchParams();
-  const [recipes, setRecipes] = useState<RecipeCard[]>([]);
+  const [recipes, setRecipes] = useState<RecipeCardType[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -202,14 +203,8 @@ function RecipesPageContent() {
     setIsFilterDrawerOpen(false);
   };
 
-  // Get color code for age group
-  const getAgeGroupColor = useCallback((ageGroupName: string): string => {
-    const ageGroup = ageGroups.find(ag => ag.name === ageGroupName);
-    return ageGroup?.age_group_meta?.color_code || '#87CEEB';
-  }, [ageGroups]);
-
   // Check if a recipe is suitable for the child's age
-  const isRecipeSuitableForAge = useCallback((recipe: RecipeCard): boolean => {
+  const isRecipeSuitableForAge = useCallback((recipe: RecipeCardType): boolean => {
     if (!profile.currentAgeGroup) return true;
     return recipe.age_group === profile.currentAgeGroup.name;
   }, [profile.currentAgeGroup]);
@@ -260,7 +255,7 @@ function RecipesPageContent() {
         <div className="flex flex-col lg:flex-row gap-8">
           
           {/* SIDEBAR FILTERS (Desktop) */}
-          <aside className="hidden lg:block w-64 flex-shrink-0 space-y-6">
+          <aside className="hidden lg:block w-64 min-w-[281px] flex-shrink-0 space-y-6">
             {/* Filter Group: Age */}
             <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
               <h3 className="font-bold text-slate-800 mb-4 flex items-center font-sans">
@@ -424,12 +419,9 @@ function RecipesPageContent() {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {suitableRecipes.map((recipe) => (
-                        <RecipeCardComponent 
+                        <RecipeCard 
                           key={recipe.id} 
-                          recipe={recipe} 
-                          getAgeGroupColor={getAgeGroupColor}
-                          showWarning={false}
-                          safetyStatus={safetyResults?.[recipe.id] || null}
+                          recipe={recipe}
                         />
                       ))}
                     </div>
@@ -442,12 +434,9 @@ function RecipesPageContent() {
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Diğer Tarifler</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {otherRecipes.map((recipe) => (
-                        <RecipeCardComponent 
+                        <RecipeCard 
                           key={recipe.id} 
-                          recipe={recipe} 
-                          getAgeGroupColor={getAgeGroupColor}
-                          showWarning={true}
-                          safetyStatus={safetyResults?.[recipe.id] || null}
+                          recipe={recipe}
                         />
                       ))}
                     </div>
@@ -458,12 +447,9 @@ function RecipesPageContent() {
                 {!profile.birthDate && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {recipes.map((recipe) => (
-                      <RecipeCardComponent 
+                      <RecipeCard 
                         key={recipe.id} 
-                        recipe={recipe} 
-                        getAgeGroupColor={getAgeGroupColor}
-                        showWarning={false}
-                        safetyStatus={safetyResults?.[recipe.id] || null}
+                        recipe={recipe}
                       />
                     ))}
                   </div>
@@ -656,149 +642,6 @@ function RecipesPageContent() {
         </div>
       )}
     </div>
-  );
-}
-
-// Recipe Card Component
-interface RecipeCardComponentProps {
-  recipe: RecipeCard;
-  getAgeGroupColor: (ageGroupName: string) => string;
-  showWarning: boolean;
-  safetyStatus?: {
-    is_safe: boolean;
-    safety_score: number;
-    critical_alerts_count: number;
-    warning_alerts_count: number;
-  } | null;
-}
-
-function RecipeCardComponent({ 
-  recipe, 
-  getAgeGroupColor,
-  showWarning,
-  safetyStatus
-}: RecipeCardComponentProps) {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const isFav = isFavorite(recipe.id, 'recipe');
-  
-  const ageGroupColor = getAgeGroupColor(recipe.age_group);
-  
-  // Determine safety indicator
-  const hasSafetyConcerns = safetyStatus && !safetyStatus.is_safe;
-  const hasCriticalAlert = safetyStatus && safetyStatus.critical_alerts_count > 0;
-  const hasWarningAlert = safetyStatus && safetyStatus.warning_alerts_count > 0;
-  
-  const handleFavoriteClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    try {
-      await toggleFavorite(recipe.id, 'recipe');
-    } catch (error) {
-      console.error('Favori işlemi başarısız:', error);
-    }
-  };
-  
-  return (
-    <Link 
-      href={`/tarifler/${recipe.slug}`}
-      className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
-    >
-      {/* Image Container */}
-      <div className="h-56 relative overflow-hidden bg-gray-100">
-        <img 
-          src={recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif'} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-          alt={decodeEntities(recipe.title)} 
-        />
-        
-        {/* Prep Time Badge on Image */}
-        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-bold text-slate-700 shadow-sm">
-          <i className="fa-regular fa-clock text-orange-500 mr-1"></i> {recipe.prep_time}
-        </div>
-        
-        {/* Favorite Button */}
-        <button 
-          onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors z-10"
-        >
-          <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
-        </button>
-        
-        {/* Age Group Badge */}
-        <div className="absolute bottom-3 left-3 flex gap-2">
-          <span 
-            className="text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm"
-            style={{ backgroundColor: ageGroupColor }}
-          >
-            {decodeEntities(recipe.age_group)}
-          </span>
-          {showWarning && (
-            <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm">
-              ⚠️
-            </span>
-          )}
-          {hasCriticalAlert && (
-            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
-              <i className="fa-solid fa-exclamation-circle"></i> Uygun Değil
-            </span>
-          )}
-          {!hasCriticalAlert && hasWarningAlert && (
-            <span className="bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-sm flex items-center gap-1">
-              <i className="fa-solid fa-triangle-exclamation"></i> Dikkat
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-5 flex-grow flex flex-col">
-        <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">
-          {decodeEntities(recipe.title)}
-        </h3>
-        
-        {/* Recipe Info - prep_time badge shown on image above */}
-        <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3 flex-wrap gap-y-1">{recipe.meal_type && (
-            <span><i className="fa-solid fa-utensils mr-1"></i> {decodeEntities(recipe.meal_type)}</span>
-          )}
-          
-          {recipe.diet_types && recipe.diet_types.length > 0 && (
-            <span><i className="fa-solid fa-leaf mr-1"></i> {decodeEntities(recipe.diet_types[0])}</span>
-          )}
-        </div>
-
-        {/* Author Info */}
-        {recipe.author && (
-          <div className="flex items-center text-xs text-gray-500 mb-3">
-            <img 
-              src={recipe.author.avatar || '/default-avatar.png'} 
-              className="w-5 h-5 rounded-full mr-2 object-cover" 
-              alt={recipe.author.name}
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(recipe.author?.name || 'User');
-              }}
-            />
-            <span>{recipe.author.name} tarafından</span>
-          </div>
-        )}
-
-        {/* Expert Approval */}
-        <div className="mt-auto pt-3 border-t border-gray-50">
-          {recipe.expert?.approved ? (
-            <div className="flex items-center">
-              <span className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-[10px] mr-2">✓</span>
-              <span className="text-xs text-gray-500 font-medium">
-                {recipe.expert.title} {recipe.expert.name} onayladı
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center">
-              <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-              <span className="text-xs text-gray-500 font-medium">Uzman Onaylı</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
   );
 }
 
