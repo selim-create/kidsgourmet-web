@@ -70,45 +70,51 @@ export function EditButton({
   
   if (variant === 'icon') {
     return (
-      <a
-        href={editUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(editUrl, '_blank', 'noopener,noreferrer');
+        }}
         className={`${baseClasses} ${sizeClasses[size]} top-3 right-3 ${className}`}
         title="Düzenle"
-        onClick={(e) => e.stopPropagation()}
       >
         <i className="fa-solid fa-pen-to-square"></i>
-      </a>
+      </button>
     );
   }
   
   if (variant === 'text') {
     return (
-      <a
-        href={editUrl}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.open(editUrl, '_blank', 'noopener,noreferrer');
+        }}
         className={`${baseClasses} px-3 py-1.5 top-3 right-3 text-xs font-medium ${className}`}
-        onClick={(e) => e.stopPropagation()}
       >
         <i className="fa-solid fa-pen-to-square mr-1.5"></i>
         Düzenle
-      </a>
+      </button>
     );
   }
   
   // full variant
   return (
-    <a
-      href={editUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.open(editUrl, '_blank', 'noopener,noreferrer');
+      }}
       className={`${baseClasses} px-4 py-2 top-3 right-3 text-sm font-bold ${className}`}
-      onClick={(e) => e.stopPropagation()}
     >
       <i className="fa-solid fa-pen-to-square mr-2"></i>
       İçeriği Düzenle
-    </a>
+    </button>
   );
 }
