@@ -150,10 +150,9 @@ export default function Header() {
     <header className="fixed top-0 w-full z-50 transition-all duration-300 bg-white" id="main-header">
         
         {/* 1. TOP BAR (Ecosystem) */}
-        <div className="bg-green-50 border-b border-green-100 text-xs py-2 px-4 transition-all" id="top-bar">
-            <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <div className="bg-green-50 border-b border-green-100 text-xs py-2 transition-all" id="top-bar">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                 <div className="flex items-center space-x-3">
-                    <span className="font-bold text-green-700 hidden sm:inline">KidsGourmet Ailesi:</span>
                     <Link href="https://rejimde.com" target="_blank" className="flex items-center hover:text-orange-500 transition-colors font-medium text-slate-600">
                         <i className="fa-solid fa-user-doctor mr-1.5"></i> Rejimde.com
                     </Link>
@@ -162,9 +161,16 @@ export default function Header() {
                         <i className="fa-solid fa-utensils mr-1.5"></i> Tariften.com
                     </Link>
                 </div>
-                <div className="hidden md:flex items-center gap-2 text-gray-500">
-                    <i className="fa-solid fa-shield-heart text-orange-500"></i>
-                    <span>Güvenilir Ebeveyn İçeriği</span>
+                <div className="hidden md:flex items-center gap-4 text-gray-500">
+                    <Link href="/hakkimizda" className="hover:text-orange-500 transition-colors">Hakkımızda</Link>
+                    <Link href="/uzman-kadromuz" className="hover:text-orange-500 transition-colors">Uzman Kadromuz</Link>
+                    <Link href="/iletisim" className="hover:text-orange-500 transition-colors">İletişim & Reklam</Link>
+                    <Link href="/yardim" className="hover:text-orange-500 transition-colors">Yardım & Destek</Link>
+                    <span className="text-gray-300">|</span>
+                    <div className="flex items-center gap-2">
+                        <i className="fa-solid fa-shield-heart text-orange-500"></i>
+                        <span>Güvenilir Ebeveyn İçeriği</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -212,7 +218,7 @@ export default function Header() {
                                 {/* Dropdown Menu */}
                                 {item.children && activeDropdown === item.label && (
                                     <div
-                                        className="absolute top-full left-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-4 animate-in fade-in slide-in-from-top-2 duration-200"
+                                        className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 max-h-[70vh] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
                                         onMouseEnter={handleDropdownStay}
                                         onMouseLeave={handleDropdownLeave}
                                     >
@@ -221,25 +227,17 @@ export default function Header() {
                                                 <Link
                                                     key={subItem.href}
                                                     href={subItem.href}
-                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                                                    className="flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors group"
                                                     onClick={() => setActiveDropdown(null)}
                                                 >
                                                     {subItem.icon && (
-                                                        <div className={`w-10 h-10 rounded-lg ${getMobileColorClasses(item.color)} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                                            <i className={subItem.icon}></i>
-                                                        </div>
+                                                        <i className={`${subItem.icon} text-gray-400 group-hover:text-orange-500 transition-colors`}></i>
                                                     )}
                                                     <div className="flex-1">
                                                         <div className="font-bold text-sm text-slate-700 group-hover:text-slate-900">
                                                             {subItem.label}
                                                         </div>
-                                                        {subItem.description && (
-                                                            <div className="text-xs text-gray-500 mt-0.5">
-                                                                {subItem.description}
-                                                            </div>
-                                                        )}
                                                     </div>
-                                                    <i className="fa-solid fa-arrow-right text-gray-400 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                                 </Link>
                                             ))}
                                         </div>

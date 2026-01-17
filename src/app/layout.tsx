@@ -25,7 +25,7 @@ export default function RootLayout({
           <ActiveChildProvider>
             <ChildProfileProvider>
               {children}
-              <Toaster position="top-right" richColors />
+              <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
             </ChildProfileProvider>
           </ActiveChildProvider>
         </UserProvider>
