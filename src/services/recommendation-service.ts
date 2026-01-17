@@ -1,18 +1,41 @@
 import { fetchAuthAPI } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
-import { RecipeCard } from '@/lib/types';
+import { Recipe } from '@/lib/types';
 
+export interface DashboardRecommendationsResponse {
+  today: Recipe[];
+  weekly_plan_status: {
+    has_plan: boolean;
+    completion: number;
+    filled_slots: number;
+    total_slots: number;
+  } | null;
+  nutrition_summary: {
+    protein_servings: number;
+    vegetable_servings: number;
+    fruit_servings: number;
+    grains_servings: number;
+    dairy_servings: number;
+    iron_rich_count: number;
+    variety_score: number;
+    new_foods_introduced: string[];
+    allergen_exposures: string[];
+  } | null;
+  alerts: any[];
+}
+
+// Legacy interface for backward compatibility
 export interface DashboardRecommendations {
-  daily_picks: RecipeCard[];
-  trending: RecipeCard[];
+  daily_picks: Recipe[];
+  trending: Recipe[];
   try_new_food?: {
     ingredient_name: string;
     ingredient_slug: string;
-    recipes: RecipeCard[];
+    recipes: Recipe[];
   };
   safety_alerts?: {
     count: number;
-    recipes: RecipeCard[];
+    recipes: Recipe[];
   };
 }
 
@@ -22,37 +45,36 @@ export interface PersonalizedRecipesOptions {
   include_scores?: boolean;
 }
 
-export interface PersonalizedRecipe extends RecipeCard {
+export interface PersonalizedRecipe extends Recipe {
   score?: number;
   reasons?: string[];
+  recipe_id?: number;
 }
 
 export const recommendationService = {
   /**
-   * Dashboard önerileri
+   * Dashboard önerileri - NEW API format with 'today' field
    */
-  getDashboardRecommendations: async (childId: string): Promise<DashboardRecommendations> => {
+  getDashboardRecommendations: async (childId: string): Promise<DashboardRecommendationsResponse> => {
     try {
       if (!childId) {
-        return { daily_picks: [], trending: [] };
+        return { today: [], weekly_plan_status: null, nutrition_summary: null, alerts: [] };
       }
       
-      const response = await fetchAuthAPI<DashboardRecommendations>(
+      const response = await fetchAuthAPI(
         `${API_ENDPOINTS.RECOMMENDATIONS_DASHBOARD}?child_id=${childId}`
       );
       
+      // API Response'u doğru şekilde map et
       return {
-        daily_picks: Array.isArray(response?.daily_picks) ? response.daily_picks : [],
-        trending: Array.isArray(response?.trending) ? response.trending : [],
-        try_new_food: response?.try_new_food,
-        safety_alerts: response?.safety_alerts,
+        today: Array.isArray(response?.today) ? response.today : [],
+        weekly_plan_status: response?.weekly_plan_status || null,
+        nutrition_summary: response?.nutrition_summary || null,
+        alerts: Array.isArray(response?.alerts) ? response.alerts : [],
       };
     } catch (error) {
-      console.error('getDashboardRecommendations error:', error);
-      return {
-        daily_picks: [],
-        trending: [],
-      };
+      console.error('getDashboardRecommendations failed:', error);
+      return { today: [], weekly_plan_status: null, nutrition_summary: null, alerts: [] };
     }
   },
   
@@ -78,18 +100,19 @@ export const recommendationService = {
         params.append('include_scores', options.include_scores.toString());
       }
       
-      const response = await fetchAuthAPI<PersonalizedRecipe[] | { recommendations: PersonalizedRecipe[] }>(
+      const response = await fetchAuthAPI(
         `${API_ENDPOINTS.RECOMMENDATIONS_RECIPES}?${params.toString()}`
       );
       
-      // Normalize API response structure - can be array or {recommendations: []}
+      // Her iki response formatını da destekle
       if (Array.isArray(response)) return response;
       if (Array.isArray(response?.recommendations)) return response.recommendations;
-      if (Array.isArray((response as any)?.data)) return (response as any).data;
+      if (Array.isArray(response?.today)) return response.today;
+      if (Array.isArray(response?.recipes)) return response.recipes;
       
       return [];
     } catch (error) {
-      console.error('getPersonalizedRecipes error:', error);
+      console.error('getPersonalizedRecipes failed:', error);
       return [];
     }
   },
@@ -97,25 +120,25 @@ export const recommendationService = {
   /**
    * Benzer güvenli tarifler
    */
-  getSimilarSafeRecipes: async (recipeId: number, childId: string): Promise<RecipeCard[]> => {
+  getSimilarSafeRecipes: async (recipeId: number, childId: string): Promise<Recipe[]> => {
     try {
       if (!recipeId || !childId) return [];
       
-      const response = await fetchAuthAPI<RecipeCard[] | { alternatives?: RecipeCard[]; recipes?: RecipeCard[]; data?: RecipeCard[] }>(
+      // Endpoint'in doğru olduğundan emin ol
+      const response = await fetchAuthAPI(
         `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
       );
       
-      // CRITICAL: Handle all possible response structures
       if (Array.isArray(response)) return response;
       if (Array.isArray(response?.alternatives)) return response.alternatives;
       if (Array.isArray(response?.recipes)) return response.recipes;
-      if (Array.isArray(response?.data)) return response.data;
+      if (Array.isArray(response?.similar)) return response.similar;
       
       return [];
     } catch (error) {
-      // CRITICAL: Silent fail with empty array
-      console.error('getSimilarSafeRecipes error:', error);
+      // Sessizce fail et - bu endpoint opsiyonel
+      console.warn('getSimilarSafeRecipes failed (non-critical):', error);
       return [];
     }
-  }
+  },
 };

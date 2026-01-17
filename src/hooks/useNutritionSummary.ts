@@ -1,9 +1,29 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { nutritionService, WeeklyNutritionSummary, MissingNutrient, VarietyAnalysis } from '@/services/nutrition-service';
+import { nutritionService, MissingNutrient } from '@/services/nutrition-service';
+import { recommendationService } from '@/services/recommendation-service';
 
-// Default safe values
+interface WeeklyNutritionSummary {
+  protein_servings: number;
+  vegetable_servings: number;
+  fruit_servings: number;
+  grains_servings: number;
+  dairy_servings: number;
+  iron_rich_count: number;
+  variety_score: number;
+  new_foods_introduced: string[];
+  allergen_exposures: string[];
+}
+
+interface MissingNutrient {
+  nutrient: string;
+  current_servings: number;
+  recommended_servings: number;
+  deficit_percentage: number;
+  suggested_foods?: string[];
+}
+
 const DEFAULT_SUMMARY: WeeklyNutritionSummary = {
   protein_servings: 0,
   vegetable_servings: 0,
@@ -12,80 +32,77 @@ const DEFAULT_SUMMARY: WeeklyNutritionSummary = {
   dairy_servings: 0,
   iron_rich_count: 0,
   variety_score: 0,
-  week_start: '',
-  week_end: '',
+  new_foods_introduced: [],
+  allergen_exposures: [],
 };
 
 /**
  * Haftalık beslenme özeti için hook
+ * API'den gelen dashboard nutrition_summary'yi kullanır
  */
-export function useNutritionSummary(childId: string | undefined, weekStart?: string) {
-  const [summary, setSummary] = useState<WeeklyNutritionSummary | null>(null);
-  const [missingNutrients, setMissingNutrients] = useState<MissingNutrient[]>([]); // CRITICAL: Always array
+export function useNutritionSummary(childId: string | undefined) {
+  const [summary, setSummary] = useState<WeeklyNutritionSummary>(DEFAULT_SUMMARY);
+  const [missingNutrients, setMissingNutrients] = useState<MissingNutrient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
+  const [error, setError] = useState<Error | null>(null);
+
   const fetchData = useCallback(async () => {
     if (!childId) {
-      setSummary(null);
+      setSummary(DEFAULT_SUMMARY);
       setMissingNutrients([]);
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      // Parallel API calls with settled promises
-      const [summaryResponse, missingResponse] = await Promise.allSettled([
-        nutritionService.getWeeklySummary(childId, weekStart),
-        nutritionService.getMissingNutrients(childId)
-      ]);
+      // Dashboard endpoint'inden nutrition_summary al
+      const dashboardData = await recommendationService.getDashboardRecommendations(childId);
       
-      // Handle summary
-      if (summaryResponse.status === 'fulfilled' && summaryResponse.value) {
-        setSummary(summaryResponse.value);
-      } else {
-        setSummary(null);
+      if (dashboardData?.nutrition_summary) {
+        setSummary({
+          ...DEFAULT_SUMMARY,
+          ...dashboardData.nutrition_summary,
+        });
       }
-      
-      // Handle missing nutrients - CRITICAL: Always ensure array
-      if (missingResponse.status === 'fulfilled') {
-        const data = missingResponse.value as any;
-        // Handle different response structures
-        const nutrients = Array.isArray(data) 
-          ? data 
-          : Array.isArray(data?.missing_nutrients) 
-            ? data.missing_nutrients 
-            : Array.isArray(data?.data) 
-              ? data.data 
-              : [];
-        setMissingNutrients(nutrients);
-      } else {
+
+      // Missing nutrients ayrı endpoint'ten al (opsiyonel)
+      try {
+        const missingData = await nutritionService.getMissingNutrients(childId);
+        setMissingNutrients(Array.isArray(missingData) ? missingData : []);
+      } catch {
+        // Missing nutrients opsiyonel, hata olursa boş array
         setMissingNutrients([]);
       }
     } catch (err) {
-      console.error('Failed to fetch nutrition data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch nutrition data');
-      setSummary(null);
-      setMissingNutrients([]); // CRITICAL: Always array on error
+      console.error('useNutritionSummary error:', err);
+      setError(err instanceof Error ? err : new Error('Beslenme verileri alınamadı'));
+      setSummary(DEFAULT_SUMMARY);
+      setMissingNutrients([]);
     } finally {
       setIsLoading(false);
     }
-  }, [childId, weekStart]);
-  
+  }, [childId]);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-  
-  return { summary, missingNutrients, isLoading, error, refetch: fetchData };
+
+  return {
+    summary,
+    missingNutrients,
+    isLoading,
+    error,
+    refetch: fetchData,
+  };
 }
 
 /**
  * Beslenme çeşitlilik analizi için hook
  */
 export function useVarietyAnalysis(childId: string | undefined, days?: number) {
-  const [analysis, setAnalysis] = useState<VarietyAnalysis | null>(null);
+  const [analysis, setAnalysis] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   

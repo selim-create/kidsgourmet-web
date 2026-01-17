@@ -19,9 +19,20 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
     );
   }
   
-  if (error || !summary) {
+  if (error) {
     return null; // Silently fail
   }
+
+  // Bugünün tarihini hesapla
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay() + 1); // Pazartesi
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+  };
   
   const nutrients = [
     { 
@@ -70,9 +81,7 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
           Haftalık Beslenme Özeti
         </h2>
         <div className="text-xs text-gray-500">
-          {summary?.week_start && new Date(summary.week_start).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
-          {summary?.week_start && summary?.week_end && ' - '}
-          {summary?.week_end && new Date(summary.week_end).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+          {formatDate(weekStart)} - {formatDate(weekEnd)}
         </div>
       </div>
       
@@ -89,7 +98,7 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-lg">
-            {Math.round((summary?.variety_score ?? 0) * 10) / 10}
+            {Math.round((summary?.variety_score ?? 0) / 10)}
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900">Çeşitlilik Skoru</div>
@@ -97,7 +106,9 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
           </div>
         </div>
         <div className="text-right text-xs text-gray-500">
-          <p>Harika gidiyorsunuz! 🎉</p>
+          {(summary?.variety_score ?? 0) >= 70 && (
+            <p>Harika gidiyorsunuz! 🎉</p>
+          )}
         </div>
       </div>
     </div>
