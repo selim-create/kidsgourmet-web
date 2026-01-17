@@ -33,6 +33,14 @@ const AGE_GROUP_COLORS: { [key: string]: string } = {
   '2+': '#FFF9C4',    // Limon Sarısı - 2+ Yaş / Gurme
 };
 
+// Border radius constants for consistency
+const BORDER_RADIUS = {
+  CARD: '24px',
+  IMAGE_CONTAINER: '24px',
+  IMAGE: '20px',
+  BADGE_ASYMMETRIC: '12px 4px 12px 4px',
+};
+
 // Get shadow color based on age group
 const getAgeGroupShadow = (ageGroup?: string): string => {
   if (!ageGroup) return 'rgba(0, 0, 0, 0.1)';
@@ -42,7 +50,7 @@ const getAgeGroupShadow = (ageGroup?: string): string => {
   if (ageGroup.includes('6-8')) return 'rgba(255, 204, 188, 0.4)';
   if (ageGroup.includes('9-11')) return 'rgba(200, 230, 201, 0.4)';
   if (ageGroup.includes('12-24')) return 'rgba(179, 229, 252, 0.4)';
-  if (ageGroup.includes('2+') || ageGroup.includes('24')) return 'rgba(255, 249, 196, 0.4)';
+  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i)) return 'rgba(255, 249, 196, 0.4)';
   
   return 'rgba(0, 0, 0, 0.1)';
 };
@@ -57,9 +65,15 @@ const getAgeGroupColor = (ageGroup?: string, providedColor?: string): string => 
   if (ageGroup.includes('6-8')) return AGE_GROUP_COLORS['6-8'];
   if (ageGroup.includes('9-11')) return AGE_GROUP_COLORS['9-11'];
   if (ageGroup.includes('12-24')) return AGE_GROUP_COLORS['12-24'];
-  if (ageGroup.includes('2+') || ageGroup.includes('24')) return AGE_GROUP_COLORS['2+'];
+  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i)) return AGE_GROUP_COLORS['2+'];
   
   return '#22C55E';
+};
+
+// Helper function to generate ui-avatars.com URL
+const generateUIAvatarURL = (name: string, backgroundColor: string): string => {
+  const bgColor = backgroundColor.replace('#', '');
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bgColor}&color=fff&size=128&bold=true`;
 };
 
 export default function RecipeCard({ recipe }: RecipeCardProps) {
@@ -82,8 +96,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     
     // Fallback to ui-avatars.com with age group color
     if (authorName) {
-      const bgColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color).replace('#', '');
-      return `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=${bgColor}&color=fff&size=128&bold=true`;
+      return generateUIAvatarURL(authorName, ageGroupColor);
     }
     
     return null;
@@ -106,8 +119,9 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   return (
     <Link 
       href={`/tarifler/${recipe.slug}`} 
-      className="group relative bg-white rounded-[24px] border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-visible flex flex-col"
+      className="group relative bg-white border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-visible flex flex-col"
       style={{
+        borderRadius: BORDER_RADIUS.CARD,
         transform: 'translateY(0)',
         transition: 'all 0.3s ease',
       }}
@@ -121,8 +135,14 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
       }}
     >
       {/* Image Container - Floating inside card */}
-      <div className="relative h-48 overflow-hidden rounded-t-[24px] mx-3 mt-3">
-        <div className="absolute inset-0 overflow-hidden rounded-[20px]">
+      <div 
+        className="relative h-48 overflow-hidden mx-3 mt-3"
+        style={{ borderRadius: BORDER_RADIUS.IMAGE_CONTAINER }}
+      >
+        <div 
+          className="absolute inset-0 overflow-hidden"
+          style={{ borderRadius: BORDER_RADIUS.IMAGE }}
+        >
           <img 
             src={recipe.image || '/placeholder-recipe.jpg'} 
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
@@ -143,7 +163,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           className="absolute top-3 left-3 px-3 py-1.5 text-white text-xs font-bold shadow-lg"
           style={{
             backgroundColor: ageGroupColor,
-            borderRadius: '12px 4px 12px 4px',
+            borderRadius: BORDER_RADIUS.BADGE_ASYMMETRIC,
           }}
         >
           {decodeEntities(recipe.age_group)}
@@ -178,8 +198,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
               className="w-full h-full object-cover"
               onError={(e) => {
                 // If image fails to load, use fallback
-                const bgColor = ageGroupColor.replace('#', '');
-                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=${bgColor}&color=fff&size=128&bold=true`;
+                e.currentTarget.src = generateUIAvatarURL(authorName, ageGroupColor);
               }}
             />
           </div>
