@@ -1,4 +1,4 @@
-import { fetchAPI } from '@/lib/api';
+import { fetchAPI, fetchAuthAPI } from '@/lib/api';
 import { API_ENDPOINTS, WP_API_NAMESPACE } from '@/lib/constants';
 import { Recipe, RecipeCard, CrossSellInfo } from '@/lib/types';
 
@@ -423,6 +423,7 @@ export const recipeService = {
 
   /**
    * Tarif değerlendirme (rating) - API entegrasyonu
+   * NOT: Bu endpoint authentication gerektiriyor
    */
   rateRecipe: async (recipeId: number, rating: number): Promise<{
     success: boolean;
@@ -430,7 +431,8 @@ export const recipeService = {
     rating_count: number;
     user_rating: number;
   }> => {
-    const response = await fetchAPI<{
+    // fetchAuthAPI kullan - authentication gerekli
+    const response = await fetchAuthAPI<{
       success: boolean;
       rating: number;
       rating_count: number;

@@ -79,9 +79,30 @@ export default function RecipeRating({
       } else {
         toast.error('Puan kaydedilirken bir hata oluştu');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Rating error:', error);
-      toast.error('Puan kaydedilirken bir hata oluştu');
+      
+      // Use errorInfo from API library for robust error handling
+      const errorInfo = error.errorInfo;
+      
+      if (errorInfo?.type === 'auth') {
+        // Authentication error - session expired
+        toast.error('Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.', {
+          action: {
+            label: 'Giriş Yap',
+            onClick: () => router.push('/login?redirect=' + encodeURIComponent(window.location.pathname))
+          }
+        });
+      } else if (errorInfo?.type === 'network') {
+        // Network error - connection failed
+        toast.error('Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.');
+      } else if (errorInfo?.userMessage) {
+        // Use the user-friendly message from errorInfo
+        toast.error(errorInfo.userMessage);
+      } else {
+        // Fallback error message
+        toast.error('Puan kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.');
+      }
     } finally {
       setIsSubmitting(false);
     }
