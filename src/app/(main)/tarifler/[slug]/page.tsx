@@ -65,6 +65,19 @@ const generateUIAvatarURL = (name: string, backgroundColor: string = '#FF8A65'):
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bgColor}&color=fff&size=128&bold=true`;
 };
 
+// Helper function to convert Turkish characters to ASCII and create URL-friendly slug
+const toSlug = (text: string): string => {
+  return text
+    .toLowerCase()
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/ı/g, 'i')
+    .replace(/\s+/g, '-');
+};
+
 // Helper function to convert age group display name to slug
 const getAgeGroupSlug = (ageGroupName: string): string => {
   const ageGroupMap: { [key: string]: string } = {
@@ -82,43 +95,23 @@ const getAgeGroupSlug = (ageGroupName: string): string => {
   
   // Fallback to simple slug conversion
   return ageGroupName
-    .toLowerCase()
-    .replace(/ş/g, 's')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c')
-    .replace(/ı/g, 'i')
     .replace(/[()&+]/g, '')
-    .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/^-|-$/g, '')
+    .split('-')
+    .map(toSlug)
+    .join('-')
+    .replace(/-+/g, '-');
 };
 
 // Helper function to convert diet type display name to slug
 const getDietTypeSlug = (dietTypeName: string): string => {
-  return dietTypeName
-    .toLowerCase()
-    .replace(/ş/g, 's')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c')
-    .replace(/ı/g, 'i')
-    .replace(/\s+/g, '-');
+  return toSlug(dietTypeName);
 };
 
 // Helper function to convert meal type display name to slug
 const getMealTypeSlug = (mealTypeName: string): string => {
-  return mealTypeName
-    .toLowerCase()
-    .replace(/ş/g, 's')
-    .replace(/ğ/g, 'g')
-    .replace(/ü/g, 'u')
-    .replace(/ö/g, 'o')
-    .replace(/ç/g, 'c')
-    .replace(/ı/g, 'i')
-    .replace(/\s+/g, '-');
+  return toSlug(mealTypeName);
 };
 
 // Get author avatar with fallback

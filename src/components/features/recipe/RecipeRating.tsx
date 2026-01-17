@@ -14,9 +14,9 @@ interface RecipeRatingProps {
   currentUserRating?: number;
 }
 
-// Fake rating hesaplama (4.0 - 5.0 arası, recipe ID'ye göre deterministik)
+// Fake rating hesaplama (4.0 - 4.9 arası, recipe ID'ye göre deterministik)
 const generateFakeRating = (recipeId: number): number => {
-  // Recipe ID'ye göre deterministik fake rating (4.0 - 5.0 arası)
+  // Recipe ID'ye göre deterministik fake rating (4.0 - 4.9 arası)
   const seed = recipeId % 10;
   return 4.0 + (seed / 10); // 4.0, 4.1, 4.2, ... 4.9
 };
