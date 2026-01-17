@@ -101,8 +101,24 @@ export const getPlainText = (rendered: { rendered?: string } | string | undefine
  * Used for generating anchor IDs from headings and URL slugs
  */
 export function slugify(text: string): string {
-  return text
-    .toString()
+  // Türkçe karakter haritası
+  const turkishMap: Record<string, string> = {
+    'ı': 'i', 'İ': 'i',
+    'ş': 's', 'Ş': 's',
+    'ç': 'c', 'Ç': 'c',
+    'ğ': 'g', 'Ğ': 'g',
+    'ü': 'u', 'Ü': 'u',
+    'ö': 'o', 'Ö': 'o'
+  };
+  
+  let result = text.toString();
+  
+  // Önce Türkçe karakterleri dönüştür
+  for (const [tr, en] of Object.entries(turkishMap)) {
+    result = result.replace(new RegExp(tr, 'g'), en);
+  }
+  
+  return result
     .normalize('NFD')                   // Normalize to decomposed form for diacritics
     .replace(/[\u0300-\u036f]/g, '')    // Remove diacritics
     .toLowerCase()

@@ -5,6 +5,7 @@
 const API_DOMAIN = 'api.kidsgourmet.com.tr';
 const OLD_DOMAIN = 'kidsgourmet.com.tr';
 const FRONTEND_DOMAIN = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com.tr';
+const API_URL = `https://${API_DOMAIN}`;
 
 /**
  * HTML içeriğindeki tüm linkleri dönüştürür
@@ -14,28 +15,36 @@ export function transformContentLinks(html: string): string {
   
   let transformed = html;
   
-  // 1. api.kidsgourmet.com.tr linklerini dönüştür
+  // 1. ÖNCE: Hatalı "/kesfet/wp-content/uploads/" URL'lerini düzelt
+  // Bu URL'ler yanlışlıkla oluşmuş, görselleri API'ye yönlendir
   transformed = transformed.replace(
-    /https?:\/\/api\.kidsgourmet\.com\.tr\/?/g,
-    `${FRONTEND_DOMAIN}/kesfet/`
+    /https?:\/\/(?:www\.)?kidsgourmet\.com\.tr\/kesfet\/wp-content\/uploads\//g,
+    `${API_URL}/wp-content/uploads/`
   );
   
-  // 2. Eski kidsgourmet.com.tr linklerini dönüştür (http ve https)
+  // 2. api.kidsgourmet.com.tr/wp-content/uploads/ → DEĞİŞTİRME (görseller API'de kalmalı)
+  // Sadece link olan (href içindeki) API URL'lerini dönüştür, img src'leri hariç
+  // Regex: href içinde olan ve /wp-content/ ile BAŞLAMAYAN API linkleri
   transformed = transformed.replace(
-    /https?:\/\/(?:www\.)?kidsgourmet\.com\.tr\/?/g,
-    `${FRONTEND_DOMAIN}/`
+    /href="https?:\/\/api\.kidsgourmet\.com\.tr\/(?!wp-content\/)([^"]*)"/g,
+    `href="${FRONTEND_DOMAIN}/kesfet/$1"`
   );
   
-  // 3. Trailing slash'ları kaldır (SEO için tutarlılık)
+  // 3. Eski kidsgourmet.com.tr linklerini dönüştür (görseller hariç)
+  transformed = transformed.replace(
+    /href="https?:\/\/(?:www\.)?kidsgourmet\.com\.tr\/(?!wp-content\/)([^"]*)"/g,
+    `href="${FRONTEND_DOMAIN}/$1"`
+  );
+  
+  // 4. Trailing slash'ları kaldır (SEO için tutarlılık)
   transformed = transformed.replace(
     /href="([^"]+)\/"/g,
     'href="$1"'
   );
   
-  // 4. Göreceli linkleri düzelt
-  // Örn: href="/bebeklerde-reflu/" -> href="/kesfet/bebeklerde-reflu"
+  // 5. Göreceli linkleri düzelt (görseller hariç)
   transformed = transformed.replace(
-    /href="\/(?!tarifler|kesfet|beslenme-rehberi|akilli-asistan|topluluk|uzmanlar|etiket|kategori|api|_next|favicon)([^"\/][^"]*)"/g,
+    /href="\/(?!tarifler|kesfet|beslenme-rehberi|akilli-asistan|topluluk|uzmanlar|etiket|kategori|api|_next|favicon|wp-content)([^"\/][^"]*)"/g,
     (match, slug) => {
       // Trailing slash'ı kaldır
       const cleanSlug = slug.replace(/\/$/, '');
@@ -56,7 +65,12 @@ export function transformUrl(url: string): string {
   try {
     const urlObj = new URL(url, FRONTEND_DOMAIN);
     
-    // API domain'inden gelen linkler
+    // wp-content path'leri her zaman API'den gelir
+    if (urlObj.pathname.startsWith('/wp-content/')) {
+      return `${API_URL}${urlObj.pathname}`;
+    }
+    
+    // API domain'inden gelen linkler (görseller hariç - yukarıda yakalandı)
     if (urlObj.hostname === API_DOMAIN || urlObj.hostname === `www.${API_DOMAIN}`) {
       const pathname = urlObj.pathname.replace(/\/$/, ''); // trailing slash kaldır
       return `/kesfet${pathname}`;
@@ -87,6 +101,11 @@ export function transformUrl(url: string): string {
     return url;
   } catch {
     // URL parse edilemedi, göreceli path olabilir
+    // wp-content göreceli path'leri
+    if (url.startsWith('/wp-content/')) {
+      return `${API_URL}${url}`;
+    }
+    
     if (url.startsWith('/')) {
       const pathname = url.replace(/\/$/, '');
       const firstSegment = pathname.split('/').filter(Boolean)[0];
