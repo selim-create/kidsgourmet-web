@@ -89,7 +89,7 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
   // Don't show banner if recipe is safe, no result yet, or error occurred
   if (error || !safetyResult || safetyResult.is_safe) return null;
   
-  // Alerts kontrolü - undefined olabilir
+  // Alerts check - can be undefined
   const alerts = safetyResult.alerts || [];
   if (alerts.length === 0) return null;
   

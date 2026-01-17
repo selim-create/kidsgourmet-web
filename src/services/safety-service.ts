@@ -48,7 +48,7 @@ export const safetyService = {
       );
     } catch (error) {
       console.error('checkRecipeSafety error:', error);
-      // Hata durumunda güvenli varsay (kullanıcıyı engellememe)
+      // In case of error, assume safe (don't block the user)
       return { 
         is_safe: true, 
         safety_score: 100, 

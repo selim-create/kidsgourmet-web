@@ -69,7 +69,7 @@ export const recommendationService = {
         `${API_ENDPOINTS.RECOMMENDATIONS_RECIPES}?${params.toString()}`
       );
       
-      // API response yapısını normalize et - array veya {recommendations: []} olabilir
+      // Normalize API response structure - can be array or {recommendations: []}
       return Array.isArray(response) ? response : (response as any)?.recommendations || [];
     } catch (error) {
       console.error('getPersonalizedRecipes error:', error);
@@ -86,7 +86,7 @@ export const recommendationService = {
         `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
       );
       
-      // API response yapısını normalize et
+      // Normalize API response structure
       return Array.isArray(response) 
         ? response 
         : (response as any)?.alternatives || (response as any)?.recipes || [];

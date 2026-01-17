@@ -22,7 +22,7 @@ export default function PersonalizedRecipePool({
     include_scores: false 
   });
   
-  // Güvenli array kontrolü - API response farklı yapıda gelebilir
+  // Safe array check - API response can come in different structure
   const recipeList: PersonalizedRecipe[] = Array.isArray(recommendations) 
     ? recommendations 
     : (recommendations as any)?.recommendations || [];

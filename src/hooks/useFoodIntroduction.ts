@@ -59,7 +59,7 @@ export function useFoodIntroduction(childId: string | undefined) {
       
       try {
         const data = await foodIntroductionService.getNextSuggestion(childId);
-        // API response yapısını normalize et
+        // Normalize API response structure
         setNextSuggestion((data as any)?.suggestion || data || null);
       } catch (err) {
         console.error('Failed to fetch next food suggestion:', err);

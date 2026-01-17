@@ -26,7 +26,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     } catch (err) {
       console.error('Failed to check recipe safety:', err);
       setError(err instanceof Error ? err.message : 'Failed to check safety');
-      // Hata durumunda güvenli varsay (kullanıcıyı engellememe)
+      // In case of error, assume safe (don't block the user)
       setSafetyResult({ is_safe: true, safety_score: 100, alerts: [] });
     } finally {
       setIsChecking(false);
