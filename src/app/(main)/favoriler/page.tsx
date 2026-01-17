@@ -62,7 +62,7 @@ export default function FavoritesPage() {
             Favori tariflerinizi, malzemelerinizi ve daha fazlasını kaydetmek için giriş yapın.
           </p>
           <Link
-            href="/giris"
+            href="/login"
             className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
           >
             Giriş Yap

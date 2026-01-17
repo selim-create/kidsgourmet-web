@@ -9,6 +9,7 @@ import {
 } from '@/lib/types';
 import { userService } from '@/services/user-service';
 import { useUser } from '@/hooks/use-user';
+import { toast } from 'sonner';
 
 interface FavoritesContextType {
   favorites: FavoritesResponse | null;
@@ -132,7 +133,17 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   // Favori ekle
   const addFavorite = useCallback(async (itemId: number, itemType: FavoriteItemType = 'recipe') => {
     if (!isAuthenticated) {
-      throw new Error('Favorilere eklemek için giriş yapmalısınız');
+      toast.error('Favorilere eklemek için giriş yapmalısınız', {
+        action: {
+          label: 'Giriş Yap',
+          onClick: () => {
+            if (typeof window !== 'undefined') {
+              window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            }
+          }
+        }
+      });
+      return;
     }
     await userService.addFavoriteItem(itemId, itemType);
     await loadFavorites();

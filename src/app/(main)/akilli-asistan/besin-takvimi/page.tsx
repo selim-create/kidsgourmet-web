@@ -78,7 +78,7 @@ export default function BesinTakvimiPage() {
     if (authLoading) return; // Wait for auth check to complete
     
     if (!isAuthenticated) {
-      router.push('/giris?redirect=/araclar/besin-takvimi');
+      router.push('/login?redirect=/araclar/besin-takvimi');
       return;
     }
 

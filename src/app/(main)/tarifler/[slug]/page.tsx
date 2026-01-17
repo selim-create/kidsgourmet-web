@@ -188,7 +188,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
       toast.error('Haftalık plan oluşturmak için giriş yapmalısınız', {
         action: {
           label: 'Giriş Yap',
-          onClick: () => router.push('/giris?redirect=' + encodeURIComponent(window.location.pathname))
+          onClick: () => router.push('/login?redirect=' + encodeURIComponent(window.location.pathname))
         }
       });
       return;
@@ -207,7 +207,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
       toast.error('Bu özelliği kullanmak için giriş yapmalısınız', {
         action: {
           label: 'Giriş Yap',
-          onClick: () => router.push('/giris?redirect=' + encodeURIComponent(window.location.pathname))
+          onClick: () => router.push('/login?redirect=' + encodeURIComponent(window.location.pathname))
         }
       });
       return;

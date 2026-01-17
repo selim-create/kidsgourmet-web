@@ -76,7 +76,7 @@ export default function CollectionDetailPage() {
   }
 
   if (!isAuthenticated) {
-    router.push('/giris');
+    router.push('/login');
     return null;
   }
 
