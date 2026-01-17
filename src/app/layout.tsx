@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { UserProvider } from "@/hooks/use-user";
+import { FavoritesProvider } from "@/contexts/favorites-context";
 import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
 import { ActiveChildProvider } from "@/contexts/ActiveChildContext";
 import { Toaster } from "sonner";
@@ -22,12 +23,14 @@ export default function RootLayout({
       </head>
       <body className="bg-gray-50 text-brand-dark font-sans antialiased">
         <UserProvider>
-          <ActiveChildProvider>
-            <ChildProfileProvider>
-              {children}
-              <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
-            </ChildProfileProvider>
-          </ActiveChildProvider>
+          <FavoritesProvider>
+            <ActiveChildProvider>
+              <ChildProfileProvider>
+                {children}
+                <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
+              </ChildProfileProvider>
+            </ActiveChildProvider>
+          </FavoritesProvider>
         </UserProvider>
       </body>
     </html>
