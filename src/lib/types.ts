@@ -740,7 +740,7 @@ export interface Tool {
   description: string;
   icon: string;
   tool_type: ToolType;
-  is_active: boolean;
+  is_active?: boolean;
   requires_auth: boolean;
   is_sponsored?: boolean;
   seo?: SEOData;
