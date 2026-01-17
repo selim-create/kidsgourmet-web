@@ -12,6 +12,10 @@ import AllergyBanner from "@/components/features/AllergyBanner";
 import DashboardVaccineWidget from "@/components/features/vaccine/DashboardVaccineWidget";
 import OverdueVaccineBanner from "@/components/features/vaccine/OverdueVaccineBanner";
 import { formatAge } from "@/utils/ageFormatter";
+import DailyRecommendations from "@/components/features/recommendations/DailyRecommendations";
+import NutritionSummaryCard from "@/components/features/nutrition/NutritionSummaryCard";
+import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrientsAlert";
+import FoodIntroductionCard from "@/components/features/food-introduction/FoodIntroductionCard";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -299,6 +303,26 @@ export default function DashboardPage() {
                     childId={activeChild.id} 
                     childName={activeChild.name}
                   />
+                )}
+
+                {/* Missing Nutrients Alert */}
+                {activeChild && (
+                  <MissingNutrientsAlert childId={activeChild.id} />
+                )}
+
+                {/* Daily Recommendations */}
+                {activeChild && (
+                  <DailyRecommendations childId={activeChild.id} />
+                )}
+
+                {/* Food Introduction Card */}
+                {activeChild && (
+                  <FoodIntroductionCard childId={activeChild.id} />
+                )}
+
+                {/* Nutrition Summary */}
+                {activeChild && (
+                  <NutritionSummaryCard childId={activeChild.id} />
                 )}
 
                 {/* 2. WEEKLY PLAN (Scrollable) */}
