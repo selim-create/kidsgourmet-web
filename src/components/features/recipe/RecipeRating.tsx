@@ -82,17 +82,25 @@ export default function RecipeRating({
     } catch (error: any) {
       console.error('Rating error:', error);
       
-      // Daha açıklayıcı hata mesajları
-      if (error.message?.includes('Authentication required') || error.message?.includes('Oturum')) {
+      // Use errorInfo from API library for robust error handling
+      const errorInfo = error.errorInfo;
+      
+      if (errorInfo?.type === 'auth') {
+        // Authentication error - session expired
         toast.error('Oturumunuz sona ermiş. Lütfen tekrar giriş yapın.', {
           action: {
             label: 'Giriş Yap',
             onClick: () => router.push('/login?redirect=' + encodeURIComponent(window.location.pathname))
           }
         });
-      } else if (error.message?.includes('Failed to fetch') || error.name === 'TypeError') {
+      } else if (errorInfo?.type === 'network') {
+        // Network error - connection failed
         toast.error('Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.');
+      } else if (errorInfo?.userMessage) {
+        // Use the user-friendly message from errorInfo
+        toast.error(errorInfo.userMessage);
       } else {
+        // Fallback error message
         toast.error('Puan kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.');
       }
     } finally {
