@@ -84,27 +84,3 @@ select:-webkit-autofill:active {
     -webkit-text-fill-color: #f9fafb !important;
   }
 }
-
-/* Input icon'larının her zaman görünür olması için */
-.input-with-icon {
-  position: relative;
-}
-
-.input-with-icon .input-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  pointer-events: none;
-  color: #9ca3af;
-}
-
-.input-with-icon input {
-  padding-left: 2.5rem;
-}
-
-/* Autofill durumunda icon rengini koru */
-.input-with-icon:has(input:-webkit-autofill) .input-icon {
-  color: #9ca3af !important;
-}

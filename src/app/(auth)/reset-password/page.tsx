@@ -146,8 +146,8 @@ function ResetPasswordForm() {
             <form onSubmit={handleSubmit} className="mt-8 space-y-6">
               <div>
                 <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-1">Yeni Şifre</label>
-                <div className="relative input-with-icon">
-                  <div className="input-icon">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                     <i className="fa-solid fa-lock"></i>
                   </div>
                   <input 
@@ -166,8 +166,8 @@ function ResetPasswordForm() {
 
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 mb-1">Şifre Tekrar</label>
-                <div className="relative input-with-icon">
-                  <div className="input-icon">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                     <i className="fa-solid fa-lock"></i>
                   </div>
                   <input 
