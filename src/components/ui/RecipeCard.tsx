@@ -13,6 +13,8 @@ interface RecipeCardProps {
     diet_types?: string[];
     meal_type?: string;
     rating?: number;
+    rating_count?: number;
+    comment_count?: number;
     expert?: {
       name: string;
       title: string;
@@ -46,11 +48,11 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   return (
     <Link 
       href={`/tarifler/${recipe.slug}`} 
-      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+      className="group relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col min-h-[420px]"
     >
-      <div className="h-56 relative overflow-hidden bg-gray-50">
+      <div className="h-56 relative overflow-hidden bg-gray-50 flex-shrink-0">
         <img 
-          src={recipe.image || 'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif'} 
+          src={recipe.image || '/placeholder-recipe.jpg'} 
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
           alt={decodeEntities(recipe.title)} 
         />
@@ -97,52 +99,58 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         </div>
       </div>
       
-      <div className="p-5">
-        <h3 className="font-sans font-bold text-lg text-slate-800 mb-1 leading-tight group-hover:text-orange-500 transition-colors">
+      <div className="p-5 flex flex-col flex-grow">
+        <h3 className="font-sans font-bold text-lg text-slate-800 mb-2 leading-tight group-hover:text-orange-500 transition-colors line-clamp-2 min-h-[3.5rem]">
           {decodeEntities(recipe.title)}
         </h3>
         
-        {/* Recipe Info */}
-        <div className="flex items-center text-xs text-gray-400 mb-3 space-x-3 flex-wrap">
-          {/* Diet Types */}
-          {recipe.diet_types && recipe.diet_types.length > 0 && (
-            <span>
-              <i className="fa-solid fa-leaf mr-1"></i> {decodeEntities(recipe.diet_types[0])}
-            </span>
-          )}
-          
-          {/* Meal Type */}
+        {/* Recipe Info - Diet Type (RIGHT) and Meal Type (LEFT) */}
+        <div className="flex items-center justify-between text-xs text-gray-400 mb-3 gap-2">
+          {/* Meal Type - LEFT */}
           {recipe.meal_type && (
-            <span>
-              <i className="fa-solid fa-utensils mr-1"></i> {decodeEntities(recipe.meal_type)}
+            <span className="flex items-center gap-1">
+              <i className="fa-solid fa-utensils"></i> {decodeEntities(recipe.meal_type)}
             </span>
           )}
           
-          {/* Rating */}
-          {recipe.rating && (
-            <span>
-              <i className="fa-solid fa-star text-yellow-400 mr-1"></i> {recipe.rating}
+          {/* Diet Types - RIGHT */}
+          {recipe.diet_types && recipe.diet_types.length > 0 && (
+            <span className="flex items-center gap-1">
+              <i className="fa-solid fa-leaf"></i> {decodeEntities(recipe.diet_types[0])}
             </span>
           )}
         </div>
         
-        {/* Expert Approval */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+        {/* Expert Approval or Author - Redesigned */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
           {recipe.expert?.approved ? (
-            <div className="flex items-center">
-              <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">👨‍⚕️</span>
-              <span className="text-xs text-gray-500 font-medium">
-                {recipe.expert.title} {recipe.expert.name} tarafından onaylandı
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                <i className="fa-solid fa-check text-green-600 text-xs"></i>
+              </div>
+              <span className="text-xs text-gray-600 font-medium truncate">
+                {recipe.expert.title} {recipe.expert.name}
               </span>
             </div>
           ) : authorName ? (
-            <div className="flex items-center">
-              <span className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] mr-2">✍️</span>
-              <span className="text-xs text-gray-500 font-medium">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <i className="fa-solid fa-user text-gray-500 text-xs"></i>
+              </div>
+              <span className="text-xs text-gray-600 font-medium truncate">
                 {authorName}
               </span>
             </div>
-          ) : null}
+          ) : (
+            <div className="flex-1"></div>
+          )}
+          
+          {/* Comment Count - RIGHT */}
+          {recipe.comment_count !== undefined && recipe.comment_count > 0 && (
+            <span className="text-xs text-gray-400 flex items-center gap-1 ml-2 flex-shrink-0">
+              <i className="fa-regular fa-comment"></i> {recipe.comment_count}
+            </span>
+          )}
         </div>
       </div>
     </Link>

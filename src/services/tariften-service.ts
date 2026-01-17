@@ -26,5 +26,31 @@ export const tariftenService = {
       console.error('Tariften service error:', error);
       return [];
     }
+  },
+
+  /**
+   * Rastgele tarif al
+   */
+  getRandom: async (): Promise<TariftenRecipe | null> => {
+    try {
+      const response = await fetch(
+        `${TARIFTEN_API_URL}/recipes/random`,
+        { 
+          next: { revalidate: 1800 }, // 30 dakika cache
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+      
+      if (!response.ok) {
+        console.warn('Tariften API error:', response.status);
+        return null;
+      }
+      
+      const data = await response.json();
+      return data.success && data.recipe ? data.recipe : null;
+    } catch (error) {
+      console.error('Tariften service error:', error);
+      return null;
+    }
   }
 };

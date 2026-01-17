@@ -72,13 +72,13 @@ export default function QuestionCard({ item }: QuestionCardProps) {
           <span className="text-xs font-medium text-gray-500">{decodeEntities(authorName)} sordu</span>
         </div>
 
-        <h3 className="font-display font-bold text-lg text-slate-800 mb-2 leading-snug">
+        <h3 className="font-display font-bold text-lg text-slate-800 mb-3 leading-snug">
           &quot;{decodeEntities(item.title)}&quot;
         </h3>
 
-        {/* Question Excerpt/Summary */}
+        {/* Question Excerpt/Summary - Made more prominent */}
         {item.excerpt && (
-          <p className="text-sm text-gray-500 mb-3 line-clamp-2 leading-relaxed">
+          <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed bg-white/50 p-3 rounded-lg border border-purple-50">
             {decodeEntities(item.excerpt)}
           </p>
         )}
