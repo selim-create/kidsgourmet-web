@@ -108,7 +108,7 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
           ))}
           
           {safetyResult.alternatives && safetyResult.alternatives.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-current opacity-30">
+            <div className="mt-4 pt-4 border-t border-gray-300">
               <p className={`font-bold text-sm ${getSeverityTextColor(highestSeverity)} mb-3`}>
                 Güvenli Alternatifler:
               </p>

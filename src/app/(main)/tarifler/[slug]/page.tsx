@@ -21,6 +21,7 @@ import Image from 'next/image';
 // Similar Safe Recipes Component
 function SimilarSafeRecipesSection({ recipeId, childId }: { recipeId: number, childId: string }) {
   const { recipes, isLoading } = useSimilarSafeRecipes(recipeId, childId);
+  const { activeChild } = useActiveChild();
   
   if (isLoading || !recipes || recipes.length === 0) {
     return null;
@@ -33,7 +34,7 @@ function SimilarSafeRecipesSection({ recipeId, childId }: { recipeId: number, ch
         Güvenli Alternatif Tarifler
       </h3>
       <p className="text-sm text-gray-700 mb-4">
-        Bu tarifler {/* child name */} için güvenli olarak işaretlenmiş benzer tariflerdir.
+        Bu tarifler{activeChild ? ` ${activeChild.name}` : ''} için güvenli olarak işaretlenmiş benzer tariflerdir.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {recipes.slice(0, 4).map((recipe) => (

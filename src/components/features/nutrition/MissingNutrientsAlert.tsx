@@ -35,34 +35,40 @@ export default function MissingNutrientsAlert({ childId }: MissingNutrientsAlert
           </h3>
           
           <div className="space-y-3">
-            {topMissing.map((nutrient, index) => (
-              <div key={index} className="text-sm">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-amber-900">
-                    {nutrient.nutrient}
-                  </span>
-                  <span className="text-xs text-amber-700">
-                    {nutrient.current_servings}/{nutrient.recommended_servings} porsiyon
-                  </span>
+            {topMissing.map((nutrient, index) => {
+              // Calculate percentage for readability
+              const completionPercentage = Math.min(
+                (nutrient.current_servings / nutrient.recommended_servings) * 100, 
+                100
+              );
+              
+              return (
+                <div key={index} className="text-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-amber-900">
+                      {nutrient.nutrient}
+                    </span>
+                    <span className="text-xs text-amber-700">
+                      {nutrient.current_servings}/{nutrient.recommended_servings} porsiyon
+                    </span>
+                  </div>
+                  
+                  {/* Progress bar */}
+                  <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
+                    <div 
+                      className="bg-amber-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${completionPercentage}%` }}
+                    ></div>
+                  </div>
+                  
+                  {nutrient.suggested_foods.length > 0 && (
+                    <p className="text-xs text-amber-700">
+                      <strong>Öneriler:</strong> {nutrient.suggested_foods.join(', ')}
+                    </p>
+                  )}
                 </div>
-                
-                {/* Progress bar */}
-                <div className="w-full bg-amber-200 rounded-full h-2 mb-2">
-                  <div 
-                    className="bg-amber-500 h-2 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${Math.min((nutrient.current_servings / nutrient.recommended_servings) * 100, 100)}%` 
-                    }}
-                  ></div>
-                </div>
-                
-                {nutrient.suggested_foods.length > 0 && (
-                  <p className="text-xs text-amber-700">
-                    <strong>Öneriler:</strong> {nutrient.suggested_foods.join(', ')}
-                  </p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
           
           <div className="mt-4 pt-3 border-t border-amber-300">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { safetyService, SafetyCheckResult, BatchSafetyResult } from '@/services/safety-service';
 
 /**
@@ -87,6 +87,9 @@ export function useBatchSafety(recipeIds: number[], childId: string | undefined)
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Memoize the recipe IDs to avoid unnecessary re-renders
+  const recipeIdsKey = useMemo(() => JSON.stringify(recipeIds), [recipeIds]);
+  
   useEffect(() => {
     if (!childId || recipeIds.length === 0) {
       setSafetyResults(null);
@@ -110,7 +113,7 @@ export function useBatchSafety(recipeIds: number[], childId: string | undefined)
     };
     
     checkBatchSafety();
-  }, [recipeIds.join(','), childId]); // Join IDs to avoid array reference changes
+  }, [recipeIdsKey, childId]);
   
   return { safetyResults, isChecking, error };
 }
