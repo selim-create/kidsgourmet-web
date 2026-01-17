@@ -32,18 +32,8 @@ export default function QuestionCard({ item }: QuestionCardProps) {
   const authorInitials = item.meta?.author_initials || getInitials(authorName);
   const answerCount = item.meta?.answer_count || 0;
 
-  // Generate excerpt from content if excerpt is missing
-  const getExcerpt = () => {
-    if (item.excerpt) return item.excerpt;
-    if (item.content) {
-      // Strip HTML tags and get first 150 characters
-      const plainText = item.content.replace(/<[^>]*>/g, '');
-      return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText;
-    }
-    return '';
-  };
-
-  const displayExcerpt = getExcerpt();
+  // Use excerpt directly - if not provided, show empty (content field doesn't exist in FeaturedItem)
+  const displayExcerpt = item.excerpt || '';
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
