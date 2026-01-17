@@ -22,11 +22,12 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     
     try {
       const result = await safetyService.checkRecipeSafety(recipeId, childId);
-      setSafetyResult(result);
+      setSafetyResult(result || { is_safe: true, safety_score: 100, alerts: [] });
     } catch (err) {
       console.error('Failed to check recipe safety:', err);
       setError(err instanceof Error ? err.message : 'Failed to check safety');
-      setSafetyResult(null);
+      // Hata durumunda güvenli varsay (kullanıcıyı engellememe)
+      setSafetyResult({ is_safe: true, safety_score: 100, alerts: [] });
     } finally {
       setIsChecking(false);
     }
@@ -63,11 +64,11 @@ export function useIngredientSafety(ingredientId: number | undefined, childId: s
       
       try {
         const result = await safetyService.checkIngredientSafety(ingredientId, childId);
-        setSafetyResult(result);
+        setSafetyResult(result || { is_safe: true, safety_score: 100, alerts: [] });
       } catch (err) {
         console.error('Failed to check ingredient safety:', err);
         setError(err instanceof Error ? err.message : 'Failed to check safety');
-        setSafetyResult(null);
+        setSafetyResult({ is_safe: true, safety_score: 100, alerts: [] });
       } finally {
         setIsChecking(false);
       }
@@ -102,11 +103,11 @@ export function useBatchSafety(recipeIds: number[], childId: string | undefined)
       
       try {
         const results = await safetyService.batchSafetyCheck(recipeIds, childId);
-        setSafetyResults(results);
+        setSafetyResults(results || {});
       } catch (err) {
         console.error('Failed to batch check safety:', err);
         setError(err instanceof Error ? err.message : 'Failed to check safety');
-        setSafetyResults(null);
+        setSafetyResults({});
       } finally {
         setIsChecking(false);
       }

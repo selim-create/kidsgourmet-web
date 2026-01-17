@@ -39,7 +39,7 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
             {nextSuggestion.introduction_week} tarihinden itibaren denemeye başlayabilirsiniz.
           </p>
           
-          {nextSuggestion.preparation_tips.length > 0 && (
+          {nextSuggestion?.preparation_tips?.length > 0 && (
             <div className="mb-4">
               <p className="text-xs font-semibold text-gray-900 mb-2">
                 <i className="fa-solid fa-lightbulb text-yellow-500 mr-1"></i>
@@ -65,7 +65,7 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
             </div>
           )}
           
-          {nextSuggestion.recipes.length > 0 && (
+          {nextSuggestion?.recipes?.length > 0 && (
             <div className="mb-3">
               <p className="text-xs font-semibold text-gray-900 mb-2">
                 Tarifler:
