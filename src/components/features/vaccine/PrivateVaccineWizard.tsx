@@ -57,6 +57,14 @@ interface BrandOption {
   name: string;
   doses: number;
   description?: string;
+  hasSchedules?: boolean;
+  schedules?: ScheduleOption[];
+}
+
+interface ScheduleOption {
+  key: string;
+  name: string;
+  description: string;
 }
 
 const brandOptions: Record<string, BrandOption[]> = {
@@ -65,20 +73,28 @@ const brandOptions: Record<string, BrandOption[]> = {
     { id: 'rotateq', name: 'RotaTeq', doses: 3, description: '3 doz (2, 4 ve 6. ayda)' },
   ],
   meningococcal_acwy: [
-    { id: 'menactra', name: 'Menactra', doses: 1 },
-    { id: 'menveo', name: 'Menveo', doses: 1 },
+    { id: 'nimenrix', name: 'Nimenrix', doses: 1, description: 'Tek doz, 5 yıl sonra rapel' },
+    { id: 'menveo', name: 'Menveo', doses: 1, description: '2 aydan itibaren yapılabilir' },
   ],
   meningococcal_b: [
-    { id: 'bexsero', name: 'Bexsero', doses: 2 },
-    { id: 'trumenba', name: 'Trumenba', doses: 2 },
+    { 
+      id: 'bexsero', 
+      name: 'Bexsero', 
+      doses: 2, 
+      hasSchedules: true,
+      schedules: [
+        { key: 'infant', name: 'Bebek Şeması (2-5 ay)', description: '3 doz' },
+        { key: 'older_infant', name: 'Büyük Bebek Şeması (6-11 ay)', description: '3 doz' },
+        { key: 'toddler', name: 'Çocuk Şeması (12-23 ay)', description: '3 doz' },
+        { key: 'child', name: 'Büyük Çocuk Şeması (2+ yaş)', description: '2 doz' },
+      ]
+    },
   ],
   varicella: [
-    { id: 'varivax', name: 'Varivax', doses: 2 },
-    { id: 'priorix_tetra', name: 'Priorix-Tetra', doses: 2 },
+    { id: 'varivax', name: 'Varivax', doses: 2, description: '1. doz 12 ay, 2. doz 4-6 yaş' },
   ],
   influenza: [
-    { id: 'fluzone', name: 'Fluzone', doses: 1, description: 'Mevsimsel' },
-    { id: 'fluarix', name: 'Fluarix', doses: 1, description: 'Mevsimsel' },
+    { id: 'generic', name: 'Mevsimsel Grip Aşısı', doses: 1, description: 'Her yıl önerilir' },
   ],
 };
 
@@ -88,10 +104,11 @@ export default function PrivateVaccineWizard({
   onClose, 
   onSubmit 
 }: PrivateVaccineWizardProps) {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState<number | 'schedule'>(1);
   const [selectedVaccine, setSelectedVaccine] = useState<VaccineType | null>(null);
   const [doctorRecommended, setDoctorRecommended] = useState<boolean | null>(null);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<string | null>(null);
   const [firstDoseDate, setFirstDoseDate] = useState('');
 
   const handleReset = () => {
@@ -99,6 +116,7 @@ export default function PrivateVaccineWizard({
     setSelectedVaccine(null);
     setDoctorRecommended(null);
     setSelectedBrand(null);
+    setSelectedSchedule(null);
     setFirstDoseDate('');
   };
 
@@ -129,6 +147,23 @@ export default function PrivateVaccineWizard({
 
   const handleBrandSelect = (brand: string) => {
     setSelectedBrand(brand);
+    
+    // Check if this brand has schedules
+    const currentBrand = selectedVaccine && brandOptions[selectedVaccine]
+      ? brandOptions[selectedVaccine].find(b => b.id === brand)
+      : null;
+    
+    if (currentBrand?.hasSchedules && currentBrand.schedules && currentBrand.schedules.length > 0) {
+      // Go to schedule selection step
+      setStep('schedule');
+    } else {
+      // Go directly to date selection step
+      setStep(4);
+    }
+  };
+
+  const handleScheduleSelect = (scheduleKey: string) => {
+    setSelectedSchedule(scheduleKey);
     setStep(4);
   };
 
@@ -136,10 +171,10 @@ export default function PrivateVaccineWizard({
   const getDefaultBrand = (vaccineType: VaccineType): string => {
     const defaults: Record<VaccineType, string> = {
       rotavirus: 'rotarix',
-      meningococcal_acwy: 'menactra',
+      meningococcal_acwy: 'nimenrix',
       meningococcal_b: 'bexsero',
       varicella: 'varivax',
-      influenza: 'fluzone',
+      influenza: 'generic',
     };
     return defaults[vaccineType];
   };
@@ -154,7 +189,7 @@ export default function PrivateVaccineWizard({
       child_id: childId,
       type: selectedVaccine,
       brand_code: brandCode,
-      schedule_key: firstDoseDate || undefined,
+      schedule_key: selectedSchedule || undefined,
     };
 
     onSubmit(request);
@@ -180,6 +215,7 @@ export default function PrivateVaccineWizard({
             {step === 1 && 'Özel Aşı Ekle'}
             {step === 2 && 'Doktor Önerisi'}
             {step === 3 && 'Marka Seçimi'}
+            {step === 'schedule' && 'Şema Seçimi'}
             {step === 4 && 'İlk Doz Tarihi'}
             {step === 5 && 'Bilgilendirme'}
           </h3>
@@ -310,6 +346,47 @@ export default function PrivateVaccineWizard({
             </div>
           )}
 
+          {/* Step 3.5: Schedule Selection (for Bexsero) */}
+          {step === 'schedule' && currentVaccineOption && selectedBrand && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{currentVaccineOption.icon}</span>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-slate-800">{currentVaccineOption.name}</h4>
+                    <p className="text-xs text-gray-600">
+                      {currentBrandOptions.find(b => b.id === selectedBrand)?.name}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-sm font-bold text-slate-800 mb-3">
+                Çocuğunuzun yaşına uygun şemayı seçin:
+              </p>
+
+              <div className="space-y-3">
+                {currentBrandOptions
+                  .find(b => b.id === selectedBrand)
+                  ?.schedules?.map((schedule) => (
+                    <button
+                      key={schedule.key}
+                      onClick={() => handleScheduleSelect(schedule.key)}
+                      className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all text-left"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-slate-800">{schedule.name}</p>
+                          <p className="text-xs text-gray-600 mt-1">{schedule.description}</p>
+                        </div>
+                        <i className="fa-solid fa-chevron-right text-gray-300"></i>
+                      </div>
+                    </button>
+                  ))}
+              </div>
+            </div>
+          )}
+
           {/* Step 4: First Dose Date */}
           {step === 4 && currentVaccineOption && (
             <div className="space-y-4">
@@ -318,11 +395,18 @@ export default function PrivateVaccineWizard({
                   <span className="text-3xl">{currentVaccineOption.icon}</span>
                   <div className="flex-1">
                     <h4 className="font-bold text-slate-800">{currentVaccineOption.name}</h4>
-                    {selectedBrand && (
-                      <p className="text-xs text-gray-600">
-                        {currentBrandOptions.find(b => b.id === selectedBrand)?.name}
-                      </p>
-                    )}
+                    {selectedBrand && (() => {
+                      const currentBrand = currentBrandOptions.find(b => b.id === selectedBrand);
+                      const currentSchedule = currentBrand?.schedules?.find(s => s.key === selectedSchedule);
+                      return (
+                        <p className="text-xs text-gray-600">
+                          {currentBrand?.name}
+                          {selectedSchedule && currentSchedule && (
+                            <span> - {currentSchedule.name}</span>
+                          )}
+                        </p>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
@@ -354,7 +438,16 @@ export default function PrivateVaccineWizard({
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setStep(step - 1)}
+                  onClick={() => {
+                    // Navigate back to schedule selection if we came from there, otherwise to brand selection
+                    if (selectedSchedule) {
+                      setStep('schedule');
+                    } else if (selectedBrand) {
+                      setStep(3);
+                    } else {
+                      setStep(2);
+                    }
+                  }}
                   className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 font-bold hover:bg-gray-50 transition-colors"
                 >
                   <i className="fa-solid fa-chevron-left mr-2"></i>
