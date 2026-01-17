@@ -29,19 +29,19 @@ export const tariftenService = {
   },
 
   /**
-   * Rastgele tarif al - API endpoint mevcut değilse alternatif yöntem kullan
+   * Get random recipe - use alternative method if API endpoint is not available
    */
   getRandom: async (): Promise<TariftenRecipe | null> => {
     try {
-      // API endpoint (/recipes/random) mevcut değil - 404 dönüyor
-      // Alternatif: popüler malzemelerle tarif getir
+      // API endpoint (/recipes/random) not available - returns 404
+      // Alternative: fetch recipe using popular ingredients
       const popularIngredients = ['havuç', 'patates', 'tavuk', 'yumurta', 'elma', 'kabak', 'brokoli'];
       const randomIngredient = popularIngredients[Math.floor(Math.random() * popularIngredients.length)];
       
       const recipes = await tariftenService.getByIngredient(randomIngredient, 1);
       return recipes.length > 0 ? recipes[0] : null;
     } catch {
-      // Silently fail - API unavailable
+      // Silently handle errors when fallback ingredient-based API call fails
       return null;
     }
   }

@@ -85,6 +85,13 @@ const getAgeGroupTextColor = (ageGroup?: string): string => {
   return '#FFFFFF';
 };
 
+// Author object with all possible avatar field variants
+interface AuthorWithAvatar {
+  avatar?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+}
+
 // Helper function to generate ui-avatars.com URL
 const generateUIAvatarURL = (name: string, backgroundColor: string): string => {
   const bgColor = backgroundColor.replace('#', '');
@@ -112,7 +119,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     // Try multiple possible avatar fields
     if (typeof recipe.author === 'object' && recipe.author) {
       // Check all possible avatar field variants
-      const authorObj = recipe.author as { avatar?: string; avatar_url?: string; avatarUrl?: string };
+      const authorObj = recipe.author as AuthorWithAvatar;
       const avatar = authorObj.avatar || authorObj.avatar_url || authorObj.avatarUrl;
       if (avatar) return avatar;
     }
