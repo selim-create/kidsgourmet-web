@@ -69,7 +69,7 @@ function AlertItem({ alert }: { alert: SafetyAlert }) {
 }
 
 export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBannerProps) {
-  const { safetyResult, isChecking, error } = useSafetyCheck(recipeId, childId);
+  const { safetyResult, isChecking, error, isApiError } = useSafetyCheck(recipeId, childId);
   
   // Don't show if no child profile
   if (!childId) return null;
@@ -85,9 +85,27 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
       </div>
     );
   }
+
+  // API hatası durumunda bilgilendirme göster (güvenli varsaymak yerine)
+  if (error || isApiError) {
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <i className="fa-solid fa-info-circle text-blue-500 text-xl mt-0.5"></i>
+          <div>
+            <p className="font-medium text-blue-800">Güvenlik Kontrolü Yapılamadı</p>
+            <p className="text-sm text-blue-600 mt-1">
+              Bu tarifin çocuğunuz için uygunluğunu şu an kontrol edemiyoruz. 
+              Lütfen malzemeleri kendiniz kontrol edin.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
-  // Don't show banner if recipe is safe, no result yet, or error occurred
-  if (error || !safetyResult || safetyResult.is_safe) return null;
+  // Don't show banner if recipe is safe or no result yet
+  if (!safetyResult || safetyResult.is_safe) return null;
   
   // Alerts check - can be undefined
   const alerts = safetyResult.alerts || [];

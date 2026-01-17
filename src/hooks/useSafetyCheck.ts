@@ -17,6 +17,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
   const [safetyResult, setSafetyResult] = useState<SafetyCheckResult>(SAFE_RESULT);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isApiError, setIsApiError] = useState(false); // NEW: API error flag
   
   // CRITICAL: Prevent duplicate calls
   const checkedRef = useRef<string | null>(null);
@@ -25,6 +26,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     if (!recipeId || !childId) {
       setSafetyResult(SAFE_RESULT);
       setIsChecking(false);
+      setIsApiError(false);
       return;
     }
     
@@ -36,14 +38,25 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     
     setIsChecking(true);
     setError(null);
+    setIsApiError(false);
     checkedRef.current = cacheKey;
     
     try {
       const result = await safetyService.checkRecipeSafety(recipeId, childId);
-      setSafetyResult(result);
+      
+      // Check if API returned a valid result
+      if (result && typeof result.is_safe === 'boolean') {
+        setSafetyResult(result);
+        setIsApiError(false);
+      } else {
+        // API succeeded but returned invalid response
+        setIsApiError(true);
+        setSafetyResult(SAFE_RESULT);
+      }
     } catch (err) {
       console.error('Failed to check recipe safety:', err);
       setError(err instanceof Error ? err.message : 'Failed to check safety');
+      setIsApiError(true); // Mark that an API error occurred
       setSafetyResult(SAFE_RESULT);
     } finally {
       setIsChecking(false);
@@ -59,7 +72,7 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
     checkSafety();
   };
   
-  return { safetyResult, isChecking, error, recheckSafety };
+  return { safetyResult, isChecking, error, isApiError, recheckSafety };
 }
 
 /**

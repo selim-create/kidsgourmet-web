@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRecommendations } from '@/hooks/useRecommendations';
 import { PersonalizedRecipe } from '@/services/recommendation-service';
+import { useUser } from '@/hooks/use-user';
 
 interface PersonalizedRecipePoolProps {
   childId: string;
@@ -16,6 +16,7 @@ export default function PersonalizedRecipePool({
   mealType,
   limit = 12 
 }: PersonalizedRecipePoolProps) {
+  const { isAuthenticated } = useUser();
   const { recommendations, isLoading, error } = useRecommendations(childId, { 
     limit,
     meal_type: mealType,
@@ -26,67 +27,92 @@ export default function PersonalizedRecipePool({
   const recipeList: PersonalizedRecipe[] = Array.isArray(recommendations) 
     ? recommendations 
     : (recommendations as any)?.recommendations || [];
-  
-  if (isLoading) {
+
+  // Auth yoksa bilgilendirme göster
+  if (!isAuthenticated) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-        </div>
+      <div className="text-center py-4 text-gray-500">
+        <i className="fa-solid fa-lock text-gray-400 text-xl mb-2"></i>
+        <p className="text-xs">Öneriler için giriş yapın</p>
       </div>
     );
   }
   
-  if (error || recipeList.length === 0) {
-    return null; // Silently fail
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-gray-100 rounded-lg p-3 animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // API hatası durumunda bilgilendirme
+  if (error) {
+    return (
+      <div className="text-center py-4 text-amber-600 bg-amber-50 rounded-lg">
+        <i className="fa-solid fa-triangle-exclamation text-xl mb-2"></i>
+        <p className="text-xs">Öneriler şu an yüklenemiyor</p>
+        <p className="text-xs text-amber-500 mt-1">Lütfen daha sonra tekrar deneyin</p>
+      </div>
+    );
+  }
+  
+  if (recipeList.length === 0) {
+    return (
+      <div className="text-center py-4 text-gray-500">
+        <i className="fa-solid fa-utensils text-gray-400 text-xl mb-2"></i>
+        <p className="text-xs">Henüz öneri oluşturulmadı</p>
+        <p className="text-xs text-gray-400 mt-1">Çocuk profilinizi güncelleyin</p>
+      </div>
+    );
   }
   
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-semibold text-gray-900 mb-3">
-        <i className="fa-solid fa-star text-yellow-500 mr-2"></i>
-        Sizin İçin Seçtiklerimiz
-      </h3>
+    <div className="space-y-2">
+      <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
+        <i className="fa-solid fa-wand-magic-sparkles text-purple-500 mr-1"></i>
+        Kişiselleştirilmiş Öneriler
+      </h4>
       
-      {recipeList.map((recipe) => (
-        <Link 
-          key={recipe?.id || Math.random()} 
+      {recipeList.slice(0, 5).map((recipe) => (
+        <Link
+          key={recipe?.id || Math.random()}
           href={`/tarifler/${recipe?.slug || ''}`}
-          className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+          className="flex items-center gap-3 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
         >
+          {/* Use img tag - no next/image hostname issues */}
           {recipe?.image && (
-            <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-              <Image
-                src={recipe.image}
-                alt={recipe?.title || 'Tarif'}
-                fill
-                sizes="64px"
-                className="object-cover"
-              />
-            </div>
+            <img
+              src={recipe.image}
+              alt={recipe?.title || 'Tarif'}
+              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+              loading="lazy"
+              onError={(e) => {
+                // Show placeholder if image fails to load
+                (e.target as HTMLImageElement).src = '/images/placeholder-recipe.png';
+              }}
+            />
           )}
           <div className="flex-1 min-w-0">
-            <h4 className="text-sm font-medium text-gray-900 line-clamp-1 mb-1">
+            <p className="text-sm font-medium text-gray-800 truncate">
               {recipe?.title || 'Tarif'}
-            </h4>
-            <div className="flex items-center gap-2 text-xs text-gray-600">
-              {recipe?.prep_time && (
-                <span className="inline-flex items-center">
-                  <i className="fa-solid fa-clock mr-1"></i>
-                  {recipe.prep_time}
-                </span>
-              )}
-              {recipe?.age_group && (
-                <span 
-                  className="px-2 py-0.5 rounded-full text-white text-xs"
-                  style={{ backgroundColor: recipe.age_group_color || '#FF8A65' }}
-                >
-                  {recipe.age_group}
-                </span>
-              )}
-            </div>
+            </p>
+            {recipe?.prep_time && (
+              <p className="text-xs text-gray-500">
+                <i className="fa-regular fa-clock mr-1"></i>
+                {recipe.prep_time}
+              </p>
+            )}
           </div>
-          <i className="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+          {recipe?.score && (
+            <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded">
+              {Math.round(recipe.score)}%
+            </span>
+          )}
         </Link>
       ))}
     </div>
