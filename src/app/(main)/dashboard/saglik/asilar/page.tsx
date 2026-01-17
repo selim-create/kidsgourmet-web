@@ -95,22 +95,27 @@ export default function VaccinePage() {
     if (!activeChild || !markDoneModal.record) return;
 
     try {
-      const updatedSchedule = await vaccineService.markVaccineDone({
+      // API'yi çağır (sadece success döner)
+      await vaccineService.markVaccineDone({
         record_id: markDoneModal.record.id,
         actual_date: date,
         notes: notes || undefined,
       });
 
+      // Schedule'ı yeniden çek - API doğrudan schedule dönmüyor
+      const updatedSchedule = await vaccineService.getVaccineSchedule(activeChild.id);
       setSchedule(updatedSchedule);
+      
+      // Modal kapanmadan önce record'u kaydet
+      const recordId = markDoneModal.record.id;
       setMarkDoneModal({ isOpen: false, record: null });
       
       toast.success('Aşı başarıyla kaydedildi!');
 
-      // Open side effect modal if requested
-      if (askSideEffects) {
-        // Find the updated record
+      // Yan etki modalını aç
+      if (askSideEffects && updatedSchedule?.vaccines) {
         const updatedRecord = updatedSchedule.vaccines.find(
-          v => v.id === markDoneModal.record!.id
+          v => v.id === recordId
         );
         if (updatedRecord) {
           setSideEffectModal({
@@ -171,10 +176,13 @@ export default function VaccinePage() {
     if (!activeChild) return;
 
     try {
+      // API sadece record ID'leri döndürüyor, schedule değil
       await vaccineService.addPrivateVaccine(request);
-      // Refresh the full schedule instead of using the response directly
+      
+      // Schedule'ı yeniden çek
       const updatedSchedule = await vaccineService.getVaccineSchedule(activeChild.id);
       setSchedule(updatedSchedule);
+      
       setPrivateVaccineWizard(false);
       toast.success('Özel aşı takvime eklendi!');
     } catch (err) {

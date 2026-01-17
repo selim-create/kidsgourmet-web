@@ -140,7 +140,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect, on
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="font-bold text-slate-800">{vaccine.name_short || vaccine.name}</h3>
+              <h3 className="font-bold text-slate-800">{vaccine.name_short || vaccine.name || vaccine.code || 'Bilinmeyen Aşı'}</h3>
               {record.is_mandatory ? (
                 <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                   Zorunlu
