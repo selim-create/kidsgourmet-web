@@ -7,10 +7,38 @@ interface VaccineCardProps {
   record: VaccineRecord;
   onMarkDone: (record: VaccineRecord) => void;
   onReportSideEffect: (record: VaccineRecord) => void;
+  onViewDetails: (record: VaccineRecord) => void;
 }
 
-export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: VaccineCardProps) {
+export default function VaccineCard({ record, onMarkDone, onReportSideEffect, onViewDetails }: VaccineCardProps) {
   const { vaccine, status, scheduled_date, actual_date } = record;
+
+  // Calculate effective status if status is empty or unknown
+  const getEffectiveStatus = (record: VaccineRecord): VaccineStatus => {
+    // If status is already set and valid, use it
+    if (record.status && ['done', 'upcoming', 'overdue', 'skipped', 'delayed'].includes(record.status)) {
+      return record.status;
+    }
+    
+    // Calculate based on dates
+    if (record.actual_date) {
+      return 'done';
+    }
+    
+    const today = new Date();
+    const scheduledDate = new Date(record.scheduled_date);
+    const diffDays = Math.ceil((scheduledDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      return 'overdue';
+    } else if (diffDays <= 7) {
+      return 'upcoming';
+    }
+    
+    return 'upcoming'; // Default to upcoming for future vaccines
+  };
+
+  const effectiveStatus = getEffectiveStatus(record);
 
   // Format date
   const formatDate = (dateStr: string): string => {
@@ -88,7 +116,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
     }
   };
 
-  const statusStyle = getStatusStyle(status);
+  const statusStyle = getStatusStyle(effectiveStatus);
   const displayDate = actual_date || scheduled_date;
 
   return (
@@ -113,7 +141,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-bold text-slate-800">{vaccine.name_short || vaccine.name}</h3>
-              {vaccine.is_mandatory ? (
+              {record.is_mandatory ? (
                 <span className="bg-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">
                   Zorunlu
                 </span>
@@ -139,7 +167,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
         )}
 
         {/* Notes if done */}
-        {status === 'done' && record.notes && (
+        {effectiveStatus === 'done' && record.notes && (
           <div className="mt-2 p-2 bg-white rounded-lg border border-gray-100">
             <p className="text-xs text-gray-600">
               <i className="fa-solid fa-note-sticky text-gray-400 mr-1"></i>
@@ -149,7 +177,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
         )}
 
         {/* Side effects if reported */}
-        {status === 'done' && record.side_effects && (
+        {effectiveStatus === 'done' && record.side_effects && (
           <div className="mt-2 p-2 bg-amber-50 rounded-lg border border-amber-100">
             <p className="text-xs font-bold text-amber-800 mb-1">Bildirilen Yan Etkiler:</p>
             <div className="flex flex-wrap gap-1">
@@ -185,7 +213,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
 
       {/* Action Buttons */}
       <div className="flex gap-2 pt-3 border-t border-gray-100">
-        {status === 'upcoming' || status === 'overdue' || status === 'delayed' ? (
+        {effectiveStatus === 'upcoming' || effectiveStatus === 'overdue' || effectiveStatus === 'delayed' ? (
           <>
             <button
               onClick={() => onMarkDone(record)}
@@ -198,7 +226,7 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
               <i className="fa-solid fa-ellipsis-vertical"></i>
             </button>
           </>
-        ) : status === 'done' ? (
+        ) : effectiveStatus === 'done' ? (
           <>
             <button
               onClick={() => onReportSideEffect(record)}
@@ -212,7 +240,10 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect }: 
             </button>
           </>
         ) : (
-          <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-3 rounded-lg transition-colors">
+          <button 
+            onClick={() => onViewDetails(record)}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+          >
             <i className="fa-solid fa-info-circle mr-1"></i>
             Detay
           </button>
