@@ -74,6 +74,15 @@ export default function ClientHead({ title, description, keywords, ogImage, url 
 
     if (url) {
       setMetaTag('og:url', url, true);
+      
+      // Set canonical link
+      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+      }
+      canonical.setAttribute('href', url);
     }
 
     // Set Twitter card type

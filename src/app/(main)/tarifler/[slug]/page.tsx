@@ -7,6 +7,7 @@ import { recipeService } from '@/services/recipe-service';
 import { Recipe, RecipeIngredient, RecipeInstruction } from '@/lib/types';
 import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
 import SafetyAlertBanner from '@/components/features/safety/SafetyAlertBanner';
+import RecipeRating from '@/components/features/recipe/RecipeRating';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import { useUser } from '@/hooks/use-user';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
@@ -17,6 +18,68 @@ import ClientHead from '@/components/seo/ClientHead';
 import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
 import Image from 'next/image';
+import RecipeCard from '@/components/ui/RecipeCard';
+
+// Age group color mapping (matching RecipeCard.tsx)
+const AGE_GROUP_COLORS: { [key: string]: string } = {
+  '0-6': '#E1BEE7',   // Lila
+  '6-8': '#FFCCBC',   // Şeftali
+  '9-11': '#C8E6C9',  // Nane Yeşili
+  '12-24': '#B3E5FC', // Gökyüzü Mavisi
+  '2+': '#FFF9C4',    // Limon Sarısı
+};
+
+// Get background color for age group badge
+const getAgeGroupColor = (ageGroup?: string): string => {
+  if (!ageGroup) return '#22C55E';
+  
+  // Extract age range from string
+  if (ageGroup.includes('0-6')) return AGE_GROUP_COLORS['0-6'];
+  if (ageGroup.includes('6-8')) return AGE_GROUP_COLORS['6-8'];
+  if (ageGroup.includes('9-11')) return AGE_GROUP_COLORS['9-11'];
+  if (ageGroup.includes('12-24')) return AGE_GROUP_COLORS['12-24'];
+  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i)) return AGE_GROUP_COLORS['2+'];
+  
+  return '#22C55E';
+};
+
+// Get text color for age group badge (dark text for light backgrounds)
+const getAgeGroupTextColor = (ageGroup?: string): string => {
+  if (!ageGroup) return '#FFFFFF';
+  
+  // Light backgrounds need dark text for readability
+  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i) || ageGroup.toLowerCase().includes('gurme')) {
+    return '#92400E'; // Amber-800 - Dark brown for yellow background
+  }
+  if (ageGroup.includes('9-11') || ageGroup.toLowerCase().includes('keşif')) {
+    return '#166534'; // Green-800 - Dark green for light green background
+  }
+  
+  // Dark backgrounds use white text
+  return '#FFFFFF';
+};
+
+// Helper function to generate ui-avatars.com URL
+const generateUIAvatarURL = (name: string, backgroundColor: string = '#FF8A65'): string => {
+  const bgColor = backgroundColor.replace('#', '');
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bgColor}&color=fff&size=128&bold=true`;
+};
+
+// Get author avatar with fallback
+const getAuthorAvatar = (author: any): string | null => {
+  if (!author) return null;
+  
+  // Try multiple possible avatar fields
+  const avatar = author.avatar || author.avatar_url || author.avatarUrl;
+  if (avatar) return avatar;
+  
+  // Fallback to ui-avatars.com
+  if (author.name) {
+    return generateUIAvatarURL(author.name);
+  }
+  
+  return null;
+};
 
 // Similar Safe Recipes Component
 function SimilarSafeRecipesSection({ recipeId, childId }: { recipeId: number, childId: string }) {
@@ -268,7 +331,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
         />
         
         {/* BREADCRUMB - Header altında kalmayacak şekilde padding ekle */}
-        <div className="bg-white border-b border-gray-100 pt-20">
+        <div className="bg-white border-b border-gray-100 pt-[calc(var(--header-height,80px)+5px)]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
@@ -314,7 +377,14 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                             <i className="fa-regular fa-clock text-orange-500 mr-2"></i> {recipe.prep_time}
                         </span>
                         {recipe.age_groups && recipe.age_groups.length > 0 && (
-                          <span className="bg-green-500 text-white px-3 py-1.5 rounded-xl text-sm font-bold shadow-sm flex items-center w-fit">
+                          <span 
+                            className="px-3 py-1.5 text-sm font-bold shadow-lg flex items-center w-fit"
+                            style={{
+                              backgroundColor: getAgeGroupColor(recipe.age_groups[0]),
+                              color: getAgeGroupTextColor(recipe.age_groups[0]),
+                              borderRadius: '12px 4px 12px 4px',
+                            }}
+                          >
                               <i className="fa-solid fa-baby mr-2"></i> {decodeHTMLEntities(recipe.age_groups[0])}
                           </span>
                         )}
@@ -370,7 +440,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                     </div>
                     
                     <div className="flex items-start justify-between gap-3 group">
-                      <h1 className="font-display font-bold text-3xl md:text-4xl text-slate-800 mb-4 leading-tight font-sans">
+                      <h1 className="font-display font-bold text-3xl md:text-4xl text-slate-800 leading-tight font-sans">
                           {decodeHTMLEntities(recipe.title)}
                       </h1>
                       <EditButton 
@@ -378,6 +448,17 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         contentId={recipe.id}
                         authorId={recipe.author?.id}
                         variant="icon"
+                      />
+                    </div>
+                    
+                    {/* Rating Section */}
+                    <div className="mb-4">
+                      <RecipeRating 
+                        recipeId={recipe.id}
+                        recipeTitle={recipe.title}
+                        initialRating={recipe.rating || 0}
+                        initialRatingCount={recipe.rating_count || 0}
+                        currentUserRating={recipe.user_rating || 0}
                       />
                     </div>
                     
@@ -812,9 +893,13 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         <div className="flex items-center gap-4">
                           <div className="relative">
                             <img 
-                              src={recipe.author.avatar || 'https://placehold.co/64x64/FFF3E0/FF9800?text=👨‍🍳'} 
+                              src={getAuthorAvatar(recipe.author) || 'https://placehold.co/64x64/FFF3E0/FF9800?text=👨‍🍳'} 
                               className="w-16 h-16 rounded-full border-3 border-white shadow-md object-cover" 
-                              alt={recipe.author.name} 
+                              alt={recipe.author.name}
+                              onError={(e) => {
+                                // Fallback to ui-avatars.com on error
+                                (e.target as HTMLImageElement).src = generateUIAvatarURL(recipe.author?.name || 'User');
+                              }}
                             />
                             <div className="absolute -bottom-1 -right-1 bg-orange-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border-2 border-white">
                               <i className="fa-solid fa-utensils"></i>
@@ -906,45 +991,67 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 </div>
             </div>
 
-            {/* RELATED RECIPES - 3 Adet Büyük Kartlar */}
+            {/* RELATED RECIPES - 4 Cards with RecipeCard Component */}
             {recipe.related_recipes && recipe.related_recipes.length > 0 && (
               <div className="mt-10">
                 <h3 className="font-bold text-slate-800 mb-6 text-xl flex items-center">
                   <i className="fa-solid fa-utensils text-orange-500 mr-2"></i> Benzer Tarifler
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {recipe.related_recipes.slice(0, 3).map((related) => (
-                    <Link 
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {recipe.related_recipes.slice(0, 4).map((related) => (
+                    <RecipeCard 
                       key={related.id}
-                      href={`/tarifler/${related.slug}`} 
-                      className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all"
-                    >
-                      <div className="aspect-[4/3] overflow-hidden">
-                        <img 
-                          src={related.image || 'https://placehold.co/400x300/FF8A65/ffffff?text=Tarif'} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                          alt={related.title} 
-                        />
-                      </div>
-                      <div className="p-4">
-                        <h4 className="font-bold text-slate-800 group-hover:text-orange-500 transition-colors mb-2">
-                          {decodeHTMLEntities(related.title)}
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          {related.age_group && (
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                              {related.age_group}
-                            </span>
-                          )}
-                          {related.prep_time && (
-                            <span className="text-xs text-gray-500">
-                              <i className="fa-regular fa-clock mr-1"></i>{related.prep_time}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
+                      recipe={related}
+                    />
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* INGREDIENT CARDS - Malzemeler Bölümü */}
+            {recipe.ingredients && recipe.ingredients.length > 0 && (
+              <div className="mt-10">
+                <h3 className="font-bold text-slate-800 mb-6 text-xl flex items-center">
+                  <i className="fa-solid fa-carrot text-green-500 mr-2"></i> Tarifin Malzemeleri
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  {recipe.ingredients.slice(0, 6).map((ingredient, index) => {
+                    // Create slug from ingredient name
+                    const ingredientSlug = (ingredient.name || ingredient.text || '')
+                      .toLowerCase()
+                      .replace(/ş/g, 's')
+                      .replace(/ğ/g, 'g')
+                      .replace(/ü/g, 'u')
+                      .replace(/ö/g, 'o')
+                      .replace(/ç/g, 'c')
+                      .replace(/ı/g, 'i')
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/^-+|-+$/g, '');
+                    
+                    return (
+                      <Link 
+                        key={ingredient.id || index}
+                        href={`/beslenme-rehberi/${ingredientSlug}`}
+                        className="group bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all flex flex-col items-center text-center"
+                      >
+                        {/* Ingredient Icon/Image Placeholder */}
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-100 to-green-50 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                          <i className="fa-solid fa-leaf text-2xl text-green-500"></i>
+                        </div>
+                        
+                        {/* Ingredient Name */}
+                        <h4 className="font-bold text-sm text-slate-800 mb-1 line-clamp-2 group-hover:text-green-600 transition-colors">
+                          {decodeHTMLEntities(ingredient.name || ingredient.text || '')}
+                        </h4>
+                        
+                        {/* Starting Age - if available */}
+                        <span className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-full mt-auto">
+                          <i className="fa-solid fa-info-circle mr-1"></i>
+                          Detaylar
+                        </span>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             )}
