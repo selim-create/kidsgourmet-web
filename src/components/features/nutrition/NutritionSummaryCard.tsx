@@ -11,7 +11,7 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
   
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
         <div className="flex items-center justify-center py-8">
           <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -74,10 +74,10 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
   ];
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">
-          <i className="fa-solid fa-chart-pie text-orange-500 mr-2"></i>
+        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+          <i className="fa-solid fa-chart-pie text-orange-500"></i>
           Haftalık Beslenme Özeti
         </h2>
         <div className="text-xs text-gray-500">
@@ -85,10 +85,10 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
         </div>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
         {nutrients.map((nutrient) => (
-          <div key={nutrient.label} className={`p-4 rounded-lg ${nutrient.color}`}>
-            <div className="text-2xl mb-2">{nutrient.icon}</div>
+          <div key={nutrient.label} className={`p-3 rounded-xl ${nutrient.color}`}>
+            <div className="text-xl mb-1">{nutrient.icon}</div>
             <div className="text-2xl font-bold mb-1">{nutrient.value}</div>
             <div className="text-xs font-medium">{nutrient.label}</div>
           </div>
