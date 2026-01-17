@@ -190,6 +190,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                   ingredientId={ingredient.id}
                                   ingredientData={{
                                     min_age_months: ingredient.min_age_months,
+                                    start_age: ingredient.start_age,
                                     allergen_info: ingredient.allergen_info,
                                     name: ingredient.name,
                                   }}

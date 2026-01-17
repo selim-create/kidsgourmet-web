@@ -104,6 +104,25 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
     );
   }
   
+  // Check for age warnings first (even if is_safe is true)
+  const ageWarnings = safetyResult?.alerts?.filter(a => a.type === 'age') || [];
+  
+  if (ageWarnings.length > 0) {
+    return (
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <i className="fa-solid fa-clock text-amber-500 text-xl mt-0.5"></i>
+          <div>
+            <p className="font-medium text-amber-800">Yaş Grubu Uyarısı</p>
+            {ageWarnings.map((alert) => (
+              <p key={`${alert.type}-${alert.message}`} className="text-sm text-amber-600 mt-1">{alert.message}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   // Show green success message if recipe is safe
   if (!safetyResult || safetyResult.is_safe) {
     return (

@@ -8,6 +8,7 @@ interface IngredientSafetyAlertProps {
   ingredientId?: number;
   ingredientData?: {
     min_age_months?: number;
+    start_age?: string;
     allergen_info?: {
       is_allergen: boolean;
       allergen_type?: string;
@@ -90,6 +91,21 @@ export default function IngredientSafetyAlert({
         `${activeChild.name} şu an ${ageInMonths} aylık.`
       );
       return;
+    }
+
+    // 2b. start_age string'inden de kontrol et (örn: "+6 Ay", "6 ay", "6+ Ay")
+    if (ingredientData?.start_age) {
+      const startAgeMatch = ingredientData.start_age.match(/\d+/);
+      const startAgeMonths = startAgeMatch ? parseInt(startAgeMatch[0], 10) : 0;
+      
+      if (startAgeMonths > 0 && ageInMonths < startAgeMonths) {
+        setSafetyStatus('age-warning');
+        setAlertMessage(
+          `Bu malzeme ${startAgeMonths}+ ay için önerilmektedir. ` +
+          `${activeChild.name} şu an ${ageInMonths} aylık.`
+        );
+        return;
+      }
     }
 
     // 3. Hardcoded yaş kısıtlamaları (API'de min_age yoksa fallback)
