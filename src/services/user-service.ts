@@ -236,7 +236,7 @@ export const userService = {
     }
     
     // Özel KG endpoint kullan (JWT destekli)
-    const response = await fetch(`${API_URL}/kg/v1/user/avatar`, {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.USER_AVATAR}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

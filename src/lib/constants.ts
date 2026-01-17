@@ -41,6 +41,7 @@ export const API_ENDPOINTS = {
   USER_COLLECTIONS: `${KG_API_NAMESPACE}/user/collections`,
   USER_COLLECTION_BY_ID: (id: string) => `${KG_API_NAMESPACE}/user/collections/${id}`,
   USER_COLLECTION_ITEMS: (id: string) => `${KG_API_NAMESPACE}/user/collections/${id}/items`,
+  USER_AVATAR: `${KG_API_NAMESPACE}/user/avatar`,
   
   // Search
   SEARCH: `${KG_API_NAMESPACE}/search`,
