@@ -12,6 +12,7 @@ import { SITE_URL } from '@/lib/constants';
 import { decodeEntities, stripHtmlAndDecode, slugify } from '@/utils/textHelpers';
 import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
+import NewsletterForm from '@/components/common/NewsletterForm';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -836,8 +837,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             </div>
                             <h3 className="font-bold text-slate-800 mb-2 font-sans">Haftalık Menü Cebine Gelsin</h3>
                             <p className="text-xs text-gray-600 mb-4">Bebeğinin ayına uygun tarifler ve ipuçları her hafta e-postanda.</p>
-                            <input type="email" placeholder="E-posta adresin" className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-green-500" />
-                            <button className="w-full bg-green-600 text-white font-bold py-2 rounded-xl text-sm hover:bg-green-700 transition-colors">Abone Ol</button>
+                            <NewsletterForm 
+                                source="blog" 
+                                variant="default"
+                                placeholder="E-posta adresin"
+                                buttonText="Abone Ol"
+                                interests={['recipes', 'tips']}
+                            />
                         </div>
 
                     </div>
