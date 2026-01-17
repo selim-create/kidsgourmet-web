@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { recommendationService, DashboardRecommendations, PersonalizedRecipe, PersonalizedRecipesOptions } from '@/services/recommendation-service';
 import { RecipeCard } from '@/lib/types';
+import { getToken } from '@/lib/api';
 
 /**
  * Dashboard önerileri için hook
@@ -15,6 +16,14 @@ export function useDashboardRecommendations(childId: string | undefined) {
   useEffect(() => {
     if (!childId) {
       setRecommendations(null);
+      return;
+    }
+
+    // Auth token kontrolü
+    const token = getToken();
+    if (!token) {
+      setRecommendations(null);
+      setError('Oturum açılmamış');
       return;
     }
     
@@ -51,6 +60,14 @@ export function useRecommendations(childId: string | undefined, options?: Person
   useEffect(() => {
     if (!childId) {
       setRecommendations([]);
+      return;
+    }
+
+    // Auth token kontrolü
+    const token = getToken();
+    if (!token) {
+      setRecommendations([]);
+      setError('Oturum açılmamış');
       return;
     }
     

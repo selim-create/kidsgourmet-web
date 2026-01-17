@@ -3,6 +3,25 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.kidsgourmet.com.tr',
+        pathname: '/wp-content/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'kidsgourmet.com.tr',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.kidsgourmet.com.tr',
+        pathname: '/**',
+      },
+    ],
+  },
   async redirects() {
     return [
       {
