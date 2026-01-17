@@ -25,7 +25,9 @@ export const commentService = {
     );
   },
 
-  // Yorum ekle (auth gerekli) - Custom endpoint kullanılıyor
+  // Yorum ekle (auth gerekli)
+  // Custom endpoint kullanılıyor çünkü WordPress standard /wp/v2/comments endpoint'i
+  // JWT token authentication'ı desteklemiyor. /kg/v1/comments endpoint'i JWT ile çalışacak şekilde yapılandırılmış.
   addComment: async (data: CommentInput): Promise<Comment> => {
     return await fetchAuthAPI<Comment>(API_ENDPOINTS.COMMENTS, {
       method: 'POST',
