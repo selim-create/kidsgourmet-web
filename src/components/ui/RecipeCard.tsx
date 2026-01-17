@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useFavorites } from '@/hooks/use-favorites';
-import { EditButton } from '@/components/ui/EditButton';
+
 
 interface RecipeCardProps {
   recipe: RecipeCardType & {
@@ -36,8 +36,7 @@ const AGE_GROUP_COLORS: { [key: string]: string } = {
 // Border radius constants for consistency
 const BORDER_RADIUS = {
   CARD: '24px',
-  IMAGE_CONTAINER: '24px',
-  IMAGE: '20px',
+  IMAGE_TOP: '24px 24px 0 0',
   BADGE_ASYMMETRIC: '12px 4px 12px 4px',
 };
 
@@ -135,13 +134,10 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
       }}
     >
       {/* Image Container - Floating inside card */}
-      <div 
-        className="relative h-48 overflow-hidden mx-3 mt-3"
-        style={{ borderRadius: BORDER_RADIUS.IMAGE_CONTAINER }}
-      >
+      <div className="relative h-48 overflow-hidden">
         <div 
           className="absolute inset-0 overflow-hidden"
-          style={{ borderRadius: BORDER_RADIUS.IMAGE }}
+          style={{ borderRadius: BORDER_RADIUS.IMAGE_TOP }}
         >
           <img 
             src={recipe.image || '/placeholder-recipe.jpg'} 
@@ -149,14 +145,6 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
             alt={decodeEntities(recipe.title)} 
           />
         </div>
-        
-        {/* Edit Button - Hover'da görünür */}
-        <EditButton 
-          contentType="recipe" 
-          contentId={recipe.id}
-          authorId={recipe.author?.id}
-          variant="text"
-        />
         
         {/* Age Group Badge - Top Left with asymmetric corners */}
         <div 

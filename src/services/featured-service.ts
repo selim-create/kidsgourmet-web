@@ -8,6 +8,7 @@ export interface FeaturedItem {
   slug: string;
   image?: string;
   excerpt?: string;
+  content?: string;
   date: string;
   meta: {
     // Recipe meta

@@ -32,8 +32,8 @@ export default function QuestionCard({ item }: QuestionCardProps) {
   const authorInitials = item.meta?.author_initials || getInitials(authorName);
   const answerCount = item.meta?.answer_count || 0;
 
-  // Use excerpt directly - if not provided, show empty (content field doesn't exist in FeaturedItem)
-  const displayExcerpt = item.excerpt || '';
+  // Use excerpt, fallback to first 150 characters of content if excerpt is empty
+  const displayExcerpt = item.excerpt || (item.content ? item.content.substring(0, 150) + '...' : '');
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
