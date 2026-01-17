@@ -7,7 +7,8 @@ import type {
   DiscussionComment,
   FeedResponse,
   CreateDiscussionRequest,
-  CreateDiscussionResponse 
+  CreateDiscussionResponse,
+  TopContributor
 } from './types';
 
 /**
@@ -156,4 +157,18 @@ export async function getPersonalizedFeed(params?: {
   const endpoint = query ? `${API_ENDPOINTS.FEED}?${query}` : API_ENDPOINTS.FEED;
   
   return fetchAuthAPI<FeedResponse>(endpoint);
+}
+
+/**
+ * Haftanın en aktif katkı sağlayanlarını getir
+ */
+export async function getTopContributors(limit: number = 3): Promise<TopContributor[]> {
+  try {
+    const endpoint = `${API_ENDPOINTS.TOP_CONTRIBUTORS}?limit=${limit}`;
+    return fetchAPI<TopContributor[]>(endpoint);
+  } catch (error) {
+    console.error('Error fetching top contributors:', error);
+    // Return empty array on error to prevent UI breaking
+    return [];
+  }
 }

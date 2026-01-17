@@ -199,7 +199,7 @@ export default function AskQuestionPage() {
                             <button 
                               type="submit" 
                               disabled={submitting}
-                              className="bg-brand-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-600 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                              className="bg-orange-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-orange-600 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                             >
                                 {submitting ? 'Gönderiliyor...' : 'Yayınla'}
                             </button>
