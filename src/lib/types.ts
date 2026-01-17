@@ -1216,8 +1216,7 @@ export interface VaccineStats {
 }
 
 export interface MarkVaccineDoneRequest {
-  child_id: string;
-  vaccine_code: string;
+  record_id: number;
   actual_date: string;
   notes?: string;
 }

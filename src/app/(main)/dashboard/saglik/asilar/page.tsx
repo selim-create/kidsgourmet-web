@@ -17,7 +17,9 @@ import OverdueVaccineBanner from '@/components/features/vaccine/OverdueVaccineBa
 import { toast } from 'sonner';
 
 // Helper function to format schedule version names
-const formatScheduleVersion = (version: string): string => {
+const formatScheduleVersion = (version: string | undefined | null): string => {
+  if (!version) return 'Aşı Takvimi';
+  
   const versionMap: Record<string, string> = {
     'TR_2026_v1': 'Türkiye 2026 Aşı Takvimi',
     'TR_2025_v1': 'Türkiye 2025 Aşı Takvimi',
@@ -94,8 +96,7 @@ export default function VaccinePage() {
 
     try {
       const updatedSchedule = await vaccineService.markVaccineDone({
-        child_id: activeChild.id,
-        vaccine_code: markDoneModal.record.vaccine.code,
+        record_id: markDoneModal.record.id,
         actual_date: date,
         notes: notes || undefined,
       });
@@ -109,7 +110,7 @@ export default function VaccinePage() {
       if (askSideEffects) {
         // Find the updated record
         const updatedRecord = updatedSchedule.vaccines.find(
-          v => v.vaccine.code === markDoneModal.record!.vaccine.code
+          v => v.id === markDoneModal.record!.id
         );
         if (updatedRecord) {
           setSideEffectModal({
@@ -170,7 +171,9 @@ export default function VaccinePage() {
     if (!activeChild) return;
 
     try {
-      const updatedSchedule = await vaccineService.addPrivateVaccine(request);
+      await vaccineService.addPrivateVaccine(request);
+      // Refresh the full schedule instead of using the response directly
+      const updatedSchedule = await vaccineService.getVaccineSchedule(activeChild.id);
       setSchedule(updatedSchedule);
       setPrivateVaccineWizard(false);
       toast.success('Özel aşı takvime eklendi!');
