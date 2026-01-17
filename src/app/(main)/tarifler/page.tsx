@@ -114,9 +114,10 @@ function RecipesPageContent() {
       ingredientSearch: '',
     };
 
-    // Only update if there are URL parameters
+    // URL parametreleri varsa filtreleri güncelle ve fetch tetikle
     if (category || dietType || mealType || ageGroup) {
       setFilters(newFilters);
+      setCurrentPage(1); // Sayfa 1'e reset et
     }
   }, [searchParams]);
   

@@ -65,6 +65,62 @@ const generateUIAvatarURL = (name: string, backgroundColor: string = '#FF8A65'):
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=${bgColor}&color=fff&size=128&bold=true`;
 };
 
+// Helper function to convert age group display name to slug
+const getAgeGroupSlug = (ageGroupName: string): string => {
+  const ageGroupMap: { [key: string]: string } = {
+    '0-6 Ay (Hazırlık Evresi)': '0-6-ay-sadece-sut',
+    '6-8 Ay (Başlangıç & Tadım)': '6-8-ay-baslangic',
+    '9-11 Ay (Keşif & Pütürlüye Geçiş)': '9-11-ay-kesif',
+    '12-24 Ay (Aile Sofrasına Geçiş)': '12-24-ay-gecis',
+    '2+ Yaş (Çocuk Gurme)': '2-yas-ve-uzeri',
+  };
+  
+  // Try exact match first
+  if (ageGroupMap[ageGroupName]) {
+    return ageGroupMap[ageGroupName];
+  }
+  
+  // Fallback to simple slug conversion
+  return ageGroupName
+    .toLowerCase()
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/ı/g, 'i')
+    .replace(/[()&+]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
+// Helper function to convert diet type display name to slug
+const getDietTypeSlug = (dietTypeName: string): string => {
+  return dietTypeName
+    .toLowerCase()
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/ı/g, 'i')
+    .replace(/\s+/g, '-');
+};
+
+// Helper function to convert meal type display name to slug
+const getMealTypeSlug = (mealTypeName: string): string => {
+  return mealTypeName
+    .toLowerCase()
+    .replace(/ş/g, 's')
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/ı/g, 'i')
+    .replace(/\s+/g, '-');
+};
+
 // Get author avatar with fallback
 const getAuthorAvatar = (author: any): string | null => {
   if (!author) return null;
@@ -341,7 +397,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                         <li>
                           <Link 
-                            href={`/tarifler?meal-type=${recipe.meal_type ? encodeURIComponent(recipe.meal_type.toLowerCase()) : ''}`} 
+                            href={`/tarifler?meal-type=${recipe.meal_type ? getMealTypeSlug(recipe.meal_type) : ''}`} 
                             className="hover:text-orange-500"
                           >
                             {recipe.meal_type || 'Tarifler'}
@@ -417,7 +473,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         {recipe.age_groups?.map((age, index) => (
                           <Link 
                             key={index}
-                            href={`/tarifler?age-group=${encodeURIComponent(age.toLowerCase().replace(/\s/g, '-'))}`}
+                            href={`/tarifler?age-group=${getAgeGroupSlug(age)}`}
                             className="bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full hover:bg-green-200 transition-colors"
                           >
                             {decodeHTMLEntities(age)}
@@ -428,7 +484,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         {recipe.diet_types?.map((diet, index) => (
                           <Link 
                             key={index}
-                            href={`/tarifler?diet-type=${encodeURIComponent(diet.toLowerCase().replace(/\s/g, '-'))}`}
+                            href={`/tarifler?diet-type=${getDietTypeSlug(diet)}`}
                             className={`text-xs font-bold px-3 py-1 rounded-full hover:opacity-80 transition-colors ${
                               index === 0 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'
                             }`}
@@ -440,7 +496,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         {/* Meal Type - Tıklanabilir */}
                         {recipe.meal_type && (
                           <Link 
-                            href={`/tarifler?meal-type=${encodeURIComponent(recipe.meal_type.toLowerCase().replace(/\s/g, '-'))}`}
+                            href={`/tarifler?meal-type=${getMealTypeSlug(recipe.meal_type)}`}
                             className="text-xs font-bold px-3 py-1 rounded uppercase tracking-wide bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors"
                           >
                             {decodeHTMLEntities(recipe.meal_type)}
