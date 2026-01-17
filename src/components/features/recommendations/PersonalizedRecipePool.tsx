@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRecommendations } from '@/hooks/useRecommendations';
+import { PersonalizedRecipe } from '@/services/recommendation-service';
 
 interface PersonalizedRecipePoolProps {
   childId: string;
@@ -21,6 +22,11 @@ export default function PersonalizedRecipePool({
     include_scores: false 
   });
   
+  // Safe array check - API response can come in different structure
+  const recipeList: PersonalizedRecipe[] = Array.isArray(recommendations) 
+    ? recommendations 
+    : (recommendations as any)?.recommendations || [];
+  
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
@@ -31,7 +37,7 @@ export default function PersonalizedRecipePool({
     );
   }
   
-  if (error || !recommendations || recommendations.length === 0) {
+  if (error || recipeList.length === 0) {
     return null; // Silently fail
   }
   
@@ -42,7 +48,7 @@ export default function PersonalizedRecipePool({
         Sizin İçin Seçtiklerimiz
       </h3>
       
-      {recommendations.map((recipe) => (
+      {recipeList.map((recipe) => (
         <Link 
           key={recipe.id} 
           href={`/tarifler/${recipe.slug}`}

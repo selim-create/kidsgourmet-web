@@ -69,7 +69,7 @@ function AlertItem({ alert }: { alert: SafetyAlert }) {
 }
 
 export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBannerProps) {
-  const { safetyResult, isChecking } = useSafetyCheck(recipeId, childId);
+  const { safetyResult, isChecking, error } = useSafetyCheck(recipeId, childId);
   
   // Don't show if no child profile
   if (!childId) return null;
@@ -86,10 +86,14 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
     );
   }
   
-  // Don't show banner if recipe is safe or no result yet
-  if (!safetyResult || safetyResult.is_safe) return null;
+  // Don't show banner if recipe is safe, no result yet, or error occurred
+  if (error || !safetyResult || safetyResult.is_safe) return null;
   
-  const highestSeverity = safetyResult.alerts.reduce((max, alert) => {
+  // Alerts check - can be undefined
+  const alerts = safetyResult.alerts || [];
+  if (alerts.length === 0) return null;
+  
+  const highestSeverity = alerts.reduce((max, alert) => {
     if (alert.severity === 'critical') return 'critical';
     if (alert.severity === 'warning' && max !== 'critical') return 'warning';
     return max;
@@ -103,7 +107,7 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
             Güvenlik Uyarıları
           </h3>
           
-          {safetyResult.alerts.map((alert, i) => (
+          {alerts.map((alert, i) => (
             <AlertItem key={i} alert={alert} />
           ))}
           

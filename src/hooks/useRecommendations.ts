@@ -60,11 +60,17 @@ export function useRecommendations(childId: string | undefined, options?: Person
       
       try {
         const data = await recommendationService.getPersonalizedRecipes(childId, options);
-        setRecommendations(data);
+        
+        // Normalize API response structure - can be array or {recommendations: []}
+        const recipes = Array.isArray(data) 
+          ? data 
+          : (data as any)?.recommendations || (data as any)?.data || [];
+        
+        setRecommendations(recipes);
       } catch (err) {
         console.error('Failed to fetch personalized recipes:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch recommendations');
-        setRecommendations([]);
+        setRecommendations([]); // Empty array in case of error
       } finally {
         setIsLoading(false);
       }

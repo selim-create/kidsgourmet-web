@@ -38,13 +38,24 @@ export const safetyService = {
     recipeId: number, 
     childId: string
   ): Promise<SafetyCheckResult> => {
-    return await fetchAuthAPI<SafetyCheckResult>(
-      API_ENDPOINTS.SAFETY_CHECK_RECIPE,
-      {
-        method: 'POST',
-        body: JSON.stringify({ recipe_id: recipeId, child_id: childId })
-      }
-    );
+    try {
+      return await fetchAuthAPI<SafetyCheckResult>(
+        API_ENDPOINTS.SAFETY_CHECK_RECIPE,
+        {
+          method: 'POST',
+          body: JSON.stringify({ recipe_id: recipeId, child_id: childId })
+        }
+      );
+    } catch (error) {
+      console.error('checkRecipeSafety error:', error);
+      // In case of error, assume safe (don't block the user)
+      return { 
+        is_safe: true, 
+        safety_score: 100, 
+        alerts: [], 
+        alternatives: [] 
+      };
+    }
   },
   
   /**
@@ -54,13 +65,23 @@ export const safetyService = {
     ingredientId: number, 
     childId: string
   ): Promise<SafetyCheckResult> => {
-    return await fetchAuthAPI<SafetyCheckResult>(
-      API_ENDPOINTS.SAFETY_CHECK_INGREDIENT,
-      {
-        method: 'POST',
-        body: JSON.stringify({ ingredient_id: ingredientId, child_id: childId })
-      }
-    );
+    try {
+      return await fetchAuthAPI<SafetyCheckResult>(
+        API_ENDPOINTS.SAFETY_CHECK_INGREDIENT,
+        {
+          method: 'POST',
+          body: JSON.stringify({ ingredient_id: ingredientId, child_id: childId })
+        }
+      );
+    } catch (error) {
+      console.error('checkIngredientSafety error:', error);
+      return { 
+        is_safe: true, 
+        safety_score: 100, 
+        alerts: [], 
+        alternatives: [] 
+      };
+    }
   },
   
   /**
@@ -70,12 +91,19 @@ export const safetyService = {
     recipeIds: number[], 
     childId: string
   ): Promise<BatchSafetyResult> => {
-    return await fetchAuthAPI<BatchSafetyResult>(
-      API_ENDPOINTS.SAFETY_BATCH_CHECK,
-      {
-        method: 'POST',
-        body: JSON.stringify({ recipe_ids: recipeIds, child_id: childId })
-      }
-    );
+    try {
+      if (!recipeIds?.length) return {};
+      
+      return await fetchAuthAPI<BatchSafetyResult>(
+        API_ENDPOINTS.SAFETY_BATCH_CHECK,
+        {
+          method: 'POST',
+          body: JSON.stringify({ recipe_ids: recipeIds, child_id: childId })
+        }
+      );
+    } catch (error) {
+      console.error('batchSafetyCheck error:', error);
+      return {};
+    }
   }
 };

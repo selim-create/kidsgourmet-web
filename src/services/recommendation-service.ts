@@ -32,9 +32,17 @@ export const recommendationService = {
    * Dashboard önerileri
    */
   getDashboardRecommendations: async (childId: string): Promise<DashboardRecommendations> => {
-    return await fetchAuthAPI<DashboardRecommendations>(
-      `${API_ENDPOINTS.RECOMMENDATIONS_DASHBOARD}?child_id=${childId}`
-    );
+    try {
+      return await fetchAuthAPI<DashboardRecommendations>(
+        `${API_ENDPOINTS.RECOMMENDATIONS_DASHBOARD}?child_id=${childId}`
+      );
+    } catch (error) {
+      console.error('getDashboardRecommendations error:', error);
+      return {
+        daily_picks: [],
+        trending: [],
+      };
+    }
   },
   
   /**
@@ -44,29 +52,47 @@ export const recommendationService = {
     childId: string, 
     options?: PersonalizedRecipesOptions
   ): Promise<PersonalizedRecipe[]> => {
-    const params = new URLSearchParams({ child_id: childId });
-    
-    if (options?.limit) {
-      params.append('limit', options.limit.toString());
+    try {
+      const params = new URLSearchParams({ child_id: childId });
+      
+      if (options?.limit) {
+        params.append('limit', options.limit.toString());
+      }
+      if (options?.meal_type) {
+        params.append('meal_type', options.meal_type);
+      }
+      if (options?.include_scores !== undefined) {
+        params.append('include_scores', options.include_scores.toString());
+      }
+      
+      const response = await fetchAuthAPI<PersonalizedRecipe[] | { recommendations: PersonalizedRecipe[] }>(
+        `${API_ENDPOINTS.RECOMMENDATIONS_RECIPES}?${params.toString()}`
+      );
+      
+      // Normalize API response structure - can be array or {recommendations: []}
+      return Array.isArray(response) ? response : (response as any)?.recommendations || [];
+    } catch (error) {
+      console.error('getPersonalizedRecipes error:', error);
+      return [];
     }
-    if (options?.meal_type) {
-      params.append('meal_type', options.meal_type);
-    }
-    if (options?.include_scores !== undefined) {
-      params.append('include_scores', options.include_scores.toString());
-    }
-    
-    return await fetchAuthAPI<PersonalizedRecipe[]>(
-      `${API_ENDPOINTS.RECOMMENDATIONS_RECIPES}?${params.toString()}`
-    );
   },
   
   /**
    * Benzer güvenli tarifler
    */
   getSimilarSafeRecipes: async (recipeId: number, childId: string): Promise<RecipeCard[]> => {
-    return await fetchAuthAPI<RecipeCard[]>(
-      `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
-    );
+    try {
+      const response = await fetchAuthAPI<RecipeCard[] | { alternatives?: RecipeCard[]; recipes?: RecipeCard[] }>(
+        `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
+      );
+      
+      // Normalize API response structure
+      return Array.isArray(response) 
+        ? response 
+        : (response as any)?.alternatives || (response as any)?.recipes || [];
+    } catch (error) {
+      console.error('getSimilarSafeRecipes error:', error);
+      return [];
+    }
   }
 };

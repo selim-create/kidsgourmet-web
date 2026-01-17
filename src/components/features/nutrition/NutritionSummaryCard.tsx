@@ -26,37 +26,37 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
   const nutrients = [
     { 
       label: 'Protein', 
-      value: summary.protein_servings, 
+      value: summary?.protein_servings ?? 0, 
       icon: '🥩',
       color: 'bg-red-100 text-red-800'
     },
     { 
       label: 'Sebze', 
-      value: summary.vegetable_servings, 
+      value: summary?.vegetable_servings ?? 0, 
       icon: '🥦',
       color: 'bg-green-100 text-green-800'
     },
     { 
       label: 'Meyve', 
-      value: summary.fruit_servings, 
+      value: summary?.fruit_servings ?? 0, 
       icon: '🍎',
       color: 'bg-orange-100 text-orange-800'
     },
     { 
       label: 'Tahıl', 
-      value: summary.grains_servings, 
+      value: summary?.grains_servings ?? 0, 
       icon: '🌾',
       color: 'bg-yellow-100 text-yellow-800'
     },
     { 
       label: 'Süt Ürünü', 
-      value: summary.dairy_servings, 
+      value: summary?.dairy_servings ?? 0, 
       icon: '🥛',
       color: 'bg-blue-100 text-blue-800'
     },
     { 
       label: 'Demir', 
-      value: summary.iron_rich_count, 
+      value: summary?.iron_rich_count ?? 0, 
       icon: '⚙️',
       color: 'bg-purple-100 text-purple-800'
     }
@@ -70,9 +70,9 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
           Haftalık Beslenme Özeti
         </h2>
         <div className="text-xs text-gray-500">
-          {new Date(summary.week_start).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
-          {' - '}
-          {new Date(summary.week_end).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+          {summary?.week_start && new Date(summary.week_start).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+          {summary?.week_start && summary?.week_end && ' - '}
+          {summary?.week_end && new Date(summary.week_end).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
         </div>
       </div>
       
@@ -89,7 +89,7 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
         <div className="flex items-center gap-2">
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-lg">
-            {Math.round(summary.variety_score * 10) / 10}
+            {Math.round((summary?.variety_score ?? 0) * 10) / 10}
           </div>
           <div>
             <div className="text-sm font-semibold text-gray-900">Çeşitlilik Skoru</div>
