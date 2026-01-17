@@ -12,7 +12,6 @@ import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
-import { useBatchSafety } from '@/hooks/useSafetyCheck';
 import RecipeCard from '@/components/ui/RecipeCard';
 
 // Yaş Grubu Sıralaması
@@ -85,10 +84,6 @@ function RecipesPageContent() {
   const { ageGroups } = useAgeGroups();
   const { mealTypes } = useMealTypes();
   const { activeChild } = useActiveChild();
-  
-  // Batch safety check for recipes
-  const recipeIds = useMemo(() => recipes.map(r => r.id), [recipes]);
-  const { safetyResults } = useBatchSafety(recipeIds, activeChild?.id);
   
   // Filtre state
   const [filters, setFilters] = useState<FilterState>({
