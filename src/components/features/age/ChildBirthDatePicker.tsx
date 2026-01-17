@@ -77,7 +77,7 @@ export default function ChildBirthDatePicker() {
   }
 
   // Modal for selecting birth date
-  if (showModal) {
+  if (showModal && typeof document !== 'undefined') {
     return createPortal(
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[200] p-4">
         <div className="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl">
