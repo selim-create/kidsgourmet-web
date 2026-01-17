@@ -152,7 +152,7 @@ const transformRecipe = (wpRecipe: any): RecipeCard => ({
   author: wpRecipe.author ? {
     id: wpRecipe.author.id || wpRecipe.author_id || 0,
     name: wpRecipe.author.name || wpRecipe.author_name || '',
-    avatar: wpRecipe.author.avatar || wpRecipe.author_avatar || '',
+    avatar: wpRecipe.author.avatar || wpRecipe.author.avatar_url || wpRecipe.author_avatar || wpRecipe.author_avatar_url || '',
   } : undefined,
   expert: wpRecipe.expert ? {
     name: wpRecipe.expert.name || '',
