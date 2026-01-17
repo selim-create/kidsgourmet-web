@@ -10,6 +10,8 @@ import ClientHead from '@/components/seo/ClientHead';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { EditButton } from '@/components/ui/EditButton';
+import { useActiveChild } from '@/contexts/ActiveChildContext';
+import IngredientSafetyBadge from '@/components/features/safety/IngredientSafetyBadge';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -17,6 +19,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const { isAuthenticated } = useUser();
+  const { activeChild } = useActiveChild();
   const router = useRouter();
 
   useEffect(() => {
@@ -177,6 +180,17 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                               className="text-slate-600 text-lg leading-relaxed mb-6"
                               dangerouslySetInnerHTML={{ __html: sanitizeHTML(ingredient.description) }}
                             />
+                            
+                            {/* Safety Badge for Child */}
+                            {activeChild && (
+                              <div className="mb-6">
+                                <IngredientSafetyBadge 
+                                  ingredientId={ingredient.id}
+                                  childId={activeChild.id}
+                                />
+                              </div>
+                            )}
+                            
                             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                                 {/* Tariflere Git */}
                                 <Link href="#recipes" className="bg-green-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-green-600 transition-colors inline-flex items-center justify-center">

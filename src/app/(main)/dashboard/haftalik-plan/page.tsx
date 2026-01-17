@@ -10,6 +10,7 @@ import { MealSlot, MealSlotType, Recipe } from '@/lib/types';
 import { mealPlanService } from '@/services/meal-plan-service';
 import { recipeService } from '@/services/recipe-service';
 import { toast } from 'sonner';
+import PersonalizedRecipePool from '@/components/features/recommendations/PersonalizedRecipePool';
 
 // Constants
 const SEARCH_DEBOUNCE_MS = 300;
@@ -688,6 +689,13 @@ export default function WeeklyPlanPage() {
                   {/* Favorilerim */}
                   {!searchQuery && (
                     <>
+                      {/* Personalized Recommendations */}
+                      {activeChild && (
+                        <div className="mb-6">
+                          <PersonalizedRecipePool childId={activeChild.id} limit={8} />
+                        </div>
+                      )}
+                      
                       <div>
                         <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
                           <i className="fa-solid fa-heart text-red-400"></i> Favorilerim

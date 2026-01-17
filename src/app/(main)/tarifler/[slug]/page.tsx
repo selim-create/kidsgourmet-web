@@ -6,14 +6,70 @@ import { notFound, useRouter } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { Recipe, RecipeIngredient, RecipeInstruction } from '@/lib/types';
 import CrossSellWidget from '@/components/features/recipe/CrossSellWidget';
-import AgeWarningBanner from '@/components/features/age/AgeWarningBanner';
+import SafetyAlertBanner from '@/components/features/safety/SafetyAlertBanner';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import { useUser } from '@/hooks/use-user';
+import { useActiveChild } from '@/contexts/ActiveChildContext';
+import { useSimilarSafeRecipes } from '@/hooks/useRecommendations';
 import { toast } from 'sonner';
 import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
 import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
+import Image from 'next/image';
+
+// Similar Safe Recipes Component
+function SimilarSafeRecipesSection({ recipeId, childId }: { recipeId: number, childId: string }) {
+  const { recipes, isLoading } = useSimilarSafeRecipes(recipeId, childId);
+  const { activeChild } = useActiveChild();
+  
+  if (isLoading || !recipes || recipes.length === 0) {
+    return null;
+  }
+  
+  return (
+    <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6">
+      <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+        <i className="fa-solid fa-shield-check text-green-600 mr-2"></i>
+        Güvenli Alternatif Tarifler
+      </h3>
+      <p className="text-sm text-gray-700 mb-4">
+        Bu tarifler{activeChild ? ` ${activeChild.name}` : ''} için güvenli olarak işaretlenmiş benzer tariflerdir.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {recipes.slice(0, 4).map((recipe) => (
+          <Link 
+            key={recipe.id} 
+            href={`/tarifler/${recipe.slug}`}
+            className="flex items-center gap-3 p-3 rounded-lg bg-white hover:shadow-md transition-shadow border border-gray-100"
+          >
+            <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+              <Image
+                src={recipe.image}
+                alt={recipe.title}
+                fill
+                sizes="64px"
+                className="object-cover"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-medium text-gray-900 line-clamp-1 mb-1">
+                {recipe.title}
+              </h4>
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className="inline-flex items-center">
+                  <i className="fa-solid fa-clock mr-1"></i>
+                  {recipe.prep_time}
+                </span>
+              </div>
+            </div>
+            <i className="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function RecipeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -28,6 +84,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const [isFavorite, setIsFavorite] = useState(false);
   const { ageGroups } = useAgeGroups();
   const { isAuthenticated } = useUser();
+  const { activeChild } = useActiveChild();
 
   useEffect(() => {
     async function fetchRecipe() {
@@ -237,11 +294,13 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
         {/* MAIN CONTENT */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
-            {/* Age Warning Banner */}
-            <AgeWarningBanner 
-              recipeAgeGroups={ageGroups.filter(ag => (recipe.age_groups || []).includes(ag.name))}
-              recipeIngredients={(recipe.ingredients || []).map(ing => ing.name || ing.text || '')}
-            />
+            {/* Safety Alert Banner - replaces Age Warning Banner */}
+            {activeChild && (
+              <SafetyAlertBanner 
+                recipeId={recipe.id}
+                childId={activeChild.id}
+              />
+            )}
             
             {/* HEADER SECTION */}
             <div className="flex flex-col lg:flex-row gap-8 mb-10">
@@ -773,6 +832,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                           </div>
                         </div>
                       </Link>
+                    )}
+
+                    {/* SIMILAR SAFE RECIPES - shown only if recipe has safety concerns */}
+                    {activeChild && (
+                      <SimilarSafeRecipesSection recipeId={recipe.id} childId={activeChild.id} />
                     )}
 
                     {/* YORUM BÖLÜMÜ */}

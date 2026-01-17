@@ -146,4 +146,23 @@ export const API_ENDPOINTS = {
   NOTIFICATION_PREFERENCES: `${KG_API_NAMESPACE}/notifications/preferences`,
   PUSH_SUBSCRIBE: `${KG_API_NAMESPACE}/notifications/push/subscribe`,
   PUSH_UNSUBSCRIBE: `${KG_API_NAMESPACE}/notifications/push/unsubscribe`,
+  
+  // Personalization - Recommendations
+  RECOMMENDATIONS_DASHBOARD: `${KG_API_NAMESPACE}/recommendations/dashboard`,
+  RECOMMENDATIONS_RECIPES: `${KG_API_NAMESPACE}/recommendations/recipes`,
+  RECOMMENDATIONS_SIMILAR: (recipeId: number) => `${KG_API_NAMESPACE}/recommendations/similar/${recipeId}`,
+  
+  // Personalization - Safety
+  SAFETY_CHECK_RECIPE: `${KG_API_NAMESPACE}/safety/check-recipe`,
+  SAFETY_CHECK_INGREDIENT: `${KG_API_NAMESPACE}/safety/check-ingredient`,
+  SAFETY_BATCH_CHECK: `${KG_API_NAMESPACE}/safety/batch-check`,
+  
+  // Personalization - Nutrition
+  NUTRITION_WEEKLY_SUMMARY: `${KG_API_NAMESPACE}/nutrition/weekly-summary`,
+  NUTRITION_MISSING_NUTRIENTS: `${KG_API_NAMESPACE}/nutrition/missing-nutrients`,
+  NUTRITION_VARIETY_ANALYSIS: `${KG_API_NAMESPACE}/nutrition/variety-analysis`,
+  
+  // Personalization - Food Introduction
+  FOOD_INTRODUCTION_SUGGESTED: `${KG_API_NAMESPACE}/food-introduction/suggested`,
+  FOOD_INTRODUCTION_NEXT: `${KG_API_NAMESPACE}/food-introduction/next-suggestion`,
 } as const;
