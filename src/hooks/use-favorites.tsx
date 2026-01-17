@@ -16,6 +16,7 @@ export function useFavorites() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // Favorileri yükle
   const loadFavorites = useCallback(async () => {
@@ -45,14 +46,40 @@ export function useFavorites() {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      loadFavorites();
-      loadCollections();
-    } else {
+    if (!isAuthenticated || isLoaded) {
+      return;
+    }
+
+    const loadData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [favoritesData, collectionsData] = await Promise.all([
+          userService.getAllFavorites(),
+          userService.getCollections(),
+        ]);
+        setFavorites(favoritesData);
+        setCollections(collectionsData);
+        setIsLoaded(true);
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        setError('Veriler yüklenirken hata oluştu');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
+  }, [isAuthenticated, isLoaded]);
+
+  // Reset isLoaded when user logs out
+  useEffect(() => {
+    if (!isAuthenticated) {
       setFavorites(null);
       setCollections([]);
+      setIsLoaded(false);
     }
-  }, [isAuthenticated, loadFavorites, loadCollections]);
+  }, [isAuthenticated]);
 
   // Favori ID'leri (hızlı lookup için)
   const favoriteIds = useMemo(() => ({
