@@ -28,11 +28,11 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
         setError(null);
         const vaccines = await vaccineService.getUpcomingVaccines(childId);
         
-        // Güvenli array erişimi (service zaten array döndürüyor ama ekstra güvenlik)
+        // Safe array access (service already returns array but extra safety)
         const vaccineArray = Array.isArray(vaccines) ? vaccines : [];
         setUpcomingVaccines(vaccineArray.slice(0, 3)); // Show max 3
         
-        // Güvenli filter
+        // Safe filter operation
         const overdue = vaccineArray.filter(v => v?.is_overdue === true).length;
         setOverdueCount(overdue);
       } catch (err) {

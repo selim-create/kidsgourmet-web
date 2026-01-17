@@ -20,7 +20,7 @@ export default function OverdueVaccineBanner({ childId, childName }: OverdueVacc
       try {
         setIsLoading(true);
         const vaccines = await vaccineService.getOverdueVaccines(childId);
-        // Güvenli array erişimi
+        // Safe array access
         setOverdueVaccines(Array.isArray(vaccines) ? vaccines : []);
       } catch (err) {
         console.error('Failed to fetch overdue vaccines:', err);

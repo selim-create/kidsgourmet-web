@@ -29,7 +29,7 @@ export const vaccineService = {
     const response = await fetchAuthAPI<unknown>(API_ENDPOINTS.VACCINES_BY_CHILD(childId));
     const data = extractApiData<VaccineSchedule>(response);
     
-    // Stats ve vaccines için fallback sağla
+    // Provide fallbacks for stats and vaccines
     return {
       ...data,
       vaccines: ensureArray<VaccineRecord>(data?.vaccines),
@@ -124,7 +124,7 @@ export const vaccineService = {
    */
   async getOverdueVaccines(childId: string): Promise<UpcomingVaccine[]> {
     const vaccines = await this.getUpcomingVaccines(childId);
-    // vaccines artık her zaman array olacak
+    // vaccines will always be an array now
     return vaccines.filter((v: UpcomingVaccine) => v?.is_overdue === true);
   },
 };

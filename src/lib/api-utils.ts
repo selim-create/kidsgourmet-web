@@ -6,7 +6,7 @@ import { VaccineStats } from './types';
  */
 export function extractApiData<T>(response: unknown): T {
   if (response === null || response === undefined) {
-    throw new Error('API yanıtı boş');
+    throw new Error('API response is empty');
   }
 
   // Direkt array ise
@@ -27,9 +27,6 @@ export function extractApiData<T>(response: unknown): T {
     }
     if ('response' in obj && obj.response !== undefined) {
       return obj.response as T;
-    }
-    if ('vaccines' in obj && Array.isArray(obj.vaccines)) {
-      return obj.vaccines as T;
     }
     
     // Wrapper yoksa doğrudan döndür
