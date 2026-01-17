@@ -10,10 +10,21 @@ import { VaccineSchedule, VaccineRecord, VaccineSideEffects, AddPrivateVaccineRe
 import VaccineTimeline from '@/components/features/vaccine/VaccineTimeline';
 import VaccineMarkDoneModal from '@/components/features/vaccine/VaccineMarkDoneModal';
 import SideEffectModal from '@/components/features/vaccine/SideEffectModal';
+import VaccineDetailModal from '@/components/features/vaccine/VaccineDetailModal';
 import PrematureWarning from '@/components/features/vaccine/PrematureWarning';
 import PrivateVaccineWizard from '@/components/features/vaccine/PrivateVaccineWizard';
 import OverdueVaccineBanner from '@/components/features/vaccine/OverdueVaccineBanner';
 import { toast } from 'sonner';
+
+// Helper function to format schedule version names
+const formatScheduleVersion = (version: string): string => {
+  const versionMap: Record<string, string> = {
+    'TR_2026_v1': 'Türkiye 2026 Aşı Takvimi',
+    'TR_2025_v1': 'Türkiye 2025 Aşı Takvimi',
+    'TR_2024_v1': 'Türkiye 2024 Aşı Takvimi',
+  };
+  return versionMap[version] || version.replace(/_/g, ' ').replace(/v(\d+)/, 'Versiyon $1');
+};
 
 export default function VaccinePage() {
   const router = useRouter();
@@ -34,6 +45,11 @@ export default function VaccinePage() {
     record: VaccineRecord | null;
     fromMarkDone: boolean;
   }>({ isOpen: false, record: null, fromMarkDone: false });
+
+  const [detailModal, setDetailModal] = useState<{
+    isOpen: boolean;
+    record: VaccineRecord | null;
+  }>({ isOpen: false, record: null });
 
   const [privateVaccineWizard, setPrivateVaccineWizard] = useState(false);
 
@@ -112,6 +128,11 @@ export default function VaccinePage() {
   // Handle side effect reporting
   const handleReportSideEffect = (record: VaccineRecord) => {
     setSideEffectModal({ isOpen: true, record, fromMarkDone: false });
+  };
+
+  // Handle view details
+  const handleViewDetails = (record: VaccineRecord) => {
+    setDetailModal({ isOpen: true, record });
   };
 
   const handleSideEffectSubmit = async (
@@ -245,7 +266,7 @@ export default function VaccinePage() {
           
           {schedule && (
             <p className="text-gray-600">
-              {activeChild.name} için {schedule.schedule_version} aşı takvimi
+              {activeChild.name} için {formatScheduleVersion(schedule.schedule_version)}
             </p>
           )}
         </div>
@@ -297,6 +318,7 @@ export default function VaccinePage() {
             vaccines={schedule.vaccines}
             onMarkDone={handleMarkDone}
             onReportSideEffect={handleReportSideEffect}
+            onViewDetails={handleViewDetails}
           />
         )}
 
@@ -324,6 +346,12 @@ export default function VaccinePage() {
         record={sideEffectModal.record}
         onClose={() => setSideEffectModal({ isOpen: false, record: null, fromMarkDone: false })}
         onSubmit={handleSideEffectSubmit}
+      />
+
+      <VaccineDetailModal
+        isOpen={detailModal.isOpen}
+        record={detailModal.record}
+        onClose={() => setDetailModal({ isOpen: false, record: null })}
       />
 
       <PrivateVaccineWizard

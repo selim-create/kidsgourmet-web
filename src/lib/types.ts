@@ -1182,6 +1182,7 @@ export interface VaccineRecord {
   notes: string | null;
   side_effects: VaccineSideEffects | null;
   side_effect_severity: 'none' | 'mild' | 'moderate' | 'severe';
+  is_mandatory: boolean;
   created_at: string;
   updated_at: string;
 }

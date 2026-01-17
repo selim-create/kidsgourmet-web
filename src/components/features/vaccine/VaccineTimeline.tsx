@@ -8,12 +8,14 @@ interface VaccineTimelineProps {
   vaccines: VaccineRecord[];
   onMarkDone: (record: VaccineRecord) => void;
   onReportSideEffect: (record: VaccineRecord) => void;
+  onViewDetails: (record: VaccineRecord) => void;
 }
 
 export default function VaccineTimeline({ 
   vaccines, 
   onMarkDone, 
-  onReportSideEffect 
+  onReportSideEffect,
+  onViewDetails
 }: VaccineTimelineProps) {
   // Group vaccines by age period
   const groupVaccinesByPeriod = (vaccines: VaccineRecord[]) => {
@@ -52,30 +54,29 @@ export default function VaccineTimeline({
 
   const groupedVaccines = groupVaccinesByPeriod(vaccines);
   
-  // Sort periods chronologically
+  // Define fixed period order
+  const periodOrder = [
+    '🍼 Yenidoğan (0-1 ay)',
+    '👶 1. Ay',
+    '🌟 2. Ay',
+    '🎈 4. Ay',
+    '🎯 6. Ay',
+    '🎂 12. Ay (1 Yaş)',
+    '🚀 18. Ay',
+    '🌈 2-4 Yaş',
+    '🎓 4-6 Yaş',
+    '📚 6+ Yaş',
+  ];
+  
+  // Sort periods chronologically using the predefined order
   const sortedPeriods = Object.keys(groupedVaccines).sort((a, b) => {
-    const extractMonth = (period: string): number => {
-      if (period.includes('Yenidoğan')) return 0;
-      if (period.includes('1. Ay')) return 1;
-      if (period.includes('2. Ay')) return 2;
-      if (period.includes('4. Ay')) return 4;
-      if (period.includes('6. Ay')) return 6;
-      if (period.includes('12. Ay')) return 12;
-      if (period.includes('18. Ay')) return 18;
-      if (period.includes('2-4 Yaş')) return 24;
-      if (period.includes('4-6 Yaş')) return 48;
-      if (period.includes('6+ Yaş')) return 72;
-      
-      const match = period.match(/(\d+)\. Ay/);
-      if (match) return parseInt(match[1]);
-      
-      const weekMatch = period.match(/(\d+)\. Hafta/);
-      if (weekMatch) return parseInt(weekMatch[1]) / 4;
-      
-      return 999;
-    };
-    
-    return extractMonth(a) - extractMonth(b);
+    const indexA = periodOrder.indexOf(a);
+    const indexB = periodOrder.indexOf(b);
+    // Handle custom periods not in the list
+    if (indexA === -1 && indexB === -1) return 0;
+    if (indexA === -1) return 1;
+    if (indexB === -1) return -1;
+    return indexA - indexB;
   });
 
   if (vaccines.length === 0) {
@@ -117,6 +118,7 @@ export default function VaccineTimeline({
                   record={record}
                   onMarkDone={onMarkDone}
                   onReportSideEffect={onReportSideEffect}
+                  onViewDetails={onViewDetails}
                 />
               </div>
             ))}
