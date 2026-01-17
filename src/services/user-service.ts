@@ -224,7 +224,7 @@ export const userService = {
     return await fetchAPI<ExpertPublicProfile[]>(API_ENDPOINTS.EXPERTS_LIST);
   },
 
-  // Avatar yükleme - Özel KG endpoint kullan
+  // Avatar upload - Uses custom KG endpoint
   uploadAvatar: async (file: File): Promise<{ id: number; url: string }> => {
     const formData = new FormData();
     formData.append('file', file);
@@ -235,7 +235,7 @@ export const userService = {
       throw new Error('Authentication required');
     }
     
-    // Özel KG endpoint kullan (JWT destekli)
+    // Use custom KG endpoint (supports JWT)
     const response = await fetch(`${API_URL}${API_ENDPOINTS.USER_AVATAR}`, {
       method: 'POST',
       headers: {

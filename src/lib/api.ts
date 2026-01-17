@@ -25,9 +25,9 @@ const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoi
  * Handle 401 Unauthorized errors
  */
 function handle401Error(token: string | null): void {
-  // Sadece token varsa ve geçersizse çıkış yap
+  // Only logout if token exists and is invalid
   if (token) {
-    // Token varsa ama 401 dönüyorsa, token geçersizdir
+    // If token exists but 401 is returned, token is invalid
     removeToken();
   }
 }
