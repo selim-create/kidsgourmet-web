@@ -97,7 +97,7 @@ export default function IngredientSafetyAlert({
     if (ingredientData?.start_age) {
       const startAgeStr = ingredientData.start_age.toString();
       const startAgeMatch = startAgeStr.match(/\d+/);
-      const startAgeMonths = startAgeMatch ? parseInt(startAgeMatch[0]) : 0;
+      const startAgeMonths = startAgeMatch ? parseInt(startAgeMatch[0], 10) : 0;
       
       if (startAgeMonths > 0 && ageInMonths < startAgeMonths) {
         setSafetyStatus('age-warning');

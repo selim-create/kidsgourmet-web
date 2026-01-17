@@ -114,8 +114,8 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
           <i className="fa-solid fa-clock text-amber-500 text-xl mt-0.5"></i>
           <div>
             <p className="font-medium text-amber-800">Yaş Grubu Uyarısı</p>
-            {ageWarnings.map((alert, i) => (
-              <p key={i} className="text-sm text-amber-600 mt-1">{alert.message}</p>
+            {ageWarnings.map((alert) => (
+              <p key={`${alert.type}-${alert.message}`} className="text-sm text-amber-600 mt-1">{alert.message}</p>
             ))}
           </div>
         </div>
