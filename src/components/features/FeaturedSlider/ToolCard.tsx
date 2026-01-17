@@ -25,7 +25,7 @@ const SMART_TOOLS = [
   { name: 'Akıllı Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby' },
   { name: 'Hava Kalitesi Rehberi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-wind' },
   { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-spray-can-sparkles' },
-  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/uc-gun-kurali', icon: 'fa-clock-rotate-left' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-clock-rotate-left' },
 ];
 
 export default function ToolCard({ item }: ToolCardProps) {

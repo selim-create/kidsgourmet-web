@@ -32,6 +32,9 @@ export default function QuestionCard({ item }: QuestionCardProps) {
   const authorInitials = item.meta?.author_initials || getInitials(authorName);
   const answerCount = item.meta?.answer_count || 0;
 
+  // Use excerpt directly - if not provided, show empty (content field doesn't exist in FeaturedItem)
+  const displayExcerpt = item.excerpt || '';
+
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -77,9 +80,9 @@ export default function QuestionCard({ item }: QuestionCardProps) {
         </h3>
 
         {/* Question Excerpt/Summary - Made more prominent */}
-        {item.excerpt && (
+        {displayExcerpt && (
           <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed bg-white/50 p-3 rounded-lg border border-purple-50">
-            {decodeEntities(item.excerpt)}
+            {decodeEntities(displayExcerpt)}
           </p>
         )}
 

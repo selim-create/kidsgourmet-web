@@ -16,14 +16,14 @@ export const tariftenService = {
       );
       
       if (!response.ok) {
-        console.warn('Tariften API error:', response.status);
+        // Gracefully handle API errors without logging to console
         return [];
       }
       
       const data = await response.json();
       return data.success ? data.recipes : [];
     } catch (error) {
-      console.error('Tariften service error:', error);
+      // Silently fail and return empty array - this is expected when API is unavailable
       return [];
     }
   },
@@ -42,14 +42,14 @@ export const tariftenService = {
       );
       
       if (!response.ok) {
-        console.warn('Tariften API error:', response.status);
+        // Gracefully handle API errors without logging to console
         return null;
       }
       
       const data = await response.json();
       return data.success && data.recipe ? data.recipe : null;
     } catch (error) {
-      console.error('Tariften service error:', error);
+      // Silently fail and return null - this is expected when API is unavailable
       return null;
     }
   }
