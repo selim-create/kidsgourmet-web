@@ -88,6 +88,21 @@ export const authService = {
   },
 
   /**
+   * Şifremi unuttum
+   */
+  forgotPassword: async (email: string): Promise<{ success: boolean; message: string }> => {
+    const response = await fetchAPI<{
+      success: boolean;
+      message: string;
+    }>(API_ENDPOINTS.AUTH_FORGOT_PASSWORD, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    
+    return response;
+  },
+
+  /**
    * Google ile giriş
    */
   googleLogin: async (idToken: string): Promise<AuthResponse> => {

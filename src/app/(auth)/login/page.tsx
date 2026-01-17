@@ -54,14 +54,20 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen bg-white overflow-hidden mx-auto max-w-6xl">
         
-        {/* LEFT SIDE: IMAGE (Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 bg-brand-light relative items-center justify-center p-12 overflow-hidden">
+        {/* LEFT SIDE: DECORATIVE (Desktop) */}
+        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-orange-50 via-brand-light to-green-50 relative items-center justify-center p-12 overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-secondary/20 rounded-full blur-3xl -ml-10 -mb-10"></div>
             
             <div className="relative z-10 text-center max-w-lg">
+                {/* Decorative Illustration */}
                 <div className="mb-8 relative inline-block">
-                    <img src="https://placehold.co/500x500/FF8A65/ffffff?text=Mutlu+Bebek" className="rounded-[3rem] shadow-2xl transform -rotate-3 border-8 border-white" alt="Mutlu Bebek" />
+                    <div className="w-64 h-64 bg-white/50 backdrop-blur-sm rounded-full shadow-2xl transform -rotate-3 border-8 border-white flex items-center justify-center">
+                        <div className="text-center">
+                            <i className="fa-solid fa-utensils text-orange-500 text-7xl mb-4"></i>
+                            <i className="fa-solid fa-heart text-red-400 text-4xl"></i>
+                        </div>
+                    </div>
                     <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg flex items-center gap-3 animate-bounce">
                         <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                             <i className="fa-solid fa-check"></i>
@@ -80,8 +86,24 @@ export default function LoginPage() {
         {/* RIGHT SIDE: FORM */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-white overflow-y-auto">
             <div className="w-full max-w-md space-y-8">
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-2 cursor-pointer group mb-8">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-orange-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
+                        <div className="relative w-12 h-12 flex items-center justify-center transform group-hover:rotate-12 transition-transform">
+                            <i className="fa-solid fa-carrot text-orange-500 text-4xl"></i>
+                        </div>
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="font-display font-bold text-3xl tracking-tight text-slate-800 leading-none">
+                            Kids<span className="text-orange-500">Gourmet</span>
+                        </span>
+                        <span className="text-xs text-gray-400 font-medium tracking-wide">Sağlıklı Nesiller</span>
+                    </div>
+                </Link>
+
                 <div>
-                    <h2 className="mt-6 text-3xl font-display font-bold text-slate-800">Tekrar Hoş Geldiniz! 👋</h2>
+                    <h2 className="text-3xl font-display font-bold text-slate-800">Tekrar Hoş Geldiniz! 👋</h2>
                     <p className="mt-2 text-sm text-gray-500">
                         Hesabınız yok mu? <Link href="/register" className="font-bold text-brand-primary hover:text-orange-600 transition-colors">Hemen ücretsiz kayıt olun</Link>
                     </p>
@@ -149,7 +171,7 @@ export default function LoginPage() {
                         <div>
                             <div className="flex items-center justify-between mb-1">
                                 <label htmlFor="password" className="block text-sm font-bold text-gray-700">Şifre</label>
-                                <a href="#" className="text-xs font-bold text-brand-primary hover:text-orange-600">Şifremi Unuttum?</a>
+                                <Link href="/forgot-password" className="text-xs font-bold text-brand-primary hover:text-orange-600">Şifremi Unuttum?</Link>
                             </div>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
