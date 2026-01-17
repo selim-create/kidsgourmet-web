@@ -280,20 +280,36 @@ export default function DashboardPage() {
                           <Link href="/dashboard/haftalik-plan" className="text-sm font-bold text-orange-500 hover:underline">Tümünü Gör</Link>
                       </div>
 
-                      {/* Days Navigation */}
+                      {/* Days Navigation - Dynamic */}
                       <div className="flex gap-2 overflow-x-auto pb-4 hide-scroll scrollbar-hide">
-                          {/* Active Day */}
-                          <button className="flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 bg-orange-500 text-white rounded-2xl shadow-md transition-transform transform scale-105">
-                              <span className="text-xs font-medium opacity-80">Pzt</span>
-                              <span className="text-lg font-bold">12</span>
-                          </button>
-                          {/* Other Days */}
-                          {['Sal', 'Çar', 'Per', 'Cum'].map((day, index) => (
-                              <button key={day} className="flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 bg-white border border-gray-100 text-gray-400 rounded-2xl hover:border-orange-500/50 hover:text-orange-500 transition-all">
-                                  <span className="text-xs font-medium">{day}</span>
-                                  <span className="text-lg font-bold">{13 + index}</span>
-                              </button>
-                          ))}
+                          {(() => {
+                            const today = new Date();
+                            const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                            const daysOfWeek = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+                            
+                            return Array.from({ length: 5 }, (_, i) => {
+                              const dayDate = new Date(today);
+                              dayDate.setDate(today.getDate() + i);
+                              const dayOfWeek = dayDate.getDay();
+                              const isToday = i === 0;
+                              
+                              return (
+                                <button 
+                                  key={i}
+                                  className={`flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 rounded-2xl transition-all ${
+                                    isToday 
+                                      ? 'bg-orange-500 text-white shadow-md transform scale-105' 
+                                      : 'bg-white border border-gray-100 text-gray-400 hover:border-orange-500/50 hover:text-orange-500'
+                                  }`}
+                                >
+                                  <span className={`text-xs font-medium ${isToday ? 'opacity-80' : ''}`}>
+                                    {daysOfWeek[dayOfWeek]}
+                                  </span>
+                                  <span className="text-lg font-bold">{dayDate.getDate()}</span>
+                                </button>
+                              );
+                            });
+                          })()}
                       </div>
 
                       {/* Meals Grid */}
