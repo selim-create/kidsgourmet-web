@@ -331,6 +331,11 @@ export interface RegisterData {
   email: string;
   password: string;
   name: string;
+  username?: string;
+  child?: {
+    name: string;
+    birth_date: string;
+  };
 }
 
 // Favoriler
