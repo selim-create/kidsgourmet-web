@@ -204,4 +204,42 @@ export const vaccineService = {
 
     return response.json();
   },
+
+  /**
+   * Get available schedule versions
+   */
+  async getScheduleVersions(): Promise<{ version: string; name: string; description: string; is_default: boolean }[]> {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.VACCINES_SCHEDULE_VERSIONS}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch schedule versions');
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Get overdue vaccines for a child
+   */
+  async getOverdueVaccines(childId: string): Promise<UpcomingVaccine[]> {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.VACCINES_UPCOMING(childId)}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch overdue vaccines');
+    }
+
+    const vaccines = await response.json();
+    // Filter only overdue vaccines
+    return vaccines.filter((v: UpcomingVaccine) => v.is_overdue);
+  },
 };
