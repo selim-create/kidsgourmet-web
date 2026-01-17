@@ -102,6 +102,11 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     ? recipe.author 
     : undefined;
 
+  // Calculate age group colors first (needed for avatar fallback)
+  const ageGroupColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color);
+  const ageGroupTextColor = getAgeGroupTextColor(recipe.age_group);
+  const shadowColor = getAgeGroupShadow(recipe.age_group);
+
   // Get author avatar URL with fallback to ui-avatars.com
   const getAuthorAvatar = () => {
     // Try multiple possible avatar fields
@@ -121,9 +126,6 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   };
 
   const authorAvatar = getAuthorAvatar();
-  const ageGroupColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color);
-  const ageGroupTextColor = getAgeGroupTextColor(recipe.age_group);
-  const shadowColor = getAgeGroupShadow(recipe.age_group);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
