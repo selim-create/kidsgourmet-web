@@ -1,4 +1,5 @@
-import Link from 'next/link'; 
+import Link from 'next/link';
+import NewsletterForm from '@/components/common/NewsletterForm'; 
 
 export default function Footer() {
   return (
@@ -19,14 +20,23 @@ export default function Footer() {
                         Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman onaylı tarifler ve akıllı araçlarla ebeveynlik yolculuğunuzda yanınızdayız.
                     </p>
                     <div className="flex space-x-3">
-                        <Link href="#" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all shadow-sm">
+                        <Link href="https://instagram.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-orange-400 hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-instagram"></i>
                         </Link>
-                        <Link href="#" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-sm">
+                        <Link href="https://youtube.com/@kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-youtube"></i>
                         </Link>
-                        <Link href="#" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-400 hover:text-white hover:border-blue-400 transition-all shadow-sm">
-                            <i className="fa-brands fa-twitter"></i>
+                        <Link href="https://twitter.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all">
+                            <i className="fa-brands fa-x-twitter"></i>
+                        </Link>
+                        <Link href="https://tiktok.com/@kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all">
+                            <i className="fa-brands fa-tiktok"></i>
+                        </Link>
+                        <Link href="https://pinterest.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white hover:border-transparent transition-all">
+                            <i className="fa-brands fa-pinterest"></i>
+                        </Link>
+                        <Link href="https://facebook.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all">
+                            <i className="fa-brands fa-facebook-f"></i>
                         </Link>
                     </div>
                 </div>
@@ -70,12 +80,13 @@ export default function Footer() {
                     <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
                         <h4 className="font-display font-bold text-slate-800 mb-2 text-base">Bültene Katıl</h4>
                         <p className="text-xs text-gray-500 mb-4">Haftalık menü önerileri ve gelişim notları e-postana gelsin.</p>
-                        <form className="flex gap-2 mb-6">
-                            <input type="email" placeholder="E-posta adresi" className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors" />
-                            <button className="bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm hover:bg-slate-700 transition-colors">
-                                <i className="fa-solid fa-paper-plane"></i>
-                            </button>
-                        </form>
+                        <div className="mb-6">
+                            <NewsletterForm 
+                                source="footer" 
+                                variant="compact" 
+                                placeholder="E-posta adresi"
+                            />
+                        </div>
 
                         <div className="border-t border-gray-100 pt-4">
                             <h4 className="font-display font-bold text-slate-800 mb-2 text-sm">Bizimle Çalışın</h4>

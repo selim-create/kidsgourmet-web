@@ -2,6 +2,7 @@
 
 import React, { use } from 'react';
 import Link from "next/link";
+import NewsletterForm from '@/components/common/NewsletterForm';
 
 export default function TagPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -226,8 +227,13 @@ export default function TagPage({ params }: { params: Promise<{ slug: string }> 
                         </div>
                         <h3 className="font-bold text-slate-800 mb-2 font-sans">BLW İpuçları</h3>
                         <p className="text-xs text-gray-600 mb-4">Bu etiketle ilgili en yeni ipuçları ve tarifler e-postana gelsin.</p>
-                        <input type="email" placeholder="E-posta adresin" className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-yellow-500" />
-                        <button className="w-full bg-yellow-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-yellow-600 transition-colors">Takip Et</button>
+                        <NewsletterForm 
+                            source="tag"
+                            variant="default"
+                            placeholder="E-posta adresin"
+                            buttonText="Takip Et"
+                            buttonClassName="w-full bg-yellow-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-yellow-600 transition-colors disabled:opacity-50"
+                        />
                     </div>
 
                     {/* Popular Tags */}

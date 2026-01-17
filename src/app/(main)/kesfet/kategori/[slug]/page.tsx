@@ -5,6 +5,7 @@ import Link from "next/link";
 import { use } from 'react'; // Next.js 15+ için gerekli
 import { blogService, BlogPost } from '@/services/blog-service';
 import BlogCard from '@/components/features/BlogCard';
+import NewsletterForm from '@/components/common/NewsletterForm';
 
 export default function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -261,12 +262,13 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                 <p className="text-gray-600 mb-8 max-w-xl mx-auto">
                     Bebeğinizin ayına özel beslenme ipuçları, yeni tarifler ve doktor önerileri her hafta e-posta kutunuzda.
                 </p>
-                <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-                    <input type="email" placeholder="E-posta adresiniz" className="flex-1 py-3 px-6 rounded-full border border-gray-200 outline-none focus:border-green-500 shadow-sm" />
-                    <button type="button" className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors">
-                        Abone Ol
-                    </button>
-                </form>
+                <NewsletterForm 
+                    source="category"
+                    variant="inline"
+                    placeholder="E-posta adresiniz"
+                    buttonText="Abone Ol"
+                    className="max-w-lg mx-auto"
+                />
                 <p className="text-xs text-gray-400 mt-4">Asla spam yapmayız. İstediğiniz zaman ayrılabilirsiniz.</p>
             </div>
         </div>
