@@ -28,7 +28,7 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
         setError(null);
         const vaccines = await vaccineService.getUpcomingVaccines(childId);
         
-        // Safe array access (service already returns array but extra safety)
+        // Defense in depth: ensure array even though service guarantees it
         const vaccineArray = Array.isArray(vaccines) ? vaccines : [];
         setUpcomingVaccines(vaccineArray.slice(0, 3)); // Show max 3
         
