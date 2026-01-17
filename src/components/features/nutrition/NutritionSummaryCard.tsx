@@ -1,6 +1,7 @@
 'use client';
 
 import { useNutritionSummary } from '@/hooks/useNutritionSummary';
+import Link from 'next/link';
 
 interface NutritionSummaryCardProps {
   childId: string;
@@ -21,6 +22,43 @@ export default function NutritionSummaryCard({ childId }: NutritionSummaryCardPr
   
   if (error) {
     return null; // Silently fail
+  }
+
+  // Check if data is empty/all zeros
+  const hasData = summary && (
+    (summary.protein_servings ?? 0) > 0 || 
+    (summary.vegetable_servings ?? 0) > 0 || 
+    (summary.fruit_servings ?? 0) > 0 ||
+    (summary.grains_servings ?? 0) > 0 ||
+    (summary.dairy_servings ?? 0) > 0 ||
+    (summary.iron_rich_count ?? 0) > 0
+  );
+
+  // Show empty state if no data
+  if (!hasData) {
+    return (
+      <div className="bg-white rounded-3xl shadow-sm p-6 border border-gray-100">
+        <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2 mb-4">
+          <i className="fa-solid fa-chart-pie text-orange-500"></i>
+          Haftalık Beslenme Özeti
+        </h2>
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i className="fa-solid fa-utensils text-orange-500 text-2xl"></i>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Henüz yeterli veri yok. Haftalık plan oluşturarak beslenme takibi yapabilirsiniz.
+          </p>
+          <Link 
+            href="/dashboard/haftalik-plan"
+            className="inline-flex items-center bg-orange-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-orange-600 transition-colors"
+          >
+            <i className="fa-solid fa-plus mr-2"></i>
+            Plan Oluştur
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   // Bugünün tarihini hesapla

@@ -17,10 +17,12 @@ import NutritionSummaryCard from "@/components/features/nutrition/NutritionSumma
 import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrientsAlert";
 import FoodIntroductionCard from "@/components/features/food-introduction/FoodIntroductionCard";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
+import { useMealPlan } from "@/hooks/useMealPlan";
+import ChildWizard from "@/components/features/ChildWizard";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading: userLoading } = useUser();
+  const { user, isAuthenticated, isLoading: userLoading, refreshUser } = useUser();
   const { activeChild, children, setActiveChild } = useActiveChild();
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [blwResults, setBlwResults] = useState<BLWTestResult[]>([]);
@@ -28,6 +30,19 @@ export default function DashboardPage() {
   const [solidFoodResults, setSolidFoodResults] = useState<SolidFoodReadinessResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isChildModalOpen, setIsChildModalOpen] = useState(false);
+  const [editingChild, setEditingChild] = useState<any>(null);
+  
+  // Meal plan hook
+  const { plan, isLoading: mealPlanLoading } = useMealPlan();
+
+  // Calculate today's meals from the plan
+  const todaysMeals = useMemo(() => {
+    if (!plan?.days) return [];
+    const today = new Date().toISOString().split('T')[0];
+    const todayPlan = plan.days.find(d => d.date === today);
+    return todayPlan?.slots || [];
+  }, [plan]);
 
   // Calculate week days dynamically
   const weekDays = useMemo(() => {
@@ -199,9 +214,13 @@ export default function DashboardPage() {
                                     </button>
                                 ))}
                                 
-                                <Link href="/profil" className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center border border-white/20 transition-all text-sm" title="Çocuk Ekle">
+                                <button 
+                                  onClick={() => setIsChildModalOpen(true)}
+                                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/30 flex items-center justify-center border border-white/20 transition-all text-sm" 
+                                  title="Çocuk Ekle"
+                                >
                                     <i className="fa-solid fa-plus"></i>
-                                </Link>
+                                </button>
                             </div>
 
                             {/* Active Child Profile */}
@@ -250,9 +269,12 @@ export default function DashboardPage() {
                             <p className="text-orange-100 text-sm md:text-base mb-4 max-w-xl mx-auto">
                               Çocuk profili ekleyerek size özel menüler ve önerilere ulaşabilirsiniz.
                             </p>
-                            <Link href="/profil" className="inline-flex bg-white text-orange-500 px-6 py-3 rounded-xl font-bold shadow-sm hover:bg-orange-50 transition-colors">
+                            <button 
+                              onClick={() => setIsChildModalOpen(true)}
+                              className="inline-flex bg-white text-orange-500 px-6 py-3 rounded-xl font-bold shadow-sm hover:bg-orange-50 transition-colors"
+                            >
                               <i className="fa-solid fa-plus mr-2"></i> İlk Çocuğunuzu Ekleyin
-                            </Link>
+                            </button>
                           </div>
                         )}
                     </div>
@@ -320,50 +342,44 @@ export default function DashboardPage() {
 
                       {/* Meals Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {/* Breakfast */}
-                          <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-                              <div className="w-16 h-16 rounded-2xl bg-yellow-50 flex items-center justify-center flex-shrink-0">
-                                  <img src="https://placehold.co/100x100/FFF9C4/FBC02D?text=Yumurta" className="w-12 h-12 rounded-xl object-cover" alt="Meal" />
+                          {todaysMeals.length > 0 ? (
+                            todaysMeals.filter(slot => slot.recipe).slice(0, 3).map((slot) => (
+                              <div key={slot.id} className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
+                                  <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+                                      <img 
+                                        src={slot.recipe?.image || 'https://placehold.co/100x100/FFF9C4/FBC02D?text=Meal'} 
+                                        className="w-12 h-12 rounded-xl object-cover" 
+                                        alt={slot.recipe?.title || 'Meal'} 
+                                      />
+                                  </div>
+                                  <div>
+                                      <span className="text-xs font-bold text-orange-500 uppercase tracking-wide">{slot.slot_label}</span>
+                                      <h4 className="font-bold text-slate-800 text-sm md:text-base">{slot.recipe?.title}</h4>
+                                      <p className="text-xs text-gray-400">
+                                        {slot.recipe?.prep_time ? `${slot.recipe.prep_time} dk • ` : ''}
+                                        {activeChild?.age_months ? `${activeChild.age_months} ay` : 'Bebek'}
+                                      </p>
+                                  </div>
+                                  <div className="ml-auto w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-300 hover:bg-green-50 hover:border-green-200 hover:text-green-500 transition-all">
+                                      <i className="fa-solid fa-check"></i>
+                                  </div>
                               </div>
-                              <div>
-                                  <span className="text-xs font-bold text-yellow-500 uppercase tracking-wide">Kahvaltı</span>
-                                  <h4 className="font-bold text-slate-800 text-sm md:text-base">Avokadolu Omlet</h4>
-                                  <p className="text-xs text-gray-400">10 dk • {activeChild.age_months ? `${activeChild.age_months} ay` : 'Bebek'}</p>
+                            ))
+                          ) : (
+                            <div className="col-span-3 text-center py-8 bg-white rounded-3xl border border-gray-100">
+                              <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i className="fa-solid fa-utensils text-orange-500 text-2xl"></i>
                               </div>
-                              <div className="ml-auto w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-300 hover:bg-green-50 hover:border-green-200 hover:text-green-500 transition-all">
-                                  <i className="fa-solid fa-check"></i>
-                              </div>
-                          </div>
-
-                          {/* Lunch */}
-                          <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-                              <div className="w-16 h-16 rounded-2xl bg-green-50 flex items-center justify-center flex-shrink-0">
-                                  <img src="https://placehold.co/100x100/DCEDC8/689F38?text=Corba" className="w-12 h-12 rounded-xl object-cover" alt="Meal" />
-                              </div>
-                              <div>
-                                  <span className="text-xs font-bold text-green-600 uppercase tracking-wide">Öğle</span>
-                                  <h4 className="font-bold text-slate-800 text-sm md:text-base">Yeşil Mercimek Çorbası</h4>
-                                  <p className="text-xs text-gray-400">30 dk • {activeChild.age_months ? `${activeChild.age_months} ay` : 'Bebek'}</p>
-                              </div>
-                              <div className="ml-auto w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-300 hover:bg-green-50 hover:border-green-200 hover:text-green-500 transition-all">
-                                  <i className="fa-solid fa-check"></i>
-                              </div>
-                          </div>
-
-                          {/* Dinner */}
-                          <div className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-                              <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                                  <img src="https://placehold.co/100x100/FFCC80/E65100?text=Kofte" className="w-12 h-12 rounded-xl object-cover" alt="Meal" />
-                              </div>
-                              <div>
-                                  <span className="text-xs font-bold text-orange-500 uppercase tracking-wide">Akşam</span>
-                                  <h4 className="font-bold text-slate-800 text-sm md:text-base">Sebzeli Somon Köfte</h4>
-                                  <p className="text-xs text-gray-400">20 dk • {activeChild.age_months ? `${activeChild.age_months} ay` : 'Bebek'}</p>
-                              </div>
-                              <div className="ml-auto w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-300 hover:bg-green-50 hover:border-green-200 hover:text-green-500 transition-all">
-                                  <i className="fa-solid fa-check"></i>
-                              </div>
-                          </div>
+                              <p className="text-gray-600 mb-4">Bugün için plan oluşturulmamış</p>
+                              <Link 
+                                href="/dashboard/haftalik-plan"
+                                className="inline-flex items-center bg-orange-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-orange-600 transition-colors"
+                              >
+                                <i className="fa-solid fa-plus mr-2"></i>
+                                Plan Oluştur
+                              </Link>
+                            </div>
+                          )}
                       </div>
                   </div>
                 )}
@@ -774,6 +790,33 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-medium">Profil</span>
             </Link>
         </div>
+
+        {/* Child Wizard Modal */}
+        <ChildWizard
+          isOpen={isChildModalOpen}
+          onClose={() => {
+            setIsChildModalOpen(false);
+            setEditingChild(null);
+          }}
+          onSave={async (childData) => {
+            try {
+              if ('id' in childData && childData.id) {
+                // Update existing child
+                await userService.updateChild(childData.id, childData);
+              } else {
+                // Add new child
+                await userService.addChild(childData);
+              }
+              // Refresh user to get updated children list
+              await refreshUser();
+              setIsChildModalOpen(false);
+            } catch (error) {
+              console.error('Error saving child:', error);
+              throw error; // Re-throw so ChildWizard can handle it
+            }
+          }}
+          child={editingChild}
+        />
 
     </div>
   );
