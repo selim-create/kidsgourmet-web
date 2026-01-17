@@ -6,6 +6,27 @@ import { use } from 'react'; // Next.js 15+ için gerekli
 import { blogService, BlogPost } from '@/services/blog-service';
 import BlogCard from '@/components/features/BlogCard';
 import NewsletterForm from '@/components/common/NewsletterForm';
+import { userService } from '@/services/user-service';
+import { ExpertPublicProfile } from '@/lib/types';
+
+// Smart Assistant Tools list
+const SMART_TOOLS = [
+  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-plate-utensils' },
+  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-book-sparkles' },
+  { name: 'Ek Gıdaya Başlama Kontrolü', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-list-check' },
+  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-circle-question' },
+  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-calendar-days' },
+  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-clipboard-check' },
+  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-chart-line' },
+  { name: 'Su İhtiyacı Hesaplayıcı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-droplet' },
+  { name: 'Alerjen Deneme Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-shield-virus' },
+  { name: 'Banyo Rutini Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-bath' },
+  { name: 'Günlük Hijyen Hesaplayıcı', path: '/akilli-asistan/gunluk-hijyen', icon: 'fa-hand-sparkles' },
+  { name: 'Akıllı Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby' },
+  { name: 'Hava Kalitesi Rehberi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-wind' },
+  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-spray-can-sparkles' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-clock-rotate-left' },
+];
 
 export default function BlogCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
@@ -19,6 +40,14 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
   // Gerçek uygulamada, slug'dan kategori ID'sini bulmak için ayrı bir servis çağrısı gerekebilir
   // veya tüm kategorileri çekip slug ile eşleştirebiliriz.
   const [categoryInfo, setCategoryInfo] = useState<{ id: number, name: string, description?: string } | null>(null);
+  
+  // Random tool selection
+  const [randomTool] = useState(() => {
+    return SMART_TOOLS[Math.floor(Math.random() * SMART_TOOLS.length)];
+  });
+  
+  // Random expert selection
+  const [randomExpert, setRandomExpert] = useState<ExpertPublicProfile | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -43,6 +72,13 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
         // 2. Bulunan kategori ID'sine göre yazıları çekelim
         const categoryPosts = await blogService.getAll(1, 10, currentCategory.id);
         setPosts(categoryPosts.posts);
+        
+        // 3. Uzmanları çek ve rastgele birini seç
+        const experts = await userService.getExperts();
+        if (experts && experts.length > 0) {
+          const randomIndex = Math.floor(Math.random() * experts.length);
+          setRandomExpert(experts[randomIndex]);
+        }
 
       } catch (err) {
         console.error("Kategori verileri çekilemedi:", err);
@@ -113,7 +149,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                                 {/* Localde Link kullanın */}
                                 <li><Link href="/" className="hover:text-green-600"><i className="fa-solid fa-house"></i></Link></li>
                                 <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                                <li><Link href="/blog" className="hover:text-green-600">Blog</Link></li>
+                                <li><Link href="/kesfet" className="hover:text-green-600">Keşfet</Link></li>
                                 <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                                 <li className="font-bold text-green-600">{categoryInfo.name}</li>
                             </ol>
@@ -131,32 +167,18 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                         </p>
                     </div>
 
-                    {/* Category Specific Tool Promo (Static for now, could be dynamic based on category) */}
-                    <div className="hidden md:block w-80 bg-white p-5 rounded-3xl shadow-lg border border-green-100 transform rotate-2 hover:rotate-0 transition-transform duration-300 cursor-pointer group">
+                    {/* Category Specific Tool Promo (Dynamic Random Tool) */}
+                    <Link href={randomTool.path} className="hidden md:block w-80 bg-white p-5 rounded-3xl shadow-lg border border-green-100 transform rotate-2 hover:rotate-0 transition-transform duration-300 cursor-pointer group">
                         <div className="flex items-start justify-between mb-3">
                             <div className="w-10 h-10 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center">
-                                <i className="fa-solid fa-check-double"></i>
+                                <i className={`fa-solid ${randomTool.icon}`}></i>
                             </div>
                             <i className="fa-solid fa-arrow-right text-gray-300 group-hover:text-orange-500 transition-colors"></i>
                         </div>
-                        <h3 className="font-bold text-slate-800 text-lg mb-1">Hazır mı?</h3>
-                        <p className="text-sm text-gray-500">Bebeğinizin ek gıdaya başlamaya hazır olup olmadığını <strong>BLW Testi</strong> ile hemen öğrenin.</p>
-                    </div>
+                        <h3 className="font-bold text-slate-800 text-lg mb-1">{randomTool.name}</h3>
+                        <p className="text-sm text-gray-500">Bebeğinizin sağlığı ve gelişimi için kişiselleştirilmiş öneriler ve hesaplamalar.</p>
+                    </Link>
 
-                </div>
-
-                {/* Sub-Category Filters (Pills) - Optional / Can be fetched if using Hierarchical Taxonomies */}
-                <div className="mt-10 flex flex-wrap justify-center md:justify-start gap-3">
-                    <button className="px-5 py-2 rounded-full bg-green-600 text-white font-bold text-sm shadow-md hover:bg-green-700 transition-colors">
-                        Tümü
-                    </button>
-                    {/* Örnek alt kategoriler (Statik, API desteklerse dinamik yapılabilir) */}
-                    <button className="px-5 py-2 rounded-full bg-white border border-green-200 text-green-700 font-medium text-sm hover:bg-green-50 transition-colors">
-                        Popüler
-                    </button>
-                    <button className="px-5 py-2 rounded-full bg-white border border-green-200 text-green-700 font-medium text-sm hover:bg-green-50 transition-colors">
-                        Yeni
-                    </button>
                 </div>
             </div>
         </div>
@@ -174,10 +196,10 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="flex flex-col lg:flex-row gap-8">
                 
                 {/* LEFT: BLOG POSTS (3 Columns Grid) */}
-                <div className="lg:col-span-3">
+                <div className="flex-1">
                     
                     {otherPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -205,46 +227,54 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                 </div>
 
                 {/* RIGHT: SIDEBAR (Category Specific) */}
-                <aside className="hidden lg:block lg:col-span-1 space-y-8">
+                <aside className="hidden lg:block space-y-8 sticky top-24 w-[300px]">
                     
                     {/* Expert Widget */}
-                    <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
-                        <div className="mb-4 relative inline-block">
-                            <img src="https://placehold.co/100x100/AED581/ffffff?text=Uzman" className="w-20 h-20 rounded-full border-4 border-green-50" alt="Uzman" />
-                            <div className="absolute bottom-0 right-0 bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border border-white">
-                                <i className="fa-solid fa-check"></i>
+                    {randomExpert ? (
+                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
+                            <div className="mb-4 relative inline-block">
+                                <img 
+                                    src={randomExpert.avatar_url || 'https://placehold.co/100x100/AED581/ffffff?text=Uzman'} 
+                                    className="w-20 h-20 rounded-full border-4 border-green-50 object-cover" 
+                                    alt={randomExpert.display_name} 
+                                />
+                                <div className="absolute bottom-0 right-0 bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border border-white">
+                                    <i className="fa-solid fa-check"></i>
+                                </div>
                             </div>
+                            <h3 className="font-bold text-slate-800">{randomExpert.display_name}</h3>
+                            <p className="text-xs text-green-600 font-bold mb-2">
+                                {randomExpert.expertise && randomExpert.expertise.length > 0 
+                                    ? randomExpert.expertise[0] 
+                                    : 'KidsGourmet Uzmanı'}
+                            </p>
+                            <p className="text-xs text-gray-500 mb-4">
+                                {randomExpert.biography 
+                                    ? (randomExpert.biography.length > 100 
+                                        ? randomExpert.biography.substring(0, 100) + '...' 
+                                        : randomExpert.biography)
+                                    : 'Alanında uzman, deneyimli ve güvenilir içerik üreticisi.'}
+                            </p>
+                            <Link 
+                                href={`/uzman/${randomExpert.username}`}
+                                className="block w-full border border-gray-200 text-gray-600 text-xs font-bold py-2 rounded-xl hover:border-green-600 hover:text-green-600 transition-colors"
+                            >
+                                Tüm Yazıları
+                            </Link>
                         </div>
-                        <h3 className="font-bold text-slate-800">Dyt. Ayşe Yılmaz</h3>
-                        <p className="text-xs text-green-600 font-bold mb-2">Çocuk Beslenme Uzmanı</p>
-                        <p className="text-xs text-gray-500 mb-4">"Ek gıda sürecinde sabırlı olun. Bebeğinizin sinyallerini takip edin."</p>
-                        <button className="w-full border border-gray-200 text-gray-600 text-xs font-bold py-2 rounded-xl hover:border-green-600 hover:text-green-600 transition-colors">
-                            Tüm Yazıları
-                        </button>
-                    </div>
-
-                    {/* Popular Tags */}
-                    <div>
-                        <h3 className="font-bold text-slate-800 mb-4 text-sm font-sans">Popüler Etiketler</h3>
-                        <div className="flex flex-wrap gap-2">
-                            <Link href="#" className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs hover:bg-green-50 hover:text-green-600 transition-colors">#blw</Link>
-                            <Link href="#" className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs hover:bg-green-50 hover:text-green-600 transition-colors">#parmakgıda</Link>
-                            <Link href="#" className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs hover:bg-green-50 hover:text-green-600 transition-colors">#alerji</Link>
-                            <Link href="#" className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs hover:bg-green-50 hover:text-green-600 transition-colors">#ilkkaşık</Link>
-                            <Link href="#" className="px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs hover:bg-green-50 hover:text-green-600 transition-colors">#kahvaltı</Link>
+                    ) : (
+                        <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
+                            <div className="mb-4 relative inline-block">
+                                <img src="https://placehold.co/100x100/AED581/ffffff?text=Uzman" className="w-20 h-20 rounded-full border-4 border-green-50" alt="Uzman" />
+                                <div className="absolute bottom-0 right-0 bg-green-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs border border-white">
+                                    <i className="fa-solid fa-check"></i>
+                                </div>
+                            </div>
+                            <h3 className="font-bold text-slate-800">KidsGourmet Uzmanı</h3>
+                            <p className="text-xs text-green-600 font-bold mb-2">Çocuk Beslenme Uzmanı</p>
+                            <p className="text-xs text-gray-500 mb-4">Alanında uzman, deneyimli ve güvenilir içerik üreticisi.</p>
                         </div>
-                    </div>
-
-                    {/* Download Guide Promo */}
-                    <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-3xl p-6 text-white text-center relative overflow-hidden group cursor-pointer">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                        <i className="fa-solid fa-file-pdf text-4xl mb-4 opacity-80 group-hover:scale-110 transition-transform"></i>
-                        <h3 className="font-bold text-lg mb-2 font-sans">Ek Gıda Başlangıç Listesi</h3>
-                        <p className="text-green-100 text-xs mb-4">İlk ay neler verilmeli? Yazdırılabilir PDF listeyi hemen indir.</p>
-                        <button className="bg-white text-green-600 px-6 py-2 rounded-xl text-xs font-bold shadow-sm hover:bg-green-50 transition-colors">
-                            İndir (Ücretsiz)
-                        </button>
-                    </div>
+                    )}
 
                 </aside>
 
