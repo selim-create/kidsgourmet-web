@@ -49,7 +49,7 @@ export default function CommentSection({ postId, postType, initialCommentCount =
     try {
       setSubmitting(true);
       const newComment = await commentService.addComment({
-        post: postId,
+        post_id: postId,
         content: commentText.trim(),
       });
       setComments(prev => [...prev, newComment]);
@@ -64,8 +64,7 @@ export default function CommentSection({ postId, postType, initialCommentCount =
   };
 
   const getAvatarUrl = (comment: Comment) => {
-    const urls = comment.author_avatar_urls;
-    return urls?.['96'] || urls?.['48'] || urls?.['24'] || null;
+    return comment.author?.avatar || null;
   };
 
   return (
@@ -143,22 +142,22 @@ export default function CommentSection({ postId, postType, initialCommentCount =
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
-                    alt={comment.author_name}
+                    alt={comment.author.name}
                     className="w-10 h-10 rounded-full flex-shrink-0"
                   />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold flex-shrink-0">
-                    {comment.author_name?.charAt(0).toUpperCase() || '?'}
+                    {comment.author.name?.charAt(0).toUpperCase() || '?'}
                   </div>
                 )}
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-slate-800 text-sm">{comment.author_name}</span>
+                    <span className="font-bold text-slate-800 text-sm">{comment.author.name}</span>
                     <span className="text-xs text-gray-400">{formatRelativeTime(comment.date)}</span>
                   </div>
                   <div
                     className="text-gray-600 text-sm prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content.rendered) }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content) }}
                   />
                 </div>
               </div>

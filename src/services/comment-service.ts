@@ -3,18 +3,20 @@ import { API_ENDPOINTS } from '@/lib/constants';
 
 export interface Comment {
   id: number;
-  post: number;
-  parent: number;
-  author_name: string;
-  author_avatar_urls?: { [key: string]: string };
+  content: string;
   date: string;
-  content: { rendered: string };
+  parent_id: number;
+  author: {
+    id: number;
+    name: string;
+    avatar: string | null;
+  };
 }
 
 export interface CommentInput {
-  post: number;
+  post_id: number;
   content: string;
-  parent?: number;
+  parent_id?: number;
 }
 
 export const commentService = {
@@ -26,12 +28,14 @@ export const commentService = {
   },
 
   // Yorum ekle (auth gerekli)
-  // Custom endpoint kullanılıyor çünkü WordPress standard /wp/v2/comments endpoint'i
-  // JWT token authentication'ı desteklemiyor. /kg/v1/comments endpoint'i JWT ile çalışacak şekilde yapılandırılmış.
   addComment: async (data: CommentInput): Promise<Comment> => {
-    return await fetchAuthAPI<Comment>(API_ENDPOINTS.COMMENTS, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
+    const response = await fetchAuthAPI<{ success: boolean; message: string; comment: Comment }>(
+      API_ENDPOINTS.COMMENTS, 
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+    return response.comment;
   },
 };
