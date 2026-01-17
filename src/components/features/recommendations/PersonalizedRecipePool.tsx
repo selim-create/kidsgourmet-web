@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRecommendations } from '@/hooks/useRecommendations';
+import { PersonalizedRecipe } from '@/services/recommendation-service';
 
 interface PersonalizedRecipePoolProps {
   childId: string;
@@ -22,7 +23,7 @@ export default function PersonalizedRecipePool({
   });
   
   // Güvenli array kontrolü - API response farklı yapıda gelebilir
-  const recipeList = Array.isArray(recommendations) 
+  const recipeList: PersonalizedRecipe[] = Array.isArray(recommendations) 
     ? recommendations 
     : (recommendations as any)?.recommendations || [];
   
