@@ -148,8 +148,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       headings.forEach((heading) => {
         const element = document.getElementById(heading.id);
         if (!element) {
-          // Try to find the heading by text content
-          const allHeadings = document.querySelectorAll('article h2, article h3');
+          // Try to find the heading by text content, including wp-block-heading class
+          const allHeadings = document.querySelectorAll('article h2, article h3, article h2.wp-block-heading, article h3.wp-block-heading');
           allHeadings.forEach((el) => {
             const text = el.textContent?.trim() || '';
             const decodedText = decodeEntities(text);
@@ -263,7 +263,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
   
   // Process content with heading IDs
-  const processedContent = post ? injectHeadingIds(post.content.rendered, headings) : '';
+  const baseProcessedContent = post ? injectHeadingIds(post.content.rendered, headings) : '';
 
   const getImageUrl = (post: BlogPost) => {
     return post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://placehold.co/1200x600/E3F2FD/81D4FA?text=Gorsel+Yok';
@@ -375,6 +375,53 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const isSponsored = post?.sponsor_data?.is_sponsored ?? false;
   const sponsorData = post?.sponsor_data;
   const isFav = post ? isFavorite(post.id, 'post') : false;
+  
+  // Create final processed content with sponsor CTA if needed
+  let processedContent = baseProcessedContent;
+  if (isSponsored && sponsorData?.sponsor_url && processedContent) {
+    const sponsorLogo = getSponsorLogo(sponsorData);
+    const sponsorCard = `
+      <div class="my-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100">
+        <div class="flex items-center gap-4">
+          ${sponsorLogo ? `<img src="${sponsorLogo}" alt="${sponsorData.sponsor_name}" class="h-10 object-contain" onerror="this.style.display='none'" />` : ''}
+          <div class="flex-1">
+            <p class="text-sm text-gray-600 mb-2">
+              Bu içerik <strong>${sponsorData.sponsor_name}</strong> tarafından desteklenmektedir.
+            </p>
+            <a 
+              href="${sponsorData.sponsor_url}"
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              class="inline-flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors"
+            >
+              Daha Fazla Bilgi <i class="fa-solid fa-external-link"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Find the 2nd closing </p> tag and inject after it
+    // If there are fewer than 2 paragraphs, inject after the 1st
+    let pCount = 0;
+    let injected = false;
+    processedContent = processedContent.replace(/<\/p>/g, (match) => {
+      pCount++;
+      if (pCount === 2 && !injected) {
+        injected = true;
+        return match + sponsorCard;
+      }
+      return match;
+    });
+    
+    // Fallback: if we didn't inject (less than 2 paragraphs), inject after first paragraph
+    if (!injected && pCount > 0) {
+      pCount = 0;
+      processedContent = processedContent.replace(/<\/p>/, (match) => {
+        return match + sponsorCard;
+      });
+    }
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -668,9 +715,19 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                 <h3 className="font-bold text-slate-800 text-lg mb-1">
                                   {sponsorData.sponsor_name}
                                 </h3>
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-gray-600 mb-2">
                                   Bu içerik sponsorlu bir içeriktir.
                                 </p>
+                                {sponsorData?.sponsor_url && (
+                                  <a 
+                                    href={sponsorData.sponsor_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer sponsored"
+                                    className="inline-flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors mt-3"
+                                  >
+                                    Daha Fazla Bilgi <i className="fa-solid fa-external-link"></i>
+                                  </a>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -765,7 +822,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                 <h4 className="font-medium text-slate-800 text-sm group-hover:text-orange-500 transition-colors">
                                   {decodeEntities(ingredient.name)}
                                 </h4>
-                                <span className="text-xs text-gray-400">{ingredient.start_age}</span>
+                                <span className="text-xs text-gray-400">
+                                  {ingredient.start_age ? `${ingredient.start_age} Ay` : '+6 Ay'}
+                                </span>
                               </Link>
                             ))}
                           </div>

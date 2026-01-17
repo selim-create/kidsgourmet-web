@@ -100,9 +100,26 @@ export const getPlainText = (rendered: { rendered?: string } | string | undefine
  * Handles Turkish characters and diacritics
  * Used for generating anchor IDs from headings and URL slugs
  */
+
+// Türkçe karakter haritası - moved outside function for performance
+const TURKISH_CHAR_MAP: Record<string, string> = {
+  'ı': 'i', 'İ': 'i',
+  'ş': 's', 'Ş': 's',
+  'ç': 'c', 'Ç': 'c',
+  'ğ': 'g', 'Ğ': 'g',
+  'ü': 'u', 'Ü': 'u',
+  'ö': 'o', 'Ö': 'o'
+};
+
 export function slugify(text: string): string {
-  return text
-    .toString()
+  let result = text.toString();
+  
+  // Önce Türkçe karakterleri dönüştür
+  for (const [tr, en] of Object.entries(TURKISH_CHAR_MAP)) {
+    result = result.replace(new RegExp(tr, 'g'), en);
+  }
+  
+  return result
     .normalize('NFD')                   // Normalize to decomposed form for diacritics
     .replace(/[\u0300-\u036f]/g, '')    // Remove diacritics
     .toLowerCase()
