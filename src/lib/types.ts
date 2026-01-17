@@ -736,7 +736,8 @@ export type ToolType =
   | 'hygiene_calculator'
   | 'diaper_calculator'
   | 'air_quality'
-  | 'stain_encyclopedia';
+  | 'stain_encyclopedia'
+  | 'vaccine_calendar';
 
 export interface Tool {
   id: number;
@@ -748,6 +749,8 @@ export interface Tool {
   is_active?: boolean;
   requires_auth: boolean;
   is_sponsored?: boolean;
+  sponsor_name?: string;
+  sponsor_url?: string;
   seo?: SEOData;
 }
 

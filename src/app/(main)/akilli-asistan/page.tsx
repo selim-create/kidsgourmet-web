@@ -142,6 +142,16 @@ const defaultTools: Tool[] = [
     requires_auth: false,
     is_sponsored: true,
   },
+  {
+    id: 14,
+    title: 'Aşı Takvimi',
+    slug: 'asi-takvimi',
+    description: 'Bebeğinizin aşı takvimini takip edin ve hatırlatıcılar alın.',
+    icon: 'fa-solid fa-syringe',
+    tool_type: 'vaccine_calendar',
+    is_active: true,
+    requires_auth: true,
+  },
 ];
 
 const toolIconColors: Record<string, string> = {
@@ -159,6 +169,7 @@ const toolIconColors: Record<string, string> = {
   diaper_calculator: 'bg-pink-50 text-pink-500',
   air_quality: 'bg-sky-50 text-sky-500',
   stain_encyclopedia: 'bg-violet-50 text-violet-500',
+  vaccine_calendar: 'bg-rose-50 text-rose-500',
 };
 
 export default function ToolsPage() {
@@ -217,14 +228,22 @@ export default function ToolsPage() {
             {tools.filter(tool => tool.is_active !== false).map((tool) => (
               <Link
                 key={tool.id}
-                href={`/araclar/${tool.slug}`}
+                href={tool.tool_type === 'vaccine_calendar' ? '/dashboard/saglik/asi-takvimi' : `/akilli-asistan/${tool.slug}`}
                 className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden relative"
               >
                 <div className="p-6">
                   {/* Sponsor Badge */}
-                  {tool.is_sponsored && (
+                  {tool.is_sponsored && tool.sponsor_name && (
                     <div className="absolute top-3 right-3 bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-semibold">
-                      Sponsorlu
+                      {tool.sponsor_name} Katkılarıyla
+                    </div>
+                  )}
+                  
+                  {/* Auth Required Badge */}
+                  {tool.requires_auth && (
+                    <div className={`absolute ${tool.is_sponsored ? 'top-10' : 'top-3'} right-3 bg-purple-100 text-purple-600 px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1`}>
+                      <i className="fa-solid fa-lock text-[10px]"></i>
+                      <span>Üyelik Gerekli</span>
                     </div>
                   )}
 
