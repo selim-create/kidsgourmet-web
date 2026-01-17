@@ -255,24 +255,24 @@ export default function VaccinePage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
             <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
               <p className="text-xs text-gray-500 mb-1">Toplam</p>
-              <p className="text-2xl font-bold text-slate-800">{schedule.stats.total}</p>
+              <p className="text-2xl font-bold text-slate-800">{schedule.stats?.total ?? 0}</p>
             </div>
             <div className="bg-green-50 rounded-2xl p-4 border border-green-100 shadow-sm">
               <p className="text-xs text-green-600 mb-1">Yapılan</p>
-              <p className="text-2xl font-bold text-green-700">{schedule.stats.done}</p>
+              <p className="text-2xl font-bold text-green-700">{schedule.stats?.done ?? 0}</p>
             </div>
             <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100 shadow-sm">
               <p className="text-xs text-blue-600 mb-1">Bekleyen</p>
-              <p className="text-2xl font-bold text-blue-700">{schedule.stats.upcoming}</p>
+              <p className="text-2xl font-bold text-blue-700">{schedule.stats?.upcoming ?? 0}</p>
             </div>
             <div className="bg-red-50 rounded-2xl p-4 border border-red-100 shadow-sm">
               <p className="text-xs text-red-600 mb-1">Geciken</p>
-              <p className="text-2xl font-bold text-red-700">{schedule.stats.overdue}</p>
+              <p className="text-2xl font-bold text-red-700">{schedule.stats?.overdue ?? 0}</p>
             </div>
             <div className="bg-purple-50 rounded-2xl p-4 border border-purple-100 shadow-sm">
               <p className="text-xs text-purple-600 mb-1">Tamamlanma</p>
               <p className="text-2xl font-bold text-purple-700">
-                {Math.round(schedule.stats.completion_percentage)}%
+                {Math.round(schedule.stats?.completion_percentage ?? 0)}%
               </p>
             </div>
           </div>
@@ -282,7 +282,7 @@ export default function VaccinePage() {
         {schedule && <PrematureWarning isPremature={schedule.is_premature} />}
 
         {/* Overdue Vaccine Banner */}
-        {schedule && schedule.stats.overdue > 0 && (
+        {schedule && (schedule.stats?.overdue ?? 0) > 0 && (
           <div className="mb-6">
             <OverdueVaccineBanner 
               childId={activeChild.id} 

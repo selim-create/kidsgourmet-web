@@ -27,14 +27,19 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
         setIsLoading(true);
         setError(null);
         const vaccines = await vaccineService.getUpcomingVaccines(childId);
-        setUpcomingVaccines(vaccines.slice(0, 3)); // Show max 3
         
-        // Count overdue vaccines
-        const overdue = vaccines.filter(v => v.is_overdue).length;
+        // Güvenli array erişimi (service zaten array döndürüyor ama ekstra güvenlik)
+        const vaccineArray = Array.isArray(vaccines) ? vaccines : [];
+        setUpcomingVaccines(vaccineArray.slice(0, 3)); // Show max 3
+        
+        // Güvenli filter
+        const overdue = vaccineArray.filter(v => v?.is_overdue === true).length;
         setOverdueCount(overdue);
       } catch (err) {
         console.error('Failed to fetch upcoming vaccines:', err);
         setError('Aşı bilgileri yüklenemedi');
+        setUpcomingVaccines([]);
+        setOverdueCount(0);
       } finally {
         setIsLoading(false);
       }

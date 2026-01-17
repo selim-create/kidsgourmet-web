@@ -10,7 +10,9 @@ import {
   UpcomingVaccine,
   VaccineHistoryItem,
   NotificationPreferences,
+  VaccineRecord,
 } from '@/lib/types';
+import { extractApiData, ensureArray, defaultVaccineStats } from '@/lib/api-utils';
 
 export const vaccineService = {
   /**
@@ -24,7 +26,15 @@ export const vaccineService = {
    * Get vaccine schedule for a specific child
    */
   async getVaccineSchedule(childId: string): Promise<VaccineSchedule> {
-    return fetchAuthAPI<VaccineSchedule>(API_ENDPOINTS.VACCINES_BY_CHILD(childId));
+    const response = await fetchAuthAPI<unknown>(API_ENDPOINTS.VACCINES_BY_CHILD(childId));
+    const data = extractApiData<VaccineSchedule>(response);
+    
+    // Stats ve vaccines için fallback sağla
+    return {
+      ...data,
+      vaccines: ensureArray<VaccineRecord>(data?.vaccines),
+      stats: data?.stats ?? defaultVaccineStats,
+    };
   },
 
   /**
@@ -71,14 +81,18 @@ export const vaccineService = {
    * Get upcoming vaccines for a child
    */
   async getUpcomingVaccines(childId: string): Promise<UpcomingVaccine[]> {
-    return fetchAuthAPI<UpcomingVaccine[]>(API_ENDPOINTS.VACCINES_UPCOMING(childId));
+    const response = await fetchAuthAPI<unknown>(API_ENDPOINTS.VACCINES_UPCOMING(childId));
+    const extracted = extractApiData<UpcomingVaccine[] | unknown>(response);
+    return ensureArray<UpcomingVaccine>(extracted);
   },
 
   /**
    * Get vaccine history for a child
    */
   async getVaccineHistory(childId: string): Promise<VaccineHistoryItem[]> {
-    return fetchAuthAPI<VaccineHistoryItem[]>(API_ENDPOINTS.VACCINES_HISTORY(childId));
+    const response = await fetchAuthAPI<unknown>(API_ENDPOINTS.VACCINES_HISTORY(childId));
+    const extracted = extractApiData<VaccineHistoryItem[] | unknown>(response);
+    return ensureArray<VaccineHistoryItem>(extracted);
   },
 
   /**
@@ -109,8 +123,8 @@ export const vaccineService = {
    * Get overdue vaccines for a child
    */
   async getOverdueVaccines(childId: string): Promise<UpcomingVaccine[]> {
-    const vaccines = await fetchAuthAPI<UpcomingVaccine[]>(API_ENDPOINTS.VACCINES_UPCOMING(childId));
-    // Filter only overdue vaccines
-    return vaccines.filter((v: UpcomingVaccine) => v.is_overdue);
+    const vaccines = await this.getUpcomingVaccines(childId);
+    // vaccines artık her zaman array olacak
+    return vaccines.filter((v: UpcomingVaccine) => v?.is_overdue === true);
   },
 };
