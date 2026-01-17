@@ -27,11 +27,16 @@ export interface Recipe {
   freezable?: boolean;
   storage_info?: string;
   special_notes?: string;
+  rating?: number;
+  rating_count?: number;
+  user_rating?: number;
   author?: {
     id: number;
     name: string;
     slug?: string;
     avatar?: string;
+    avatar_url?: string;
+    avatarUrl?: string;
   };
 }
 

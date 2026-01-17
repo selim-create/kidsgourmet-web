@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useSafetyCheck } from '@/hooks/useSafetyCheck';
 import { SafetyAlert } from '@/services/safety-service';
 import AlternativeRecipeList from './AlternativeRecipeList';
@@ -71,24 +70,12 @@ function AlertItem({ alert }: { alert: SafetyAlert }) {
 
 export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBannerProps) {
   const { safetyResult, isChecking, error, isApiError } = useSafetyCheck(recipeId, childId);
-  const [minLoadingTimePassed, setMinLoadingTimePassed] = useState(false);
-  
-  // Minimum loading display time (800ms)
-  useEffect(() => {
-    if (isChecking) {
-      setMinLoadingTimePassed(false);
-      const timer = setTimeout(() => {
-        setMinLoadingTimePassed(true);
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [isChecking]);
   
   // Don't show if no child profile
   if (!childId) return null;
   
-  // Show loading state with minimum display time
-  if (isChecking || !minLoadingTimePassed) {
+  // Show loading state
+  if (isChecking) {
     return (
       <div className="bg-gray-50 border-l-4 border-gray-300 p-4 mb-6 rounded-lg">
         <div className="flex items-center">
