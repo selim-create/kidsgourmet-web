@@ -103,6 +103,21 @@ export const authService = {
   },
 
   /**
+   * Reset password with key
+   */
+  resetPassword: async (key: string, login: string, password: string): Promise<{ success: boolean; message: string }> => {
+    const response = await fetchAPI<{
+      success: boolean;
+      message: string;
+    }>(API_ENDPOINTS.AUTH_RESET_PASSWORD, {
+      method: 'POST',
+      body: JSON.stringify({ key, login, password }),
+    });
+    
+    return response;
+  },
+
+  /**
    * Google ile giriş
    */
   googleLogin: async (idToken: string): Promise<AuthResponse> => {
