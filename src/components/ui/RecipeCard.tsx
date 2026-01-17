@@ -69,6 +69,29 @@ const getAgeGroupColor = (ageGroup?: string, providedColor?: string): string => 
   return '#22C55E';
 };
 
+// Get text color for age group badge (dark text for light backgrounds)
+const getAgeGroupTextColor = (ageGroup?: string): string => {
+  if (!ageGroup) return '#FFFFFF';
+  
+  // Light backgrounds need dark text for readability
+  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i) || ageGroup.toLowerCase().includes('gurme')) {
+    return '#92400E'; // Amber-800 - Dark brown for yellow background
+  }
+  if (ageGroup.includes('9-11') || ageGroup.toLowerCase().includes('keşif')) {
+    return '#166534'; // Green-800 - Dark green for light green background
+  }
+  
+  // Dark backgrounds use white text
+  return '#FFFFFF';
+};
+
+// Author object with all possible avatar field variants
+interface AuthorWithAvatar {
+  avatar?: string;
+  avatar_url?: string;
+  avatarUrl?: string;
+}
+
 // Helper function to generate ui-avatars.com URL
 const generateUIAvatarURL = (name: string, backgroundColor: string): string => {
   const bgColor = backgroundColor.replace('#', '');
@@ -86,11 +109,19 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     ? recipe.author 
     : undefined;
 
+  // Calculate age group colors first (needed for avatar fallback)
+  const ageGroupColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color);
+  const ageGroupTextColor = getAgeGroupTextColor(recipe.age_group);
+  const shadowColor = getAgeGroupShadow(recipe.age_group);
+
   // Get author avatar URL with fallback to ui-avatars.com
   const getAuthorAvatar = () => {
-    // Try to get real avatar from author object
-    if (typeof recipe.author === 'object' && recipe.author?.avatar) {
-      return recipe.author.avatar;
+    // Try multiple possible avatar fields
+    if (typeof recipe.author === 'object' && recipe.author) {
+      // Check all possible avatar field variants
+      const authorObj = recipe.author as AuthorWithAvatar;
+      const avatar = authorObj.avatar || authorObj.avatar_url || authorObj.avatarUrl;
+      if (avatar) return avatar;
     }
     
     // Fallback to ui-avatars.com with age group color
@@ -102,8 +133,6 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
   };
 
   const authorAvatar = getAuthorAvatar();
-  const ageGroupColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color);
-  const shadowColor = getAgeGroupShadow(recipe.age_group);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -148,9 +177,10 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         
         {/* Age Group Badge - Top Left with asymmetric corners */}
         <div 
-          className="absolute top-3 left-3 px-3 py-1.5 text-white text-xs font-bold shadow-lg"
+          className="absolute top-3 left-3 px-3 py-1.5 text-xs font-bold shadow-lg"
           style={{
             backgroundColor: ageGroupColor,
+            color: ageGroupTextColor,
             borderRadius: BORDER_RADIUS.BADGE_ASYMMETRIC,
           }}
         >

@@ -152,7 +152,13 @@ const transformRecipe = (wpRecipe: any): RecipeCard => ({
   author: wpRecipe.author ? {
     id: wpRecipe.author.id || wpRecipe.author_id || 0,
     name: wpRecipe.author.name || wpRecipe.author_name || '',
-    avatar: wpRecipe.author.avatar || wpRecipe.author.avatar_url || wpRecipe.author_avatar || wpRecipe.author_avatar_url || '',
+    avatar: wpRecipe.author.avatar 
+      || wpRecipe.author.avatar_url  // WordPress custom field
+      || wpRecipe.author_avatar 
+      || wpRecipe.author_avatar_url
+      || wpRecipe._embedded?.author?.[0]?.avatar_urls?.['96']  // WP REST API standard
+      || wpRecipe._embedded?.author?.[0]?.avatar_urls?.['48']
+      || '',
   } : undefined,
   expert: wpRecipe.expert ? {
     name: wpRecipe.expert.name || '',
