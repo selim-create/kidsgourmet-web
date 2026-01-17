@@ -72,6 +72,14 @@ const brandOptions: Record<string, BrandOption[]> = {
     { id: 'bexsero', name: 'Bexsero', doses: 2 },
     { id: 'trumenba', name: 'Trumenba', doses: 2 },
   ],
+  varicella: [
+    { id: 'varivax', name: 'Varivax', doses: 2 },
+    { id: 'priorix_tetra', name: 'Priorix-Tetra', doses: 2 },
+  ],
+  influenza: [
+    { id: 'fluzone', name: 'Fluzone', doses: 1, description: 'Mevsimsel' },
+    { id: 'fluarix', name: 'Fluarix', doses: 1, description: 'Mevsimsel' },
+  ],
 };
 
 export default function PrivateVaccineWizard({ 
@@ -124,14 +132,29 @@ export default function PrivateVaccineWizard({
     setStep(4);
   };
 
+  // Default brand mapping for when no brand is specified
+  const getDefaultBrand = (vaccineType: VaccineType): string => {
+    const defaults: Record<VaccineType, string> = {
+      rotavirus: 'rotarix',
+      meningococcal_acwy: 'menactra',
+      meningococcal_b: 'bexsero',
+      varicella: 'varivax',
+      influenza: 'fluzone',
+    };
+    return defaults[vaccineType];
+  };
+
   const handleSubmit = () => {
     if (!selectedVaccine) return;
 
+    // Use selected brand or fallback to default
+    const brandCode = selectedBrand || getDefaultBrand(selectedVaccine);
+
     const request: AddPrivateVaccineRequest = {
       child_id: childId,
-      vaccine_type: selectedVaccine,
-      brand: selectedBrand || undefined,
-      first_dose_date: firstDoseDate || undefined,
+      type: selectedVaccine,
+      brand_code: brandCode,
+      schedule_key: firstDoseDate || undefined,
     };
 
     onSubmit(request);
@@ -284,16 +307,6 @@ export default function PrivateVaccineWizard({
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={() => {
-                  setSelectedBrand(null);
-                  setStep(4);
-                }}
-                className="w-full p-3 text-sm text-gray-600 hover:text-slate-800 transition-colors"
-              >
-                Marka belirtmeden devam et
-              </button>
             </div>
           )}
 

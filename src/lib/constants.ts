@@ -137,7 +137,7 @@ export const API_ENDPOINTS = {
   VACCINES_BY_CHILD: (childId: string) => `${KG_API_NAMESPACE}/health/vaccines?child_id=${childId}`,
   VACCINES_MARK_DONE: `${KG_API_NAMESPACE}/health/vaccines/mark-done`,
   VACCINES_UPDATE_STATUS: `${KG_API_NAMESPACE}/health/vaccines/update-status`,
-  VACCINES_ADD_PRIVATE: `${KG_API_NAMESPACE}/health/vaccines/add-private`,
+  VACCINES_ADD_PRIVATE: `${KG_API_NAMESPACE}/health/vaccines/private/add`,
   VACCINES_SIDE_EFFECTS: `${KG_API_NAMESPACE}/health/vaccines/side-effects`,
   VACCINES_UPCOMING: (childId: string) => `${KG_API_NAMESPACE}/health/vaccines/upcoming?child_id=${childId}`,
   VACCINES_HISTORY: (childId: string) => `${KG_API_NAMESPACE}/health/vaccines/history?child_id=${childId}`,

@@ -1229,9 +1229,9 @@ export interface UpdateVaccineStatusRequest {
 
 export interface AddPrivateVaccineRequest {
   child_id: string;
-  vaccine_type: 'rotavirus' | 'meningococcal_acwy' | 'meningococcal_b' | 'varicella' | 'influenza';
-  brand?: string;
-  first_dose_date?: string;
+  type: 'rotavirus' | 'meningococcal_acwy' | 'meningococcal_b' | 'varicella' | 'influenza';
+  brand_code: string;
+  schedule_key?: string;
 }
 
 export interface ReportSideEffectRequest {
