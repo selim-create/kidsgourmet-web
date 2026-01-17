@@ -29,27 +29,19 @@ export const tariftenService = {
   },
 
   /**
-   * Rastgele tarif al
+   * Rastgele tarif al - API endpoint mevcut değilse alternatif yöntem kullan
    */
   getRandom: async (): Promise<TariftenRecipe | null> => {
     try {
-      const response = await fetch(
-        `${TARIFTEN_API_URL}/recipes/random`,
-        { 
-          next: { revalidate: 1800 }, // 30 dakika cache
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
+      // API endpoint (/recipes/random) mevcut değil - 404 dönüyor
+      // Alternatif: popüler malzemelerle tarif getir
+      const popularIngredients = ['havuç', 'patates', 'tavuk', 'yumurta', 'elma', 'kabak', 'brokoli'];
+      const randomIngredient = popularIngredients[Math.floor(Math.random() * popularIngredients.length)];
       
-      if (!response.ok) {
-        // Gracefully handle API errors without logging to console
-        return null;
-      }
-      
-      const data = await response.json();
-      return data.success && data.recipe ? data.recipe : null;
-    } catch (error) {
-      // Silently fail and return null - this is expected when API is unavailable
+      const recipes = await tariftenService.getByIngredient(randomIngredient, 1);
+      return recipes.length > 0 ? recipes[0] : null;
+    } catch {
+      // Silently fail - API unavailable
       return null;
     }
   }

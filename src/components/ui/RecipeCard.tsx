@@ -69,6 +69,22 @@ const getAgeGroupColor = (ageGroup?: string, providedColor?: string): string => 
   return '#22C55E';
 };
 
+// Get text color for age group badge (dark text for light backgrounds)
+const getAgeGroupTextColor = (ageGroup?: string): string => {
+  if (!ageGroup) return '#FFFFFF';
+  
+  // Açık arka plan renkleri için koyu yazı
+  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i) || ageGroup.toLowerCase().includes('gurme')) {
+    return '#92400E'; // Amber-800 - Sarı için koyu kahverengi
+  }
+  if (ageGroup.includes('9-11') || ageGroup.toLowerCase().includes('keşif')) {
+    return '#166534'; // Green-800 - Açık yeşil için koyu yeşil
+  }
+  
+  // Koyu arka plan renkleri için beyaz yazı
+  return '#FFFFFF';
+};
+
 // Helper function to generate ui-avatars.com URL
 const generateUIAvatarURL = (name: string, backgroundColor: string): string => {
   const bgColor = backgroundColor.replace('#', '');
@@ -88,9 +104,12 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
   // Get author avatar URL with fallback to ui-avatars.com
   const getAuthorAvatar = () => {
-    // Try to get real avatar from author object
-    if (typeof recipe.author === 'object' && recipe.author?.avatar) {
-      return recipe.author.avatar;
+    // Try multiple possible avatar fields
+    if (typeof recipe.author === 'object') {
+      const avatar = recipe.author?.avatar 
+        || (recipe.author as any)?.avatar_url 
+        || (recipe.author as any)?.avatarUrl;
+      if (avatar) return avatar;
     }
     
     // Fallback to ui-avatars.com with age group color
@@ -103,6 +122,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
   const authorAvatar = getAuthorAvatar();
   const ageGroupColor = getAgeGroupColor(recipe.age_group, recipe.age_group_color);
+  const ageGroupTextColor = getAgeGroupTextColor(recipe.age_group);
   const shadowColor = getAgeGroupShadow(recipe.age_group);
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
@@ -148,9 +168,10 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         
         {/* Age Group Badge - Top Left with asymmetric corners */}
         <div 
-          className="absolute top-3 left-3 px-3 py-1.5 text-white text-xs font-bold shadow-lg"
+          className="absolute top-3 left-3 px-3 py-1.5 text-xs font-bold shadow-lg"
           style={{
             backgroundColor: ageGroupColor,
+            color: ageGroupTextColor,
             borderRadius: BORDER_RADIUS.BADGE_ASYMMETRIC,
           }}
         >
