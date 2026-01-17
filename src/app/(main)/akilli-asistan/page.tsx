@@ -233,9 +233,9 @@ export default function ToolsPage() {
               >
                 <div className="p-6">
                   {/* Sponsor Badge */}
-                  {tool.is_sponsored && tool.sponsor_name && (
+                  {tool.is_sponsored && (
                     <div className="absolute top-3 right-3 bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs font-semibold">
-                      {tool.sponsor_name} Katkılarıyla
+                      {tool.sponsor_name ? `${tool.sponsor_name} Katkılarıyla` : 'Sponsorlu'}
                     </div>
                   )}
                   
