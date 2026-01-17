@@ -227,7 +227,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                 </div>
 
                 {/* RIGHT: SIDEBAR (Category Specific) */}
-                <aside className="hidden lg:block space-y-8 sticky top-24" style={{ width: '300px' }}>
+                <aside className="hidden lg:block space-y-8 sticky top-24 w-[300px]">
                     
                     {/* Expert Widget */}
                     {randomExpert ? (
