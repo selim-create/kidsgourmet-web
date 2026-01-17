@@ -32,6 +32,19 @@ export default function QuestionCard({ item }: QuestionCardProps) {
   const authorInitials = item.meta?.author_initials || getInitials(authorName);
   const answerCount = item.meta?.answer_count || 0;
 
+  // Generate excerpt from content if excerpt is missing
+  const getExcerpt = () => {
+    if (item.excerpt) return item.excerpt;
+    if (item.content) {
+      // Strip HTML tags and get first 150 characters
+      const plainText = item.content.replace(/<[^>]*>/g, '');
+      return plainText.length > 150 ? plainText.substring(0, 150) + '...' : plainText;
+    }
+    return '';
+  };
+
+  const displayExcerpt = getExcerpt();
+
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -77,9 +90,9 @@ export default function QuestionCard({ item }: QuestionCardProps) {
         </h3>
 
         {/* Question Excerpt/Summary - Made more prominent */}
-        {item.excerpt && (
+        {displayExcerpt && (
           <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed bg-white/50 p-3 rounded-lg border border-purple-50">
-            {decodeEntities(item.excerpt)}
+            {decodeEntities(displayExcerpt)}
           </p>
         )}
 

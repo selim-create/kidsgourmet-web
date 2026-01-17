@@ -73,16 +73,10 @@ export default function RecipeCard({ item }: RecipeCardProps) {
               </span>
             )}
           </div>
-          {/* Meal type moved to right corner */}
+          {/* Meal type on the right - only show if meal_type exists */}
           {item.meta?.meal_type && (
             <span className="text-xs font-medium text-gray-500 bg-gray-50 px-2 py-1 rounded-lg">
               <i className="fa-solid fa-utensils mr-1"></i>{decodeEntities(item.meta.meal_type)}
-            </span>
-          )}
-          {/* Only show rating if both rating and rating_count exist and are > 0 */}
-          {item.meta?.rating && item.meta?.rating_count && item.meta.rating_count > 0 && (
-            <span className="text-xs text-gray-400">
-              {item.meta.rating} <i className="fa-solid fa-star text-yellow-400"></i> ({item.meta.rating_count})
             </span>
           )}
         </div>
