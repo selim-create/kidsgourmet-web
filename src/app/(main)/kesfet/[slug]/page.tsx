@@ -402,14 +402,25 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     `;
     
     // Find the 2nd closing </p> tag and inject after it
+    // If there are fewer than 2 paragraphs, inject after the 1st
     let pCount = 0;
+    let injected = false;
     processedContent = processedContent.replace(/<\/p>/g, (match) => {
       pCount++;
-      if (pCount === 2) {
+      if (pCount === 2 && !injected) {
+        injected = true;
         return match + sponsorCard;
       }
       return match;
     });
+    
+    // Fallback: if we didn't inject (less than 2 paragraphs), inject after first paragraph
+    if (!injected && pCount > 0) {
+      pCount = 0;
+      processedContent = processedContent.replace(/<\/p>/, (match) => {
+        return match + sponsorCard;
+      });
+    }
   }
 
   return (
