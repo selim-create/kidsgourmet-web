@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { EditButton } from '@/components/ui/EditButton';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import IngredientSafetyAlert from '@/components/features/safety/IngredientSafetyAlert';
+import RecipeCard from '@/components/ui/RecipeCard';
 
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -128,18 +129,18 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
           url={typeof window !== 'undefined' ? window.location.href : ''}
         />
 
-        {/* BREADCRUMB - pt-20 eklendi (header yüksekliği için) */}
-        <div className="bg-white border-b border-gray-100 pt-20">
+        {/* BREADCRUMB */}
+        <div className="bg-white border-b border-gray-100 pt-[80px]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
                         <li><Link href="/" className="hover:text-green-500"><i className="fa-solid fa-house"></i></Link></li>
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                        <li><Link href="/malzeme-rehberi" className="hover:text-green-500">Malzeme Rehberi</Link></li>
+                        <li><Link href="/beslenme-rehberi" className="hover:text-green-500">Beslenme Rehberi</Link></li>
                         {ingredient.category && (
                           <>
                             <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
-                            <li><Link href={`/malzeme-rehberi?kategori=${ingredient.category}`} className="hover:text-green-500">{ingredient.category}</Link></li>
+                            <li><Link href={`/beslenme-rehberi?kategori=${ingredient.category}`} className="hover:text-green-500">{ingredient.category}</Link></li>
                           </>
                         )}
                         <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
@@ -149,8 +150,8 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
             </div>
         </div>
 
-        {/* MAIN CONTAINER */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-8">
+        {/* MAIN CONTAINER - Padding azaltıldı */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8">
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
                 
@@ -422,47 +423,19 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 ? (
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                               {ingredient.related_recipes.slice(0, 6).map((recipe) => (
-                                <Link 
-                                  key={recipe.id} 
-                                  href={`/tarifler/${recipe.slug}`} 
-                                  className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden"
-                                >
-                                    <div className="aspect-[4/3] overflow-hidden relative">
-                                        <img 
-                                          src={recipe.image || 'https://placehold.co/400x300/FFF3E0/FF8A65?text=Tarif'} 
-                                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                                          alt={recipe.title}
-                                        />
-                                        {/* Age Group Badge */}
-                                        <span className="absolute top-3 left-3 bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg">
-                                          {decodeHTMLEntities(recipe.age_group)}
-                                        </span>
-                                        {/* Prep Time Badge */}
-                                        <span className="absolute top-3 right-3 bg-white/90 backdrop-blur text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg">
-                                          <i className="fa-regular fa-clock mr-1"></i> {recipe.prep_time}
-                                        </span>
-                                    </div>
-                                    <div className="p-4">
-                                        <h3 className="font-bold text-slate-800 group-hover:text-green-500 transition-colors mb-2">
-                                          {decodeHTMLEntities(recipe.title)}
-                                        </h3>
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            {/* Meal Type */}
-                                            {recipe.meal_type && (
-                                              <span className="text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded">
-                                                <i className="fa-solid fa-utensils mr-1"></i>
-                                                {decodeHTMLEntities(recipe.meal_type)}
-                                              </span>
-                                            )}
-                                            {/* Diet Types */}
-                                            {recipe.diet_types && recipe.diet_types.length > 0 && (
-                                              <span className="text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded">
-                                                {decodeHTMLEntities(recipe.diet_types[0])}
-                                              </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </Link>
+                                <RecipeCard 
+                                  key={recipe.id}
+                                  recipe={{
+                                    id: recipe.id,
+                                    slug: recipe.slug,
+                                    title: recipe.title,
+                                    image: recipe.image || '',
+                                    prep_time: recipe.prep_time || '',
+                                    age_group: recipe.age_group || '',
+                                    meal_type: recipe.meal_type,
+                                    diet_types: recipe.diet_types,
+                                  }}
+                                />
                               ))}
                           </div>
                         ) : (
@@ -491,14 +464,21 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                     <div className="sticky top-24 space-y-6">
                         
                         {/* IMAGE CARD - Desktop only */}
-                        <div className="rounded-3xl overflow-hidden shadow-lg">
+                        <div className="rounded-3xl overflow-hidden shadow-lg relative group">
                             <img 
                               src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} 
                               alt={ingredient.name}
                               className="w-full h-auto object-cover"
                             />
+                            {/* Edit Button - Hover'da görünür */}
+                            <EditButton 
+                              contentType="ingredient" 
+                              contentId={ingredient.id}
+                              variant="icon"
+                              className="!opacity-0 group-hover:!opacity-100 !top-4 !right-4"
+                            />
                             {ingredient.image_credit && (
-                              <p className="text-xs text-gray-400 text-center mt-2">
+                              <p className="text-xs text-gray-400 text-center py-2 bg-gray-50">
                                 📷 {ingredient.image_source === 'dall-e-3' ? 'AI Generated' : ingredient.image_credit}
                               </p>
                             )}

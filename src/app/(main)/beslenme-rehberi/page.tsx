@@ -201,11 +201,21 @@ export default function IngredientsGuidePage() {
   };
 
   // Mevsim badge bilgisi
-  const getSeasonBadge = (season: string | undefined) => {
+  const getSeasonBadge = (season: string | string[] | undefined) => {
     if (!season) return null;
-    // Birden fazla mevsim varsa ilkini al
-    const seasonKey = season.split(',')[0].trim();
-    return SEASON_CONFIG[seasonKey] || SEASON_CONFIG['Tüm Yıl'];
+    
+    // Eğer season bir array ise, ilk elemanı al
+    let seasonStr = '';
+    if (Array.isArray(season)) {
+      seasonStr = season[0] || '';
+    } else if (typeof season === 'string') {
+      // Birden fazla mevsim varsa ilkini al
+      seasonStr = season.split(',')[0].trim();
+    } else {
+      return null;
+    }
+    
+    return SEASON_CONFIG[seasonStr] || SEASON_CONFIG['Tüm Yıl'];
   };
 
   // Filtreleme logic
@@ -332,7 +342,14 @@ export default function IngredientsGuidePage() {
                             {seasonBadge && (
                               <div className={`absolute bottom-2 right-2 ${seasonBadge.bg} backdrop-blur px-2 py-1 rounded-lg text-xs font-bold ${seasonBadge.text} shadow-sm flex items-center gap-1`}>
                                 <i className={`fa-solid ${seasonBadge.icon}`}></i>
-                                {ingredient.season?.split(',')[0].trim()}
+                                {(() => {
+                                  const displaySeason = Array.isArray(ingredient.season) 
+                                    ? ingredient.season[0] 
+                                    : typeof ingredient.season === 'string' 
+                                      ? ingredient.season.split(',')[0].trim() 
+                                      : '';
+                                  return displaySeason;
+                                })()}
                               </div>
                             )}
                             
