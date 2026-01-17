@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
+import { calculateAgeInMonths } from '@/utils/ageCalculator';
+import { 
+  checkIngredientAgeRestriction, 
+  getAlertUIConfig, 
+  type AlertSeverity 
+} from '@/utils/safetyMapping';
+import { decodeEntities } from '@/utils/textHelpers';
 
 interface IngredientSafetyAlertProps {
   ingredientSlug: string;
@@ -25,6 +32,7 @@ export default function IngredientSafetyAlert({
   const { activeChild } = useActiveChild();
   const [safetyStatus, setSafetyStatus] = useState<'loading' | 'safe' | 'age-warning' | 'allergy-warning' | 'no-child'>('no-child');
   const [alertMessage, setAlertMessage] = useState<string>('');
+  const [severity, setSeverity] = useState<AlertSeverity>('info');
 
   useEffect(() => {
     if (!activeChild?.id) {
@@ -36,10 +44,7 @@ export default function IngredientSafetyAlert({
     let ageInMonths = 24; // Varsayılan
     if (activeChild.birth_date) {
       const birthDate = new Date(activeChild.birth_date);
-      const now = new Date();
-      ageInMonths = Math.floor(
-        (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-      );
+      ageInMonths = calculateAgeInMonths(birthDate);
     }
 
     // 1. Alerji Kontrolü
@@ -54,6 +59,7 @@ export default function IngredientSafetyAlert({
         a.includes(allergenType) || allergenType.includes(a)
       )) {
         setSafetyStatus('allergy-warning');
+        setSeverity('critical');
         setAlertMessage(`${activeChild.name} bu malzemeye (${ingredientData.allergen_info.allergen_type}) alerjik!`);
         return;
       }
@@ -77,6 +83,7 @@ export default function IngredientSafetyAlert({
       if (childAllergies.includes(allergen) || childAllergies.some(a => keywords.includes(a))) {
         if (keywords.some(k => slugLower.includes(k))) {
           setSafetyStatus('allergy-warning');
+          setSeverity('critical');
           setAlertMessage(`${activeChild.name} bu malzemeye alerjik olabilir!`);
           return;
         }
@@ -85,7 +92,11 @@ export default function IngredientSafetyAlert({
 
     // 2. Yaş Kontrolü - API'den gelen min_age_months kullan
     if (ingredientData?.min_age_months && ageInMonths < ingredientData.min_age_months) {
+      const ageDiff = ingredientData.min_age_months - ageInMonths;
+      const ageSeverity: AlertSeverity = ageDiff >= 12 ? 'critical' : 'warning';
+      
       setSafetyStatus('age-warning');
+      setSeverity(ageSeverity);
       setAlertMessage(
         `Bu malzeme ${ingredientData.min_age_months} aydan küçük bebekler için uygun değildir. ` +
         `${activeChild.name} şu an ${ageInMonths} aylık.`
@@ -99,7 +110,11 @@ export default function IngredientSafetyAlert({
       const startAgeMonths = startAgeMatch ? parseInt(startAgeMatch[0], 10) : 0;
       
       if (startAgeMonths > 0 && ageInMonths < startAgeMonths) {
+        const ageDiff = startAgeMonths - ageInMonths;
+        const ageSeverity: AlertSeverity = ageDiff >= 12 ? 'critical' : 'warning';
+        
         setSafetyStatus('age-warning');
+        setSeverity(ageSeverity);
         setAlertMessage(
           `Bu malzeme ${startAgeMonths}+ ay için önerilmektedir. ` +
           `${activeChild.name} şu an ${ageInMonths} aylık.`
@@ -108,39 +123,35 @@ export default function IngredientSafetyAlert({
       }
     }
 
-    // 3. Hardcoded yaş kısıtlamaları (API'de min_age yoksa fallback)
-    const ageRestrictions: Record<string, { minAge: number; message: string }> = {
-      'bal': { minAge: 12, message: 'Bal 12 aydan küçük bebeklere verilmemelidir (botulizm riski).' },
-      'honey': { minAge: 12, message: 'Bal 12 aydan küçük bebeklere verilmemelidir (botulizm riski).' },
-      'tuz': { minAge: 12, message: '12 aydan küçük bebeklere tuz eklenmemelidir.' },
-      'seker': { minAge: 24, message: '2 yaşından küçük çocuklara şeker eklenmemelidir.' },
-      'sugar': { minAge: 24, message: '2 yaşından küçük çocuklara şeker eklenmemelidir.' },
-      'findik': { minAge: 48, message: 'Tam fındık 4 yaşından küçük çocuklara boğulma riski oluşturur.' },
-      'ceviz': { minAge: 48, message: 'Tam ceviz 4 yaşından küçük çocuklara boğulma riski oluşturur.' },
-      'badem': { minAge: 48, message: 'Tam badem 4 yaşından küçük çocuklara boğulma riski oluşturur.' },
-      'fistik': { minAge: 48, message: 'Tam fıstık 4 yaşından küçük çocuklara boğulma riski oluşturur.' },
-    };
-
-    for (const [ingredient, rule] of Object.entries(ageRestrictions)) {
-      if (slugLower.includes(ingredient) && ageInMonths < rule.minAge) {
-        setSafetyStatus('age-warning');
-        setAlertMessage(`${rule.message} ${activeChild.name} şu an ${ageInMonths} aylık.`);
-        return;
-      }
+    // 3. Centralized ingredient age restrictions
+    const restriction = checkIngredientAgeRestriction(slugLower, ageInMonths);
+    if (restriction && restriction.restricted) {
+      setSafetyStatus('age-warning');
+      setSeverity(restriction.severity);
+      setAlertMessage(`${restriction.message} ${activeChild.name} şu an ${ageInMonths} aylık.`);
+      return;
     }
 
     // Tüm kontrollerden geçti - güvenli
     setSafetyStatus('safe');
+    setSeverity('success');
     setAlertMessage('');
   }, [activeChild, ingredientSlug, ingredientData]);
 
+  // Decode alert message
+  const decodedMessage = decodeEntities(alertMessage);
+
+  // Get UI config based on severity
+  const uiConfig = getAlertUIConfig(severity);
+
   // Çocuk profili seçilmemiş
   if (safetyStatus === 'no-child') {
+    const infoConfig = getAlertUIConfig('info');
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+      <div className={`${infoConfig.bgColor} border ${infoConfig.borderColor.replace('border-', 'border-')} rounded-xl p-4 mb-6`}>
         <div className="flex items-center gap-3">
-          <i className="fa-solid fa-info-circle text-blue-500 text-xl"></i>
-          <p className="text-sm text-blue-700">
+          <i className={`fa-solid fa-info-circle ${infoConfig.iconColor} text-xl`}></i>
+          <p className={`text-sm ${infoConfig.textColor}`}>
             Kişiselleştirilmiş güvenlik kontrolü için üst menüden çocuk profilinizi seçin.
           </p>
         </div>
@@ -151,14 +162,14 @@ export default function IngredientSafetyAlert({
   // Güvenli
   if (safetyStatus === 'safe') {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+      <div className={`${uiConfig.bgColor} border ${uiConfig.borderColor.replace('border-', 'border-')} rounded-xl p-4 mb-6`}>
         <div className="flex items-center gap-3">
-          <i className="fa-solid fa-circle-check text-green-500 text-xl"></i>
+          <i className={`fa-solid fa-circle-check ${uiConfig.iconColor} text-xl`}></i>
           <div>
-            <p className="font-medium text-green-800">
+            <p className={`font-medium ${uiConfig.textColor}`}>
               {activeChild?.name} için Uygun Görünüyor
             </p>
-            <p className="text-sm text-green-600">
+            <p className={`text-sm ${uiConfig.textColor}`}>
               Bu malzeme çocuğunuzun yaşı ve alerjileri için güvenli görünüyor.
             </p>
           </div>
@@ -170,12 +181,12 @@ export default function IngredientSafetyAlert({
   // Yaş uyarısı
   if (safetyStatus === 'age-warning') {
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+      <div className={`${uiConfig.bgColor} border ${uiConfig.borderColor.replace('border-', 'border-')} rounded-xl p-4 mb-6`}>
         <div className="flex items-start gap-3">
-          <i className="fa-solid fa-triangle-exclamation text-amber-500 text-xl mt-0.5"></i>
+          <i className={`fa-solid fa-triangle-exclamation ${uiConfig.iconColor} text-xl mt-0.5`}></i>
           <div>
-            <p className="font-bold text-amber-800">Yaş Uyarısı</p>
-            <p className="text-sm text-amber-700 mt-1">{alertMessage}</p>
+            <p className={`font-bold ${uiConfig.textColor}`}>Yaş Uyarısı</p>
+            <p className={`text-sm ${uiConfig.textColor} mt-1`}>{decodedMessage}</p>
           </div>
         </div>
       </div>
@@ -185,12 +196,12 @@ export default function IngredientSafetyAlert({
   // Alerji uyarısı
   if (safetyStatus === 'allergy-warning') {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+      <div className={`${uiConfig.bgColor} border ${uiConfig.borderColor.replace('border-', 'border-')} rounded-xl p-4 mb-6`}>
         <div className="flex items-start gap-3">
-          <i className="fa-solid fa-circle-xmark text-red-500 text-xl mt-0.5"></i>
+          <i className={`fa-solid fa-circle-xmark ${uiConfig.iconColor} text-xl mt-0.5`}></i>
           <div>
-            <p className="font-bold text-red-800">Alerji Uyarısı!</p>
-            <p className="text-sm text-red-700 mt-1">{alertMessage}</p>
+            <p className={`font-bold ${uiConfig.textColor}`}>Alerji Uyarısı!</p>
+            <p className={`text-sm ${uiConfig.textColor} mt-1`}>{decodedMessage}</p>
           </div>
         </div>
       </div>

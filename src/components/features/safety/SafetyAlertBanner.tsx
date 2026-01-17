@@ -2,6 +2,8 @@
 
 import { useSafetyCheck } from '@/hooks/useSafetyCheck';
 import { SafetyAlert } from '@/services/safety-service';
+import { getAlertUIConfig } from '@/utils/safetyMapping';
+import { decodeEntities } from '@/utils/textHelpers';
 import AlternativeRecipeList from './AlternativeRecipeList';
 
 interface SafetyAlertBannerProps {
@@ -9,59 +11,25 @@ interface SafetyAlertBannerProps {
   childId?: string;
 }
 
-const getSeverityStyles = (severity: 'critical' | 'warning' | 'info') => {
-  switch (severity) {
-    case 'critical':
-      return 'bg-red-50 border-l-4 border-red-500';
-    case 'warning':
-      return 'bg-orange-50 border-l-4 border-orange-500';
-    case 'info':
-      return 'bg-blue-50 border-l-4 border-blue-500';
-    default:
-      return 'bg-gray-50 border-l-4 border-gray-500';
-  }
-};
-
-const getSeverityIcon = (severity: 'critical' | 'warning' | 'info') => {
-  switch (severity) {
-    case 'critical':
-      return '🛑';
-    case 'warning':
-      return '⚠️';
-    case 'info':
-      return 'ℹ️';
-    default:
-      return '📌';
-  }
-};
-
-const getSeverityTextColor = (severity: 'critical' | 'warning' | 'info') => {
-  switch (severity) {
-    case 'critical':
-      return 'text-red-800';
-    case 'warning':
-      return 'text-orange-800';
-    case 'info':
-      return 'text-blue-800';
-    default:
-      return 'text-gray-800';
-  }
-};
-
 function AlertItem({ alert }: { alert: SafetyAlert }) {
+  const uiConfig = getAlertUIConfig(alert.severity);
+  const decodedMessage = decodeEntities(alert.message);
+  const decodedIngredient = decodeEntities(alert.ingredient);
+  const decodedAlternative = decodeEntities(alert.alternative);
+  
   return (
     <div className="mb-3 last:mb-0">
-      <p className={`text-sm font-semibold ${getSeverityTextColor(alert.severity)} mb-1`}>
-        {getSeverityIcon(alert.severity)} {alert.message}
+      <p className={`text-sm font-semibold ${uiConfig.textColor} mb-1`}>
+        {uiConfig.icon} {decodedMessage}
       </p>
-      {alert.ingredient && (
+      {decodedIngredient && (
         <p className="text-xs text-gray-700 ml-5">
-          <strong>Malzeme:</strong> {alert.ingredient}
+          <strong>Malzeme:</strong> {decodedIngredient}
         </p>
       )}
-      {alert.alternative && (
+      {decodedAlternative && (
         <p className="text-xs text-gray-700 ml-5">
-          <strong>Alternatif:</strong> {alert.alternative}
+          <strong>Alternatif:</strong> {decodedAlternative}
         </p>
       )}
     </div>
@@ -69,7 +37,7 @@ function AlertItem({ alert }: { alert: SafetyAlert }) {
 }
 
 export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBannerProps) {
-  const { safetyResult, isChecking, error, isApiError } = useSafetyCheck(recipeId, childId);
+  const { safetyResult, isChecking, error, errorInfo, isApiError, recheckSafety, canRetry } = useSafetyCheck(recipeId, childId);
   
   // Don't show if no child profile
   if (!childId) return null;
@@ -88,16 +56,34 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
 
   // API hatası durumunda bilgilendirme göster (güvenli varsaymak yerine)
   if (error || isApiError) {
+    const errorMessage = error || 'Bu tarifin çocuğunuz için uygunluğunu şu an kontrol edemiyoruz.';
+    
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
         <div className="flex items-start gap-3">
           <i className="fa-solid fa-info-circle text-blue-500 text-xl mt-0.5"></i>
-          <div>
+          <div className="flex-1">
             <p className="font-medium text-blue-800">Güvenlik Kontrolü Yapılamadı</p>
             <p className="text-sm text-blue-600 mt-1">
-              Bu tarifin çocuğunuz için uygunluğunu şu an kontrol edemiyoruz. 
-              Lütfen malzemeleri kendiniz kontrol edin.
+              {decodeEntities(errorMessage)}
             </p>
+            {errorInfo?.type && (
+              <p className="text-xs text-blue-500 mt-1">
+                {errorInfo.type === 'network' && '🌐 İnternet bağlantısı sorunu'}
+                {errorInfo.type === 'timeout' && '⏱️ Zaman aşımı'}
+                {errorInfo.type === 'cors' && '🔒 Güvenlik hatası'}
+                {errorInfo.type === 'server' && '🖥️ Sunucu hatası'}
+              </p>
+            )}
+            {canRetry && (
+              <button
+                onClick={recheckSafety}
+                className="mt-3 px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                <i className="fa-solid fa-rotate-right mr-2"></i>
+                Tekrar Dene
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -108,14 +94,24 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
   const ageWarnings = safetyResult?.alerts?.filter(a => a.type === 'age') || [];
   
   if (ageWarnings.length > 0) {
+    const highestSeverity = ageWarnings.reduce((max, alert) => {
+      if (alert.severity === 'critical') return 'critical';
+      if (alert.severity === 'warning' && max !== 'critical') return 'warning';
+      return max;
+    }, 'info' as 'critical' | 'warning' | 'info');
+    
+    const uiConfig = getAlertUIConfig(highestSeverity);
+    
     return (
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+      <div className={`${uiConfig.bgColor} border ${uiConfig.borderColor.replace('border-', 'border-')} rounded-xl p-4 mb-6`}>
         <div className="flex items-start gap-3">
-          <i className="fa-solid fa-clock text-amber-500 text-xl mt-0.5"></i>
+          <i className={`fa-solid fa-clock ${uiConfig.iconColor} text-xl mt-0.5`}></i>
           <div>
-            <p className="font-medium text-amber-800">Yaş Grubu Uyarısı</p>
-            {ageWarnings.map((alert) => (
-              <p key={`${alert.type}-${alert.message}`} className="text-sm text-amber-600 mt-1">{alert.message}</p>
+            <p className={`font-medium ${uiConfig.textColor}`}>Yaş Grubu Uyarısı</p>
+            {ageWarnings.map((alert, idx) => (
+              <p key={`${alert.type}-${idx}`} className={`text-sm ${uiConfig.textColor} mt-1`}>
+                {decodeEntities(alert.message)}
+              </p>
             ))}
           </div>
         </div>
@@ -125,13 +121,15 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
   
   // Show green success message if recipe is safe
   if (!safetyResult || safetyResult.is_safe) {
+    const successConfig = getAlertUIConfig('success');
+    
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6 animate-fade-in">
+      <div className={`${successConfig.bgColor} border ${successConfig.borderColor.replace('border-', 'border-')} rounded-xl p-4 mb-6 animate-fade-in`}>
         <div className="flex items-center gap-3">
-          <i className="fa-solid fa-shield-check text-green-500 text-xl"></i>
+          <i className={`fa-solid fa-shield-check ${successConfig.iconColor} text-xl`}></i>
           <div>
-            <p className="font-medium text-green-800">Güvenlik Kontrolü Tamamlandı</p>
-            <p className="text-sm text-green-600">Bu tarif çocuğunuz için güvenli görünüyor.</p>
+            <p className={`font-medium ${successConfig.textColor}`}>Güvenlik Kontrolü Tamamlandı</p>
+            <p className={`text-sm ${successConfig.textColor}`}>Bu tarif çocuğunuz için güvenli görünüyor.</p>
           </div>
         </div>
       </div>
@@ -148,11 +146,13 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
     return max;
   }, 'info' as 'critical' | 'warning' | 'info');
   
+  const uiConfig = getAlertUIConfig(highestSeverity);
+  
   return (
-    <div className={`p-4 rounded-lg mb-6 ${getSeverityStyles(highestSeverity)}`}>
+    <div className={`p-4 rounded-lg mb-6 ${uiConfig.bgColor} border-l-4 ${uiConfig.borderColor}`}>
       <div className="flex items-start">
         <div className="flex-1">
-          <h3 className={`text-sm font-bold ${getSeverityTextColor(highestSeverity)} mb-3`}>
+          <h3 className={`text-sm font-bold ${uiConfig.textColor} mb-3`}>
             Güvenlik Uyarıları
           </h3>
           
@@ -162,7 +162,7 @@ export default function SafetyAlertBanner({ recipeId, childId }: SafetyAlertBann
           
           {safetyResult.alternatives && safetyResult.alternatives.length > 0 && (
             <div className="mt-4 pt-4 border-t border-gray-300">
-              <p className={`font-bold text-sm ${getSeverityTextColor(highestSeverity)} mb-3`}>
+              <p className={`font-bold text-sm ${uiConfig.textColor} mb-3`}>
                 Güvenli Alternatifler:
               </p>
               <AlternativeRecipeList recipes={safetyResult.alternatives} />
