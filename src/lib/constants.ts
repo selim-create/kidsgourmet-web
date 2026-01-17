@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
   AUTH_ME: `${KG_API_NAMESPACE}/auth/me`,
   AUTH_GOOGLE: `${KG_API_NAMESPACE}/auth/google`,
   AUTH_FORGOT_PASSWORD: `${KG_API_NAMESPACE}/auth/forgot-password`,
+  AUTH_RESET_PASSWORD: `${KG_API_NAMESPACE}/auth/reset-password`,
   
   // User
   USER_PROFILE: `${KG_API_NAMESPACE}/user/profile`,

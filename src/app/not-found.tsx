@@ -13,7 +13,9 @@ export default function NotFound() {
             
             {/* Illustration */}
             <div className="mb-8 relative">
-                <img src="https://placehold.co/400x300/FFF3E0/FF8A65?text=Ups+Dokuldu" className="rounded-[2rem] shadow-xl transform rotate-3 border-8 border-white" alt="Dökülmüş Mama" />
+                <div className="w-64 h-64 bg-white rounded-full shadow-2xl flex items-center justify-center transform rotate-3 border-8 border-orange-100">
+                    <i className="fa-solid fa-bowl-food text-orange-500 text-8xl"></i>
+                </div>
                 <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg animate-bounce">
                     <span className="text-4xl">🤷‍♀️</span>
                 </div>
