@@ -62,7 +62,7 @@ const defaultTools: Tool[] = [
     title: 'Bu Gıda Verilir mi?',
     slug: 'bu-gida-verilir-mi',
     description: 'Tek bir besin için hızlı karar verin. Hangi yaşta, nasıl verilebilir?',
-    icon: 'fa-solid fa-check-circle',
+    icon: 'fa-solid fa-circle-check',
     tool_type: 'food_checker',
     is_active: true,
     requires_auth: false,
