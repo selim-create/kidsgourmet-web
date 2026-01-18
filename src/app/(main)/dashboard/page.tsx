@@ -100,6 +100,10 @@ const SidebarItem = ({ iconClass, label, active = false, badge, href = "#" }: {
   </Link>
 );
 
+// Constants for MealCard display
+const MEAL_COLORS = ['yellow', 'green', 'orange'] as const;
+const MEAL_ICONS = ['🌅', '🍱', '🌙'];
+
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: userLoading, refreshUser } = useUser();
@@ -124,7 +128,7 @@ export default function DashboardPage() {
     return todayPlan?.slots || [];
   }, [plan]);
 
-  // Mock data for recommended recipes
+  // Mock data for recommended recipes (as per design spec)
   const recommendedRecipes = useMemo(() => [
     { id: 1, title: "Sebzeli Mücver", image: "🥦", time: "25 dk", match: "95" },
     { id: 2, title: "Muzlu Yulaf Bar", image: "🍌", time: "15 dk", match: "88" },
@@ -505,8 +509,6 @@ export default function DashboardPage() {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           {todaysMeals.length > 0 ? (
                             todaysMeals.filter(slot => slot.recipe).slice(0, 3).map((slot, idx) => {
-                              const colors = ['yellow', 'green', 'orange'] as const;
-                              const icons = ['🌅', '🍱', '🌙'];
                               return (
                                 <MealCard
                                   key={slot.id}
@@ -514,8 +516,8 @@ export default function DashboardPage() {
                                   category={slot.slot_label}
                                   time={slot.recipe?.prep_time ? `${slot.recipe.prep_time} dk` : '25 dk'}
                                   calories="180 kcal"
-                                  icon={icons[idx % 3]}
-                                  color={colors[idx % 3]}
+                                  icon={MEAL_ICONS[idx % 3]}
+                                  color={MEAL_COLORS[idx % 3]}
                                   isDone={false}
                                   onClick={() => {}}
                                 />
@@ -991,9 +993,9 @@ export default function DashboardPage() {
                 <span className="text-[10px] font-medium">Plan</span>
             </Link>
             
-            {/* Search FAB (Floating Action Button style in navbar) */}
+            {/* Food Search FAB (Floating Action Button style in navbar) */}
             <div className="relative -top-8">
-                <Link href="/beslenme-rehberi" className="flex items-center justify-center w-14 h-14 bg-orange-500 rounded-full text-white shadow-lg shadow-orange-200 hover:scale-105 transition-transform">
+                <Link href="/beslenme-rehberi" className="flex items-center justify-center w-14 h-14 bg-orange-500 rounded-full text-white shadow-lg shadow-orange-200 hover:scale-105 transition-transform" title="Gıda Ara">
                     <i className="fa-solid fa-magnifying-glass text-2xl"></i>
                 </Link>
             </div>
