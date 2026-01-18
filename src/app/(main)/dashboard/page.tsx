@@ -124,14 +124,6 @@ export default function DashboardPage() {
     return todayPlan?.slots || [];
   }, [plan]);
 
-  // Mock data for weekly nutrition
-  const weeklyNutrition = useMemo(() => ({
-    protein: { current: 4, target: 5, label: "Protein" },
-    veggie: { current: 2, target: 5, label: "Sebze" },
-    fruit: { current: 5, target: 5, label: "Meyve" },
-    water: { current: 600, target: 800, label: "Su (ml)" }
-  }), []);
-
   // Mock data for recommended recipes
   const recommendedRecipes = useMemo(() => [
     { id: 1, title: "Sebzeli Mücver", image: "🥦", time: "25 dk", match: "95" },
@@ -605,77 +597,6 @@ export default function DashboardPage() {
                               {day.isToday && <span className="text-[8px] mt-1">●</span>}
                             </button>
                           ))}
-                      </div>
-                  </div>
-                )}
-
-                {/* 2. WEEKLY PLAN (Scrollable) */}
-                {activeChild && false && (
-                  <div>
-                      <div className="flex items-center justify-between mb-4">
-                          <h2 className="font-display font-bold text-xl text-stone-800">{activeChild?.name} için Haftalık Plan</h2>
-                          <Link href="/dashboard/haftalik-plan" className="text-sm font-bold text-orange-500 hover:underline">Tümünü Gör</Link>
-                      </div>
-
-                      {/* Days Navigation - Dynamic */}
-                      <div className="flex gap-2 overflow-x-auto pb-4 hide-scroll scrollbar-hide">
-                          {weekDays.map((day, index) => (
-                            <button 
-                              key={index}
-                              className={`flex-shrink-0 flex flex-col items-center justify-center w-14 h-16 rounded-2xl transition-all ${
-                                day.isToday 
-                                  ? 'bg-orange-500 text-white shadow-md transform scale-105' 
-                                  : 'bg-white border border-stone-100 text-stone-400 hover:border-orange-500/50 hover:text-orange-500'
-                              }`}
-                            >
-                              <span className={`text-xs font-medium ${day.isToday ? 'opacity-80' : ''}`}>
-                                {day.dayName}
-                              </span>
-                              <span className="text-lg font-bold">{day.dayNumber}</span>
-                            </button>
-                          ))}
-                      </div>
-
-                      {/* Meals Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {todaysMeals.length > 0 ? (
-                            todaysMeals.filter(slot => slot.recipe).slice(0, 3).map((slot) => (
-                              <div key={slot.id} className="bg-white p-4 rounded-3xl border border-stone-100 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer">
-                                  <div className="w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center flex-shrink-0">
-                                      <img 
-                                        src={slot.recipe?.image || 'https://placehold.co/100x100/FFF9C4/FBC02D?text=Meal'} 
-                                        className="w-12 h-12 rounded-xl object-cover" 
-                                        alt={slot.recipe?.title || 'Meal'} 
-                                      />
-                                  </div>
-                                  <div>
-                                      <span className="text-xs font-bold text-orange-500 uppercase tracking-wide">{slot.slot_label}</span>
-                                      <h4 className="font-bold text-stone-800 text-sm md:text-base">{slot.recipe?.title}</h4>
-                                      <p className="text-xs text-stone-400">
-                                        {slot.recipe?.prep_time ? `${slot.recipe.prep_time} dk • ` : ''}
-                                        {activeChild?.age_months ? `${activeChild.age_months} ay` : 'Bebek'}
-                                      </p>
-                                  </div>
-                                  <div className="ml-auto w-8 h-8 rounded-full border border-stone-200 flex items-center justify-center text-stone-300 hover:bg-green-50 hover:border-green-200 hover:text-green-500 transition-all">
-                                      <i className="fa-solid fa-check"></i>
-                                  </div>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="col-span-3 text-center py-8 bg-white rounded-3xl border border-stone-100">
-                              <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <i className="fa-solid fa-utensils text-orange-500 text-2xl"></i>
-                              </div>
-                              <p className="text-stone-600 mb-4">Bugün için plan oluşturulmamış</p>
-                              <Link 
-                                href="/dashboard/haftalik-plan"
-                                className="inline-flex items-center bg-orange-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-orange-600 transition-colors"
-                              >
-                                <i className="fa-solid fa-plus mr-2"></i>
-                                Plan Oluştur
-                              </Link>
-                            </div>
-                          )}
                       </div>
                   </div>
                 )}
