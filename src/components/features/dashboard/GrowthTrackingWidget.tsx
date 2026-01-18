@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { PercentileResult } from '@/lib/types';
+import { formatDate } from '@/utils/helpers';
 
 interface GrowthTrackingWidgetProps {
   results: PercentileResult[];
@@ -20,21 +21,6 @@ export default function GrowthTrackingWidget({ results, childId, childName }: Gr
 
   // Get the most recent result
   const latestResult = childResults[0];
-
-  // Format date
-  const formatDate = (dateStr: string): string => {
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
-      return date.toLocaleDateString('tr-TR', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-      });
-    } catch {
-      return 'Tarih bilinmiyor';
-    }
-  };
 
   // Interpret percentile with category
   const interpretPercentile = (percentile: number, category: string): string => {

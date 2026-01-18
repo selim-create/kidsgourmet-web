@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BLWTestResult } from '@/lib/types';
+import { formatDate } from '@/utils/helpers';
 
 interface BLWReadinessWidgetProps {
   results: BLWTestResult[];
@@ -20,22 +21,6 @@ export default function BLWReadinessWidget({ results, childId, childName }: BLWR
 
   // Get the most recent result
   const latestResult = childResults[0];
-
-  // Format date - Fixed timestamp parsing
-  const formatDate = (dateStr: string): string => {
-    try {
-      // Handle ISO 8601 format (e.g., "2026-01-15T12:09:12+03:00")
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
-      return date.toLocaleDateString('tr-TR', { 
-        day: 'numeric', 
-        month: 'long', 
-        year: 'numeric' 
-      });
-    } catch {
-      return 'Tarih bilinmiyor';
-    }
-  };
 
   // Get result category info based on score
   const getResultCategoryInfo = (score: number): { 

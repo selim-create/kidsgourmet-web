@@ -131,17 +131,6 @@ export default function DashboardPage() {
     return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
   }, [selectedDate]);
 
-  // Helper function: Format date with fallback for invalid dates
-  const formatDate = (dateStr: string): string => {
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
-      return date.toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
-    } catch {
-      return 'Tarih bilinmiyor';
-    }
-  };
-
   // Auth guard
   useEffect(() => {
     if (!userLoading && !isAuthenticated) {
