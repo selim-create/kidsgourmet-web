@@ -30,34 +30,34 @@ const transformWPIngredient = (wp: any): Ingredient => ({
   image: wp._embedded?.['wp:featuredmedia']?.[0]?.source_url || 
          wp.featured_media_url || 
          'https://placehold.co/400x400/AED581/ffffff?text=Malzeme',
-  category: wp.meta?._kg_category || wp.acf?.category || '',
-  start_age: wp.meta?._kg_start_age || wp.acf?.start_age || '+6 Ay',
-  benefits: wp.meta?._kg_benefits || wp.acf?.benefits || '',
-  prep_methods: wp.meta?._kg_prep_methods || wp.acf?.prep_methods || [],
-  allergy_risk: wp.meta?._kg_allergy_risk || wp.acf?.allergy_risk || 'Düşük',
-  season: wp.meta?._kg_season || wp.acf?.season || 'Tüm Yıl',
-  storage_tips: wp.meta?._kg_storage_tips || wp.acf?.storage_tips,
+  category: wp.meta?._kg_category || '',
+  start_age: wp.meta?._kg_start_age || '+6 Ay',
+  benefits: wp.meta?._kg_benefits || '',
+  prep_methods: wp.meta?._kg_prep_methods || [],
+  allergy_risk: wp.meta?._kg_allergy_risk || 'Düşük',
+  season: wp.meta?._kg_season || 'Tüm Yıl',
+  storage_tips: wp.meta?._kg_storage_tips,
   
   // 🆕 Yeni alanlar
-  prep_by_age: wp.meta?._kg_prep_by_age || wp.acf?.prep_by_age || [],
-  selection_tips: wp.meta?._kg_selection_tips || wp.acf?.selection_tips || '',
-  pro_tips: wp.meta?._kg_pro_tips || wp.acf?.pro_tips || '',
-  pairings: wp.meta?._kg_pairings || wp.acf?.pairings || [],
-  nutrition: wp.meta?._kg_nutrition || wp.acf?.nutrition || {},
+  prep_by_age: wp.meta?._kg_prep_by_age || [],
+  selection_tips: wp.meta?._kg_selection_tips || '',
+  pro_tips: wp.meta?._kg_pro_tips || '',
+  pairings: wp.meta?._kg_pairings || [],
+  nutrition: wp.meta?._kg_nutrition || {},
   
-  related_recipes: wp.meta?._kg_related_recipes || wp.acf?.related_recipes || [],
-  faq: wp.meta?._kg_faq || wp.acf?.faq || [],
+  related_recipes: wp.meta?._kg_related_recipes || [],
+  faq: wp.meta?._kg_faq || [],
   
-  ai_generated: wp.meta?._kg_ai_generated || wp.acf?.ai_generated || false,
-  image_source: wp.meta?._kg_image_source || wp.acf?.image_source || '',
+  ai_generated: wp.meta?._kg_ai_generated || false,
+  image_source: wp.meta?._kg_image_source || '',
   
   // 🆕 Backend konsolidasyonu sonrası yeni alanlar
-  allergen_info: wp.meta?._kg_allergen_info || wp.acf?.allergen_info || null,
-  allergens: wp.meta?._kg_allergens || wp.acf?.allergens || [],
-  nutrition_per_100g: wp.meta?._kg_nutrition_per_100g || wp.acf?.nutrition_per_100g || null,
-  prep_methods_list: wp.meta?._kg_prep_methods_list || wp.acf?.prep_methods_list || [],
-  image_credit: wp.meta?._kg_image_credit || wp.acf?.image_credit || '',
-  seo: wp.meta?._kg_seo || wp.acf?.seo || undefined,
+  allergen_info: wp.meta?._kg_allergen_info || null,
+  allergens: wp.meta?._kg_allergens || [],
+  nutrition_per_100g: wp.meta?._kg_nutrition_per_100g || null,
+  prep_methods_list: wp.meta?._kg_prep_methods_list || [],
+  image_credit: wp.meta?._kg_image_credit || '',
+  seo: wp.meta?._kg_seo || undefined,
 });
 
 // Transform function for API response format - GÜNCELLENMİŞ
