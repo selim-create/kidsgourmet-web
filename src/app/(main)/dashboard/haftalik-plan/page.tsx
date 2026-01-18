@@ -12,6 +12,10 @@ import { recipeService } from '@/services/recipe-service';
 import { toast } from 'sonner';
 import PersonalizedRecipePool from '@/components/features/recommendations/PersonalizedRecipePool';
 import DashboardSidebar from '@/components/layout/DashboardSidebar';
+import StatCard from '@/components/features/meal-plan/StatCard';
+import MealSlotCard from '@/components/features/meal-plan/MealSlotCard';
+import MealRowCard from '@/components/features/meal-plan/MealRowCard';
+import RecipeSuggestionCard from '@/components/features/meal-plan/RecipeSuggestionCard';
 
 // Constants
 const SEARCH_DEBOUNCE_MS = 300;
@@ -175,172 +179,7 @@ export default function WeeklyPlanPage() {
     }
   };
 
-  // Slot kartı bileşeni
-  const SlotCard = ({ slot }: { slot: MealSlot }) => {
-    const colors = SLOT_COLORS[slot.slot_type] || SLOT_COLORS.breakfast;
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    if (slot.status === 'skipped') {
-      return (
-        <div className={`${colors.bg} p-3 rounded-xl border border-gray-200 opacity-60`}>
-          <div className="flex items-start justify-between mb-2">
-            <span className={`text-[10px] font-bold ${colors.text} ${colors.label} px-2 py-0.5 rounded`}>
-              {slot.slot_label}
-            </span>
-            <button 
-              onClick={() => skipSlot(slot.id, 'other')}
-              className="text-gray-400 hover:text-orange-500 text-xs"
-            >
-              <i className="fa-solid fa-rotate-left"></i>
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 italic">
-            {slot.skip_reason === 'eating_out' ? 'Dışarıda yiyoruz' : 
-             slot.skip_reason === 'ready_meal' ? 'Hazır mama' : 
-             slot.skip_reason === 'family_meal' ? 'Aile yemeği' : 'Atlandı'}
-          </p>
-        </div>
-      );
-    }
-
-    if (slot.status === 'empty' || !slot.recipe) {
-      return (
-        <button 
-          onClick={() => setSelectedSlotId(slot.id)}
-          className={`border-2 border-dashed rounded-xl p-3 flex items-center justify-center transition-all h-20 w-full ${
-            selectedSlotId === slot.id 
-              ? 'border-orange-500 bg-orange-50 text-orange-500' 
-              : 'border-gray-200 text-gray-400 hover:border-orange-500 hover:text-orange-500 hover:bg-orange-50'
-          }`}
-        >
-          <i className="fa-solid fa-plus mr-1"></i>
-          <span className="text-xs font-bold">{slot.slot_label}</span>
-        </button>
-      );
-    }
-
-    return (
-      <div className="bg-white p-3 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative">
-        <div className="flex items-start justify-between mb-2">
-          <span className={`text-[10px] font-bold ${colors.text} ${colors.label} px-2 py-0.5 rounded`}>
-            {slot.slot_label}
-          </span>
-          
-          {/* Menü Butonu - Her zaman görünür */}
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsMenuOpen(!isMenuOpen);
-            }}
-            className="text-gray-400 hover:text-orange-500 p-1 -mr-1"
-          >
-            <i className="fa-solid fa-ellipsis-vertical"></i>
-          </button>
-          
-          {/* Dropdown Menü */}
-          {isMenuOpen && (
-            <>
-              {/* Backdrop */}
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setIsMenuOpen(false)}
-              />
-              <div className="absolute right-0 top-8 bg-white rounded-lg shadow-xl border border-gray-100 p-1 z-50 min-w-[160px]">
-                <button
-                  onClick={() => {
-                    refreshSlot(slot.id);
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center gap-2"
-                >
-                  <i className="fa-solid fa-rotate text-blue-500"></i> Değiştir
-                </button>
-                <button
-                  onClick={() => {
-                    skipSlot(slot.id, 'eating_out');
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center gap-2"
-                >
-                  <i className="fa-solid fa-utensils text-orange-500"></i> Dışarıdayız
-                </button>
-                <button
-                  onClick={() => {
-                    skipSlot(slot.id, 'ready_meal');
-                    setIsMenuOpen(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 rounded flex items-center gap-2"
-                >
-                  <i className="fa-solid fa-jar text-purple-500"></i> Hazır Mama
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-        
-        {/* Tarif Bilgisi - Larger image and better display */}
-        <Link href={`/tarifler/${slot.recipe.slug}`}>
-          <div className="flex items-center gap-2 mb-2">
-            <img 
-              src={slot.recipe.image || 'https://placehold.co/100x100/FFF3E0/FF8A65?text=Tarif'} 
-              className="w-16 h-16 rounded-xl object-cover" 
-              alt={slot.recipe.title} 
-            />
-            <p className="text-sm font-bold text-slate-700 line-clamp-2 flex-1">{slot.recipe.title}</p>
-          </div>
-          <p className="text-[10px] text-gray-400 flex items-center gap-1">
-            <i className="fa-regular fa-clock"></i> {slot.recipe.prep_time}
-          </p>
-        </Link>
-      </div>
-    );
-  };
-
-  // RecipePoolCard bileşeni (Sidebar için mini kart)
-  interface RecipePoolCardProps {
-    recipe: Recipe | RecipeCardLite;
-    onSelect: () => void;
-    isSelectable: boolean;
-  }
-
-  const RecipePoolCard = ({ recipe, onSelect, isSelectable }: RecipePoolCardProps) => {
-    // Type guard to check if it's a full Recipe
-    const isFullRecipe = (r: RecipePoolCardProps['recipe']): r is Recipe => {
-      return 'slug' in r && 'content' in r;
-    };
-    
-    const image = isFullRecipe(recipe) ? recipe.image : (recipe.image || PLACEHOLDER_RECIPE_IMAGE);
-    const prepTime = isFullRecipe(recipe) ? recipe.prep_time : recipe.prep_time;
-
-    return (
-      <div 
-        onClick={isSelectable ? onSelect : undefined}
-        className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
-          isSelectable 
-            ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300' 
-            : 'border-gray-100 bg-gray-50 opacity-60'
-        }`}
-      >
-        <img 
-          src={image} 
-          alt={recipe.title}
-          className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-        />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-slate-700 line-clamp-2">{recipe.title}</p>
-          {prepTime && (
-            <p className="text-[10px] text-gray-400 mt-0.5">
-              <i className="fa-regular fa-clock mr-1"></i>
-              {prepTime}
-            </p>
-          )}
-        </div>
-        {isSelectable && (
-          <i className="fa-solid fa-plus text-orange-500 text-sm flex-shrink-0"></i>
-        )}
-      </div>
-    );
-  };
 
   // Auth check
   if (userLoading) {
@@ -360,7 +199,7 @@ export default function WeeklyPlanPage() {
         {/* Hero Section */}
         <section className="py-16 px-4 text-center max-w-4xl mx-auto">
           <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="fa-solid fa-calendar-days text-orange-500 text-3xl"></i>
+            <i className="fa-solid fa-calendar text-orange-500 text-4xl"></i>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
             Bebeğiniz İçin Kişiselleştirilmiş Haftalık Beslenme Planı
@@ -614,42 +453,30 @@ export default function WeeklyPlanPage() {
 
                     {/* Weekly Stats Summary */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-green-50 p-3 rounded-xl border border-green-100 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                                <i className="fa-solid fa-leaf"></i>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-green-600 uppercase">Sebze</p>
-                                <p className="text-sm font-bold text-slate-800">{stats.vegetables_servings} Porsiyon</p>
-                            </div>
-                        </div>
-                        <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                                <i className="fa-solid fa-egg"></i>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-blue-600 uppercase">Protein</p>
-                                <p className="text-sm font-bold text-slate-800">{stats.protein_servings} Porsiyon</p>
-                            </div>
-                        </div>
-                        <div className="bg-yellow-50 p-3 rounded-xl border border-yellow-100 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
-                                <i className="fa-solid fa-wheat-awn"></i>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-yellow-600 uppercase">Tahıl</p>
-                                <p className="text-sm font-bold text-slate-800">{stats.grains_servings} Porsiyon</p>
-                            </div>
-                        </div>
-                        <div className="bg-red-50 p-3 rounded-xl border border-red-100 flex items-center gap-3">
-                            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600">
-                                <i className="fa-solid fa-triangle-exclamation"></i>
-                            </div>
-                            <div>
-                                <p className="text-[10px] font-bold text-red-600 uppercase">Alerjen</p>
-                                <p className="text-sm font-bold text-slate-800">{stats.new_allergens_introduced.length} Yeni</p>
-                            </div>
-                        </div>
+                        <StatCard 
+                          icon={<i className="fa-solid fa-leaf text-green-600"></i>}
+                          label="Sebze"
+                          value={`${stats.vegetables_servings} Porsiyon`}
+                          color="green"
+                        />
+                        <StatCard 
+                          icon={<i className="fa-solid fa-egg text-blue-600"></i>}
+                          label="Protein"
+                          value={`${stats.protein_servings} Porsiyon`}
+                          color="blue"
+                        />
+                        <StatCard 
+                          icon={<i className="fa-solid fa-wheat-awn text-yellow-600"></i>}
+                          label="Tahıl"
+                          value={`${stats.grains_servings} Porsiyon`}
+                          color="yellow"
+                        />
+                        <StatCard 
+                          icon={<i className="fa-solid fa-triangle-exclamation text-red-600"></i>}
+                          label="Alerjen"
+                          value={`${stats.new_allergens_introduced.length} Yeni`}
+                          color="red"
+                        />
                     </div>
 
                 </div>
@@ -704,7 +531,15 @@ export default function WeeklyPlanPage() {
                                     </div>
                                     
                                     {day.slots.map((slot) => (
-                                      <SlotCard key={slot.id} slot={slot} />
+                                      <MealSlotCard 
+                                        key={slot.id} 
+                                        slot={slot}
+                                        isSelected={selectedSlotId === slot.id}
+                                        onClick={() => setSelectedSlotId(slot.id)}
+                                        onRefresh={() => refreshSlot(slot.id)}
+                                        onSkip={(reason) => skipSlot(slot.id, reason)}
+                                        isCompact={true}
+                                      />
                                     ))}
                                 </div>
                               ))}
@@ -722,12 +557,17 @@ export default function WeeklyPlanPage() {
                                     <span className="text-orange-100">{new Date(day.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}</span>
                                   </div>
                                 </div>
-                                <div className="p-4">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                                    {day.slots.map((slot) => (
-                                      <SlotCard key={slot.id} slot={slot} />
-                                    ))}
-                                  </div>
+                                <div className="p-4 space-y-3">
+                                     {day.slots.map((slot) => (
+                                       <MealRowCard 
+                                         key={slot.id} 
+                                         slot={slot}
+                                         isSelected={selectedSlotId === slot.id}
+                                         onClick={() => setSelectedSlotId(slot.id)}
+                                         onRefresh={() => refreshSlot(slot.id)}
+                                         onSkip={(reason) => skipSlot(slot.id, reason)}
+                                       />
+                                     ))}
                                 </div>
                               </div>
                             ))}
@@ -788,10 +628,10 @@ export default function WeeklyPlanPage() {
                       ) : searchResults.length > 0 ? (
                         <div className="space-y-2">
                           {searchResults.map(recipe => (
-                            <RecipePoolCard 
+                            <RecipeSuggestionCard 
                               key={recipe.id} 
-                              recipe={recipe} 
-                              onSelect={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
+                              recipe={recipe}
+                              onClick={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
                               isSelectable={!!selectedSlotId}
                             />
                           ))}
@@ -828,10 +668,10 @@ export default function WeeklyPlanPage() {
                         ) : favorites?.recipes && favorites.recipes.length > 0 ? (
                           <div className="space-y-2">
                             {favorites.recipes.slice(0, 5).map(recipe => (
-                              <RecipePoolCard 
+                              <RecipeSuggestionCard 
                                 key={recipe.id} 
-                                recipe={recipe} 
-                                onSelect={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
+                                recipe={recipe}
+                                onClick={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
                                 isSelectable={!!selectedSlotId}
                               />
                             ))}
@@ -937,10 +777,10 @@ export default function WeeklyPlanPage() {
                     ) : searchResults.length > 0 ? (
                       <div className="space-y-2">
                         {searchResults.map(recipe => (
-                          <RecipePoolCard 
+                          <RecipeSuggestionCard 
                             key={recipe.id} 
-                            recipe={recipe} 
-                            onSelect={() => {
+                            recipe={recipe}
+                            onClick={() => {
                               if (selectedSlotId) {
                                 handleAddRecipeToSlot(selectedSlotId, recipe.id);
                               }
@@ -975,10 +815,10 @@ export default function WeeklyPlanPage() {
                     <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Favorilerim</h4>
                     <div className="space-y-2">
                       {favorites.recipes.slice(0, 8).map(recipe => (
-                        <RecipePoolCard 
+                        <RecipeSuggestionCard
                           key={recipe.id} 
-                          recipe={recipe} 
-                          onSelect={() => {
+                          recipe={recipe}
+                          onClick={() => {
                             if (selectedSlotId) {
                               handleAddRecipeToSlot(selectedSlotId, recipe.id);
                             }
