@@ -8,6 +8,7 @@ import { Ingredient, PrepByAge, IngredientPairing } from '@/lib/types';
 import { sanitizeHTML, decodeHTMLEntities } from '@/utils/helpers';
 import ClientHead from '@/components/seo/ClientHead';
 import { useUser } from '@/hooks/use-user';
+import { useShoppingList } from '@/hooks/use-shopping-list';
 import { toast } from 'sonner';
 import { EditButton } from '@/components/ui/EditButton';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
@@ -21,6 +22,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
   const [isFavorite, setIsFavorite] = useState(false);
   const { isAuthenticated } = useUser();
   const { activeChild } = useActiveChild();
+  const { addItems, isLoading: isAddingToList } = useShoppingList();
   const router = useRouter();
 
   useEffect(() => {
@@ -82,6 +84,32 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
     }
     setIsFavorite(!isFavorite);
     toast.success(isFavorite ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi!');
+  };
+
+  // Alışveriş listesine ekle
+  const handleAddToShoppingList = async () => {
+    if (!isAuthenticated) {
+      toast.error('Bu özelliği kullanmak için giriş yapmalısınız', {
+        action: {
+          label: 'Giriş Yap',
+          onClick: () => router.push('/login?redirect=' + encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : ''))
+        }
+      });
+      return;
+    }
+    
+    if (!ingredient) return;
+    
+    try {
+      await addItems([{
+        ingredient: ingredient.name,
+        amount: '1 adet',
+        checked: false,
+      }]);
+      toast.success(`${ingredient.name} alışveriş listesine eklendi!`);
+    } catch (error) {
+      toast.error('Eklenirken bir hata oluştu');
+    }
   };
 
   // Paylaşım fonksiyonları
@@ -215,6 +243,16 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                 >
                                   <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart mr-2`}></i>
                                   {isFavorite ? 'Kaydedildi' : 'Kaydet'}
+                                </button>
+                                
+                                {/* Alışveriş Listesine Ekle */}
+                                <button 
+                                  onClick={handleAddToShoppingList}
+                                  disabled={isAddingToList}
+                                  className="bg-orange-500 text-white font-bold py-3 px-6 rounded-xl shadow-md hover:bg-orange-600 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <i className={`fa-solid ${isAddingToList ? 'fa-spinner fa-spin' : 'fa-basket-shopping'} mr-2`}></i>
+                                  {isAddingToList ? 'Ekleniyor...' : 'Listeye Ekle'}
                                 </button>
                                 
                                 {/* Paylaşım Butonları */}
