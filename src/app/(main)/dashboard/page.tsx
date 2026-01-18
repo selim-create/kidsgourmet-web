@@ -270,8 +270,12 @@ export default function DashboardPage() {
                                             : "bg-stone-50 hover:bg-stone-100 border-stone-200 opacity-70 hover:opacity-100 text-stone-700"
                                         }`}
                                     >
-                                        <div className={`w-6 h-6 rounded-full border ${activeChild?.id === child.id ? "border-white bg-white/20" : "border-stone-300 bg-white"} flex items-center justify-center text-xs font-bold ${activeChild?.id === child.id ? "text-white" : "text-orange-500"}`}>
-                                          {child.name.charAt(0).toUpperCase()}
+                                        <div className={`w-6 h-6 rounded-full border ${activeChild?.id === child.id ? "border-white bg-white/20" : "border-stone-300 bg-white"} flex items-center justify-center text-xs font-bold ${activeChild?.id === child.id ? "text-white" : "text-orange-500"} overflow-hidden`}>
+                                          {child.avatar_url ? (
+                                            <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" />
+                                          ) : (
+                                            child.name.charAt(0).toUpperCase()
+                                          )}
                                         </div>
                                         <span className={`text-sm ${activeChild?.id === child.id ? "font-bold" : "font-medium"}`}>{child.name}</span>
                                     </button>
