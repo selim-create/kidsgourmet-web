@@ -138,6 +138,27 @@ export function formatRelativeTime(dateString: string): string {
 }
 
 /**
+ * Format ISO 8601 date string to localized Turkish date
+ * Handles formats like "2026-01-15T12:09:12+03:00"
+ * 
+ * @param dateStr - ISO 8601 date string
+ * @returns Formatted date string (e.g., "15 Ocak 2026") or "Tarih bilinmiyor" on error
+ */
+export function formatDate(dateStr: string): string {
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return 'Tarih bilinmiyor';
+    return date.toLocaleDateString('tr-TR', { 
+      day: 'numeric', 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  } catch {
+    return 'Tarih bilinmiyor';
+  }
+}
+
+/**
  * Expert role identifiers
  * Users with these roles or is_expert flag are considered experts
  */
