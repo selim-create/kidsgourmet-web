@@ -12,23 +12,44 @@ import { toast } from 'sonner';
 const guessCategory = (ingredientName: string): ShoppingCategory => {
   const name = ingredientName.toLowerCase();
   
-  // Süt Ürünleri
-  if (/süt|yoğurt|peynir|tereyağ|kaymak|kefir|lor|çökelek|labne|ayran/i.test(name)) {
+  // Süt Ürünleri keywords
+  const dairyKeywords = ['süt', 'yoğurt', 'peynir', 'tereyağ', 'kaymak', 'kefir', 'lor', 'çökelek', 'labne', 'ayran'];
+  if (dairyKeywords.some(keyword => name.includes(keyword))) {
     return 'dairy';
   }
   
-  // Et & Protein
-  if (/et|tavuk|balık|yumurta|köfte|sucuk|sosis|jambon|hindi|kuzu|dana|kıyma|biftek|pirzola|karides|somon|ton|levrek|çupra|sardalya|hamsi|uskumru|alabalık/i.test(name)) {
+  // Et & Protein keywords
+  const proteinKeywords = [
+    'et', 'tavuk', 'balık', 'yumurta', 'köfte', 'sucuk', 'sosis', 'jambon', 
+    'hindi', 'kuzu', 'dana', 'kıyma', 'biftek', 'pirzola', 'karides', 'somon', 
+    'ton', 'levrek', 'çupra', 'sardalya', 'hamsi', 'uskumru', 'alabalık'
+  ];
+  if (proteinKeywords.some(keyword => name.includes(keyword))) {
     return 'meat_protein';
   }
   
-  // Meyve & Sebze
-  if (/elma|armut|muz|portakal|mandalina|üzüm|çilek|kiraz|şeftali|kayısı|erik|karpuz|kavun|avokado|domates|salatalık|biber|patlıcan|kabak|havuç|patates|soğan|sarımsak|brokoli|karnabahar|ıspanak|marul|lahana|pırasa|kereviz|enginar|bamya|fasulye|bezelye|nane|maydanoz|dereotu|roka|semizotu|börülce|kırmızı|yeşil|turp|pancar/i.test(name)) {
+  // Meyve & Sebze keywords
+  const produceKeywords = [
+    'elma', 'armut', 'muz', 'portakal', 'mandalina', 'üzüm', 'çilek', 'kiraz', 
+    'şeftali', 'kayısı', 'erik', 'karpuz', 'kavun', 'avokado', 'domates', 
+    'salatalık', 'biber', 'patlıcan', 'kabak', 'havuç', 'patates', 'soğan', 
+    'sarımsak', 'brokoli', 'karnabahar', 'ıspanak', 'marul', 'lahana', 'pırasa', 
+    'kereviz', 'enginar', 'bamya', 'fasulye', 'bezelye', 'nane', 'maydanoz', 
+    'dereotu', 'roka', 'semizotu', 'börülce', 'kırmızı', 'yeşil', 'turp', 'pancar'
+  ];
+  if (produceKeywords.some(keyword => name.includes(keyword))) {
     return 'fruits_vegetables';
   }
   
-  // Kuru Gıda
-  if (/un|şeker|tuz|pirinç|bulgur|makarna|nohut|mercimek|börülce|yulaf|mısır|ekmek|bisküvi|kraker|gevrek|kahve|çay|kakao|bal|reçel|zeytinyağ|ayçiçek|sıvıyağ|margarin|pekmez|tahin|fıstık|fındık|badem|ceviz|susam|irmik|kepek|kinoa/i.test(name)) {
+  // Kuru Gıda keywords
+  const grainsKeywords = [
+    'un', 'şeker', 'tuz', 'pirinç', 'bulgur', 'makarna', 'nohut', 'mercimek', 
+    'yulaf', 'mısır', 'ekmek', 'bisküvi', 'kraker', 'gevrek', 'kahve', 'çay', 
+    'kakao', 'bal', 'reçel', 'zeytinyağ', 'ayçiçek', 'sıvıyağ', 'margarin', 
+    'pekmez', 'tahin', 'fıstık', 'fındık', 'badem', 'ceviz', 'susam', 'irmik', 
+    'kepek', 'kinoa'
+  ];
+  if (grainsKeywords.some(keyword => name.includes(keyword))) {
     return 'grains';
   }
   

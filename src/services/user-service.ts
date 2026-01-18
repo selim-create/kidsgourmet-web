@@ -11,10 +11,20 @@ import {
   FavoriteItemType,
   Collection,
   CollectionInput,
-  CollectionItem,
   ExpertPublicProfile,
   SocialLinks
 } from '@/lib/types';
+
+// Backend response format for shopping list items
+interface BackendShoppingListItem {
+  id: string | number;
+  item: string;
+  quantity: string;
+  checked: boolean;
+  recipe_id?: number;
+  recipe_title?: string;
+  category?: string;
+}
 
 export const userService = {
   /**
@@ -149,17 +159,17 @@ export const userService = {
 
   // Alışveriş Listesi
   getShoppingList: async (): Promise<ShoppingListItem[]> => {
-    // Backend dönen format: { id: string, item: string, quantity: string, checked: boolean }
-    // Frontend format: { id: number, ingredient: string, amount?: string, checked: boolean, category?: ShoppingCategory }
-    const backendResponse = await fetchAuthAPI<any[]>(API_ENDPOINTS.USER_SHOPPING_LIST);
+    // Backend dönen format: BackendShoppingListItem
+    // Frontend format: ShoppingListItem
+    const backendResponse = await fetchAuthAPI<BackendShoppingListItem[]>(API_ENDPOINTS.USER_SHOPPING_LIST);
     
     // Transform backend response to frontend format
-    return backendResponse.map((item: any) => ({
+    return backendResponse.map((item) => ({
       id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
-      ingredient: item.item || item.ingredient || '',
-      amount: item.quantity || item.amount,
+      ingredient: item.item || '',
+      amount: item.quantity,
       checked: item.checked || false,
-      category: item.category,
+      category: item.category as any,
       recipe_id: item.recipe_id,
       recipe_title: item.recipe_title,
     }));
@@ -174,7 +184,7 @@ export const userService = {
     for (const item of items) {
       try {
         // Backend'e göndermek için format dönüşümü
-        const backendResponse = await fetchAuthAPI<any>(API_ENDPOINTS.USER_SHOPPING_LIST, {
+        const backendResponse = await fetchAuthAPI<BackendShoppingListItem>(API_ENDPOINTS.USER_SHOPPING_LIST, {
           method: 'POST',
           body: JSON.stringify({
             item: item.ingredient,      // 'ingredient' -> 'item'
@@ -185,8 +195,8 @@ export const userService = {
         // Backend response'unu frontend formatına dönüştür
         const transformedItem: ShoppingListItem = {
           id: typeof backendResponse.id === 'string' ? parseInt(backendResponse.id, 10) : backendResponse.id,
-          ingredient: backendResponse.item || backendResponse.ingredient || item.ingredient,
-          amount: backendResponse.quantity || backendResponse.amount || item.amount,
+          ingredient: backendResponse.item || item.ingredient,
+          amount: backendResponse.quantity || item.amount,
           checked: backendResponse.checked || false,
           category: item.category, // Frontend'den gelen kategoriyi koru
           recipe_id: backendResponse.recipe_id,
