@@ -310,6 +310,8 @@ export interface Child {
   age_months?: number;
   notes?: string;
   kvkk_consent?: boolean;
+  avatar_url?: string;      // Signed URL (geçici)
+  has_avatar?: boolean;     // Avatar var mı?
   // Backward compatibility
   allergens?: string[];
   blw_test_results?: BLWTestResult[];

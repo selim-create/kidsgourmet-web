@@ -7,6 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { userService } from "@/services/user-service";
 import { Child, SocialLinks } from "@/lib/types";
 import ChildWizard from "@/components/features/ChildWizard";
+import ChildAvatarUpload from "@/components/features/ChildAvatarUpload";
 import { toast } from "sonner";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
@@ -293,11 +294,13 @@ export default function ProfileSettingsPage() {
                               </button>
                             </div>
                             <div className="flex items-center gap-4 mb-4">
-                                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold ${
-                                  index === 0 ? 'bg-orange-100 text-orange-500 border-2 border-orange-500' : 'bg-gray-100 text-gray-500'
-                                }`}>
-                                  {child.name.charAt(0).toUpperCase()}
-                                </div>
+                                <ChildAvatarUpload
+                                  childId={child.id}
+                                  currentAvatarUrl={child.avatar_url}
+                                  childName={child.name}
+                                  size="sm"
+                                  onAvatarChange={() => fetchChildren()}
+                                />
                                 <div>
                                     <h3 className="font-bold text-lg text-slate-800">{child.name}</h3>
                                     <p className={`text-sm font-medium ${index === 0 ? 'text-orange-500' : 'text-gray-500'}`}>
