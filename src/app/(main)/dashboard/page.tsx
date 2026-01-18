@@ -18,6 +18,7 @@ import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrie
 import FoodIntroductionCard from "@/components/features/food-introduction/FoodIntroductionCard";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import ChildWizard from "@/components/features/ChildWizard";
+import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
 // --- SUB COMPONENTS ---
 
@@ -86,20 +87,6 @@ function NutritionBar({ label, current, total, iconClass, color, bgColor, textCo
    )
 }
 
-const SidebarItem = ({ iconClass, label, active = false, badge, href = "#" }: {
-  iconClass: string;
-  label: string;
-  active?: boolean;
-  badge?: string;
-  href?: string;
-}) => (
-  <Link href={href} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${active ? 'bg-orange-500 text-white shadow-lg shadow-orange-200' : 'text-stone-600 hover:bg-orange-50 hover:text-orange-600'}`}>
-    <i className={`${iconClass} w-5 text-center ${active ? "text-white" : "text-stone-400 group-hover:text-orange-500"}`}></i>
-    <span className="text-sm font-semibold">{label}</span>
-    {badge && <span className={`ml-auto text-[10px] px-2 py-0.5 rounded-full font-bold ${active ? 'bg-white text-orange-500' : badge === '!' ? 'bg-red-500 text-white' : 'bg-orange-100 text-orange-600'}`}>{badge}</span>}
-  </Link>
-);
-
 // Constants for MealCard display
 const MEAL_COLORS = ['yellow', 'green', 'orange'] as const;
 const MEAL_ICONS = ['🌅', '🍱', '🌙'];
@@ -128,12 +115,7 @@ export default function DashboardPage() {
     return todayPlan?.slots || [];
   }, [plan]);
 
-  // Mock data for recommended recipes (as per design spec)
-  const recommendedRecipes = useMemo(() => [
-    { id: 1, title: "Sebzeli Mücver", image: "🥦", time: "25 dk", match: "95" },
-    { id: 2, title: "Muzlu Yulaf Bar", image: "🍌", time: "15 dk", match: "88" },
-    { id: 3, title: "Bal Kabaklı Çorba", image: "🎃", time: "30 dk", match: "92" },
-  ], []);
+  // Removed mock data - using real data only
 
   // Today's formatted date
   const todayFormatted = useMemo(() => {
@@ -253,97 +235,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen relative bg-[#FDFBF7]">
+    <div className="flex h-screen bg-[#FDFBF7] overflow-hidden">
 
-        {/* DESKTOP SIDEBAR */}
-        <aside className="hidden lg:flex flex-col w-72 bg-white border-r border-stone-100 shadow-[4px_0_24px_rgba(0,0,0,0.02)] fixed h-screen z-30">
-          {/* Logo Area */}
-          <div className="p-6 border-b border-stone-100">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-black text-lg">KG</span>
-              </div>
-              <div>
-                <h1 className="font-black text-stone-900 text-lg">KidsGourmet</h1>
-                <p className="text-[10px] text-stone-500 font-medium">Sağlıklı Bebek Beslenmesi</p>
-              </div>
-            </Link>
-          </div>
+        {/* SOL SIDEBAR - Navigation Only */}
+        <DashboardSidebar activePage="dashboard" />
 
-          {/* User Profile Card */}
-          {user && (
-            <div className="p-4 mx-4 mt-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-100">
-              <div className="flex items-center gap-3 mb-3">
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} className="w-12 h-12 rounded-full border-2 border-white shadow-sm" alt="User" />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-orange-200 flex items-center justify-center text-lg font-bold text-orange-700 border-2 border-white shadow-sm">
-                    {user.name && user.name.length > 0 ? user.name.charAt(0).toUpperCase() : '?'}
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-stone-900 text-sm truncate">{user.display_name || user.name}</p>
-                  <p className="text-[10px] text-stone-600">Premium Üye ⭐</p>
-                </div>
-              </div>
-              {activeChild && (
-                <div className="text-[10px] bg-white/60 backdrop-blur px-2 py-1 rounded-lg text-stone-700 font-medium">
-                  Aktif: <span className="font-bold">{activeChild.name}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Navigation - Scrollable */}
-          <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
-            {/* Menü Section */}
-            <div>
-              <h3 className="text-[10px] font-black uppercase tracking-wider text-stone-400 mb-3 px-4">Menü</h3>
-              <div className="space-y-1">
-                <SidebarItem iconClass="fa-solid fa-house" label="Dashboard" active={true} href="/dashboard" />
-                <SidebarItem iconClass="fa-solid fa-calendar-days" label="Haftalık Plan" href="/dashboard/haftalik-plan" />
-                <SidebarItem iconClass="fa-solid fa-utensils" label="Tarifler" href="/tarifler" badge="Yeni" />
-                <SidebarItem iconClass="fa-solid fa-basket-shopping" label="Alışveriş Listesi" href="/alisveris-listesi" />
-              </div>
-            </div>
-
-            {/* Gelişim & Sağlık Section */}
-            <div>
-              <h3 className="text-[10px] font-black uppercase tracking-wider text-stone-400 mb-3 px-4">Gelişim &amp; Sağlık</h3>
-              <div className="space-y-1">
-                <SidebarItem iconClass="fa-solid fa-chart-line" label="Büyüme Takibi" href="/akilli-asistan/persentil" />
-                <SidebarItem iconClass="fa-solid fa-syringe" label="Aşı Takvimi" href="/dashboard/saglik/asilar" badge="!" />
-                <SidebarItem iconClass="fa-solid fa-brain" label="BLW Hazırlık" href="/akilli-asistan/blw-testi" />
-                <SidebarItem iconClass="fa-solid fa-apple-whole" label="Beslenme Rehberi" href="/beslenme-rehberi" />
-              </div>
-            </div>
-
-            {/* Topluluk Section */}
-            <div>
-              <h3 className="text-[10px] font-black uppercase tracking-wider text-stone-400 mb-3 px-4">Topluluk</h3>
-              <div className="space-y-1">
-                <SidebarItem iconClass="fa-solid fa-users" label="Çemberler" href="/topluluk" badge="24" />
-                <SidebarItem iconClass="fa-solid fa-heart" label="Favoriler" href="/favoriler" />
-                <SidebarItem iconClass="fa-solid fa-user" label="Profil" href="/profil" />
-              </div>
-            </div>
-          </nav>
-
-          {/* Bottom CTA */}
-          <div className="p-4 border-t border-stone-100">
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-4 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full blur-2xl"></div>
-              <p className="text-[10px] font-black uppercase tracking-wider opacity-80 mb-1">Yeni Özellik</p>
-              <p className="font-bold text-sm mb-2">AI Asistan ile Sohbet Et! 🤖</p>
-              <Link href="/akilli-asistan" className="block w-full bg-white text-purple-600 text-center py-2 rounded-xl text-xs font-bold hover:bg-purple-50 transition-colors">
-                Hemen Dene
-              </Link>
-            </div>
-          </div>
-        </aside>
-
-        {/* MAIN CONTENT AREA */}
-        <main className="flex-1 w-full min-w-0 lg:ml-72">
+        {/* MAIN CONTENT - Scrollable */}
+        <main className="flex-1 overflow-y-auto lg:ml-0">
             
             {/* MOBILE HEADER */}
             <div className="lg:hidden bg-white/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30 border-b border-stone-100">
@@ -364,7 +262,7 @@ export default function DashboardPage() {
             </div>
 
             {/* DASHBOARD CONTENT */}
-            <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8 pb-24">
+            <div className="p-4 md:p-8 space-y-8 pb-24">
 
                 {/* 1. HERO: Child Status & Switcher - NEW WHITE CARD DESIGN */}
                 <div className="bg-white rounded-[2.5rem] p-6 md:p-10 relative overflow-hidden shadow-lg transition-all duration-500">
@@ -542,38 +440,7 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* 3. ÖNERİLEN TARİFLER - Horizontal Scroll */}
-                {activeChild && (
-                  <div>
-                      <div className="flex items-center justify-between mb-4">
-                          <h2 className="font-display font-black text-xl text-stone-900">✨ Önerilen Tarifler</h2>
-                          <Link href="/tarifler" className="text-sm font-bold text-orange-500 hover:underline">Tümünü Gör</Link>
-                      </div>
-
-                      {/* Recipe Cards - Horizontal Scroll */}
-                      <div className="flex gap-4 overflow-x-auto pb-4 hide-scroll scrollbar-hide">
-                          {recommendedRecipes.map((recipe) => (
-                            <div key={recipe.id} className="flex-shrink-0 w-64 bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer group">
-                              <div className="h-40 bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center text-6xl relative overflow-hidden">
-                                {recipe.image}
-                                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-xs font-black text-orange-500">
-                                  {recipe.match}% uygun
-                                </div>
-                              </div>
-                              <div className="p-4">
-                                <h4 className="font-bold text-stone-900 text-sm mb-2 group-hover:text-orange-500 transition-colors">{recipe.title}</h4>
-                                <div className="flex items-center gap-3 text-xs text-stone-500">
-                                  <span className="flex items-center gap-1"><i className="fa-regular fa-clock text-[10px]"></i> {recipe.time}</span>
-                                  <span className="flex items-center gap-1"><i className="fa-solid fa-fire text-[10px]"></i> Kolay</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                  </div>
-                )}
-
-                {/* 4. HAFTALIK BAKIŞ - 7 Day Calendar */}
+                {/* 3. HAFTALIK BAKIŞ - 7 Day Calendar */}
                 {activeChild && (
                   <div className="bg-stone-50 rounded-2xl p-6">
                       <div className="flex items-center justify-between mb-6">
@@ -603,384 +470,197 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* 3. INFO WIDGETS GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    
-                    {/* Shopping List Widget */}
-                    <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm relative overflow-hidden group cursor-pointer hover:border-orange-200 transition-colors">
-                        <div className="absolute -right-4 -top-4 bg-orange-50 w-24 h-24 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-                        <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                            <i className="fa-solid fa-basket-shopping text-orange-500 mr-2"></i> Alışveriş Listesi
-                        </h3>
-                        {shoppingList.length > 0 ? (
-                          <>
-                            <ul className="space-y-3 mb-4">
-                                {shoppingList.slice(0, 3).map((item) => (
-                                  <li key={item.id} className="flex items-center text-sm text-stone-600">
-                                      <span className={`w-2 h-2 ${item.checked ? 'bg-stone-400' : 'bg-green-400'} rounded-full mr-2`}></span>
-                                      <span className={item.checked ? 'line-through text-stone-400' : ''}>{item.ingredient} {item.amount && `(${item.amount})`}</span>
-                                  </li>
-                                ))}
-                            </ul>
-                            <Link href="/alisveris-listesi" className="block w-full bg-stone-50 text-stone-600 font-bold py-2 rounded-xl text-sm hover:bg-stone-100 transition-colors text-center">
-                                Tüm Listeyi Gör ({shoppingList.length})
-                            </Link>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-sm text-stone-500 mb-4">Henüz alışveriş listeniz boş.</p>
-                            <Link href="/tarifler" className="block w-full bg-stone-50 text-stone-600 font-bold py-2 rounded-xl text-sm hover:bg-stone-100 transition-colors text-center">
-                                Tarif Keşfet
-                            </Link>
-                          </>
-                        )}
-                    </div>
-
-                    {/* Expert Tip Widget (Rejimde.com) */}
-                    <div className="bg-green-50/50 p-6 rounded-3xl border border-green-100 shadow-sm relative">
-                        <span className="absolute top-4 right-4 bg-white text-green-600 text-[10px] font-bold px-2 py-1 rounded shadow-sm">Uzman İpucu</span>
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-green-500 shadow-sm">
-                                <i className="fa-solid fa-user-doctor"></i>
-                            </div>
-                            <h3 className="font-bold text-stone-800 text-sm">Dyt. Ayşe Yılmaz</h3>
-                        </div>
-                        <p className="text-sm text-stone-700 italic mb-3">
-                            &ldquo;{activeChild ? activeChild.name : 'Çocuğunuz'} için beslenme takvimi oluşturmayı unutmayın. Düzenli öğünler gelişim için önemlidir...&rdquo;
-                        </p>
-                        <Link href="#" className="text-xs font-bold text-green-600 hover:underline">Devamını Oku (Rejimde.com)</Link>
-                    </div>
-
-                    {/* Tools Widget */}
-                    <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm">
-                        <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                            <i className="fa-solid fa-toolbox text-blue-400 mr-2"></i> Hızlı Araçlar
-                        </h3>
-                        <div className="grid grid-cols-2 gap-3">
-                            <Link href="/beslenme-rehberi" className="flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 p-3 rounded-2xl transition-colors">
-                                <i className="fa-solid fa-magnifying-glass text-blue-500 mb-1"></i>
-                                <span className="text-xs font-bold text-blue-700">Gıda Ara</span>
-                            </Link>
-                            <Link href="/akilli-asistan" className="flex flex-col items-center justify-center bg-purple-50 hover:bg-purple-100 p-3 rounded-2xl transition-colors">
-                                <i className="fa-solid fa-chart-line text-purple-500 mb-1"></i>
-                                <span className="text-xs font-bold text-purple-700">Gelişim</span>
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Vaccine Widget */}
-                    {activeChild && (
-                      <DashboardVaccineWidget 
-                        childId={activeChild.id} 
-                        childName={activeChild.name}
-                      />
-                    )}
-
-                    {/* BLW Test Results Widget */}
-                    {blwResults.length > 0 && (
-                      <div className="bg-white rounded-2xl border border-stone-100 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="font-bold text-stone-800 flex items-center gap-2">
-                            <i className="fa-solid fa-baby text-green-500"></i>
-                            BLW Hazırlık Testi
-                          </h3>
-                          <Link href="/akilli-asistan/blw-testi" className="text-sm text-orange-500 hover:underline">
-                            Tekrar Test Et
-                          </Link>
-                        </div>
-                        
-                        {blwResults.slice(0, 3).map((result, index) => {
-                          // Çocuk adını bul (children array'inden)
-                          const childName = result.child_id 
-                            ? children.find(c => c.id === result.child_id)?.name || result.child_name
-                            : null;
-                          
-                          // BLW sonuç kategorisi (threshold: 80 ve 55)
-                          const getBLWResultCategory = (score: number) => {
-                            if (score >= 80) return { text: 'Hazır', color: 'green', emoji: '✅', bg: 'bg-green-500' };
-                            if (score >= 55) return { text: 'Neredeyse Hazır', color: 'amber', emoji: '⏳', bg: 'bg-amber-500' };
-                            return { text: 'Biraz Daha Zaman', color: 'red', emoji: '⏰', bg: 'bg-red-500' };
-                          };
-                          
-                          const category = getBLWResultCategory(result.score);
-                          
-                          return (
-                            <div key={index} className="flex items-center gap-4 p-3 bg-stone-50 rounded-xl mb-2 last:mb-0">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${category.bg}`}>
-                                {Math.round(result.score)}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-medium text-stone-800">{category.text}</p>
-                                  <span className="text-lg">{category.emoji}</span>
-                                </div>
-                                <p className="text-xs text-stone-500">
-                                  {childName && <span className="font-medium text-stone-600">{childName} • </span>}
-                                  {formatDate(result.created_at)}
-                                </p>
-                              </div>
-                              {result.red_flags && result.red_flags.length > 0 && (
-                                <div className="relative group">
-                                  <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center cursor-help">
-                                    <i className="fa-solid fa-exclamation text-xs"></i>
-                                  </div>
-                                  {/* Tooltip */}
-                                  <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                    <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
-                                    {result.red_flags.slice(0, 2).map((flag, i) => (
-                                      <p key={i}>• {flag.message}</p>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Percentile Results Widget - Büyüme Takibi */}
-                    {percentileResults.length > 0 && (
-                      <div className="bg-white rounded-2xl border border-stone-100 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="font-bold text-stone-800 flex items-center gap-2">
-                            <i className="fa-solid fa-chart-line text-blue-500"></i>
-                            Büyüme Takibi
-                          </h3>
-                          <Link href="/akilli-asistan/persentil" className="text-sm text-orange-500 hover:underline">
-                            Yeni Ölçüm
-                          </Link>
-                        </div>
-                        
-                        {percentileResults.slice(0, 3).map((result, index) => {
-                          // Çocuk adını bul
-                          const childName = result.child_id 
-                            ? children.find(c => c.id === result.child_id)?.name 
-                            : null;
-                          
-                          // Ölçüm türlerini göster
-                          const getMeasurementSummary = () => {
-                            if (!result.percentiles || result.percentiles.length === 0) return 'Ölçüm yok';
-                            
-                            const items: string[] = [];
-                            const weight = result.percentiles.find(p => p.measurement_type === 'weight_for_age');
-                            const height = result.percentiles.find(p => p.measurement_type === 'height_for_age');
-                            const head = result.percentiles.find(p => p.measurement_type === 'head_for_age');
-                            
-                            if (weight) items.push(`Kilo: ${Math.round(weight.percentile)}p`);
-                            if (height) items.push(`Boy: ${Math.round(height.percentile)}p`);
-                            if (head) items.push(`Baş: ${Math.round(head.percentile)}p`);
-                            
-                            return items.length > 0 ? items.join(' • ') : 'Ölçüm yok';
-                          };
-                          
-                          // Genel durum rengi
-                          const getOverallStatus = () => {
-                            if (!result.percentiles || result.percentiles.length === 0) {
-                              return { bg: 'bg-stone-500', icon: 'fa-question' };
-                            }
-                            
-                            const hasVeryLow = result.percentiles.some(p => p.category === 'very_low');
-                            const hasVeryHigh = result.percentiles.some(p => p.category === 'very_high');
-                            const hasLowOrHigh = result.percentiles.some(p => p.category === 'low' || p.category === 'high');
-                            
-                            if (hasVeryLow || hasVeryHigh) return { bg: 'bg-red-500', icon: 'fa-triangle-exclamation' };
-                            if (hasLowOrHigh) return { bg: 'bg-amber-500', icon: 'fa-circle-exclamation' };
-                            return { bg: 'bg-green-500', icon: 'fa-circle-check' };
-                          };
-                          
-                          const status = getOverallStatus();
-                          const hasWarnings = result.red_flags && result.red_flags.length > 0;
-                          
-                          return (
-                            <div key={index} className="flex items-center gap-4 p-3 bg-stone-50 rounded-xl mb-2 last:mb-0">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${status.bg}`}>
-                                <i className={`fa-solid ${status.icon} text-lg`}></i>
-                              </div>
-                              <div className="flex-1">
-                                <p className="font-medium text-stone-800 text-sm">
-                                  {getMeasurementSummary()}
-                                </p>
-                                <p className="text-xs text-stone-500">
-                                  {childName && <span className="font-medium text-stone-600">{childName} • </span>}
-                                  {result.age_in_months > 0 && `${result.age_in_months} aylık • `}
-                                  {formatDate(result.created_at)}
-                                </p>
-                              </div>
-                              {hasWarnings && (
-                                <div className="relative group">
-                                  <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center cursor-help">
-                                    <i className="fa-solid fa-exclamation text-xs"></i>
-                                  </div>
-                                  {/* Tooltip */}
-                                  <div className="absolute bottom-full right-0 mb-2 w-56 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
-                                    <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
-                                    {result.red_flags.slice(0, 2).map((flag, i) => (
-                                      <p key={i}>• {flag.message}</p>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Solid Food Readiness Results Widget */}
-                    {solidFoodResults.length > 0 && (
-                      <div className="bg-white rounded-2xl border border-stone-100 p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="font-bold text-stone-800 flex items-center gap-2">
-                            <i className="fa-solid fa-utensils text-orange-500"></i>
-                            Ek Gıda Hazırlık
-                          </h3>
-                          <Link href="/akilli-asistan/ek-gidaya-baslama" className="text-sm text-orange-500 hover:underline">
-                            Tekrar Test Et
-                          </Link>
-                        </div>
-                        
-                        {solidFoodResults.slice(0, 3).map((result, index) => {
-                          // Çocuk adını bul
-                          const childName = result.child_id 
-                            ? children.find(c => c.id === result.child_id)?.name || result.child_name
-                            : null;
-                          
-                          // Ek Gıda sonuç kategorisi (threshold: 80 ve 50)
-                          const getSolidFoodResultCategory = (score: number) => {
-                            if (score >= 80) return { text: 'Hazır', color: 'green', emoji: '🎉', bg: 'bg-green-500' };
-                            if (score >= 50) return { text: 'Neredeyse Hazır', color: 'amber', emoji: '💪', bg: 'bg-amber-500' };
-                            return { text: 'Biraz Daha Zaman', color: 'red', emoji: '🕐', bg: 'bg-red-500' };
-                          };
-                          
-                          const category = getSolidFoodResultCategory(result.score);
-                          
-                          return (
-                            <div key={index} className="flex items-center gap-4 p-3 bg-stone-50 rounded-xl mb-2 last:mb-0">
-                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${category.bg}`}>
-                                {Math.round(result.score)}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="font-medium text-stone-800">{category.text}</p>
-                                  <span className="text-lg">{category.emoji}</span>
-                                </div>
-                                <p className="text-xs text-stone-500">
-                                  {childName && <span className="font-medium text-stone-600">{childName} • </span>}
-                                  {formatDate(result.created_at)}
-                                </p>
-                              </div>
-                              {result.red_flags && result.red_flags.length > 0 && (
-                                <div className="relative group">
-                                  <div className="w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center cursor-help">
-                                    <i className="fa-solid fa-exclamation text-xs"></i>
-                                  </div>
-                                  {/* Tooltip */}
-                                  <div className="absolute bottom-full right-0 mb-2 w-48 bg-red-50 border border-red-200 rounded-lg p-2 text-xs text-red-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                    <p className="font-bold mb-1">Dikkat Edilmesi Gerekenler:</p>
-                                    {result.red_flags.slice(0, 2).map((flag, i) => (
-                                      <p key={i}>• {flag}</p>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                </div>
-
-                {/* 4. NEW FEATURE WIDGETS */}
-                {activeChild && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    
-                    {/* Today's Menu Widget */}
-                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-3xl border border-orange-100 shadow-sm">
-                      <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                        <i className="fa-solid fa-sun text-yellow-500 mr-2"></i> Bugünün Menüsü
-                      </h3>
-                      <div className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center">
-                            <i className="fa-solid fa-bowl-food text-orange-500 text-2xl"></i>
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-stone-800 text-sm">Sebzeli Pirinç Pilavı</h4>
-                            <p className="text-xs text-stone-500">{activeChild.age_months ? `${activeChild.age_months} ay` : 'Bebek'} • 25 dk</p>
-                          </div>
-                        </div>
-                        <Link href="/tarifler" className="block w-full bg-orange-500 text-white text-center py-2 rounded-xl text-sm font-bold hover:bg-orange-600 transition-colors">
-                          Tarifi Gör
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* My Circles Widget */}
-                    <div className="bg-purple-50 p-6 rounded-3xl border border-purple-100 shadow-sm">
-                      <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                        <i className="fa-solid fa-users text-purple-500 mr-2"></i> Çemberlerim
-                      </h3>
-                      <div className="space-y-2 mb-4">
-                        <div className="bg-white rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow cursor-pointer">
-                          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                            <i className="fa-solid fa-carrot text-purple-500 text-sm"></i>
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold text-sm text-stone-800">BLW Deneyimleri</p>
-                            <p className="text-xs text-stone-500">24 yeni mesaj</p>
-                          </div>
-                        </div>
-                        <div className="bg-white rounded-xl p-3 flex items-center gap-3 hover:shadow-sm transition-shadow cursor-pointer">
-                          <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i className="fa-solid fa-apple-whole text-green-500 text-sm"></i>
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold text-sm text-stone-800">İlk 1000 Gün</p>
-                            <p className="text-xs text-stone-500">12 yeni mesaj</p>
-                          </div>
-                        </div>
-                      </div>
-                      <Link href="/topluluk" className="block w-full bg-purple-500 text-white text-center py-2 rounded-xl text-sm font-bold hover:bg-purple-600 transition-colors">
-                        Tüm Çemberler
-                      </Link>
-                    </div>
-
-                    {/* Quick Shortcuts Widget */}
-                    <div className="bg-blue-50 p-6 rounded-3xl border border-blue-100 shadow-sm">
-                      <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                        <i className="fa-solid fa-bolt text-blue-500 mr-2"></i> Kısayollar
-                      </h3>
-                      <div className="space-y-2">
-                        <Link href="/akilli-asistan/persentil" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                            <i className="fa-solid fa-chart-line text-blue-500"></i>
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold text-sm text-stone-800">Büyüme Grafiği</p>
-                            <p className="text-xs text-stone-500">Boy & kilo takibi</p>
-                          </div>
-                          <i className="fa-solid fa-chevron-right text-stone-300"></i>
-                        </Link>
-                        <Link href="/dashboard/saglik/asilar" className="flex items-center gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow">
-                          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                            <i className="fa-solid fa-syringe text-green-500"></i>
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-bold text-sm text-stone-800">Aşı Takvimi</p>
-                            <p className="text-xs text-stone-500">Aşı hatırlatıcı</p>
-                          </div>
-                          <i className="fa-solid fa-chevron-right text-stone-300"></i>
-                        </Link>
-                      </div>
-                    </div>
-
-                  </div>
-                )}
-
             </div>
         </main>
+
+        {/* SAĞ SIDEBAR - Widgets (hidden on mobile/tablet, shown xl+) */}
+        <aside className="hidden xl:block w-80 bg-white border-l border-stone-100 overflow-y-auto p-6 space-y-6">
+          
+          {activeChild && (
+            <>
+              {/* Shopping List Widget */}
+              <div className="bg-stone-50 p-5 rounded-2xl border border-stone-200 relative overflow-hidden group hover:border-orange-200 transition-colors">
+                  <div className="absolute -right-4 -top-4 bg-orange-50 w-24 h-24 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
+                  <h3 className="font-bold text-stone-800 mb-4 flex items-center relative z-10">
+                      <i className="fa-solid fa-basket-shopping text-orange-500 mr-2"></i> Alışveriş Listesi
+                  </h3>
+                  {shoppingList.length > 0 ? (
+                    <>
+                      <ul className="space-y-3 mb-4 relative z-10">
+                          {shoppingList.slice(0, 3).map((item) => (
+                            <li key={item.id} className="flex items-center text-sm text-stone-600">
+                                <span className={`w-2 h-2 ${item.checked ? 'bg-stone-400' : 'bg-green-400'} rounded-full mr-2`}></span>
+                                <span className={item.checked ? 'line-through text-stone-400' : ''}>{item.ingredient} {item.amount && `(${item.amount})`}</span>
+                            </li>
+                          ))}
+                      </ul>
+                      <Link href="/alisveris-listesi" className="block w-full bg-white text-stone-600 font-bold py-2 rounded-xl text-sm hover:bg-stone-100 transition-colors text-center relative z-10">
+                          Tüm Listeyi Gör ({shoppingList.length})
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm text-stone-500 mb-4 relative z-10">Henüz alışveriş listeniz boş.</p>
+                      <Link href="/tarifler" className="block w-full bg-white text-stone-600 font-bold py-2 rounded-xl text-sm hover:bg-stone-100 transition-colors text-center relative z-10">
+                          Tarif Keşfet
+                      </Link>
+                    </>
+                  )}
+              </div>
+
+              {/* Growth Tracking Widget */}
+              {percentileResults.length > 0 && (
+                <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-stone-800 flex items-center gap-2">
+                      <i className="fa-solid fa-chart-line text-blue-500"></i>
+                      Büyüme Takibi
+                    </h3>
+                    <Link href="/akilli-asistan/persentil" className="text-sm text-orange-500 hover:underline">
+                      Yeni
+                    </Link>
+                  </div>
+                  
+                  {percentileResults.slice(0, 2).map((result, index) => {
+                    const childName = result.child_id 
+                      ? children.find(c => c.id === result.child_id)?.name 
+                      : null;
+                    
+                    const getMeasurementSummary = () => {
+                      if (!result.percentiles || result.percentiles.length === 0) return 'Ölçüm yok';
+                      
+                      const items: string[] = [];
+                      const weight = result.percentiles.find(p => p.measurement_type === 'weight_for_age');
+                      const height = result.percentiles.find(p => p.measurement_type === 'height_for_age');
+                      
+                      if (weight) items.push(`Kilo: ${Math.round(weight.percentile)}p`);
+                      if (height) items.push(`Boy: ${Math.round(height.percentile)}p`);
+                      
+                      return items.length > 0 ? items.join(' • ') : 'Ölçüm yok';
+                    };
+                    
+                    const getOverallStatus = () => {
+                      if (!result.percentiles || result.percentiles.length === 0) {
+                        return { bg: 'bg-stone-500', icon: 'fa-question' };
+                      }
+                      
+                      const hasVeryLow = result.percentiles.some(p => p.category === 'very_low');
+                      const hasVeryHigh = result.percentiles.some(p => p.category === 'very_high');
+                      const hasLowOrHigh = result.percentiles.some(p => p.category === 'low' || p.category === 'high');
+                      
+                      if (hasVeryLow || hasVeryHigh) return { bg: 'bg-red-500', icon: 'fa-triangle-exclamation' };
+                      if (hasLowOrHigh) return { bg: 'bg-amber-500', icon: 'fa-circle-exclamation' };
+                      return { bg: 'bg-green-500', icon: 'fa-circle-check' };
+                    };
+                    
+                    const status = getOverallStatus();
+                    
+                    return (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-xl mb-2 last:mb-0">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${status.bg}`}>
+                          <i className={`fa-solid ${status.icon} text-sm`}></i>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-stone-800 text-xs truncate">
+                            {getMeasurementSummary()}
+                          </p>
+                          <p className="text-[10px] text-stone-500 truncate">
+                            {formatDate(result.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* BLW Readiness Widget */}
+              {blwResults.length > 0 && (
+                <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-stone-800 flex items-center gap-2">
+                      <i className="fa-solid fa-baby text-green-500"></i>
+                      BLW Hazırlık
+                    </h3>
+                    <Link href="/akilli-asistan/blw-testi" className="text-sm text-orange-500 hover:underline">
+                      Test Et
+                    </Link>
+                  </div>
+                  
+                  {blwResults.slice(0, 2).map((result, index) => {
+                    const getBLWResultCategory = (score: number) => {
+                      if (score >= 80) return { text: 'Hazır', emoji: '✅', bg: 'bg-green-500' };
+                      if (score >= 55) return { text: 'Neredeyse', emoji: '⏳', bg: 'bg-amber-500' };
+                      return { text: 'Bekle', emoji: '⏰', bg: 'bg-red-500' };
+                    };
+                    
+                    const category = getBLWResultCategory(result.score);
+                    
+                    return (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-xl mb-2 last:mb-0">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${category.bg} text-sm`}>
+                          {Math.round(result.score)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1">
+                            <p className="font-medium text-stone-800 text-xs">{category.text}</p>
+                            <span className="text-sm">{category.emoji}</span>
+                          </div>
+                          <p className="text-[10px] text-stone-500 truncate">
+                            {formatDate(result.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Daily Nutrition Widget */}
+              <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
+                <h3 className="font-bold text-stone-800 mb-4 flex items-center">
+                  <i className="fa-solid fa-apple-whole text-green-500 mr-2"></i> Günlük Beslenme
+                </h3>
+                <NutritionSummaryCard childId={activeChild.id} />
+              </div>
+
+              {/* Vaccine Calendar Widget */}
+              <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
+                <DashboardVaccineWidget 
+                  childId={activeChild.id} 
+                  childName={activeChild.name}
+                />
+              </div>
+
+              {/* Quick Tools Widget */}
+              <div className="bg-stone-50 p-5 rounded-2xl border border-stone-200">
+                  <h3 className="font-bold text-stone-800 mb-4 flex items-center">
+                      <i className="fa-solid fa-toolbox text-blue-400 mr-2"></i> Hızlı Araçlar
+                  </h3>
+                  <div className="space-y-2">
+                      <Link href="/beslenme-rehberi" className="flex items-center gap-3 bg-white hover:bg-blue-50 p-3 rounded-xl transition-colors">
+                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                              <i className="fa-solid fa-magnifying-glass text-blue-500"></i>
+                          </div>
+                          <div className="flex-1">
+                              <p className="text-sm font-bold text-stone-800">Gıda Ara</p>
+                              <p className="text-xs text-stone-500">Besin değerleri</p>
+                          </div>
+                      </Link>
+                      <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white hover:bg-purple-50 p-3 rounded-xl transition-colors">
+                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                              <i className="fa-solid fa-robot text-purple-500"></i>
+                          </div>
+                          <div className="flex-1">
+                              <p className="text-sm font-bold text-stone-800">AI Asistan</p>
+                              <p className="text-xs text-stone-500">Sohbet et</p>
+                          </div>
+                      </Link>
+                  </div>
+              </div>
+            </>
+          )}
+        </aside>
 
         {/* MOBILE BOTTOM NAVIGATION (Sticky) */}
         <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-stone-200 flex justify-around py-3 pb-safe z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
