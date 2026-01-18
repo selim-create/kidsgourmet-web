@@ -7,7 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
 import { toolService } from "@/services/tool-service";
-import { ShoppingListItem, BLWTestResult, PercentileResult, SolidFoodReadinessResult } from "@/lib/types";
+import { BLWTestResult, PercentileResult, SolidFoodReadinessResult } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import DashboardVaccineWidget from "@/components/features/vaccine/DashboardVaccineWidget";
 import OverdueVaccineBanner from "@/components/features/vaccine/OverdueVaccineBanner";
@@ -16,6 +16,8 @@ import DailyRecommendations from "@/components/features/recommendations/DailyRec
 import NutritionSummaryCard from "@/components/features/nutrition/NutritionSummaryCard";
 import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrientsAlert";
 import FoodIntroductionCard from "@/components/features/food-introduction/FoodIntroductionCard";
+import WeeklyOverview from "@/components/features/meal-plan/WeeklyOverview";
+import DashboardShoppingList from "@/components/features/shopping/DashboardShoppingList";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import ChildWizard from "@/components/features/ChildWizard";
 import ChildAvatarUpload from "@/components/features/ChildAvatarUpload";
@@ -96,7 +98,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const { user, isAuthenticated, isLoading: userLoading, refreshUser } = useUser();
   const { activeChild, children, setActiveChild } = useActiveChild();
-  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [blwResults, setBlwResults] = useState<BLWTestResult[]>([]);
   const [percentileResults, setPercentileResults] = useState<PercentileResult[]>([]);
   const [solidFoodResults, setSolidFoodResults] = useState<SolidFoodReadinessResult[]>([]);
@@ -104,44 +105,28 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
   const [editingChild, setEditingChild] = useState<any>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    // Initialize with today's date
+    return new Date().toISOString().split('T')[0];
+  });
   
   // Meal plan hook
   const { plan, isLoading: mealPlanLoading } = useMealPlan();
 
-  // Calculate today's meals from the plan
-  const todaysMeals = useMemo(() => {
+  // Calculate selected date's meals from the plan
+  const selectedDayMeals = useMemo(() => {
     if (!plan?.days) return [];
-    const today = new Date().toISOString().split('T')[0];
-    const todayPlan = plan.days.find(d => d.date === today);
-    return todayPlan?.slots || [];
-  }, [plan]);
+    const selectedPlan = plan.days.find(d => d.date === selectedDate);
+    return selectedPlan?.slots || [];
+  }, [plan, selectedDate]);
 
   // Removed mock data - using real data only
 
-  // Today's formatted date
-  const todayFormatted = useMemo(() => {
-    const today = new Date();
-    return today.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
-  }, []);
-
-  // Calculate week days dynamically - 7 days
-  const weekDays = useMemo(() => {
-    const today = new Date();
-    const daysOfWeek = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
-    
-    return Array.from({ length: 7 }, (_, i) => {
-      const dayDate = new Date(today);
-      dayDate.setDate(today.getDate() + i);
-      const dayOfWeek = dayDate.getDay();
-      const isToday = i === 0;
-      
-      return {
-        dayName: daysOfWeek[dayOfWeek],
-        dayNumber: dayDate.getDate(),
-        isToday
-      };
-    });
-  }, []);
+  // Selected day's formatted date
+  const selectedDateFormatted = useMemo(() => {
+    const date = new Date(selectedDate);
+    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', weekday: 'long' });
+  }, [selectedDate]);
 
   // Helper function: Format date with fallback for invalid dates
   const formatDate = (dateStr: string): string => {
@@ -179,14 +164,12 @@ export default function DashboardPage() {
       
       try {
         // Fetch all data in parallel - hatalar sessizce handle edilir
-        const [shoppingListData, blwResultsData, percentileResultsData, solidFoodResultsData] = await Promise.all([
-          userService.getShoppingList().catch(() => []),
+        const [blwResultsData, percentileResultsData, solidFoodResultsData] = await Promise.all([
           toolService.getUserBLWResults().catch(() => []),
           toolService.getUserPercentileResults().catch(() => []),
           toolService.getUserSolidFoodResults().catch(() => []),  // 404 hatası sessizce handle edilir
         ]);
         
-        setShoppingList(shoppingListData || []);
         setBlwResults(blwResultsData || []);
         setPercentileResults(percentileResultsData || []);
         setSolidFoodResults(solidFoodResultsData || []);
@@ -385,48 +368,46 @@ export default function DashboardPage() {
                   <MissingNutrientsAlert childId={activeChild.id} />
                 )}
 
-                {/* Daily Recommendations */}
+                {/* 4. HAFTALIK BAKIŞ - New Position with WeeklyOverview Component */}
                 {activeChild && (
-                  <DailyRecommendations childId={activeChild.id} />
+                  <WeeklyOverview 
+                    selectedDate={selectedDate}
+                    onDateSelect={setSelectedDate}
+                  />
                 )}
 
-                {/* Food Introduction Card */}
-                {activeChild && (
-                  <FoodIntroductionCard childId={activeChild.id} />
-                )}
-
-                {/* Nutrition Summary */}
-                {activeChild && (
-                  <NutritionSummaryCard childId={activeChild.id} />
-                )}
-
-                {/* 2. BUGÜNÜN MENÜSÜ - 3-Column MealCard Grid */}
+                {/* 5. BUGÜNÜN MENÜSÜ - Dynamic based on selected date */}
                 {activeChild && (
                   <div>
                       <div className="flex items-center justify-between mb-4">
                           <div>
                             <h2 className="font-display font-black text-xl text-stone-900">☀️ Bugünün Menüsü</h2>
-                            <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">{todayFormatted}</p>
+                            <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider mt-1">{selectedDateFormatted}</p>
                           </div>
                           <Link href="/dashboard/haftalik-plan" className="text-sm font-bold text-orange-500 hover:underline">Tümünü Gör</Link>
                       </div>
 
                       {/* Meals Grid - 3 Columns */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {todaysMeals.length > 0 ? (
-                            todaysMeals.filter(slot => slot.recipe).slice(0, 3).map((slot, idx) => {
+                          {selectedDayMeals.length > 0 ? (
+                            selectedDayMeals.filter(slot => slot.recipe).slice(0, 3).map((slot, idx) => {
+                              const recipeSlug = slot.recipe?.slug || '';
                               return (
-                                <MealCard
+                                <Link
                                   key={slot.id}
-                                  title={slot.recipe?.title || 'Öğün'}
-                                  category={slot.slot_label}
-                                  time={slot.recipe?.prep_time ? `${slot.recipe.prep_time} dk` : '25 dk'}
-                                  calories="180 kcal"
-                                  icon={MEAL_ICONS[idx % 3]}
-                                  color={MEAL_COLORS[idx % 3]}
-                                  isDone={false}
-                                  onClick={() => {}}
-                                />
+                                  href={`/tarifler/${recipeSlug}`}
+                                  className="block"
+                                >
+                                  <MealCard
+                                    title={slot.recipe?.title || 'Öğün'}
+                                    category={slot.slot_label}
+                                    time={slot.recipe?.prep_time || '25 dk'}
+                                    calories="180 kcal"
+                                    icon={MEAL_ICONS[idx % 3]}
+                                    color={MEAL_COLORS[idx % 3]}
+                                    isDone={false}
+                                  />
+                                </Link>
                               );
                             })
                           ) : (
@@ -434,7 +415,7 @@ export default function DashboardPage() {
                               <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-3">
                                 <i className="fa-solid fa-utensils text-orange-500 text-2xl"></i>
                               </div>
-                              <p className="text-stone-600 mb-4">Bugün için plan oluşturulmamış</p>
+                              <p className="text-stone-600 mb-4">Bu gün için plan oluşturulmamış</p>
                               <Link 
                                 href="/dashboard/haftalik-plan"
                                 className="inline-flex items-center bg-orange-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-orange-600 transition-colors"
@@ -448,92 +429,56 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* 3. HAFTALIK BAKIŞ - 7 Day Calendar */}
+                {/* 6. BUGÜN İÇİN ÖNERİLER - Daily Recommendations */}
                 {activeChild && (
-                  <div className="bg-stone-50 rounded-2xl p-6">
-                      <div className="flex items-center justify-between mb-6">
-                          <h2 className="font-display font-black text-xl text-stone-900">📅 Haftalık Bakış</h2>
-                          <Link href="/dashboard/haftalik-plan" className="text-sm font-bold text-orange-500 hover:underline">Detaylı Plan</Link>
-                      </div>
+                  <DailyRecommendations childId={activeChild.id} />
+                )}
 
-                      {/* Days Navigation - 7 Days */}
-                      <div className="grid grid-cols-7 gap-2">
-                          {weekDays.map((day, index) => (
-                            <button 
-                              key={index}
-                              className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all ${
-                                day.isToday 
-                                  ? 'bg-orange-500 text-white shadow-md transform scale-105' 
-                                  : 'bg-white border border-stone-200 text-stone-400 hover:border-orange-500/50 hover:text-orange-500'
-                              }`}
-                            >
-                              <span className={`text-[10px] font-black uppercase ${day.isToday ? 'opacity-80' : ''}`}>
-                                {day.dayName}
-                              </span>
-                              <span className="text-lg font-bold mt-1">{day.dayNumber}</span>
-                              {day.isToday && <span className="text-[8px] mt-1">●</span>}
-                            </button>
-                          ))}
-                      </div>
-                  </div>
+                {/* 7. BU HAFTA DENENEBİLİR - Food Introduction Card */}
+                {activeChild && (
+                  <FoodIntroductionCard childId={activeChild.id} />
+                )}
+
+                {/* 8. HAFTALIK BESLENME ÖZETİ - Nutrition Summary */}
+                {activeChild && (
+                  <NutritionSummaryCard childId={activeChild.id} />
+                )}
+
+                {/* 9. ALIŞVERİŞ LİSTESİ - Shopping List (moved from sidebar) */}
+                {activeChild && (
+                  <DashboardShoppingList />
                 )}
 
             </div>
         </main>
 
-        {/* SAĞ SIDEBAR - Widgets (hidden on mobile/tablet, shown xl+) */}
-        <aside className="hidden xl:block w-80 bg-white border-l border-stone-100 overflow-y-auto p-6 space-y-6">
+        {/* SAĞ SIDEBAR - Widgets (hidden on mobile/tablet, shown xl+) - UPDATED WIDTH */}
+        <aside className="hidden xl:block w-96 bg-white border-l border-stone-100 overflow-y-auto p-6 space-y-6">
           
           {activeChild && (
             <>
-              {/* Shopping List Widget */}
-              <div className="bg-stone-50 p-5 rounded-2xl border border-stone-200 relative overflow-hidden group hover:border-orange-200 transition-colors">
-                  <div className="absolute -right-4 -top-4 bg-orange-50 w-24 h-24 rounded-full opacity-50 group-hover:scale-110 transition-transform"></div>
-                  <h3 className="font-bold text-stone-800 mb-4 flex items-center relative z-10">
-                      <i className="fa-solid fa-basket-shopping text-orange-500 mr-2"></i> Alışveriş Listesi
-                  </h3>
-                  {shoppingList.length > 0 ? (
-                    <>
-                      <ul className="space-y-3 mb-4 relative z-10">
-                          {shoppingList.slice(0, 3).map((item) => (
-                            <li key={item.id} className="flex items-center text-sm text-stone-600">
-                                <span className={`w-2 h-2 ${item.checked ? 'bg-stone-400' : 'bg-green-400'} rounded-full mr-2`}></span>
-                                <span className={item.checked ? 'line-through text-stone-400' : ''}>{item.ingredient} {item.amount && `(${item.amount})`}</span>
-                            </li>
-                          ))}
-                      </ul>
-                      <Link href="/alisveris-listesi" className="block w-full bg-white text-stone-600 font-bold py-2 rounded-xl text-sm hover:bg-stone-100 transition-colors text-center relative z-10">
-                          Tüm Listeyi Gör ({shoppingList.length})
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-sm text-stone-500 mb-4 relative z-10">Henüz alışveriş listeniz boş.</p>
-                      <Link href="/tarifler" className="block w-full bg-white text-stone-600 font-bold py-2 rounded-xl text-sm hover:bg-stone-100 transition-colors text-center relative z-10">
-                          Tarif Keşfet
-                      </Link>
-                    </>
-                  )}
-              </div>
+              {/* 1. VACCINE CALENDAR WIDGET - MOVED TO FIRST POSITION */}
+              <DashboardVaccineWidget 
+                childId={activeChild.id} 
+                childName={activeChild.name}
+              />
 
-              {/* Growth Tracking Widget */}
+              {/* 2. GROWTH TRACKING WIDGET - Enhanced Design */}
               {percentileResults.length > 0 && (
-                <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-stone-800 flex items-center gap-2">
-                      <i className="fa-solid fa-chart-line text-blue-500"></i>
-                      Büyüme Takibi
-                    </h3>
-                    <Link href="/akilli-asistan/persentil" className="text-sm text-orange-500 hover:underline">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                        <i className="fa-solid fa-chart-line text-blue-500"></i>
+                      </div>
+                      <h3 className="font-bold text-stone-800">Büyüme Takibi</h3>
+                    </div>
+                    <Link href="/akilli-asistan/persentil" className="text-sm text-blue-600 hover:underline font-medium">
                       Yeni
                     </Link>
                   </div>
                   
                   {percentileResults.slice(0, 2).map((result, index) => {
-                    const childName = result.child_id 
-                      ? children.find(c => c.id === result.child_id)?.name 
-                      : null;
-                    
                     const getMeasurementSummary = () => {
                       if (!result.percentiles || result.percentiles.length === 0) return 'Ölçüm yok';
                       
@@ -564,33 +509,43 @@ export default function DashboardPage() {
                     const status = getOverallStatus();
                     
                     return (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-xl mb-2 last:mb-0">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${status.bg}`}>
-                          <i className={`fa-solid ${status.icon} text-sm`}></i>
+                      <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm mb-3 last:mb-0">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${status.bg} shadow-sm`}>
+                          <i className={`fa-solid ${status.icon} text-base`}></i>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-stone-800 text-xs truncate">
+                          <p className="font-bold text-stone-800 text-sm truncate">
                             {getMeasurementSummary()}
                           </p>
-                          <p className="text-[10px] text-stone-500 truncate">
+                          <p className="text-[10px] text-stone-500 mt-0.5 truncate">
                             {formatDate(result.created_at)}
                           </p>
                         </div>
                       </div>
                     );
                   })}
+                  
+                  <Link 
+                    href="/akilli-asistan/persentil"
+                    className="block w-full bg-blue-500 text-white text-center py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm mt-4"
+                  >
+                    <i className="fa-solid fa-chart-line mr-2"></i>
+                    Detaylı Takip
+                  </Link>
                 </div>
               )}
 
-              {/* BLW Readiness Widget */}
+              {/* 3. BLW READINESS WIDGET - Enhanced Design */}
               {blwResults.length > 0 && (
-                <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-stone-800 flex items-center gap-2">
-                      <i className="fa-solid fa-baby text-green-500"></i>
-                      BLW Hazırlık
-                    </h3>
-                    <Link href="/akilli-asistan/blw-testi" className="text-sm text-orange-500 hover:underline">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl border border-green-100 p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                        <i className="fa-solid fa-baby text-green-500"></i>
+                      </div>
+                      <h3 className="font-bold text-stone-800">BLW Hazırlık</h3>
+                    </div>
+                    <Link href="/akilli-asistan/blw-testi" className="text-sm text-green-600 hover:underline font-medium">
                       Test Et
                     </Link>
                   </div>
@@ -605,59 +560,52 @@ export default function DashboardPage() {
                     const category = getBLWResultCategory(result.score);
                     
                     return (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-xl mb-2 last:mb-0">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${category.bg} text-sm`}>
+                      <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm mb-3 last:mb-0">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${category.bg} text-lg shadow-sm`}>
                           {Math.round(result.score)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1">
-                            <p className="font-medium text-stone-800 text-xs">{category.text}</p>
-                            <span className="text-sm">{category.emoji}</span>
+                          <div className="flex items-center gap-2">
+                            <p className="font-bold text-stone-800 text-sm">{category.text}</p>
+                            <span className="text-base">{category.emoji}</span>
                           </div>
-                          <p className="text-[10px] text-stone-500 truncate">
+                          <p className="text-[10px] text-stone-500 mt-0.5 truncate">
                             {formatDate(result.created_at)}
                           </p>
                         </div>
                       </div>
                     );
                   })}
+                  
+                  <Link 
+                    href="/akilli-asistan/blw-testi"
+                    className="block w-full bg-green-500 text-white text-center py-2.5 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors shadow-sm mt-4"
+                  >
+                    <i className="fa-solid fa-baby mr-2"></i>
+                    Yeni Test Yap
+                  </Link>
                 </div>
               )}
 
-              {/* Daily Nutrition Widget */}
-              <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
-                <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                  <i className="fa-solid fa-apple-whole text-green-500 mr-2"></i> Günlük Beslenme
-                </h3>
-                <NutritionSummaryCard childId={activeChild.id} />
-              </div>
-
-              {/* Vaccine Calendar Widget */}
-              <div className="bg-stone-50 rounded-2xl border border-stone-200 p-5">
-                <DashboardVaccineWidget 
-                  childId={activeChild.id} 
-                  childName={activeChild.name}
-                />
-              </div>
-
-              {/* Quick Tools Widget */}
-              <div className="bg-stone-50 p-5 rounded-2xl border border-stone-200">
-                  <h3 className="font-bold text-stone-800 mb-4 flex items-center">
-                      <i className="fa-solid fa-toolbox text-blue-400 mr-2"></i> Hızlı Araçlar
+              {/* 4. QUICK TOOLS WIDGET */}
+              <div className="bg-stone-50 p-6 rounded-3xl border border-stone-200">
+                  <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
+                      <i className="fa-solid fa-toolbox text-blue-400 text-lg"></i> 
+                      <span>Hızlı Araçlar</span>
                   </h3>
-                  <div className="space-y-2">
-                      <Link href="/beslenme-rehberi" className="flex items-center gap-3 bg-white hover:bg-blue-50 p-3 rounded-xl transition-colors">
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                              <i className="fa-solid fa-magnifying-glass text-blue-500"></i>
+                  <div className="space-y-3">
+                      <Link href="/beslenme-rehberi" className="flex items-center gap-3 bg-white hover:bg-blue-50 p-4 rounded-xl transition-all border border-stone-100 hover:border-blue-200 hover:shadow-sm">
+                          <div className="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
+                              <i className="fa-solid fa-magnifying-glass text-blue-500 text-lg"></i>
                           </div>
                           <div className="flex-1">
                               <p className="text-sm font-bold text-stone-800">Gıda Ara</p>
                               <p className="text-xs text-stone-500">Besin değerleri</p>
                           </div>
                       </Link>
-                      <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white hover:bg-purple-50 p-3 rounded-xl transition-colors">
-                          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                              <i className="fa-solid fa-robot text-purple-500"></i>
+                      <Link href="/akilli-asistan" className="flex items-center gap-3 bg-white hover:bg-purple-50 p-4 rounded-xl transition-all border border-stone-100 hover:border-purple-200 hover:shadow-sm">
+                          <div className="w-11 h-11 bg-purple-100 rounded-xl flex items-center justify-center">
+                              <i className="fa-solid fa-robot text-purple-500 text-lg"></i>
                           </div>
                           <div className="flex-1">
                               <p className="text-sm font-bold text-stone-800">AI Asistan</p>
