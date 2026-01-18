@@ -45,13 +45,6 @@ export default function EmbedContainer({ embedData }: EmbedContainerProps) {
 
   const { title, icon, color } = getEmbedInfo(embedData.type);
 
-  // Determine grid columns based on number of items
-  const getGridCols = (itemCount: number) => {
-    if (itemCount === 1) return 'grid-cols-1';
-    if (itemCount === 2) return 'grid-cols-1 md:grid-cols-2';
-    return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
-  };
-
   return (
     <div className="my-12 p-8 bg-gradient-to-br from-gray-50 to-slate-50 rounded-3xl border border-gray-100">
       {/* Header */}
@@ -62,8 +55,8 @@ export default function EmbedContainer({ embedData }: EmbedContainerProps) {
         </h3>
       </div>
 
-      {/* Grid of embed cards */}
-      <div className={`grid ${getGridCols(embedData.items.length)} gap-6`}>
+      {/* Single column layout - stacked cards */}
+      <div className="flex flex-col gap-4">
         {embedData.items.map((item) => (
           <EmbedCard key={item.id} item={item} />
         ))}
