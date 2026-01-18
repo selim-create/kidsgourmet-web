@@ -149,7 +149,20 @@ export const userService = {
 
   // Alışveriş Listesi
   getShoppingList: async (): Promise<ShoppingListItem[]> => {
-    return await fetchAuthAPI<ShoppingListItem[]>(API_ENDPOINTS.USER_SHOPPING_LIST);
+    // Backend dönen format: { id: string, item: string, quantity: string, checked: boolean }
+    // Frontend format: { id: number, ingredient: string, amount?: string, checked: boolean, category?: ShoppingCategory }
+    const backendResponse = await fetchAuthAPI<any[]>(API_ENDPOINTS.USER_SHOPPING_LIST);
+    
+    // Transform backend response to frontend format
+    return backendResponse.map((item: any) => ({
+      id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
+      ingredient: item.item || item.ingredient || '',
+      amount: item.quantity || item.amount,
+      checked: item.checked || false,
+      category: item.category,
+      recipe_id: item.recipe_id,
+      recipe_title: item.recipe_title,
+    }));
   },
 
   addToShoppingList: async (items: Omit<ShoppingListItem, 'id'>[]): Promise<ShoppingListItem[]> => {
@@ -160,14 +173,27 @@ export const userService = {
     
     for (const item of items) {
       try {
-        const response = await fetchAuthAPI<ShoppingListItem>(API_ENDPOINTS.USER_SHOPPING_LIST, {
+        // Backend'e göndermek için format dönüşümü
+        const backendResponse = await fetchAuthAPI<any>(API_ENDPOINTS.USER_SHOPPING_LIST, {
           method: 'POST',
           body: JSON.stringify({
             item: item.ingredient,      // 'ingredient' -> 'item'
             quantity: item.amount || '1 adet',  // 'amount' -> 'quantity'
           }),
         });
-        addedItems.push(response);
+        
+        // Backend response'unu frontend formatına dönüştür
+        const transformedItem: ShoppingListItem = {
+          id: typeof backendResponse.id === 'string' ? parseInt(backendResponse.id, 10) : backendResponse.id,
+          ingredient: backendResponse.item || backendResponse.ingredient || item.ingredient,
+          amount: backendResponse.quantity || backendResponse.amount || item.amount,
+          checked: backendResponse.checked || false,
+          category: item.category, // Frontend'den gelen kategoriyi koru
+          recipe_id: backendResponse.recipe_id,
+          recipe_title: backendResponse.recipe_title,
+        };
+        
+        addedItems.push(transformedItem);
       } catch (error) {
         console.error(`Failed to add item: ${item.ingredient}`, error);
         failedItems.push(item.ingredient);

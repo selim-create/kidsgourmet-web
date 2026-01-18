@@ -428,6 +428,7 @@ export interface ShoppingListItem {
   ingredient: string;
   amount?: string;
   checked: boolean;
+  category?: ShoppingCategory;
   recipe_id?: number;
   recipe_title?: string;
 }

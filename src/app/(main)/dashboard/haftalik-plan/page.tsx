@@ -106,12 +106,19 @@ export default function WeeklyPlanPage() {
       return;
     }
 
+    // Backend endpoint henüz mevcut değil - kullanıcıya bilgi ver
+    toast.info('Bu özellik yakında gelecek! 🚀', {
+      description: 'Şu an için malzemeleri beslenme rehberinden manuel olarak ekleyebilirsiniz.',
+      duration: 5000,
+    });
+    
+    // Gelecekte backend endpoint hazır olduğunda bu kod aktif edilecek:
+    /*
     setIsCreatingShoppingList(true);
     try {
       const response = await mealPlanService.generateShoppingList(plan.id);
       if (response.success) {
         toast.success(`${response.total_count} ürün eklendi! 🛒`);
-        // Yönlendirme yapabiliriz
         window.location.href = '/alisveris-listesi';
       }
     } catch {
@@ -119,6 +126,7 @@ export default function WeeklyPlanPage() {
     } finally {
       setIsCreatingShoppingList(false);
     }
+    */
   };
 
   // Tarif arama

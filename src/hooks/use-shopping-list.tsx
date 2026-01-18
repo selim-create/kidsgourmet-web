@@ -1,10 +1,39 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ShoppingListItem } from '@/lib/types';
+import { ShoppingListItem, ShoppingCategory } from '@/lib/types';
 import { userService } from '@/services/user-service';
 import { useUser } from './use-user';
 import { toast } from 'sonner';
+
+/**
+ * Malzeme adına göre kategori tahmini yap
+ */
+const guessCategory = (ingredientName: string): ShoppingCategory => {
+  const name = ingredientName.toLowerCase();
+  
+  // Süt Ürünleri
+  if (/süt|yoğurt|peynir|tereyağ|kaymak|kefir|lor|çökelek|labne|ayran/i.test(name)) {
+    return 'dairy';
+  }
+  
+  // Et & Protein
+  if (/et|tavuk|balık|yumurta|köfte|sucuk|sosis|jambon|hindi|kuzu|dana|kıyma|biftek|pirzola|karides|somon|ton|levrek|çupra|sardalya|hamsi|uskumru|alabalık/i.test(name)) {
+    return 'meat_protein';
+  }
+  
+  // Meyve & Sebze
+  if (/elma|armut|muz|portakal|mandalina|üzüm|çilek|kiraz|şeftali|kayısı|erik|karpuz|kavun|avokado|domates|salatalık|biber|patlıcan|kabak|havuç|patates|soğan|sarımsak|brokoli|karnabahar|ıspanak|marul|lahana|pırasa|kereviz|enginar|bamya|fasulye|bezelye|nane|maydanoz|dereotu|roka|semizotu|börülce|kırmızı|yeşil|turp|pancar/i.test(name)) {
+    return 'fruits_vegetables';
+  }
+  
+  // Kuru Gıda
+  if (/un|şeker|tuz|pirinç|bulgur|makarna|nohut|mercimek|börülce|yulaf|mısır|ekmek|bisküvi|kraker|gevrek|kahve|çay|kakao|bal|reçel|zeytinyağ|ayçiçek|sıvıyağ|margarin|pekmez|tahin|fıstık|fındık|badem|ceviz|susam|irmik|kepek|kinoa/i.test(name)) {
+    return 'grains';
+  }
+  
+  return 'other';
+};
 
 export function useShoppingList() {
   const { isAuthenticated } = useUser();
@@ -35,7 +64,13 @@ export function useShoppingList() {
     
     setIsLoading(true);
     try {
-      const added = await userService.addToShoppingList(newItems);
+      // Kategorisi olmayan itemlara kategori tahmin et
+      const itemsWithCategory = newItems.map(item => ({
+        ...item,
+        category: item.category || guessCategory(item.ingredient),
+      }));
+      
+      const added = await userService.addToShoppingList(itemsWithCategory);
       setItems(prev => [...prev, ...added]);
       
       // Başarılı eklenen item sayısına göre mesaj göster
