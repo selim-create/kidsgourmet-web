@@ -16,6 +16,8 @@ import DashboardSidebar from '@/components/layout/DashboardSidebar';
 // Constants
 const SEARCH_DEBOUNCE_MS = 300;
 const PLACEHOLDER_RECIPE_IMAGE = 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T';
+const MOBILE_BREAKPOINT = 768; // Tailwind's md breakpoint
+const DESKTOP_SIDEBAR_BREAKPOINT = 1280; // Tailwind's xl breakpoint
 
 // Lightweight recipe type for sidebar cards
 interface RecipeCardLite {
@@ -68,20 +70,29 @@ export default function WeeklyPlanPage() {
 
   // Set default view mode based on screen size after mount
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setViewMode('daily');
-      } else {
-        setViewMode('weekly');
-      }
+      // Clear any pending timeout
+      clearTimeout(timeoutId);
+      
+      // Debounce the state update to avoid rapid changes
+      timeoutId = setTimeout(() => {
+        const newViewMode = window.innerWidth < MOBILE_BREAKPOINT ? 'daily' : 'weekly';
+        setViewMode(newViewMode);
+      }, 150);
     };
     
     // Set initial view mode
-    handleResize();
+    const initialViewMode = window.innerWidth < MOBILE_BREAKPOINT ? 'daily' : 'weekly';
+    setViewMode(initialViewMode);
     
-    // Optional: listen to resize events
+    // Listen to resize events
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   // Alışveriş listesi oluştur
@@ -140,7 +151,7 @@ export default function WeeklyPlanPage() {
   useEffect(() => {
     if (selectedSlotId) {
       // Use matchMedia for better SSR compatibility
-      const isMobile = window.matchMedia('(max-width: 1279px)').matches;
+      const isMobile = window.matchMedia(`(max-width: ${DESKTOP_SIDEBAR_BREAKPOINT - 1}px)`).matches;
       if (isMobile) {
         setIsMobileRecipePoolOpen(true);
       }
@@ -357,7 +368,7 @@ export default function WeeklyPlanPage() {
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
             Çocuğunuzun yaşına, alerjenlerine ve beslenme ihtiyaçlarına özel 
             haftalık menü planı oluşturun. Yapay zeka destekli öneri sistemi ile 
-            sağlıklı beslenme hiç bu kadar kolay olmamıştı.
+            sağlıklı beslenme hiç bu kadar kolay olmamıştır.
           </p>
           
           {/* Özellikler */}
@@ -442,7 +453,7 @@ export default function WeeklyPlanPage() {
               </details>
               <details className="bg-white rounded-xl p-4 shadow-sm">
                 <summary className="font-bold text-slate-800 cursor-pointer">Planı değiştirebilir miyim?</summary>
-                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya &apos;dışarıda yiyoruz&apos; olarak işaretleyebilirsiniz.</p>
+                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya 'dışarıda yiyoruz' olarak işaretleyebilirsiniz.</p>
               </details>
             </div>
           </div>
