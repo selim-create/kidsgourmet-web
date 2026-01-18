@@ -55,13 +55,8 @@ export default function WeeklyPlanPage() {
 
   const [isCreatingShoppingList, setIsCreatingShoppingList] = useState(false);
   
-  // View mode state - default to daily on mobile
-  const [viewMode, setViewMode] = useState<'weekly' | 'daily'>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 768 ? 'daily' : 'weekly';
-    }
-    return 'weekly';
-  });
+  // View mode state - default to weekly, will be set to daily on mobile after mount
+  const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
   
   // Yeni state'ler
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,6 +65,24 @@ export default function WeeklyPlanPage() {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [isChildDropdownOpen, setIsChildDropdownOpen] = useState(false);
   const [isMobileRecipePoolOpen, setIsMobileRecipePoolOpen] = useState(false);
+
+  // Set default view mode based on screen size after mount
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setViewMode('daily');
+      } else {
+        setViewMode('weekly');
+      }
+    };
+    
+    // Set initial view mode
+    handleResize();
+    
+    // Optional: listen to resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Alışveriş listesi oluştur
   const handleCreateShoppingList = async () => {
@@ -125,8 +138,12 @@ export default function WeeklyPlanPage() {
 
   // Open mobile sheet when slot is selected on mobile
   useEffect(() => {
-    if (selectedSlotId && typeof window !== 'undefined' && window.innerWidth < 1280) {
-      setIsMobileRecipePoolOpen(true);
+    if (selectedSlotId) {
+      // Use matchMedia for better SSR compatibility
+      const isMobile = window.matchMedia('(max-width: 1279px)').matches;
+      if (isMobile) {
+        setIsMobileRecipePoolOpen(true);
+      }
     }
   }, [selectedSlotId]);
 
@@ -425,7 +442,7 @@ export default function WeeklyPlanPage() {
               </details>
               <details className="bg-white rounded-xl p-4 shadow-sm">
                 <summary className="font-bold text-slate-800 cursor-pointer">Planı değiştirebilir miyim?</summary>
-                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya &quot;dışarıda yiyoruz&quot; olarak işaretleyebilirsiniz.</p>
+                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya &apos;dışarıda yiyoruz&apos; olarak işaretleyebilirsiniz.</p>
               </details>
             </div>
           </div>
@@ -885,7 +902,7 @@ export default function WeeklyPlanPage() {
                   <i className="fa-solid fa-xmark text-gray-500"></i>
                 </button>
               </div>
-              <div className="overflow-y-auto p-4 space-y-4" style={{ maxHeight: 'calc(80vh - 60px)' }}>
+              <div className="overflow-y-auto p-4 space-y-4 max-h-[calc(80vh-60px)]">
                 {/* Arama */}
                 <div className="relative">
                   <input
