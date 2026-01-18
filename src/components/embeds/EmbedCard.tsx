@@ -29,6 +29,9 @@ const TOOL_URL_MAPPING: { [key: string]: string } = {
   'hygiene_calculator': '/akilli-asistan/hijyen-hesaplayici',
 };
 
+// Regex pattern for matching 24+ months age group variations
+const AGE_24_PLUS_PATTERN = /\(24\+?\s*(Ay|yaş)/i;
+
 // Get background color for age group badge
 const getAgeGroupColor = (ageGroup?: string | null, providedColor?: string): string => {
   if (providedColor) return providedColor;
@@ -39,7 +42,7 @@ const getAgeGroupColor = (ageGroup?: string | null, providedColor?: string): str
   if (ageGroup.includes('6-8')) return AGE_GROUP_COLORS['6-8'];
   if (ageGroup.includes('9-11')) return AGE_GROUP_COLORS['9-11'];
   if (ageGroup.includes('12-24')) return AGE_GROUP_COLORS['12-24'];
-  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i)) return AGE_GROUP_COLORS['2+'];
+  if (ageGroup.includes('2+') || AGE_24_PLUS_PATTERN.test(ageGroup)) return AGE_GROUP_COLORS['2+'];
   
   return '#22C55E';
 };
@@ -49,7 +52,7 @@ const getAgeGroupTextColor = (ageGroup?: string | null): string => {
   if (!ageGroup) return '#FFFFFF';
   
   // Light backgrounds need dark text for readability
-  if (ageGroup.includes('2+') || ageGroup.match(/\(24\+?\s*(Ay|yaş)/i) || ageGroup.toLowerCase().includes('gurme')) {
+  if (ageGroup.includes('2+') || AGE_24_PLUS_PATTERN.test(ageGroup) || ageGroup.toLowerCase().includes('gurme')) {
     return '#92400E'; // Amber-800 - Dark brown for yellow background
   }
   if (ageGroup.includes('9-11') || ageGroup.toLowerCase().includes('keşif')) {
@@ -185,7 +188,7 @@ function ToolEmbedCard({ item }: { item: ToolEmbedItem }) {
   const safeIconClass = sanitizeIconClass(item.tool_icon || 'fa-solid fa-wand-magic-sparkles');
   
   // Get correct URL from mapping or use item.slug as fallback
-  const toolUrl = TOOL_URL_MAPPING[item.tool_type] || `/akilli-asistan/${item.slug}`;
+  const toolUrl = TOOL_URL_MAPPING[item.tool_type] || (item.slug ? `/akilli-asistan/${item.slug}` : '/akilli-asistan');
   
   return (
     <Link 
