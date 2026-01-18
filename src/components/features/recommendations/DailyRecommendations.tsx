@@ -33,11 +33,10 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
   }
   
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900">
-          <i className="fa-solid fa-sparkles text-orange-500 mr-2"></i>
-          Bugün İçin Öneriler
+    <div className="bg-white rounded-3xl shadow-sm border border-stone-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-display font-black text-xl text-stone-900">
+          ✨ Bugün İçin Öneriler
         </h2>
       </div>
       
@@ -46,9 +45,9 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
           <Link 
             key={(recipe as any)?.recipe_id || recipe?.id || Math.random()}
             href={`/tarifler/${recipe?.slug || ''}`}
-            className="group block"
+            className="group block bg-stone-50 rounded-2xl overflow-hidden hover:shadow-md transition-all border border-stone-100 hover:border-orange-200"
           >
-            <div className="relative aspect-[4/3] rounded-lg overflow-hidden mb-3">
+            <div className="relative aspect-[4/3] overflow-hidden">
               {recipe?.image && (
                 <Image
                   src={recipe.image}
@@ -60,38 +59,50 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
               )}
               {(recipe as any)?.age_group && (
                 <div 
-                  className="absolute top-2 left-2 px-2 py-1 rounded-full text-white text-xs font-medium"
+                  className="absolute top-2 left-2 px-3 py-1 rounded-full text-white text-xs font-bold shadow-sm"
                   style={{ backgroundColor: (recipe as any).age_group_color || '#FF8A65' }}
                 >
                   {(recipe as any).age_group}
                 </div>
               )}
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-orange-500 transition-colors line-clamp-2">
-              {recipe?.title || 'Tarif'}
-            </h3>
-            <div className="flex items-center text-sm text-gray-600">
-              <i className="fa-solid fa-clock mr-1"></i>
-              {(recipe as any)?.prep_time}
-            </div>
-            {(recipe as any)?.score && (
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-xs text-purple-600 font-bold">
-                  %{Math.round((recipe as any).score)} uyumlu
-                </span>
+            <div className="p-4">
+              <h3 className="font-bold text-stone-900 mb-2 group-hover:text-orange-500 transition-colors line-clamp-2 text-sm">
+                {recipe?.title || 'Tarif'}
+              </h3>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-stone-600">
+                {(recipe as any)?.prep_time && (
+                  <span className="flex items-center gap-1">
+                    <i className="fa-regular fa-clock text-orange-500"></i>
+                    {(recipe as any).prep_time}
+                  </span>
+                )}
+                {(recipe as any)?.meal_type && (
+                  <span className="flex items-center gap-1">
+                    <i className="fa-solid fa-utensils text-green-500"></i>
+                    {(recipe as any).meal_type}
+                  </span>
+                )}
               </div>
-            )}
+              {(recipe as any)?.score && (
+                <div className="mt-2 inline-flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-full">
+                  <span className="text-xs text-purple-600 font-bold">
+                    %{Math.round((recipe as any).score)} uyumlu
+                  </span>
+                </div>
+              )}
+            </div>
           </Link>
         ))}
       </div>
       
-      <div className="mt-4 text-center">
+      <div className="mt-6 text-center">
         <Link 
           href="/tarifler"
-          className="inline-flex items-center text-orange-500 hover:text-orange-600 font-medium text-sm"
+          className="inline-flex items-center text-orange-500 hover:text-orange-600 font-bold text-sm transition-colors"
         >
           Tüm Tarifleri Görüntüle
-          <i className="fa-solid fa-chevron-right ml-1 text-xs"></i>
+          <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
         </Link>
       </div>
     </div>
