@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useDashboardRecommendations } from '@/hooks/useDashboardRecommendations';
 import { useUser } from '@/hooks/use-user';
 
@@ -8,12 +7,16 @@ interface PersonalizedRecipePoolProps {
   childId: string;
   mealType?: string;
   limit?: number;
+  onSelectRecipe?: (recipeId: number) => void;  // Yeni prop
+  isSelectable?: boolean;                        // Yeni prop
 }
 
 export default function PersonalizedRecipePool({ 
   childId, 
   mealType,
-  limit = 12 
+  limit = 12,
+  onSelectRecipe,
+  isSelectable = false
 }: PersonalizedRecipePoolProps) {
   const { isAuthenticated } = useUser();
   // useDashboardRecommendations kullan - bu doğru response mapping yapıyor
@@ -66,38 +69,50 @@ export default function PersonalizedRecipePool({
     <div className="space-y-2">
       <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
         <i className="fa-solid fa-wand-magic-sparkles text-purple-500 mr-1"></i>
-        Önerilen Tarifler
+        Kişisel Öneriler
       </h4>
       
-      {recipeList.slice(0, 5).map((recipe) => (
-        <Link
-          key={(recipe as any)?.recipe_id || recipe?.id || Math.random()}
-          href={`/tarifler/${recipe?.slug || ''}`}
-          className="flex items-center gap-3 p-2 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-        >
-          {recipe?.image && (
-            <img
-              src={recipe.image}
-              alt={recipe?.title || 'Tarif'}
-              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-              loading="lazy"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-800 truncate">
-              {recipe?.title || 'Tarif'}
-            </p>
+      {recipeList.slice(0, limit).map((recipe) => {
+        const recipeId = (recipe as any)?.recipe_id || recipe?.id;
+        
+        return (
+          <div
+            key={recipeId || Math.random()}
+            onClick={() => isSelectable && recipeId && onSelectRecipe?.(recipeId)}
+            className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
+              isSelectable 
+                ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300' 
+                : 'border-gray-100 hover:bg-gray-50'
+            }`}
+          >
+            {recipe?.image && (
+              <img
+                src={recipe.image}
+                alt={recipe?.title || 'Tarif'}
+                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                loading="lazy"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-800 truncate">
+                {recipe?.title || 'Tarif'}
+              </p>
+              {recipe?.prep_time && (
+                <p className="text-xs text-gray-500">
+                  <i className="fa-regular fa-clock mr-1"></i>
+                  {recipe.prep_time}
+                </p>
+              )}
+            </div>
+            {isSelectable && (
+              <i className="fa-solid fa-plus text-orange-500 text-sm flex-shrink-0"></i>
+            )}
           </div>
-          {(recipe as any)?.score && (
-            <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-1 rounded">
-              %{Math.round((recipe as any).score)}
-            </span>
-          )}
-        </Link>
-      ))}
+        );
+      })}
     </div>
   );
 }
