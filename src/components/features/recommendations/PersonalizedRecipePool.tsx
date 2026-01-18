@@ -67,8 +67,8 @@ export default function PersonalizedRecipePool({
   
   return (
     <div className="space-y-2">
-      <h4 className="text-xs font-bold text-gray-500 uppercase mb-2">
-        <i className="fa-solid fa-wand-magic-sparkles text-purple-500 mr-1"></i>
+      <h4 className="text-xs font-black text-stone-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+        <i className="fa-solid fa-wand-magic-sparkles text-orange-500 mr-1"></i>
         Kişisel Öneriler
       </h4>
       
@@ -79,36 +79,40 @@ export default function PersonalizedRecipePool({
           <div
             key={recipeId || Math.random()}
             onClick={() => isSelectable && recipeId && onSelectRecipe?.(recipeId)}
-            className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
+            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
               isSelectable 
-                ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300' 
-                : 'border-gray-100 hover:bg-gray-50'
+                ? 'border-stone-100 bg-white shadow-sm cursor-pointer hover:shadow-md hover:border-orange-200 group' 
+                : 'border-stone-100 hover:bg-stone-50'
             }`}
           >
             {recipe?.image && (
-              <img
-                src={recipe.image}
-                alt={recipe?.title || 'Tarif'}
-                className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                loading="lazy"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
+              <div className="w-14 h-14 rounded-lg bg-stone-50 flex items-center justify-center overflow-hidden shadow-inner flex-shrink-0">
+                <img
+                  src={recipe.image}
+                  alt={recipe?.title || 'Tarif'}
+                  className="w-full h-full object-cover rounded-lg"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-800 truncate">
+              <p className="text-sm font-bold text-stone-800 line-clamp-1 group-hover:text-orange-600 transition-colors">
                 {recipe?.title || 'Tarif'}
               </p>
               {recipe?.prep_time && (
-                <p className="text-xs text-gray-500">
-                  <i className="fa-regular fa-clock mr-1"></i>
+                <p className="text-[10px] text-stone-400 flex items-center gap-0.5 font-medium mt-1.5">
+                  <i className="fa-regular fa-clock text-[9px]"></i>
                   {recipe.prep_time}
                 </p>
               )}
             </div>
             {isSelectable && (
-              <i className="fa-solid fa-plus text-orange-500 text-sm flex-shrink-0"></i>
+              <div className="w-8 h-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-400 group-hover:bg-orange-500 group-hover:text-white transition-colors shadow-sm">
+                <i className="fa-solid fa-plus text-sm"></i>
+              </div>
             )}
           </div>
         );

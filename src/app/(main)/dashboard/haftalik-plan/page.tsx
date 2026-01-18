@@ -317,7 +317,7 @@ export default function WeeklyPlanPage() {
   }
 
   return (
-    <div className="flex min-h-screen relative">
+    <div className="flex min-h-screen relative bg-[#FDFBF7]">
 
         {/* DESKTOP SIDEBAR */}
         <DashboardSidebar activePage="haftalik-plan" />
@@ -326,31 +326,29 @@ export default function WeeklyPlanPage() {
         <main className="flex-1 w-full min-w-0 flex flex-col h-screen overflow-hidden">
             
             {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100 flex-shrink-0">
+            <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-stone-100 flex-shrink-0">
                 <span className="font-display font-bold text-lg text-slate-800">Haftalık Plan</span>
                 <div className="flex gap-2">
-                    <button className="text-gray-500 text-xl"><i className="fa-solid fa-print"></i></button>
+                    <button className="text-stone-500 text-xl"><i className="fa-solid fa-print"></i></button>
                     <button className="text-orange-500 text-xl"><i className="fa-solid fa-share-nodes"></i></button>
                 </div>
             </div>
 
             {/* PLAN HEADER & CONTROLS */}
-            <div className="bg-white border-b border-gray-100 p-4 md:p-6 z-20 shadow-sm md:shadow-none flex-shrink-0">
-                <div className="max-w-6xl mx-auto">
+            <header className="h-20 bg-white border-b border-stone-100 flex items-center justify-between px-6 flex-shrink-0 z-20">
+                <div className="max-w-full mx-auto w-full flex items-center justify-between">
                     
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-                        
-                        {/* Child Switcher & Date Nav */}
-                        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                        {/* Left: Child Switcher & Date Nav */}
+                        <div className="flex items-center gap-6">
                             {/* Child Dropdown */}
                             {userChildren.length > 0 && (
                               <div className="relative">
                                 <button 
                                   onClick={() => setIsChildDropdownOpen(!isChildDropdownOpen)}
-                                  className="bg-orange-50 px-4 py-2 rounded-full flex items-center gap-2 border border-orange-100 hover:bg-orange-100 transition-colors"
+                                  className="flex items-center gap-2 bg-stone-100 hover:bg-stone-200 px-4 py-2 rounded-full text-sm font-bold text-stone-800 transition-colors"
                                 >
-                                  <span className="text-sm font-bold text-slate-800">{activeChild.name}</span>
-                                  <i className={`fa-solid fa-chevron-down text-xs text-orange-500 transition-transform ${isChildDropdownOpen ? 'rotate-180' : ''}`}></i>
+                                  <span>{activeChild.name}</span>
+                                  <i className={`fa-solid fa-chevron-down text-sm transition-transform ${isChildDropdownOpen ? 'rotate-180' : ''}`}></i>
                                 </button>
                                 
                                 {isChildDropdownOpen && userChildren.length > 1 && (
@@ -360,7 +358,7 @@ export default function WeeklyPlanPage() {
                                       className="fixed inset-0 z-40" 
                                       onClick={() => setIsChildDropdownOpen(false)} 
                                     />
-                                    <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-50 p-1">
+                                    <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-stone-100 z-50 p-1">
                                       {userChildren.map(child => (
                                         <button 
                                           key={child.id} 
@@ -368,7 +366,7 @@ export default function WeeklyPlanPage() {
                                             setActiveChild(child);
                                             setIsChildDropdownOpen(false);
                                           }}
-                                          className={`w-full text-left flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg ${
+                                          className={`w-full text-left flex items-center gap-2 p-2 hover:bg-stone-50 rounded-lg ${
                                             activeChild?.id === child.id ? 'bg-orange-50 text-orange-600' : ''
                                           }`}
                                         >
@@ -387,105 +385,105 @@ export default function WeeklyPlanPage() {
                               </div>
                             )}
 
-                            {/* Date Nav - Geliştirilmiş */}
-                            <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-200">
-                                <button 
-                                  onClick={goToPreviousWeek}
-                                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm text-gray-500 transition-all"
-                                  title="Önceki hafta"
-                                >
-                                    <i className="fa-solid fa-chevron-left"></i>
-                                </button>
-                                <div className="px-4 text-center">
-                                  <span className="text-sm font-bold text-slate-700 block">{weekRange}</span>
-                                  {isCurrentWeek && (
-                                    <span className="text-[10px] text-orange-500 font-medium">Bu Hafta</span>
-                                  )}
-                                </div>
-                                <button 
-                                  onClick={goToNextWeek}
-                                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white hover:shadow-sm text-gray-500 transition-all"
-                                  title="Sonraki hafta"
-                                >
-                                    <i className="fa-solid fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            
-                            {/* View Mode Toggle */}
-                            <div className="flex bg-gray-100 rounded-lg p-1">
+                            {/* Date Navigator - Rounded pill style */}
+                            <div className="flex items-center gap-3 bg-white border border-stone-200 rounded-full px-2 py-1">
                               <button 
-                                onClick={() => setViewMode('weekly')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                                  viewMode === 'weekly' ? 'bg-white shadow text-orange-600' : 'text-gray-600'
-                                }`}
+                                onClick={goToPreviousWeek}
+                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-400 hover:text-orange-500 transition-colors"
+                                title="Önceki hafta"
                               >
-                                <i className="fa-solid fa-calendar-week mr-1"></i> Haftalık
+                                <i className="fa-solid fa-chevron-left"></i>
                               </button>
+                              <div className="flex flex-col items-center px-2 w-40">
+                                <span className="text-sm font-bold text-stone-800">{weekRange}</span>
+                                {isCurrentWeek && (
+                                  <span className="text-[9px] text-orange-500 font-medium">Bu Hafta</span>
+                                )}
+                              </div>
                               <button 
-                                onClick={() => setViewMode('daily')}
-                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                                  viewMode === 'daily' ? 'bg-white shadow text-orange-600' : 'text-gray-600'
-                                }`}
+                                onClick={goToNextWeek}
+                                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-400 hover:text-orange-500 transition-colors"
+                                title="Sonraki hafta"
                               >
-                                <i className="fa-solid fa-calendar-day mr-1"></i> Günlük
+                                <i className="fa-solid fa-chevron-right"></i>
                               </button>
                             </div>
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex gap-3 w-full md:w-auto">
+                        {/* Right: View Toggle & Actions */}
+                        <div className="flex items-center gap-3">
+                            {/* View Mode Toggle */}
+                            <div className="flex bg-stone-100 rounded-lg p-1">
+                              <button 
+                                onClick={() => setViewMode('daily')}
+                                className={`w-9 h-9 rounded-md transition-all flex items-center justify-center ${
+                                  viewMode === 'daily' ? 'bg-white shadow text-orange-600' : 'text-stone-400 hover:text-stone-600'
+                                }`}
+                              >
+                                <i className="fa-solid fa-list text-lg"></i>
+                              </button>
+                              <button 
+                                onClick={() => setViewMode('weekly')}
+                                className={`w-9 h-9 rounded-md transition-all flex items-center justify-center ${
+                                  viewMode === 'weekly' ? 'bg-white shadow text-orange-600' : 'text-stone-400 hover:text-stone-600'
+                                }`}
+                              >
+                                <i className="fa-solid fa-border-all text-lg"></i>
+                              </button>
+                            </div>
+                            
+                            <div className="h-8 w-px bg-stone-200 mx-1"></div>
+
                             <button 
                               onClick={handleCreateShoppingList}
                               disabled={!plan || isCreatingShoppingList}
-                              className="flex-1 md:flex-none bg-orange-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-orange-600 transition-colors flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-200 flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isCreatingShoppingList ? (
-                                  <><i className="fa-solid fa-spinner fa-spin"></i> Oluşturuluyor...</>
+                                  <><i className="fa-solid fa-spinner fa-spin text-lg"></i> Oluşturuluyor...</>
                                 ) : (
-                                  <><i className="fa-solid fa-basket-shopping"></i> Liste Oluştur</>
+                                  <><i className="fa-solid fa-basket-shopping text-lg"></i> Liste Oluştur</>
                                 )}
                             </button>
-                            <button className="hidden md:flex bg-white border border-gray-200 text-gray-600 px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors gap-2 items-center">
-                                <i className="fa-solid fa-print"></i> Yazdır
-                            </button>
                         </div>
-                    </div>
+                    
+                </div>
+            </header>
 
-                    {/* Weekly Stats Summary */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Stats Bar */}
+            <div className="bg-white border-b border-stone-100 p-4 flex-shrink-0">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
                         <StatCard 
-                          icon={<i className="fa-solid fa-leaf text-green-600"></i>}
+                          icon={<i className="fa-solid fa-carrot"></i>}
                           label="Sebze"
                           value={`${stats.vegetables_servings} Porsiyon`}
                           color="green"
                         />
                         <StatCard 
-                          icon={<i className="fa-solid fa-egg text-blue-600"></i>}
+                          icon={<i className="fa-solid fa-drumstick-bite"></i>}
                           label="Protein"
                           value={`${stats.protein_servings} Porsiyon`}
-                          color="blue"
+                          color="red"
                         />
                         <StatCard 
-                          icon={<i className="fa-solid fa-wheat-awn text-yellow-600"></i>}
+                          icon={<i className="fa-solid fa-wheat-awn"></i>}
                           label="Tahıl"
                           value={`${stats.grains_servings} Porsiyon`}
                           color="yellow"
                         />
                         <StatCard 
-                          icon={<i className="fa-solid fa-triangle-exclamation text-red-600"></i>}
+                          icon={<i className="fa-solid fa-triangle-exclamation"></i>}
                           label="Alerjen"
-                          value={`${stats.new_allergens_introduced.length} Yeni`}
-                          color="red"
+                          value={`${stats.new_allergens_introduced.length} Adet`}
+                          color="orange"
                         />
                     </div>
-
-                </div>
             </div>
 
             {/* MAIN GRID - Updated flex structure */}
             <div className="flex flex-1 overflow-hidden">
               {/* WEEK GRID */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50">
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#FDFBF7]">
                 <div className="max-w-6xl mx-auto pb-24">
                     
                     {isLoading ? (
@@ -521,28 +519,39 @@ export default function WeeklyPlanPage() {
                         {/* Weekly View */}
                         {viewMode === 'weekly' && (
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 min-h-[600px]">
-                              {plan.days.map((day) => (
-                                <div key={day.date} className="flex flex-col gap-3">
-                                    <div className="text-center p-2 bg-white rounded-xl shadow-sm border-b-2 border-orange-500">
-                                        <span className="text-xs text-gray-400 font-bold uppercase">{day.day_name}</span>
-                                        <div className="text-lg font-bold text-slate-800">
-                                          {new Date(day.date).getDate()}
-                                        </div>
+                              {plan.days.map((day) => {
+                                const isToday = new Date(day.date).toDateString() === new Date().toDateString();
+                                return (
+                                  <div key={day.date} className={`flex flex-col gap-3 ${isToday ? 'bg-orange-50/30 -m-2 p-2 rounded-2xl border border-orange-100/50' : ''}`}>
+                                    <div className={`text-center p-3 rounded-2xl border-b-4 shadow-sm ${
+                                      isToday 
+                                        ? 'bg-orange-500 text-white border-orange-600' 
+                                        : 'bg-white text-stone-800 border-stone-200'
+                                    }`}>
+                                      <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${
+                                        isToday ? 'text-orange-100' : 'text-stone-400'
+                                      }`}>
+                                        {day.day_name}
+                                      </span>
+                                      <span className="text-xl font-black">{new Date(day.date).getDate()}</span>
                                     </div>
                                     
-                                    {day.slots.map((slot) => (
-                                      <MealSlotCard 
-                                        key={slot.id} 
-                                        slot={slot}
-                                        isSelected={selectedSlotId === slot.id}
-                                        onClick={() => setSelectedSlotId(slot.id)}
-                                        onRefresh={() => refreshSlot(slot.id)}
-                                        onSkip={(reason) => skipSlot(slot.id, reason)}
-                                        isCompact={true}
-                                      />
-                                    ))}
-                                </div>
-                              ))}
+                                    <div className="space-y-3">
+                                      {day.slots.map((slot) => (
+                                        <MealSlotCard 
+                                          key={slot.id} 
+                                          slot={slot}
+                                          isSelected={selectedSlotId === slot.id}
+                                          onClick={() => setSelectedSlotId(slot.id)}
+                                          onRefresh={() => refreshSlot(slot.id)}
+                                          onSkip={(reason) => skipSlot(slot.id, reason)}
+                                          isCompact={true}
+                                        />
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                           </div>
                         )}
                         
@@ -550,7 +559,7 @@ export default function WeeklyPlanPage() {
                         {viewMode === 'daily' && (
                           <div className="space-y-6">
                             {plan.days.map((day) => (
-                              <div key={day.date} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                              <div key={day.date} className="bg-white rounded-2xl shadow-sm border border-stone-100 overflow-hidden">
                                 <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-3">
                                   <div className="flex items-center justify-between text-white">
                                     <span className="font-bold">{day.day_name}</span>
@@ -580,45 +589,51 @@ export default function WeeklyPlanPage() {
               </div>
               
               {/* RECIPE POOL SIDEBAR - Desktop Only */}
-              <aside className="hidden xl:flex w-80 bg-white border-l border-gray-100 flex-col overflow-hidden">
-                <div className="p-4 border-b border-gray-100">
-                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                    <i className="fa-solid fa-bookmark text-orange-500"></i> Tarif Havuzu
+              <aside className="hidden xl:flex w-96 bg-white border-l border-stone-100 flex-col overflow-hidden">
+                <div className="h-16 flex items-center justify-between px-6 border-b border-stone-100">
+                  <h3 className="font-bold text-stone-800 flex items-center gap-2">
+                    <i className="fa-solid fa-wand-magic-sparkles text-orange-500 text-lg"></i> 
+                    Sizin İçin Seçtiklerimiz
                   </h3>
-                  {selectedSlotId ? (
-                    <p className="text-xs text-orange-500 mt-1 font-medium">
-                      <i className="fa-solid fa-arrow-left mr-1"></i>
-                      Eklemek için tarife tıklayın
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-500 mt-1">Önce bir slot seçin</p>
-                  )}
                 </div>
                 
-                {/* Arama */}
-                <div className="p-4 border-b border-gray-100">
+                {/* Search */}
+                <div className="p-4 border-b border-stone-100">
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Tarif ara..."
+                      placeholder="Tarif, besin veya etiket ara..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-orange-200 transition-all"
                     />
-                    <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <i className="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-stone-400 text-lg"></i>
                     {isSearching && (
                       <i className="fa-solid fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-orange-500 text-sm"></i>
                     )}
                   </div>
                 </div>
                 
-                {/* İçerik */}
+                {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                  
+                  {selectedSlotId ? (
+                    <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mb-4">
+                      <p className="text-sm text-orange-800 font-bold flex items-center gap-2 mb-1">
+                        <i className="fa-solid fa-wand-magic-sparkles"></i> Slot Seçildi
+                      </p>
+                      <p className="text-xs text-orange-600">Aşağıdaki listeden bir tarif seçerek plana ekle.</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-stone-400 text-center italic bg-stone-50 p-2 rounded-lg border border-stone-100">
+                      Önce takvimden bir öğün seçin, ardından buradan tarif ekleyin.
+                    </p>
+                  )}
                   
                   {/* Arama Sonuçları */}
                   {searchQuery && (
                     <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
+                      <h4 className="text-xs font-black text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <i className="fa-solid fa-search"></i> Arama Sonuçları
                       </h4>
                       {isSearching ? (
@@ -637,7 +652,7 @@ export default function WeeklyPlanPage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-gray-400 text-center py-4">Sonuç bulunamadı</p>
+                        <p className="text-xs text-stone-400 text-center py-4">Sonuç bulunamadı</p>
                       )}
                     </div>
                   )}
@@ -657,9 +672,10 @@ export default function WeeklyPlanPage() {
                         </div>
                       )}
                       
-                      <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
-                          <i className="fa-solid fa-heart text-red-400"></i> Favorilerim
+                      {/* Favorites Section */}
+                      <div className="pt-4 border-t border-stone-100">
+                        <h4 className="text-xs font-black text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <i className="fa-solid fa-heart text-red-500 text-sm"></i> Favori Tarifler
                         </h4>
                         {favoritesLoading ? (
                           <div className="text-center py-4">
@@ -685,7 +701,7 @@ export default function WeeklyPlanPage() {
                             )}
                           </div>
                         ) : (
-                          <div className="text-center py-6 text-gray-400">
+                          <div className="text-center py-6 text-stone-400">
                             <i className="fa-regular fa-heart text-2xl mb-2 block"></i>
                             <p className="text-xs">Henüz favori tarifiniz yok</p>
                             <Link href="/tarifler" className="text-xs text-orange-500 hover:underline mt-1 inline-block">
@@ -741,16 +757,19 @@ export default function WeeklyPlanPage() {
             />
             {/* Sheet */}
             <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] overflow-hidden">
-              <div className="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between">
-                <h3 className="font-bold text-slate-800">Tarif Seç</h3>
+              <div className="sticky top-0 bg-white border-b border-stone-100 p-4 flex items-center justify-between">
+                <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                  <i className="fa-solid fa-wand-magic-sparkles text-orange-500"></i>
+                  Tarif Seç
+                </h3>
                 <button 
                   onClick={() => {
                     setIsMobileRecipePoolOpen(false);
                     setSelectedSlotId(null);
                   }}
-                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                  className="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors"
                 >
-                  <i className="fa-solid fa-xmark text-gray-500"></i>
+                  <i className="fa-solid fa-xmark text-stone-500"></i>
                 </button>
               </div>
               <div className="overflow-y-auto p-4 space-y-4 max-h-[calc(80vh-60px)]">
@@ -758,18 +777,18 @@ export default function WeeklyPlanPage() {
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Tarif ara..."
+                    placeholder="Tarif, besin veya etiket ara..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl"
+                    className="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-orange-200"
                   />
-                  <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i className="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-stone-400 text-lg"></i>
                 </div>
                 
                 {/* Arama Sonuçları */}
                 {searchQuery && (
                   <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Arama Sonuçları</h4>
+                    <h4 className="text-xs font-black text-stone-400 uppercase tracking-wider mb-3">Arama Sonuçları</h4>
                     {isSearching ? (
                       <div className="text-center py-4">
                         <i className="fa-solid fa-spinner fa-spin text-orange-500"></i>
@@ -790,29 +809,36 @@ export default function WeeklyPlanPage() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400 text-center py-4">Sonuç bulunamadı</p>
+                      <p className="text-xs text-stone-400 text-center py-4">Sonuç bulunamadı</p>
                     )}
                   </div>
                 )}
                 
                 {/* Kişisel Öneriler */}
                 {!searchQuery && activeChild && (
-                  <PersonalizedRecipePool 
-                    childId={activeChild.id} 
-                    limit={10}
-                    isSelectable={true}
-                    onSelectRecipe={(recipeId) => {
-                      if (selectedSlotId) {
-                        handleAddRecipeToSlot(selectedSlotId, recipeId);
-                      }
-                    }}
-                  />
+                  <div>
+                    <h4 className="text-xs font-black text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <i className="fa-solid fa-wand-magic-sparkles text-orange-500"></i> Kişisel Öneriler
+                    </h4>
+                    <PersonalizedRecipePool 
+                      childId={activeChild.id} 
+                      limit={10}
+                      isSelectable={true}
+                      onSelectRecipe={(recipeId) => {
+                        if (selectedSlotId) {
+                          handleAddRecipeToSlot(selectedSlotId, recipeId);
+                        }
+                      }}
+                    />
+                  </div>
                 )}
                 
                 {/* Favoriler */}
                 {!searchQuery && favorites?.recipes && favorites.recipes.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Favorilerim</h4>
+                  <div className="pt-4 border-t border-stone-100">
+                    <h4 className="text-xs font-black text-stone-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <i className="fa-solid fa-heart text-red-500"></i> Favorilerim
+                    </h4>
                     <div className="space-y-2">
                       {favorites.recipes.slice(0, 8).map(recipe => (
                         <RecipeSuggestionCard

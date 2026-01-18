@@ -26,18 +26,20 @@ export default function RecipeSuggestionCard({
   return (
     <div
       onClick={isSelectable ? onClick : undefined}
-      className={`flex items-center gap-3 p-2 rounded-lg border transition-all ${
-        isSelectable
-          ? 'border-orange-200 bg-orange-50 cursor-pointer hover:bg-orange-100 hover:border-orange-300'
-          : 'border-gray-100 bg-gray-50 opacity-60'
+      className={`flex items-center gap-3 p-3 bg-white rounded-xl border border-stone-100 shadow-sm hover:shadow-md hover:border-orange-200 transition-all group ${
+        isSelectable ? 'cursor-pointer' : 'opacity-60'
       }`}
     >
-      <div className="relative">
-        <img
-          src={recipe.image || PLACEHOLDER_IMAGE}
-          alt={recipe.title}
-          className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-        />
+      <div className="relative w-14 h-14 rounded-lg bg-stone-50 flex items-center justify-center text-2xl shadow-inner overflow-hidden flex-shrink-0">
+        {recipe.image ? (
+          <img
+            src={recipe.image || PLACEHOLDER_IMAGE}
+            alt={recipe.title}
+            className="w-full h-full object-cover rounded-lg"
+          />
+        ) : (
+          <span>🍽️</span>
+        )}
         {matchPercentage !== undefined && matchPercentage > 0 && (
           <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
             {matchPercentage}%
@@ -45,16 +47,19 @@ export default function RecipeSuggestionCard({
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-bold text-slate-700 line-clamp-2">{recipe.title}</p>
+        <p className="text-sm font-bold text-stone-800 line-clamp-1 group-hover:text-orange-600 transition-colors">{recipe.title}</p>
         {recipe.prep_time && (
-          <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
-            <i className="fa-regular fa-clock"></i>
-            {recipe.prep_time}
-          </p>
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="text-[10px] text-stone-400 flex items-center gap-0.5 font-medium">
+              <i className="fa-regular fa-clock text-[9px]"></i> {recipe.prep_time}
+            </span>
+          </div>
         )}
       </div>
       {isSelectable && (
-        <i className="fa-solid fa-plus text-orange-500 flex-shrink-0"></i>
+        <div className="w-8 h-8 rounded-full bg-stone-50 flex items-center justify-center text-stone-400 group-hover:bg-orange-500 group-hover:text-white transition-colors shadow-sm">
+          <i className="fa-solid fa-plus text-sm"></i>
+        </div>
       )}
     </div>
   );
