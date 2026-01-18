@@ -7,50 +7,47 @@ import { useUser } from './use-user';
 import { toast } from 'sonner';
 
 /**
- * Malzeme adına göre kategori tahmini yap
+ * Category keyword configuration
+ * Keywords are matched as substrings in lowercase ingredient names
  */
-const guessCategory = (ingredientName: string): ShoppingCategory => {
-  const name = ingredientName.toLowerCase();
-  
-  // Süt Ürünleri keywords
-  const dairyKeywords = ['süt', 'yoğurt', 'peynir', 'tereyağ', 'kaymak', 'kefir', 'lor', 'çökelek', 'labne', 'ayran'];
-  if (dairyKeywords.some(keyword => name.includes(keyword))) {
-    return 'dairy';
-  }
-  
-  // Et & Protein keywords
-  const proteinKeywords = [
+const CATEGORY_KEYWORDS: Record<ShoppingCategory, string[]> = {
+  dairy: ['süt', 'yoğurt', 'peynir', 'tereyağ', 'kaymak', 'kefir', 'lor', 'çökelek', 'labne', 'ayran'],
+  meat_protein: [
     'et', 'tavuk', 'balık', 'yumurta', 'köfte', 'sucuk', 'sosis', 'jambon', 
     'hindi', 'kuzu', 'dana', 'kıyma', 'biftek', 'pirzola', 'karides', 'somon', 
     'ton', 'levrek', 'çupra', 'sardalya', 'hamsi', 'uskumru', 'alabalık'
-  ];
-  if (proteinKeywords.some(keyword => name.includes(keyword))) {
-    return 'meat_protein';
-  }
-  
-  // Meyve & Sebze keywords
-  const produceKeywords = [
+  ],
+  fruits_vegetables: [
     'elma', 'armut', 'muz', 'portakal', 'mandalina', 'üzüm', 'çilek', 'kiraz', 
     'şeftali', 'kayısı', 'erik', 'karpuz', 'kavun', 'avokado', 'domates', 
     'salatalık', 'biber', 'patlıcan', 'kabak', 'havuç', 'patates', 'soğan', 
     'sarımsak', 'brokoli', 'karnabahar', 'ıspanak', 'marul', 'lahana', 'pırasa', 
     'kereviz', 'enginar', 'bamya', 'fasulye', 'bezelye', 'nane', 'maydanoz', 
     'dereotu', 'roka', 'semizotu', 'börülce', 'kırmızı', 'yeşil', 'turp', 'pancar'
-  ];
-  if (produceKeywords.some(keyword => name.includes(keyword))) {
-    return 'fruits_vegetables';
-  }
-  
-  // Kuru Gıda keywords
-  const grainsKeywords = [
+  ],
+  grains: [
     'un', 'şeker', 'tuz', 'pirinç', 'bulgur', 'makarna', 'nohut', 'mercimek', 
     'yulaf', 'mısır', 'ekmek', 'bisküvi', 'kraker', 'gevrek', 'kahve', 'çay', 
     'kakao', 'bal', 'reçel', 'zeytinyağ', 'ayçiçek', 'sıvıyağ', 'margarin', 
     'pekmez', 'tahin', 'fıstık', 'fındık', 'badem', 'ceviz', 'susam', 'irmik', 
     'kepek', 'kinoa'
-  ];
-  if (grainsKeywords.some(keyword => name.includes(keyword))) {
-    return 'grains';
+  ],
+  other: [] // Default category, no keywords needed
+};
+
+/**
+ * Malzeme adına göre kategori tahmini yap
+ */
+const guessCategory = (ingredientName: string): ShoppingCategory => {
+  const name = ingredientName.toLowerCase();
+  
+  // Check each category's keywords
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (category === 'other') continue; // Skip default category
+    
+    if (keywords.some(keyword => name.includes(keyword))) {
+      return category as ShoppingCategory;
+    }
   }
   
   return 'other';

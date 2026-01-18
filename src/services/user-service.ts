@@ -169,7 +169,7 @@ export const userService = {
       ingredient: item.item || '',
       amount: item.quantity,
       checked: item.checked || false,
-      category: item.category as any,
+      category: item.category as 'dairy' | 'meat_protein' | 'fruits_vegetables' | 'grains' | 'other' | undefined,
       recipe_id: item.recipe_id,
       recipe_title: item.recipe_title,
     }));
