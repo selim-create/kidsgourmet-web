@@ -463,7 +463,7 @@ export default function WeeklyPlanPage() {
                           icon={<i className="fa-solid fa-drumstick-bite"></i>}
                           label="Protein"
                           value={`${stats.protein_servings} Porsiyon`}
-                          color="red"
+                          color="orange"
                         />
                         <StatCard 
                           icon={<i className="fa-solid fa-wheat-awn"></i>}
@@ -474,7 +474,7 @@ export default function WeeklyPlanPage() {
                         <StatCard 
                           icon={<i className="fa-solid fa-triangle-exclamation"></i>}
                           label="Alerjen"
-                          value={`${stats.new_allergens_introduced.length} Adet`}
+                          value={`${stats.new_allergens_introduced.length} Yeni`}
                           color="orange"
                         />
                     </div>
