@@ -255,4 +255,43 @@ export const userService = {
       url: data.source_url || data.url,
     };
   },
+
+  // Child Avatar İşlemleri
+  uploadChildAvatar: async (childId: string, file: File): Promise<{ avatar: { url: string } }> => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    
+    const token = getToken();
+    
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+    
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.USER_CHILDREN}/${childId}/avatar`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Avatar yüklenemedi');
+    }
+    
+    return await response.json();
+  },
+
+  getChildAvatarUrl: async (childId: string): Promise<{ url: string; expires_in: number }> => {
+    return await fetchAuthAPI<{ url: string; expires_in: number }>(
+      `${API_ENDPOINTS.USER_CHILDREN}/${childId}/avatar`
+    );
+  },
+
+  deleteChildAvatar: async (childId: string): Promise<void> => {
+    await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_CHILDREN}/${childId}/avatar`, {
+      method: 'DELETE',
+    });
+  },
 };

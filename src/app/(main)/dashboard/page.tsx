@@ -18,6 +18,7 @@ import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrie
 import FoodIntroductionCard from "@/components/features/food-introduction/FoodIntroductionCard";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import ChildWizard from "@/components/features/ChildWizard";
+import ChildAvatarUpload from "@/components/features/ChildAvatarUpload";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 
 // --- SUB COMPONENTS ---
@@ -307,11 +308,18 @@ export default function DashboardPage() {
                               <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
                                   {/* Child Photo/Avatar */}
                                   <div className="relative flex-shrink-0">
-                                      <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-orange-100 shadow-xl overflow-hidden bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 flex items-center justify-center">
-                                          <span className="text-4xl md:text-5xl font-bold text-orange-500">
-                                            {activeChild.name.charAt(0).toUpperCase()}
-                                          </span>
-                                      </div>
+                                      <ChildAvatarUpload
+                                        childId={activeChild.id}
+                                        currentAvatarUrl={activeChild.avatar_url}
+                                        childName={activeChild.name}
+                                        size="lg"
+                                        onAvatarChange={() => {
+                                          // Refresh children list to get updated avatar
+                                          if (user) {
+                                            refreshUser();
+                                          }
+                                        }}
+                                      />
                                       <div className="absolute bottom-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
                                           {activeChild.birth_date ? formatAge(activeChild.birth_date) : activeChild.age_months ? `${activeChild.age_months} Aylık` : 'Bebek'}
                                       </div>
