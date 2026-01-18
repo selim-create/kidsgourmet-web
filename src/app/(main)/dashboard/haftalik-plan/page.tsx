@@ -422,14 +422,14 @@ export default function WeeklyPlanPage() {
           {/* CTA Butonlar */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
-              href="/kayit" 
+              href="/register" 
               className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg shadow-orange-200"
             >
               <i className="fa-solid fa-user-plus mr-2"></i>
               Ücretsiz Hesap Oluştur
             </Link>
             <Link 
-              href="/giris" 
+              href="/login" 
               className="bg-white border-2 border-gray-200 text-slate-800 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-colors"
             >
               <i className="fa-solid fa-right-to-bracket mr-2"></i>
