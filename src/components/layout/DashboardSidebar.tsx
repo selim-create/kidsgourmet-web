@@ -79,6 +79,14 @@ export default function DashboardSidebar({ activePage }: DashboardSidebarProps) 
           <i className="fa-solid fa-user-doctor w-5 text-center text-stone-400"></i>
           <span className="text-sm font-semibold">Uzmanına Sor</span>
         </Link>
+
+        {/* Hesap */}
+        <p className="px-4 py-2 mt-6 text-[11px] font-extrabold text-stone-400 uppercase tracking-wider">Hesap</p>
+        
+        <Link href="/profil" className={linkClasses('profil')}>
+          <i className={`fa-solid fa-user-gear ${iconClasses('profil')}`}></i>
+          <span className="text-sm font-semibold">Profil Düzenleme</span>
+        </Link>
       </nav>
     </aside>
   );

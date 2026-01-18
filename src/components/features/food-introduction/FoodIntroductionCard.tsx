@@ -24,6 +24,11 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
     return null; // Silently fail
   }
   
+  // Don't render if no ingredient name (no hardcoded fallback)
+  if (!nextSuggestion.ingredient_name) {
+    return null;
+  }
+  
   // CRITICAL: preparation_tips array guarantee
   const preparationTips = Array.isArray(nextSuggestion?.preparation_tips) 
     ? nextSuggestion.preparation_tips 
@@ -40,7 +45,7 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900 mb-2">
-            Bu Hafta Denenebilir: {nextSuggestion.ingredient_name || 'Yeni Besin'}
+            Bu Hafta Denenebilir: {nextSuggestion.ingredient_name}
           </h3>
           
           {nextSuggestion.introduction_week && (
