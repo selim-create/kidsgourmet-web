@@ -149,7 +149,7 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler? meal-type=kahvalti" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
+                                    <Link href="/tarifler?meal-type=kahvalti" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
                                         <i className="fa-solid fa-egg text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
                                         Kahvaltı
                                     </Link>
@@ -161,7 +161,7 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler? meal-type=ara-ogun" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
+                                    <Link href="/tarifler?meal-type=ara-ogun" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
                                         <i className="fa-solid fa-cookie-bite text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
                                         Ara Öğün
                                     </Link>
@@ -173,7 +173,7 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler? meal-type=tatli" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
+                                    <Link href="/tarifler?meal-type=tatli" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
                                         <i className="fa-solid fa-ice-cream text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
                                         Tatlılar
                                     </Link>
@@ -213,8 +213,8 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/malzemeler" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
-                                        Malzemeler
+                                    <Link href="/beslenme-rehberi/3-gun-kurali" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
+                                        3 Gün Kuralı
                                     </Link>
                                 </li>
                             </ul>
@@ -253,7 +253,7 @@ export default function Footer() {
                                 </li>
                                 <li>
                                     <Link href="/reklam-verin" className="inline-flex items-center gap-1. 5 px-3 py-1.5 bg-orange-100 text-orange-600 rounded-full text-sm font-bold hover:bg-orange-500 hover:text-white transition-all">
-                                        <i className="fa-solid fa-bullhorn text-xs"></i>
+                                        <i className="fa-solid fa-bullhorn text-xs"></i> 
                                         Reklam Verin
                                     </Link>
                                 </li>
@@ -326,7 +326,7 @@ export default function Footer() {
                             className="flex items-center gap-2 text-sm text-gray-500 hover: text-green-600 transition-colors"
                         >
                             <i className="fa-solid fa-user-doctor text-green-500"></i>
-                            <span className="font-medium">Rejimde. com</span>
+                            <span className="font-medium">Rejimde.com</span>
                         </Link>
                         <Link 
                             href="https://tariften.com" 
