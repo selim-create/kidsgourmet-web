@@ -1,13 +1,15 @@
 import React from 'react';
-import { Recipe } from '@/lib/types';
+
+// Lightweight recipe type for suggestions
+export interface RecipeSuggestion {
+  id: number;
+  title: string;
+  image?: string;
+  prep_time?: string;
+}
 
 interface RecipeSuggestionCardProps {
-  recipe: {
-    id: number;
-    title: string;
-    image?: string;
-    prep_time?: string;
-  };
+  recipe: RecipeSuggestion;
   onClick: () => void;
   isSelectable?: boolean;
   matchPercentage?: number;

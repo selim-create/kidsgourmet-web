@@ -186,7 +186,7 @@ export default function WeeklyPlanPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <i className="fa-solid fa-spinner fa-spin text-4xl text-orange-500 mb-4"></i>
           <p className="text-gray-600">Yükleniyor...</p>
         </div>
       </div>
@@ -221,14 +221,14 @@ export default function WeeklyPlanPage() {
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <i className="fa-solid fa-triangle-exclamation text-green-500 text-xl"></i>
+                <i className="fa-solid fa-shield-heart text-green-500 text-xl"></i>
               </div>
               <h3 className="font-bold text-slate-800 mb-2">Alerjen Kontrolü</h3>
               <p className="text-sm text-gray-600">Çocuğunuzun alerjilerine uygun güvenli yiyecek önerileri</p>
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                <i className="fa-solid fa-basket-shopping text-orange-500 text-xl"></i>
+                <i className="fa-solid fa-chart-pie text-orange-500 text-xl"></i>
               </div>
               <h3 className="font-bold text-slate-800 mb-2">Beslenme Takibi</h3>
               <p className="text-sm text-gray-600">Haftalık sebze, protein ve tahıl tüketimi analizi</p>
