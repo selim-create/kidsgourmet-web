@@ -163,7 +163,7 @@ export default function Header() {
                 </div>
                 <div className="hidden md:flex items-center gap-4 text-gray-500">
                     <Link href="/hakkimizda" className="hover:text-orange-500 transition-colors">Hakkımızda</Link>
-                    <Link href="/uzman-kadromuz" className="hover:text-orange-500 transition-colors">Uzman Kadromuz</Link>
+                    <Link href="/uzmanlar" className="hover:text-orange-500 transition-colors">Uzman Kadromuz</Link>
                     <Link href="/iletisim" className="hover:text-orange-500 transition-colors">İletişim & Reklam</Link>
                     <Link href="/yardim" className="hover:text-orange-500 transition-colors">Yardım & Destek</Link>
                     <span className="text-gray-300">|</span>

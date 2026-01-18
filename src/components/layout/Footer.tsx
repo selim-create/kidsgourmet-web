@@ -20,22 +20,22 @@ export default function Footer() {
                         Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman onaylı tarifler ve akıllı araçlarla ebeveynlik yolculuğunuzda yanınızdayız.
                     </p>
                     <div className="flex space-x-3">
-                        <Link href="https://instagram.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-orange-400 hover:text-white hover:border-transparent transition-all">
+                        <Link href="https://www.instagram.com/kidsgourmet/" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gradient-to-br hover:from-purple-600 hover:via-pink-500 hover:to-orange-400 hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-instagram"></i>
                         </Link>
-                        <Link href="https://youtube.com/@kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-transparent transition-all">
+                        <Link href="https://www.youtube.com/channel/UCkXtLdtEfhl8Do1pPW4fgsQ" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-youtube"></i>
                         </Link>
-                        <Link href="https://twitter.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all">
+                        <Link href="https://twitter.com/kidsandgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-x-twitter"></i>
                         </Link>
                         <Link href="https://tiktok.com/@kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-tiktok"></i>
                         </Link>
-                        <Link href="https://pinterest.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white hover:border-transparent transition-all">
+                        <Link href="https://tr.pinterest.com/KidsandGourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-pinterest"></i>
                         </Link>
-                        <Link href="https://facebook.com/kidsgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all">
+                        <Link href="https://www.facebook.com/kidsandgourmet" target="_blank" className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all">
                             <i className="fa-brands fa-facebook-f"></i>
                         </Link>
                     </div>
