@@ -146,11 +146,13 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
               <i className="fa-solid fa-syringe text-green-500"></i>
             </div>
             <div>
-              <h3 className="font-bold text-slate-800">Sıradaki Aşı</h3>
+              <h3 className="font-bold text-slate-800">💉 Aşı Takvimi</h3>
               {overdueCount > 0 && (
-                <p className="text-xs text-red-600 font-bold">
-                  {overdueCount} gecikmiş!
-                </p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {overdueCount} Gecikmiş
+                  </span>
+                </div>
               )}
             </div>
           </div>
@@ -162,12 +164,16 @@ export default function DashboardVaccineWidget({ childId, childName }: Dashboard
           </Link>
         </div>
 
+        {/* Child Name - More Prominent */}
+        {childName && (
+          <p className="text-sm font-bold text-stone-800 mb-3">👶 {childName} için</p>
+        )}
+
         {/* Next Vaccine */}
         <div className="bg-white rounded-xl p-4 shadow-sm mb-3">
           <div className="flex items-start gap-3">
             <div className="flex-1">
               <p className="text-xs text-gray-500 mb-1">
-                {childName && `${childName} • `}
                 {nextVaccine.vaccine.name_short || nextVaccine.vaccine.name}
               </p>
               <h4 className="font-bold text-slate-800 mb-2">

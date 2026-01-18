@@ -12,6 +12,9 @@ import AllergyBanner from "@/components/features/AllergyBanner";
 import DashboardVaccineWidget from "@/components/features/vaccine/DashboardVaccineWidget";
 import OverdueVaccineBanner from "@/components/features/vaccine/OverdueVaccineBanner";
 import { formatAge } from "@/utils/ageFormatter";
+import GrowthTrackingWidget from "@/components/features/dashboard/GrowthTrackingWidget";
+import BLWReadinessWidget from "@/components/features/dashboard/BLWReadinessWidget";
+import FoodIntroductionGuideWidget from "@/components/features/dashboard/FoodIntroductionGuideWidget";
 import DailyRecommendations from "@/components/features/recommendations/DailyRecommendations";
 import NutritionSummaryCard from "@/components/features/nutrition/NutritionSummaryCard";
 import MissingNutrientsAlert from "@/components/features/nutrition/MissingNutrientsAlert";
@@ -467,131 +470,33 @@ export default function DashboardPage() {
                 childName={activeChild.name}
               />
 
-              {/* 2. GROWTH TRACKING WIDGET - Enhanced Design */}
+              {/* 2. GROWTH TRACKING WIDGET - New Component */}
               {percentileResults.length > 0 && (
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                        <i className="fa-solid fa-chart-line text-blue-500"></i>
-                      </div>
-                      <h3 className="font-bold text-stone-800">Büyüme Takibi</h3>
-                    </div>
-                    <Link href="/akilli-asistan/persentil" className="text-sm text-blue-600 hover:underline font-medium">
-                      Yeni
-                    </Link>
-                  </div>
-                  
-                  {percentileResults.slice(0, 2).map((result, index) => {
-                    const getMeasurementSummary = () => {
-                      if (!result.percentiles || result.percentiles.length === 0) return 'Ölçüm yok';
-                      
-                      const items: string[] = [];
-                      const weight = result.percentiles.find(p => p.measurement_type === 'weight_for_age');
-                      const height = result.percentiles.find(p => p.measurement_type === 'height_for_age');
-                      
-                      if (weight) items.push(`Kilo: ${Math.round(weight.percentile)}p`);
-                      if (height) items.push(`Boy: ${Math.round(height.percentile)}p`);
-                      
-                      return items.length > 0 ? items.join(' • ') : 'Ölçüm yok';
-                    };
-                    
-                    const getOverallStatus = () => {
-                      if (!result.percentiles || result.percentiles.length === 0) {
-                        return { bg: 'bg-stone-500', icon: 'fa-question' };
-                      }
-                      
-                      const hasVeryLow = result.percentiles.some(p => p.category === 'very_low');
-                      const hasVeryHigh = result.percentiles.some(p => p.category === 'very_high');
-                      const hasLowOrHigh = result.percentiles.some(p => p.category === 'low' || p.category === 'high');
-                      
-                      if (hasVeryLow || hasVeryHigh) return { bg: 'bg-red-500', icon: 'fa-triangle-exclamation' };
-                      if (hasLowOrHigh) return { bg: 'bg-amber-500', icon: 'fa-circle-exclamation' };
-                      return { bg: 'bg-green-500', icon: 'fa-circle-check' };
-                    };
-                    
-                    const status = getOverallStatus();
-                    
-                    return (
-                      <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm mb-3 last:mb-0">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${status.bg} shadow-sm`}>
-                          <i className={`fa-solid ${status.icon} text-base`}></i>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-stone-800 text-sm truncate">
-                            {getMeasurementSummary()}
-                          </p>
-                          <p className="text-[10px] text-stone-500 mt-0.5 truncate">
-                            {formatDate(result.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                  <Link 
-                    href="/akilli-asistan/persentil"
-                    className="block w-full bg-blue-500 text-white text-center py-2.5 rounded-xl text-sm font-bold hover:bg-blue-600 transition-colors shadow-sm mt-4"
-                  >
-                    <i className="fa-solid fa-chart-line mr-2"></i>
-                    Detaylı Takip
-                  </Link>
-                </div>
+                <GrowthTrackingWidget
+                  results={percentileResults}
+                  childId={activeChild.id}
+                  childName={activeChild.name}
+                />
               )}
 
-              {/* 3. BLW READINESS WIDGET - Enhanced Design */}
+              {/* 3. BLW READINESS WIDGET - New Component */}
               {blwResults.length > 0 && (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl border border-green-100 p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                        <i className="fa-solid fa-baby text-green-500"></i>
-                      </div>
-                      <h3 className="font-bold text-stone-800">BLW Hazırlık</h3>
-                    </div>
-                    <Link href="/akilli-asistan/blw-testi" className="text-sm text-green-600 hover:underline font-medium">
-                      Test Et
-                    </Link>
-                  </div>
-                  
-                  {blwResults.slice(0, 2).map((result, index) => {
-                    const getBLWResultCategory = (score: number) => {
-                      if (score >= 80) return { text: 'Hazır', emoji: '✅', bg: 'bg-green-500' };
-                      if (score >= 55) return { text: 'Neredeyse', emoji: '⏳', bg: 'bg-amber-500' };
-                      return { text: 'Bekle', emoji: '⏰', bg: 'bg-red-500' };
-                    };
-                    
-                    const category = getBLWResultCategory(result.score);
-                    
-                    return (
-                      <div key={index} className="flex items-center gap-3 p-4 bg-white rounded-xl shadow-sm mb-3 last:mb-0">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold ${category.bg} text-lg shadow-sm`}>
-                          {Math.round(result.score)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-bold text-stone-800 text-sm">{category.text}</p>
-                            <span className="text-base">{category.emoji}</span>
-                          </div>
-                          <p className="text-[10px] text-stone-500 mt-0.5 truncate">
-                            {formatDate(result.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                  <Link 
-                    href="/akilli-asistan/blw-testi"
-                    className="block w-full bg-green-500 text-white text-center py-2.5 rounded-xl text-sm font-bold hover:bg-green-600 transition-colors shadow-sm mt-4"
-                  >
-                    <i className="fa-solid fa-baby mr-2"></i>
-                    Yeni Test Yap
-                  </Link>
-                </div>
+                <BLWReadinessWidget
+                  results={blwResults}
+                  childId={activeChild.id}
+                  childName={activeChild.name}
+                />
               )}
 
-              {/* 4. QUICK TOOLS WIDGET */}
+              {/* 4. FOOD INTRODUCTION GUIDE WIDGET - New Component */}
+              {activeChild.age_months && (
+                <FoodIntroductionGuideWidget
+                  childAgeMonths={activeChild.age_months}
+                  childName={activeChild.name}
+                />
+              )}
+
+              {/* 5. QUICK TOOLS WIDGET */}
               <div className="bg-stone-50 p-6 rounded-3xl border border-stone-200">
                   <h3 className="font-bold text-stone-800 mb-4 flex items-center gap-2">
                       <i className="fa-solid fa-toolbox text-blue-400 text-lg"></i> 
