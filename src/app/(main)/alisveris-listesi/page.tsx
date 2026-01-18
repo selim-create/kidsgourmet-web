@@ -206,7 +206,7 @@ export default function ShoppingListPage() {
                               <div className="p-2">
                                   {categoryItems.map((item) => (
                                       <label 
-                                        key={item.id} 
+                                        key={String(item.id)} 
                                         className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer group transition-colors select-none"
                                       >
                                           <input 

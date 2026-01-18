@@ -424,7 +424,7 @@ export interface CollectionInput {
 
 // Alışveriş Listesi
 export interface ShoppingListItem {
-  id: number;
+  id: number | string; // Backend string döndürüyor, her ikisini de destekle
   ingredient: string;
   amount?: string;
   checked: boolean;

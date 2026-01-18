@@ -6,6 +6,7 @@ import { useUser } from '@/hooks/use-user';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { useMealPlan } from '@/hooks/useMealPlan';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useShoppingList } from '@/hooks/use-shopping-list';
 import { MealSlot, MealSlotType, Recipe } from '@/lib/types';
 import { mealPlanService } from '@/services/meal-plan-service';
 import { recipeService } from '@/services/recipe-service';
@@ -58,6 +59,7 @@ export default function WeeklyPlanPage() {
     reload: reloadPlan
   } = useMealPlan();
   const { favorites, isLoading: favoritesLoading } = useFavorites();
+  const { refreshList } = useShoppingList();
 
   const [isCreatingShoppingList, setIsCreatingShoppingList] = useState(false);
   
@@ -106,27 +108,22 @@ export default function WeeklyPlanPage() {
       return;
     }
 
-    // Backend endpoint henüz mevcut değil - kullanıcıya bilgi ver
-    toast.info('Bu özellik yakında gelecek! 🚀', {
-      description: 'Şu an için malzemeleri beslenme rehberinden manuel olarak ekleyebilirsiniz.',
-      duration: 5000,
-    });
-    
-    // Gelecekte backend endpoint hazır olduğunda bu kod aktif edilecek:
-    /*
     setIsCreatingShoppingList(true);
     try {
       const response = await mealPlanService.generateShoppingList(plan.id);
       if (response.success) {
-        toast.success(`${response.total_count} ürün eklendi! 🛒`);
+        // Backend listeyi kaydetti, şimdi frontend'i yenile
+        await refreshList();
+        toast.success(`${response.total_count} ürün alışveriş listesine eklendi! 🛒`);
+        // Yönlendirme yap
         window.location.href = '/alisveris-listesi';
       }
-    } catch {
-      toast.error('Liste oluşturulamadı');
+    } catch (error) {
+      console.error('Liste oluşturma hatası:', error);
+      toast.error('Liste oluşturulamadı. Lütfen tekrar deneyin.');
     } finally {
       setIsCreatingShoppingList(false);
     }
-    */
   };
 
   // Tarif arama

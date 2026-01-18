@@ -106,18 +106,41 @@ export function useShoppingList() {
     }
   };
 
-  const removeItem = async (id: number) => {
-    await userService.removeFromShoppingList(id);
-    setItems(prev => prev.filter(item => item.id !== id));
+  const removeItem = async (id: number | string) => {
+    // Optimistic update için önceki state'i sakla
+    const previousItems = [...items];
+    
+    // Hemen UI'dan kaldır (optimistic)
+    setItems(prev => prev.filter(item => String(item.id) !== String(id)));
+    
+    try {
+      await userService.removeFromShoppingList(id);
+      toast.success('Ürün silindi');
+    } catch (error) {
+      // Hata durumunda geri al
+      setItems(previousItems);
+      console.error('Remove item error:', error);
+      toast.error('Ürün silinemedi');
+    }
   };
 
-  const toggleItem = async (id: number) => {
-    const item = items.find(i => i.id === id);
+  const toggleItem = async (id: number | string) => {
+    const item = items.find(i => String(i.id) === String(id));
     if (item) {
-      await userService.toggleShoppingListItem(id, !item.checked);
+      // Optimistic update
       setItems(prev => prev.map(i => 
-        i.id === id ? { ...i, checked: !i.checked } : i
+        String(i.id) === String(id) ? { ...i, checked: !i.checked } : i
       ));
+      
+      try {
+        await userService.toggleShoppingListItem(id, !item.checked);
+      } catch (error) {
+        // Hata durumunda geri al
+        setItems(prev => prev.map(i => 
+          String(i.id) === String(id) ? { ...i, checked: item.checked } : i
+        ));
+        toast.error('İşlem başarısız');
+      }
     }
   };
 
