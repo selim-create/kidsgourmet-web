@@ -15,6 +15,7 @@ import { EditButton } from '@/components/ui/EditButton';
 import NewsletterForm from '@/components/common/NewsletterForm';
 import RecipeCard from '@/components/ui/RecipeCard';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
+import ContentWithEmbeds from '@/components/embeds/ContentWithEmbeds';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -603,8 +604,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         [&_h2.wp-block-heading]:text-2xl [&_h2.wp-block-heading]:mt-10 [&_h2.wp-block-heading]:mb-4 [&_h2.wp-block-heading]:pb-2 [&_h2.wp-block-heading]:border-b [&_h2.wp-block-heading]:border-gray-100
                         [&_h3.wp-block-heading]:text-xl [&_h3.wp-block-heading]:mt-8 [&_h3.wp-block-heading]:mb-3
                         [&_h4.wp-block-heading]:text-lg [&_h4.wp-block-heading]:mt-6 [&_h4.wp-block-heading]:mb-2"
-                        dangerouslySetInnerHTML={{ __html: processedContent }}
-                    />
+                    >
+                      <ContentWithEmbeds 
+                        htmlContent={processedContent}
+                        embeddedContent={post.embedded_content}
+                      />
+                    </div>
 
                     {/* Sponsor CTA */}
                     {isSponsored && sponsorData?.sponsor_url && (
