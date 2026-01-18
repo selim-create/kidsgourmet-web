@@ -267,7 +267,7 @@ export const userService = {
       throw new Error('Authentication required');
     }
     
-    const response = await fetch(`${API_URL}${API_ENDPOINTS.USER_CHILDREN}/${childId}/avatar`, {
+    const response = await fetch(`${API_URL}${API_ENDPOINTS.CHILD_PROFILE_AVATAR(childId)}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -285,12 +285,12 @@ export const userService = {
 
   getChildAvatarUrl: async (childId: string): Promise<{ url: string; expires_in: number }> => {
     return await fetchAuthAPI<{ url: string; expires_in: number }>(
-      `${API_ENDPOINTS.USER_CHILDREN}/${childId}/avatar`
+      API_ENDPOINTS.CHILD_PROFILE_AVATAR(childId)
     );
   },
 
   deleteChildAvatar: async (childId: string): Promise<void> => {
-    await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_CHILDREN}/${childId}/avatar`, {
+    await fetchAuthAPI<void>(API_ENDPOINTS.CHILD_PROFILE_AVATAR(childId), {
       method: 'DELETE',
     });
   },
