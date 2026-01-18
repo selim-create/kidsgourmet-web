@@ -9,6 +9,9 @@ interface FoodIntroductionGuideWidgetProps {
 }
 
 export default function FoodIntroductionGuideWidget({ childAgeMonths, childName }: FoodIntroductionGuideWidgetProps) {
+  // Define allowed color keys as a type
+  type ColorKey = 'blue' | 'green' | 'orange' | 'teal' | 'purple';
+  
   // Determine age stage and content
   const getAgeStageInfo = (ageMonths: number): {
     stage: string;
@@ -16,7 +19,7 @@ export default function FoodIntroductionGuideWidget({ childAgeMonths, childName 
     tips: string[];
     warnings: string[];
     icon: string;
-    color: string;
+    color: ColorKey;
   } => {
     if (ageMonths < 6) {
       return {
@@ -154,7 +157,7 @@ export default function FoodIntroductionGuideWidget({ childAgeMonths, childName 
     }
   };
 
-  const colors = colorClasses[stageInfo.color as keyof typeof colorClasses];
+  const colors = colorClasses[stageInfo.color];
 
   return (
     <div className={`bg-gradient-to-br ${colors.bg} rounded-3xl border ${colors.border} p-6 shadow-sm`}>

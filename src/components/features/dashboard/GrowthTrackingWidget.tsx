@@ -79,7 +79,7 @@ export default function GrowthTrackingWidget({ results, childId, childName }: Gr
       {/* Measurements Grid */}
       <div className="grid grid-cols-3 gap-2 mb-4">
         {/* Weight */}
-        {weightMeasurement && (
+        {weightMeasurement && latestResult.measurement.weight_kg !== undefined && (
           <div className={`p-3 rounded-xl ${getCategoryColor(weightMeasurement.category).bg}`}>
             <div className="text-center">
               <div className="text-lg mb-1">⚖️</div>
@@ -98,7 +98,7 @@ export default function GrowthTrackingWidget({ results, childId, childName }: Gr
         )}
 
         {/* Height */}
-        {heightMeasurement && (
+        {heightMeasurement && latestResult.measurement.height_cm !== undefined && (
           <div className={`p-3 rounded-xl ${getCategoryColor(heightMeasurement.category).bg}`}>
             <div className="text-center">
               <div className="text-lg mb-1">📏</div>
@@ -117,7 +117,7 @@ export default function GrowthTrackingWidget({ results, childId, childName }: Gr
         )}
 
         {/* Head Circumference */}
-        {headMeasurement && (
+        {headMeasurement && latestResult.measurement.head_circumference_cm !== undefined && (
           <div className={`p-3 rounded-xl ${getCategoryColor(headMeasurement.category).bg}`}>
             <div className="text-center">
               <div className="text-lg mb-1">🧠</div>
