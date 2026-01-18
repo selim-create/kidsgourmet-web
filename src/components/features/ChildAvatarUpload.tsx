@@ -19,6 +19,12 @@ const SIZE_MAP = {
   lg: 'w-32 h-32',
 };
 
+const TEXT_SIZE_MAP = {
+  sm: 'text-2xl',
+  md: 'text-3xl',
+  lg: 'text-4xl',
+};
+
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 const ACCEPTED_FILE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
@@ -90,6 +96,7 @@ export default function ChildAvatarUpload({
   };
 
   const handleDelete = async () => {
+    // TODO: Replace with a proper modal component for better UX
     if (!confirm('Fotoğrafı silmek istediğinizden emin misiniz?')) {
       return;
     }
@@ -174,7 +181,7 @@ export default function ChildAvatarUpload({
             {isUploading ? (
               <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              <span className="text-4xl font-bold text-orange-500">
+              <span className={`${TEXT_SIZE_MAP[size]} font-bold text-orange-500`}>
                 {getInitials()}
               </span>
             )}

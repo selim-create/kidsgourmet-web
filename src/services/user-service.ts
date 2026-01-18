@@ -256,7 +256,7 @@ export const userService = {
     };
   },
 
-  // Child Avatar İşlemleri
+  // Child Avatar Operations
   uploadChildAvatar: async (childId: string, file: File): Promise<{ avatar: { url: string } }> => {
     const formData = new FormData();
     formData.append('avatar', file);

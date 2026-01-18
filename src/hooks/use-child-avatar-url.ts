@@ -67,7 +67,7 @@ export function useChildAvatarUrl(childId: string | null, hasAvatar: boolean = f
         clearTimeout(refreshTimeoutRef.current);
       }
     };
-  }, [childId, hasAvatar, refreshUrl]);
+  }, [childId, hasAvatar]); // Removed refreshUrl from dependencies to prevent infinite loop
 
   return { avatarUrl, isLoading, refreshUrl };
 }
