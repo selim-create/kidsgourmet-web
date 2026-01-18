@@ -3,6 +3,25 @@ import Link from 'next/link';
 import { RecipeEmbedItem, IngredientEmbedItem, ToolEmbedItem, PostEmbedItem, EmbedItem } from '@/services/blog-service';
 import { decodeEntities } from '@/utils/textHelpers';
 
+// Placeholder image URLs
+const PLACEHOLDER_IMAGES = {
+  recipe: 'https://placehold.co/400x300/FFF3E0/FF8A65?text=Tarif+Görseli',
+  ingredient: 'https://placehold.co/300x300/E0F2F1/26A69A?text=Malzeme',
+  tool: 'https://placehold.co/400x200/F3E5F5/9C27B0?text=Araç',
+  post: 'https://placehold.co/800x450/E3F2FD/2196F3?text=Yazı+Görseli'
+};
+
+// Validate FontAwesome icon class (prevent XSS)
+const sanitizeIconClass = (iconClass: string): string => {
+  // Only allow fa-* patterns with alphanumeric and hyphens
+  const iconPattern = /^fa-(solid|regular|brands|light|duotone|thin)\s+fa-[\w-]+$/;
+  if (iconPattern.test(iconClass.trim())) {
+    return iconClass.trim();
+  }
+  // Default fallback icon
+  return 'fa-solid fa-wand-magic-sparkles';
+};
+
 interface EmbedCardProps {
   item: EmbedItem;
 }
@@ -22,12 +41,12 @@ function RecipeEmbedCard({ item }: { item: RecipeEmbedItem }) {
   return (
     <Link 
       href={item.url}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:scale-105"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 transform-gpu"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
         <img 
-          src={item.image || 'https://placehold.co/400x300/FFF3E0/FF8A65?text=Tarif+Görseli'} 
+          src={item.image || PLACEHOLDER_IMAGES.recipe} 
           alt={decodeEntities(item.title)}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
@@ -73,12 +92,12 @@ function IngredientEmbedCard({ item }: { item: IngredientEmbedItem }) {
   return (
     <Link 
       href={item.url}
-      className="group block bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-emerald-100"
+      className="group block bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-emerald-100 transform-gpu"
     >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-white">
         <img 
-          src={item.image || 'https://placehold.co/300x300/E0F2F1/26A69A?text=Malzeme'} 
+          src={item.image || PLACEHOLDER_IMAGES.ingredient} 
           alt={decodeEntities(item.title)}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
@@ -123,15 +142,17 @@ function IngredientEmbedCard({ item }: { item: IngredientEmbedItem }) {
 
 // Tool Card - Purple theme (violet/purple gradient)
 function ToolEmbedCard({ item }: { item: ToolEmbedItem }) {
+  const safeIconClass = sanitizeIconClass(item.tool_icon || 'fa-solid fa-wand-magic-sparkles');
+  
   return (
     <Link 
       href={item.url}
-      className="group block bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-violet-100"
+      className="group block bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-violet-100 transform-gpu"
     >
       <div className="flex items-center gap-4 p-5">
         {/* Gradient Icon */}
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-md">
-          <i className={`${item.tool_icon || 'fa-solid fa-wand-magic-sparkles'} text-white text-2xl`}></i>
+          <i className={`${safeIconClass} text-white text-2xl`}></i>
         </div>
         
         {/* Content */}
@@ -167,12 +188,12 @@ function PostEmbedCard({ item }: { item: PostEmbedItem }) {
   return (
     <Link 
       href={item.url}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+      className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 transform-gpu"
     >
       {/* Image */}
       <div className="relative aspect-video overflow-hidden bg-gray-100">
         <img 
-          src={item.image || 'https://placehold.co/800x450/E3F2FD/2196F3?text=Yazı+Görseli'} 
+          src={item.image || PLACEHOLDER_IMAGES.post} 
           alt={decodeEntities(item.title)}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />

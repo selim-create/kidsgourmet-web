@@ -18,6 +18,10 @@ export default function ContentWithEmbeds({ htmlContent, embeddedContent }: Cont
   }
 
   // Split content by closing paragraph tags
+  // Note: This is a simplified approach that works for standard WordPress content.
+  // It assumes well-formed HTML with standard </p> tags.
+  // For more complex HTML structures (self-closing tags, nested elements),
+  // consider using a proper HTML parser library.
   const splitContent = (content: string): string[] => {
     const parts: string[] = [];
     const regex = /<\/p>/gi;
