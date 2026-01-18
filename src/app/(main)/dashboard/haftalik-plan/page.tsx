@@ -557,19 +557,17 @@ export default function WeeklyPlanPage() {
                                     <span className="text-orange-100">{new Date(day.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}</span>
                                   </div>
                                 </div>
-                                <div className="p-4">
-                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                                    {day.slots.map((slot) => (
-                                      <MealRowCard 
-                                        key={slot.id} 
-                                        slot={slot}
-                                        isSelected={selectedSlotId === slot.id}
-                                        onClick={() => setSelectedSlotId(slot.id)}
-                                        onRefresh={() => refreshSlot(slot.id)}
-                                        onSkip={(reason) => skipSlot(slot.id, reason)}
-                                      />
-                                    ))}
-                                  </div>
+                                <div className="p-4 space-y-3">
+                                     {day.slots.map((slot) => (
+                                       <MealRowCard 
+                                         key={slot.id} 
+                                         slot={slot}
+                                         isSelected={selectedSlotId === slot.id}
+                                         onClick={() => setSelectedSlotId(slot.id)}
+                                         onRefresh={() => refreshSlot(slot.id)}
+                                         onSkip={(reason) => skipSlot(slot.id, reason)}
+                                       />
+                                     ))}
                                 </div>
                               </div>
                             ))}
