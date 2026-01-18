@@ -16,6 +16,8 @@ import DashboardSidebar from '@/components/layout/DashboardSidebar';
 // Constants
 const SEARCH_DEBOUNCE_MS = 300;
 const PLACEHOLDER_RECIPE_IMAGE = 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T';
+const MOBILE_BREAKPOINT = 768; // Tailwind's md breakpoint
+const DESKTOP_SIDEBAR_BREAKPOINT = 1280; // Tailwind's xl breakpoint
 
 // Lightweight recipe type for sidebar cards
 interface RecipeCardLite {
@@ -55,12 +57,43 @@ export default function WeeklyPlanPage() {
 
   const [isCreatingShoppingList, setIsCreatingShoppingList] = useState(false);
   
+  // View mode state - default to weekly, will be set to daily on mobile after mount
+  const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
+  
   // Yeni state'ler
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [isChildDropdownOpen, setIsChildDropdownOpen] = useState(false);
+  const [isMobileRecipePoolOpen, setIsMobileRecipePoolOpen] = useState(false);
+
+  // Set default view mode based on screen size after mount
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const handleResize = () => {
+      // Clear any pending timeout
+      clearTimeout(timeoutId);
+      
+      // Debounce the state update to avoid rapid changes
+      timeoutId = setTimeout(() => {
+        const newViewMode = window.innerWidth < MOBILE_BREAKPOINT ? 'daily' : 'weekly';
+        setViewMode(newViewMode);
+      }, 150);
+    };
+    
+    // Set initial view mode
+    const initialViewMode = window.innerWidth < MOBILE_BREAKPOINT ? 'daily' : 'weekly';
+    setViewMode(initialViewMode);
+    
+    // Listen to resize events
+    window.addEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // Alışveriş listesi oluştur
   const handleCreateShoppingList = async () => {
@@ -114,6 +147,17 @@ export default function WeeklyPlanPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
+  // Open mobile sheet when slot is selected on mobile
+  useEffect(() => {
+    if (selectedSlotId) {
+      // Use matchMedia for better SSR compatibility
+      const isMobile = window.matchMedia(`(max-width: ${DESKTOP_SIDEBAR_BREAKPOINT - 1}px)`).matches;
+      if (isMobile) {
+        setIsMobileRecipePoolOpen(true);
+      }
+    }
+  }, [selectedSlotId]);
+
   // Slot'a tarif ekle
   const handleAddRecipeToSlot = async (slotId: string, recipeId: number) => {
     if (!plan?.id) return;
@@ -123,6 +167,7 @@ export default function WeeklyPlanPage() {
       await mealPlanService.assignRecipeToSlot(plan.id, slotId, recipeId);
       await reloadPlan();
       setSelectedSlotId(null);
+      setIsMobileRecipePoolOpen(false);
       toast.success('Tarif eklendi!');
     } catch (error) {
       console.error('Tarif eklenemedi:', error);
@@ -233,15 +278,15 @@ export default function WeeklyPlanPage() {
           )}
         </div>
         
-        {/* Tarif Bilgisi */}
+        {/* Tarif Bilgisi - Larger image and better display */}
         <Link href={`/tarifler/${slot.recipe.slug}`}>
           <div className="flex items-center gap-2 mb-2">
             <img 
               src={slot.recipe.image || 'https://placehold.co/100x100/FFF3E0/FF8A65?text=Tarif'} 
-              className="w-12 h-12 rounded-lg object-cover" 
+              className="w-16 h-16 rounded-xl object-cover" 
               alt={slot.recipe.title} 
             />
-            <p className="text-xs font-bold text-slate-700 line-clamp-2 flex-1">{slot.recipe.title}</p>
+            <p className="text-sm font-bold text-slate-700 line-clamp-2 flex-1">{slot.recipe.title}</p>
           </div>
           <p className="text-[10px] text-gray-400 flex items-center gap-1">
             <i className="fa-regular fa-clock"></i> {slot.recipe.prep_time}
@@ -311,15 +356,108 @@ export default function WeeklyPlanPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <i className="fa-solid fa-lock text-4xl text-gray-400 mb-4"></i>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Giriş Yapmanız Gerekiyor</h2>
-          <p className="text-gray-600 mb-4">Haftalık planınızı görüntülemek için giriş yapın</p>
-          <Link href="/login" className="bg-orange-500 text-white px-6 py-2 rounded-xl font-bold">
-            Giriş Yap
-          </Link>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-orange-50 to-white">
+        {/* Hero Section */}
+        <section className="py-16 px-4 text-center max-w-4xl mx-auto">
+          <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="fa-solid fa-calendar-days text-orange-500 text-3xl"></i>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">
+            Bebeğiniz İçin Kişiselleştirilmiş Haftalık Beslenme Planı
+          </h1>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Çocuğunuzun yaşına, alerjenlerine ve beslenme ihtiyaçlarına özel 
+            haftalık menü planı oluşturun. Yapay zeka destekli öneri sistemi ile 
+            sağlıklı beslenme hiç bu kadar kolay olmamıştır.
+          </p>
+          
+          {/* Özellikler */}
+          <div className="grid md:grid-cols-3 gap-6 mb-12">
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i className="fa-solid fa-wand-magic-sparkles text-purple-500 text-xl"></i>
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">AI Destekli Planlama</h3>
+              <p className="text-sm text-gray-600">Çocuğunuzun profiline özel tarifler ve beslenme önerileri</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i className="fa-solid fa-shield-heart text-green-500 text-xl"></i>
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Alerjen Kontrolü</h3>
+              <p className="text-sm text-gray-600">Çocuğunuzun alerjilerine uygun güvenli yiyecek önerileri</p>
+            </div>
+            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <i className="fa-solid fa-chart-pie text-orange-500 text-xl"></i>
+              </div>
+              <h3 className="font-bold text-slate-800 mb-2">Beslenme Takibi</h3>
+              <p className="text-sm text-gray-600">Haftalık sebze, protein ve tahıl tüketimi analizi</p>
+            </div>
+          </div>
+
+          {/* Nasıl Çalışır */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-12">
+            <h2 className="text-xl font-bold text-slate-800 mb-6">Nasıl Çalışır?</h2>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">1</div>
+                <p className="text-sm text-gray-600">Çocuk profili oluşturun</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">2</div>
+                <p className="text-sm text-gray-600">Alerjenleri belirleyin</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">3</div>
+                <p className="text-sm text-gray-600">AI plan oluştursun</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-orange-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">4</div>
+                <p className="text-sm text-gray-600">Alışveriş listesi alın</p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Butonlar */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              href="/kayit" 
+              className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg shadow-orange-200"
+            >
+              <i className="fa-solid fa-user-plus mr-2"></i>
+              Ücretsiz Hesap Oluştur
+            </Link>
+            <Link 
+              href="/giris" 
+              className="bg-white border-2 border-gray-200 text-slate-800 px-8 py-4 rounded-xl font-bold hover:bg-gray-50 transition-colors"
+            >
+              <i className="fa-solid fa-right-to-bracket mr-2"></i>
+              Giriş Yap
+            </Link>
+          </div>
+        </section>
+
+        {/* FAQ Section for SEO */}
+        <section className="py-12 px-4 bg-gray-50">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-2xl font-bold text-slate-800 mb-8 text-center">Sıkça Sorulan Sorular</h2>
+            <div className="space-y-4">
+              <details className="bg-white rounded-xl p-4 shadow-sm">
+                <summary className="font-bold text-slate-800 cursor-pointer">Haftalık plan nasıl oluşturulur?</summary>
+                <p className="mt-3 text-gray-600">Çocuğunuzun yaşını ve alerjenlerini girdiğinizde, yapay zeka sizin için yaşa uygun ve güvenli tariflerden oluşan bir haftalık menü hazırlar.</p>
+              </details>
+              <details className="bg-white rounded-xl p-4 shadow-sm">
+                <summary className="font-bold text-slate-800 cursor-pointer">Alerjen kontrolü nasıl yapılıyor?</summary>
+                <p className="mt-3 text-gray-600">Sisteme girdiğiniz alerjenler otomatik olarak filtrelenir ve çocuğunuza zararlı olabilecek malzemeler içeren tarifler önerilmez.</p>
+              </details>
+              <details className="bg-white rounded-xl p-4 shadow-sm">
+                <summary className="font-bold text-slate-800 cursor-pointer">Planı değiştirebilir miyim?</summary>
+                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya 'dışarıda yiyoruz' olarak işaretleyebilirsiniz.</p>
+              </details>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -433,6 +571,26 @@ export default function WeeklyPlanPage() {
                                     <i className="fa-solid fa-chevron-right"></i>
                                 </button>
                             </div>
+                            
+                            {/* View Mode Toggle */}
+                            <div className="flex bg-gray-100 rounded-lg p-1">
+                              <button 
+                                onClick={() => setViewMode('weekly')}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                  viewMode === 'weekly' ? 'bg-white shadow text-orange-600' : 'text-gray-600'
+                                }`}
+                              >
+                                <i className="fa-solid fa-calendar-week mr-1"></i> Haftalık
+                              </button>
+                              <button 
+                                onClick={() => setViewMode('daily')}
+                                className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                  viewMode === 'daily' ? 'bg-white shadow text-orange-600' : 'text-gray-600'
+                                }`}
+                              >
+                                <i className="fa-solid fa-calendar-day mr-1"></i> Günlük
+                              </button>
+                            </div>
                         </div>
 
                         {/* Actions */}
@@ -532,22 +690,50 @@ export default function WeeklyPlanPage() {
                           </button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-7 gap-4 min-h-[600px]">
-                          {plan.days.map((day) => (
-                            <div key={day.date} className="flex flex-col gap-3">
-                                <div className="text-center p-2 bg-white rounded-xl shadow-sm border-b-2 border-orange-500">
-                                    <span className="text-xs text-gray-400 font-bold uppercase">{day.day_name}</span>
-                                    <div className="text-lg font-bold text-slate-800">
-                                      {new Date(day.date).getDate()}
+                      <>
+                        {/* Weekly View */}
+                        {viewMode === 'weekly' && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 min-h-[600px]">
+                              {plan.days.map((day) => (
+                                <div key={day.date} className="flex flex-col gap-3">
+                                    <div className="text-center p-2 bg-white rounded-xl shadow-sm border-b-2 border-orange-500">
+                                        <span className="text-xs text-gray-400 font-bold uppercase">{day.day_name}</span>
+                                        <div className="text-lg font-bold text-slate-800">
+                                          {new Date(day.date).getDate()}
+                                        </div>
                                     </div>
+                                    
+                                    {day.slots.map((slot) => (
+                                      <SlotCard key={slot.id} slot={slot} />
+                                    ))}
                                 </div>
-                                
-                                {day.slots.map((slot) => (
-                                  <SlotCard key={slot.id} slot={slot} />
-                                ))}
-                            </div>
-                          ))}
-                      </div>
+                              ))}
+                          </div>
+                        )}
+                        
+                        {/* Daily View */}
+                        {viewMode === 'daily' && (
+                          <div className="space-y-6">
+                            {plan.days.map((day) => (
+                              <div key={day.date} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="bg-gradient-to-r from-orange-500 to-orange-400 px-4 py-3">
+                                  <div className="flex items-center justify-between text-white">
+                                    <span className="font-bold">{day.day_name}</span>
+                                    <span className="text-orange-100">{new Date(day.date).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}</span>
+                                  </div>
+                                </div>
+                                <div className="p-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                    {day.slots.map((slot) => (
+                                      <SlotCard key={slot.id} slot={slot} />
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </>
                     )}
                     
                 </div>
@@ -701,6 +887,112 @@ export default function WeeklyPlanPage() {
                 <span className="text-[10px] font-medium">Profil</span>
             </Link>
         </div>
+
+        {/* MOBILE BOTTOM SHEET - Recipe Pool */}
+        {isMobileRecipePoolOpen && (
+          <div className="xl:hidden fixed inset-0 z-50">
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/50" 
+              onClick={() => {
+                setIsMobileRecipePoolOpen(false);
+                setSelectedSlotId(null);
+              }}
+            />
+            {/* Sheet */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[80vh] overflow-hidden">
+              <div className="sticky top-0 bg-white border-b border-gray-100 p-4 flex items-center justify-between">
+                <h3 className="font-bold text-slate-800">Tarif Seç</h3>
+                <button 
+                  onClick={() => {
+                    setIsMobileRecipePoolOpen(false);
+                    setSelectedSlotId(null);
+                  }}
+                  className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                >
+                  <i className="fa-solid fa-xmark text-gray-500"></i>
+                </button>
+              </div>
+              <div className="overflow-y-auto p-4 space-y-4 max-h-[calc(80vh-60px)]">
+                {/* Arama */}
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Tarif ara..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl"
+                  />
+                  <i className="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                
+                {/* Arama Sonuçları */}
+                {searchQuery && (
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Arama Sonuçları</h4>
+                    {isSearching ? (
+                      <div className="text-center py-4">
+                        <i className="fa-solid fa-spinner fa-spin text-orange-500"></i>
+                      </div>
+                    ) : searchResults.length > 0 ? (
+                      <div className="space-y-2">
+                        {searchResults.map(recipe => (
+                          <RecipePoolCard 
+                            key={recipe.id} 
+                            recipe={recipe} 
+                            onSelect={() => {
+                              if (selectedSlotId) {
+                                handleAddRecipeToSlot(selectedSlotId, recipe.id);
+                              }
+                            }}
+                            isSelectable={true}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-400 text-center py-4">Sonuç bulunamadı</p>
+                    )}
+                  </div>
+                )}
+                
+                {/* Kişisel Öneriler */}
+                {!searchQuery && activeChild && (
+                  <PersonalizedRecipePool 
+                    childId={activeChild.id} 
+                    limit={10}
+                    isSelectable={true}
+                    onSelectRecipe={(recipeId) => {
+                      if (selectedSlotId) {
+                        handleAddRecipeToSlot(selectedSlotId, recipeId);
+                      }
+                    }}
+                  />
+                )}
+                
+                {/* Favoriler */}
+                {!searchQuery && favorites?.recipes && favorites.recipes.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Favorilerim</h4>
+                    <div className="space-y-2">
+                      {favorites.recipes.slice(0, 8).map(recipe => (
+                        <RecipePoolCard 
+                          key={recipe.id} 
+                          recipe={recipe} 
+                          onSelect={() => {
+                            if (selectedSlotId) {
+                              handleAddRecipeToSlot(selectedSlotId, recipe.id);
+                            }
+                          }}
+                          isSelectable={true}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
     </div>
   );
