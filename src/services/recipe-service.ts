@@ -28,7 +28,7 @@ const transformWPRecipeToCard = (wp: any): RecipeCard => ({
     ?.find((t: any) => t.taxonomy === 'age-group')?.name || '+6 Ay',
   age_group_color: wp._embedded?.['wp:term']?.flat()
     ?.find((t: any) => t.taxonomy === 'age-group')?.age_group_meta?.color_code || '',
-  prep_time: wp.meta?._kg_prep_time || wp.acf?.prep_time || '15 dk',
+  prep_time: wp.meta?._kg_prep_time || '15 dk',
   // NEW FIELDS: Additional recipe metadata
   meal_type: wp._embedded?.['wp:term']?.flat()
     ?.find((t: any) => t.taxonomy === 'meal-type')?.name || '',
