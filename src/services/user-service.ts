@@ -165,7 +165,7 @@ export const userService = {
     
     // Transform backend response to frontend format
     return backendResponse.map((item) => ({
-      id: typeof item.id === 'string' ? parseInt(item.id, 10) : item.id,
+      id: item.id, // String olarak tut, parseInt kullanma!
       ingredient: item.item || '',
       amount: item.quantity,
       checked: item.checked || false,
@@ -194,7 +194,7 @@ export const userService = {
         
         // Backend response'unu frontend formatına dönüştür
         const transformedItem: ShoppingListItem = {
-          id: typeof backendResponse.id === 'string' ? parseInt(backendResponse.id, 10) : backendResponse.id,
+          id: backendResponse.id, // String olarak tut!
           ingredient: backendResponse.item || item.ingredient,
           amount: backendResponse.quantity || item.amount,
           checked: backendResponse.checked || false,
@@ -223,13 +223,13 @@ export const userService = {
     return addedItems;
   },
 
-  removeFromShoppingList: async (id: number): Promise<void> => {
+  removeFromShoppingList: async (id: number | string): Promise<void> => {
     await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_SHOPPING_LIST}/${id}`, {
       method: 'DELETE',
     });
   },
 
-  toggleShoppingListItem: async (id: number, checked: boolean): Promise<void> => {
+  toggleShoppingListItem: async (id: number | string, checked: boolean): Promise<void> => {
     await fetchAuthAPI<void>(`${API_ENDPOINTS.USER_SHOPPING_LIST}/${id}`, {
       method: 'PATCH',
       body: JSON.stringify({ checked }),
