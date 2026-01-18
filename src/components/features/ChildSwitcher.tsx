@@ -87,8 +87,12 @@ export default function ChildSwitcher() {
         onClick={() => setIsOpen(!isOpen)}
         className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-orange-50 hover:bg-orange-100 transition-colors border border-orange-200"
       >
-        <div className="w-6 h-6 rounded-full bg-orange-200 flex items-center justify-center text-xs font-bold text-orange-600">
-          {activeChild?.name.charAt(0).toUpperCase()}
+        <div className="w-6 h-6 rounded-full bg-orange-200 flex items-center justify-center text-xs font-bold text-orange-600 overflow-hidden">
+          {activeChild?.avatar_url ? (
+            <img src={activeChild.avatar_url} alt={activeChild.name} className="w-full h-full object-cover" />
+          ) : (
+            activeChild?.name.charAt(0).toUpperCase()
+          )}
         </div>
         <div className="flex flex-col items-start">
           <span className="text-xs font-bold text-slate-800 leading-none">
@@ -119,12 +123,16 @@ export default function ChildSwitcher() {
                     : 'hover:bg-gray-50'
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold overflow-hidden ${
                   activeChild?.id === child.id
                     ? 'bg-orange-200 text-orange-600'
                     : 'bg-gray-200 text-gray-600'
                 }`}>
-                  {child.name.charAt(0).toUpperCase()}
+                  {child.avatar_url ? (
+                    <img src={child.avatar_url} alt={child.name} className="w-full h-full object-cover" />
+                  ) : (
+                    child.name.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="flex-1 text-left">
                   <div className="font-bold text-sm text-slate-800">{child.name}</div>
