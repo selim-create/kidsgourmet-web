@@ -36,6 +36,14 @@ export function useMealPlan() {
     try {
       // Hafta bilgisi ile plan getir
       const activePlan = await mealPlanService.getPlanForWeek(activeChild.id, weekStart);
+      
+      // ⚠️ API farklı bir hafta döndürüyorsa, istenen haftada plan yok demektir
+      if (activePlan && activePlan.week_start !== weekStart) {
+        console.log(`Requested week ${weekStart}, but API returned ${activePlan.week_start} - no plan for requested week`);
+        setPlan(null);
+        return;
+      }
+      
       setPlan(activePlan);
     } catch (err: any) {
       console.error('Plan yüklenemedi:', err);

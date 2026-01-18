@@ -17,32 +17,6 @@ import DashboardSidebar from '@/components/layout/DashboardSidebar';
 const SEARCH_DEBOUNCE_MS = 300;
 const PLACEHOLDER_RECIPE_IMAGE = 'https://placehold.co/60x60/FFF3E0/FF8A65?text=T';
 
-// Age group mapping
-const AGE_GROUP_SLUGS: Record<string, string> = {
-  '0-6': '0-6-ay-sadece-sut',
-  '6-8': '6-8-ay-baslangic',
-  '9-11': '9-11-ay-kesif',
-  '12-24': '12-24-ay-gecis',
-  '24+': '2-yas-ve-uzeri',
-};
-
-// Helper function for age group calculation
-const getAgeGroupSlug = (ageInMonths: number): string => {
-  if (ageInMonths < 6) return AGE_GROUP_SLUGS['0-6'];
-  if (ageInMonths <= 8) return AGE_GROUP_SLUGS['6-8'];
-  if (ageInMonths <= 11) return AGE_GROUP_SLUGS['9-11'];
-  if (ageInMonths <= 24) return AGE_GROUP_SLUGS['12-24'];
-  return AGE_GROUP_SLUGS['24+'];
-};
-
-// Helper function for age calculation
-const calculateAgeInMonths = (birthDate: string): number => {
-  const birth = new Date(birthDate);
-  const now = new Date();
-  return (now.getFullYear() - birth.getFullYear()) * 12 + 
-         (now.getMonth() - birth.getMonth());
-};
-
 // Lightweight recipe type for sidebar cards
 interface RecipeCardLite {
   id: number;
@@ -82,12 +56,11 @@ export default function WeeklyPlanPage() {
   const [isCreatingShoppingList, setIsCreatingShoppingList] = useState(false);
   
   // Yeni state'ler
-  const [suggestedRecipes, setSuggestedRecipes] = useState<Recipe[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Recipe[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
-  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
+  const [isChildDropdownOpen, setIsChildDropdownOpen] = useState(false);
 
   // Alışveriş listesi oluştur
   const handleCreateShoppingList = async () => {
@@ -110,37 +83,6 @@ export default function WeeklyPlanPage() {
       setIsCreatingShoppingList(false);
     }
   };
-
-  // Yaşa uygun önerileri yükle
-  useEffect(() => {
-    const loadSuggestions = async () => {
-      if (!activeChild?.birth_date) {
-        setSuggestedRecipes([]);
-        return;
-      }
-      
-      setIsSuggestionsLoading(true);
-      try {
-        const ageInMonths = calculateAgeInMonths(activeChild.birth_date);
-        const ageGroup = getAgeGroupSlug(ageInMonths);
-        
-        // Tarifler API'sini kullan
-        const recipes = await recipeService.getByFilters({
-          age_group: ageGroup,
-          per_page: 10,
-        });
-        
-        setSuggestedRecipes(recipes);
-      } catch (error) {
-        console.error('Öneriler yüklenemedi:', error);
-        setSuggestedRecipes([]);
-      } finally {
-        setIsSuggestionsLoading(false);
-      }
-    };
-    
-    loadSuggestions();
-  }, [activeChild?.birth_date]);
 
   // Tarif arama
   const handleSearch = async (query: string) => {
@@ -425,23 +367,46 @@ export default function WeeklyPlanPage() {
                         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
                             {/* Child Dropdown */}
                             {userChildren.length > 0 && (
-                              <div className="relative group cursor-pointer bg-orange-50 px-4 py-2 rounded-full flex items-center gap-2 border border-orange-100 hover:bg-orange-100 transition-colors">
+                              <div className="relative">
+                                <button 
+                                  onClick={() => setIsChildDropdownOpen(!isChildDropdownOpen)}
+                                  className="bg-orange-50 px-4 py-2 rounded-full flex items-center gap-2 border border-orange-100 hover:bg-orange-100 transition-colors"
+                                >
                                   <span className="text-sm font-bold text-slate-800">{activeChild.name}</span>
-                                  <i className="fa-solid fa-chevron-down text-xs text-orange-500"></i>
-                                  
-                                  {userChildren.length > 1 && (
-                                    <div className="absolute top-full left-0 mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-100 hidden group-hover:block p-1">
-                                        {userChildren.map(child => (
-                                            <div 
-                                              key={child.id} 
-                                              onClick={() => setActiveChild(child)} 
-                                              className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg"
-                                            >
-                                                <span className="text-sm font-medium text-slate-700">{child.name}</span>
-                                            </div>
-                                        ))}
+                                  <i className={`fa-solid fa-chevron-down text-xs text-orange-500 transition-transform ${isChildDropdownOpen ? 'rotate-180' : ''}`}></i>
+                                </button>
+                                
+                                {isChildDropdownOpen && userChildren.length > 1 && (
+                                  <>
+                                    {/* Backdrop for closing */}
+                                    <div 
+                                      className="fixed inset-0 z-40" 
+                                      onClick={() => setIsChildDropdownOpen(false)} 
+                                    />
+                                    <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-50 p-1">
+                                      {userChildren.map(child => (
+                                        <button 
+                                          key={child.id} 
+                                          onClick={() => {
+                                            setActiveChild(child);
+                                            setIsChildDropdownOpen(false);
+                                          }}
+                                          className={`w-full text-left flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg ${
+                                            activeChild?.id === child.id ? 'bg-orange-50 text-orange-600' : ''
+                                          }`}
+                                        >
+                                          <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-xs font-bold text-orange-600">
+                                            {child.name.charAt(0).toUpperCase()}
+                                          </div>
+                                          <span className="text-sm font-medium text-slate-700">{child.name}</span>
+                                          {activeChild?.id === child.id && (
+                                            <i className="fa-solid fa-check text-orange-500 ml-auto text-xs"></i>
+                                          )}
+                                        </button>
+                                      ))}
                                     </div>
-                                  )}
+                                  </>
+                                )}
                               </div>
                             )}
 
@@ -657,7 +622,12 @@ export default function WeeklyPlanPage() {
                       {/* Personalized Recommendations */}
                       {activeChild && (
                         <div className="mb-6">
-                          <PersonalizedRecipePool childId={activeChild.id} limit={8} />
+                          <PersonalizedRecipePool 
+                            childId={activeChild.id} 
+                            limit={8}
+                            isSelectable={!!selectedSlotId}
+                            onSelectRecipe={(recipeId) => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipeId)}
+                          />
                         </div>
                       )}
                       
@@ -695,35 +665,6 @@ export default function WeeklyPlanPage() {
                             <Link href="/tarifler" className="text-xs text-orange-500 hover:underline mt-1 inline-block">
                               Tariflere göz at
                             </Link>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Yaşa Uygun Öneriler */}
-                      <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 flex items-center gap-2">
-                          <i className="fa-solid fa-wand-magic-sparkles text-purple-400"></i> 
-                          {activeChild?.name} İçin Öneriler
-                        </h4>
-                        {isSuggestionsLoading ? (
-                          <div className="text-center py-4">
-                            <i className="fa-solid fa-spinner fa-spin text-orange-500"></i>
-                          </div>
-                        ) : suggestedRecipes.length > 0 ? (
-                          <div className="space-y-2">
-                            {suggestedRecipes.map(recipe => (
-                              <RecipePoolCard 
-                                key={recipe.id} 
-                                recipe={recipe} 
-                                onSelect={() => selectedSlotId && handleAddRecipeToSlot(selectedSlotId, recipe.id)}
-                                isSelectable={!!selectedSlotId}
-                              />
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-6 text-gray-400">
-                            <i className="fa-solid fa-carrot text-2xl mb-2 block"></i>
-                            <p className="text-xs">Öneri bulunamadı</p>
                           </div>
                         )}
                       </div>
