@@ -28,7 +28,7 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
         const foundCircle = circlesData.find(c => c.slug === slug);
         
         if (!foundCircle) {
-          setError('Çember bulunamadı');
+          setError('Odak bulunamadı');
           return;
         }
         
@@ -61,11 +61,11 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
       if (circle.is_following) {
         await unfollowCircle(circle.id);
         setCircle({ ...circle, is_following: false });
-        toast.success('Çember takipten çıkarıldı');
+        toast.success('Odak takipten çıkarıldı');
       } else {
         await followCircle(circle.id);
         setCircle({ ...circle, is_following: true });
-        toast.success('Çember takip edildi');
+        toast.success('Odak takip edildi');
       }
     } catch (err) {
       console.error('Error toggling follow:', err);
@@ -81,7 +81,7 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-            <p className="mt-4 text-gray-500">Çember yükleniyor...</p>
+            <p className="mt-4 text-gray-500">Odak yükleniyor...</p>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
-            {error || 'Çember bulunamadı'}
+            {error || 'Odak bulunamadı'}
           </div>
           <Link href="/topluluk" className="inline-block mt-4 text-orange-500 hover:underline font-bold">
             ← Topluluğa Dön
@@ -157,7 +157,7 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
                 >
                     <img src="https://placehold.co/100x100/FFCC80/ffffff?text=Siz" className="w-10 h-10 rounded-full bg-gray-100" alt="User" />
                     <div className="flex-1 bg-gray-50 rounded-full px-4 py-2.5 text-gray-400 text-sm">
-                        {circle.name} çemberinde bir soru sor...
+                        {circle.name} odağında bir soru sor...
                     </div>
                     <button className="text-brand-primary text-xl"><i className="fa-regular fa-image"></i></button>
                 </Link>
@@ -165,7 +165,7 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
                 {/* Discussions List */}
                 {discussions.length === 0 ? (
                   <div className="text-center py-12 bg-white rounded-3xl border border-gray-100">
-                    <p className="text-gray-500">Bu çemberde henüz tartışma bulunmuyor.</p>
+                    <p className="text-gray-500">Bu odakta henüz tartışma bulunmuyor.</p>
                     <Link 
                       href="/topluluk/soru-sor"
                       className="inline-block mt-4 text-orange-500 hover:underline font-bold"
@@ -235,7 +235,7 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
                 
                 {/* Related Circles */}
                 <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm">
-                    <h3 className="font-bold text-slate-800 text-sm mb-3">İlgili Çemberler</h3>
+                    <h3 className="font-bold text-slate-800 text-sm mb-3">İlgili Odaklar</h3>
                     <nav className="space-y-1">
                         <Link href="#" className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">
                             <span className="w-2 h-2 rounded-full bg-orange-500"></span>
