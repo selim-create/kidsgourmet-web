@@ -407,7 +407,7 @@ export default function Home() {
                       {rejimdeContent ? (
                         <p className="text-lg text-gray-600">
                             Kanıtlanmış bilimsel verilerle, sürdürülebilir sağlıklı yaşam için size uygun{' '}
-                            <Link href={`https://www.rejimde.com/${rejimdeContent.type}/${rejimdeContent.slug}`} target="_blank" rel="noopener noreferrer" className="text-green-600 font-bold underline decoration-dotted underline-offset-4 hover:text-green-700">
+                            <Link href={rejimdeContent.url || `https://www.rejimde.com/${rejimdeContent.type === 'diet' ? 'diets' : 'exercises'}/${rejimdeContent.slug}`} target="_blank" rel="noopener noreferrer" className="text-green-600 font-bold underline decoration-dotted underline-offset-4 hover:text-green-700">
                               {decodeEntities(rejimdeContent.title)}
                             </Link>{' '}
                             {rejimdeContent.type === 'diet' ? 'diyet programını' : 'egzersiz programını'} hemen keşfedin!

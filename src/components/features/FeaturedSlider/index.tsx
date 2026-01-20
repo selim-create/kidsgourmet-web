@@ -118,11 +118,11 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
             <h2 className="font-display font-bold text-3xl text-slate-800">Günün Öne Çıkanları</h2>
             <p className="text-gray-500 text-sm">Tarifler, Rehberler, Soru-Cevaplar ve Araçlar, hepsi burada!</p>
 
-            {/* Filter Chips */}
-            <div className="mt-4 flex flex-wrap gap-2 overflow-x-auto">
+            {/* Filter Chips - Mobilde yatay scroll */}
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide md:flex-wrap md:overflow-visible">
               <button
                 onClick={() => setFilter('all')}
-                className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                   filter === 'all'
                     ? 'border-orange-500 bg-white text-orange-500'
                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
@@ -134,7 +134,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.recipe > 0 && (
                 <button
                   onClick={() => setFilter('recipe')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'recipe'
                       ? 'border-orange-500 bg-orange-500 text-white'
                       : 'border-orange-200 bg-orange-50 text-orange-500 hover:bg-orange-100'
@@ -147,7 +147,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.blog > 0 && (
                 <button
                   onClick={() => setFilter('blog')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'blog'
                       ? 'border-blue-200 bg-blue-50 text-blue-600'
                       : 'border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100'
@@ -160,7 +160,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.question > 0 && (
                 <button
                   onClick={() => setFilter('question')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'question'
                       ? 'border-purple-200 bg-purple-50 text-purple-500'
                       : 'border-purple-200 bg-purple-50 text-purple-500 hover:bg-purple-100'
@@ -173,7 +173,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.sponsored > 0 && (
                 <button
                   onClick={() => setFilter('sponsored')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${
                     filter === 'sponsored'
                       ? 'bg-slate-700 text-white border-slate-700'
                       : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
@@ -191,7 +191,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.ingredient > 0 && (
                 <button
                   onClick={() => setFilter('ingredient')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'ingredient'
                       ? 'border-green-200 bg-green-50 text-green-600'
                       : 'border-green-200 bg-green-50 text-green-600 hover:bg-green-100'
@@ -204,7 +204,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               {typeCounts.tool > 0 && (
                 <button
                   onClick={() => setFilter('tool')}
-                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
+                  className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'tool'
                       ? 'border-indigo-200 bg-indigo-50 text-indigo-600'
                       : 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
@@ -262,6 +262,13 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
       <style jsx>{`
         .hide-scroll::-webkit-scrollbar {
           display: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
     </div>
