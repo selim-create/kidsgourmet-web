@@ -172,3 +172,59 @@ export async function getTopContributors(limit: number = 3): Promise<TopContribu
     return [];
   }
 }
+
+/**
+ * Tartışmaya oy ver (like/dislike toggle)
+ */
+export async function voteDiscussion(
+  discussionId: number, 
+  voteType: 'like' | 'dislike'
+): Promise<{
+  success: boolean; 
+  like_count: number; 
+  dislike_count: number; 
+  user_vote: string | null
+}> {
+  return fetchAuthAPI(`/kg/v1/community/discussions/${discussionId}/vote`, {
+    method: 'POST',
+    body: JSON.stringify({ vote_type: voteType }),
+  });
+}
+
+/**
+ * Yoruma oy ver (like/dislike toggle)
+ */
+export async function voteComment(
+  commentId: number, 
+  voteType: 'like' | 'dislike'
+): Promise<{
+  success: boolean; 
+  like_count: number; 
+  dislike_count: number; 
+  user_vote: string | null
+}> {
+  return fetchAuthAPI(`/kg/v1/community/comments/${commentId}/vote`, {
+    method: 'POST',
+    body: JSON.stringify({ vote_type: voteType }),
+  });
+}
+
+/**
+ * İçerik raporla (discussion veya comment)
+ */
+export async function reportContent(
+  contentType: 'discussion' | 'comment',
+  contentId: number,
+  reason: string,
+  description?: string
+): Promise<{ success: boolean; message: string }> {
+  return fetchAuthAPI('/kg/v1/community/report', {
+    method: 'POST',
+    body: JSON.stringify({ 
+      content_type: contentType, 
+      content_id: contentId, 
+      reason, 
+      description 
+    }),
+  });
+}
