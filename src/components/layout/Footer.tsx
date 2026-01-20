@@ -89,7 +89,7 @@ export default function Footer() {
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 aria-label="Facebook"
-                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover: border-transparent transition-all shadow-sm"
+                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
                                 <i className="fa-brands fa-facebook-f text-sm"></i>
                             </Link>
@@ -107,7 +107,7 @@ export default function Footer() {
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 aria-label="YouTube"
-                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover: border-transparent transition-all shadow-sm"
+                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
                                 <i className="fa-brands fa-youtube text-sm"></i>
                             </Link>
