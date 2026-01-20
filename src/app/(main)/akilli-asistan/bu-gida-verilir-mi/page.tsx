@@ -53,6 +53,7 @@ export default function BuGidaVerilirMiPage() {
     const startAgeStr = selectedIngredient.start_age || '+6 Ay';
     const startAgeMatch = startAgeStr.match(/\d+/);
     const startAgeMonths = startAgeMatch ? parseInt(startAgeMatch[0]) : 6;
+    const startAgeDisplay = startAgeStr.toLowerCase().includes('ay') ? startAgeStr : `${startAgeMonths} ay`;
 
     if (babyAgeMonths >= startAgeMonths) {
       return {
@@ -68,7 +69,7 @@ export default function BuGidaVerilirMiPage() {
         icon: '⚠️',
         title: 'Dikkatli Ver',
         color: 'yellow',
-        message: `${selectedIngredient.name} için önerilen minimum yaş ${startAgeStr}. Bebeğiniz neredeyse bu yaşta.`
+        message: `${selectedIngredient.name} için önerilen minimum yaş ${startAgeDisplay}. Bebeğiniz neredeyse bu yaşta.`
       };
     } else {
       return {
@@ -76,7 +77,7 @@ export default function BuGidaVerilirMiPage() {
         icon: '❌',
         title: 'Henüz Değil',
         color: 'red',
-        message: `${selectedIngredient.name} için önerilen minimum yaş ${startAgeStr}. Bebeğinizin daha büyümesini bekleyin.`
+        message: `${selectedIngredient.name} için önerilen minimum yaş ${startAgeDisplay}. Bebeğinizin daha büyümesini bekleyin.`
       };
     }
   };
@@ -94,7 +95,7 @@ export default function BuGidaVerilirMiPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30 pt-[25px]">
         <button onClick={() => router.push('/araclar')} className="text-gray-500">
           <i className="fa-solid fa-arrow-left"></i>
         </button>
@@ -110,7 +111,7 @@ export default function BuGidaVerilirMiPage() {
           </div>
           <h1 className="font-display font-bold text-3xl mb-3">Bu Gıda Verilir mi?</h1>
           <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            Bebeğinize hangi gıdayı ne zaman verebileceğinizi öğrenin
+            Bebeğinize hangi gıdayı ne zaman verebileceğinizi öğrenin!
           </p>
         </div>
 
@@ -171,7 +172,7 @@ export default function BuGidaVerilirMiPage() {
             {/* Baby Age */}
             <div>
               <label className="block text-sm font-bold text-slate-800 mb-2">
-                Bebeğinizin Yaşı (ay) <span className="text-red-500">*</span>
+                Bebeğinizin Yaşı (Ay) <span className="text-red-500">*</span>
               </label>
               <input
                 type="number"
@@ -338,7 +339,7 @@ export default function BuGidaVerilirMiPage() {
             </div>
             <h3 className="font-bold text-slate-800 text-xl mb-2">Gıda Arayın</h3>
             <p className="text-gray-500 max-w-md mx-auto">
-              Yukarıdaki arama kutusundan bir gıda arayın ve bebeğinize uygun olup olmadığını öğrenin
+              Yukarıdaki arama kutusundan bir gıda arayın ve bebeğinize uygun olup olmadığını öğrenin.
             </p>
           </div>
         )}
