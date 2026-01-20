@@ -77,7 +77,7 @@ export default function WaterCalculatorPage() {
               Su İhtiyacı Hesaplayıcı
             </h1>
             <p className="text-xl text-slate-600">
-              Bebeğinizin kilosuna ve yaşına göre günlük sıvı ihtiyacını hesaplayın
+              Bebeğinizin kilosuna ve yaşına göre günlük sıvı ihtiyacını hesaplayın.
             </p>
           </div>
 

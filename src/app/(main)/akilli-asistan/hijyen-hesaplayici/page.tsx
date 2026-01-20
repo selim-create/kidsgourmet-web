@@ -72,13 +72,18 @@ export default function HygieneCalculatorPage() {
         title: 'Günlük Hijyen Hesaplayıcı Sonucu',
         text: text,
         url: url,
-      }).catch(() => {
-        // If share fails, fallback to clipboard
-        navigator.clipboard.writeText(`${text}\n${url}`);
-        toast.success('Sonuç panoya kopyalandı!');
+      }).then(() => {
+        // Başarılı paylaşım - toast gösterme
+      }).catch((error) => {
+        // Kullanıcı iptal ettiyse veya hata olduysa
+        if (error.name !== 'AbortError') {
+          navigator.clipboard.writeText(`${text}\n${url}`);
+          toast.success('Sonuç panoya kopyalandı!');
+        }
+        // AbortError durumunda (kullanıcı iptal etti) hiçbir şey yapma
       });
     } else {
-      // Fallback: Copy to clipboard
+      // Share API desteklenmiyorsa clipboard'a kopyala
       navigator.clipboard.writeText(`${text}\n${url}`);
       toast.success('Sonuç panoya kopyalandı!');
     }
@@ -87,7 +92,7 @@ export default function HygieneCalculatorPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30">
         <Link href="/akilli-asistan" className="text-gray-600">
           <i className="fa-solid fa-arrow-left"></i>
         </Link>
@@ -106,7 +111,7 @@ export default function HygieneCalculatorPage() {
               </div>
               <h1 className="font-display font-bold text-3xl mb-2">Günlük Hijyen Hesaplayıcı</h1>
               <p className="text-teal-50">
-                Günlük mendil ve hijyen ürünü ihtiyacınızı hesaplayın
+                Günlük mendil ve hijyen ürünü ihtiyacınızı hesaplayın.
               </p>
             </div>
 
@@ -137,7 +142,7 @@ export default function HygieneCalculatorPage() {
                   </div>
                   <div>
                     <h3 className="font-bold text-slate-800 mb-1">Çanta Önerileri</h3>
-                    <p className="text-gray-600 text-sm">Dışarı çıkarken yanınızda bulundurmanız gerekenler</p>
+                    <p className="text-gray-600 text-sm">Dışarı çıkarken bebek çantanızı hazırlayın.</p>
                   </div>
                 </div>
               </div>

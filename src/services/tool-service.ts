@@ -212,11 +212,11 @@ export const toolService = {
       formula = '30ml x kilo (kg)';
       recommendations.push('Ek gıdaya yeni başlayan bebeklerde su ihtiyacı düşüktür');
       recommendations.push('Anne sütü veya formula ana sıvı kaynağıdır');
-      recommendations.push('Yemeklerle birlikte küçük yudumlarda su sunun');
+      recommendations.push('Yemeklerle birlikte küçük yudumlarda su verebilirsiniz.');
     } else {
       dailyWaterMl = Math.round(weightKg * 40);
       formula = '40ml x kilo (kg)';
-      recommendations.push('Gün boyunca düzenli aralıklarla su sunun');
+      recommendations.push('Gün boyunca düzenli aralıklarla su verebilirsiniz.');
       recommendations.push('Yemeklerle birlikte mutlaka su verin');
       recommendations.push('Sıcak havalarda ve fiziksel aktivite sonrası ihtiyaç artar');
     }

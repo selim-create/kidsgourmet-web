@@ -267,7 +267,7 @@ export default function AlerjenPlanlayiciPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30">
         <button onClick={() => router.push('/araclar')} className="text-gray-500">
           <i className="fa-solid fa-arrow-left"></i>
         </button>
@@ -283,7 +283,7 @@ export default function AlerjenPlanlayiciPage() {
           </div>
           <h1 className="font-display font-bold text-3xl mb-3">Alerjen Deneme Planlayıcı</h1>
           <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            Alerjenik gıdaları güvenle tanıtın
+            Alerjenik gıdaları güvenle tanıtın.
           </p>
         </div>
 
@@ -352,7 +352,7 @@ export default function AlerjenPlanlayiciPage() {
                   <ul className="text-blue-800 text-sm space-y-1 mb-4">
                     <li>✓ Aynı anda sadece tek bir alerjen deneyin</li>
                     <li>✓ Denemeyi evde ve gündüz saatlerinde yapın</li>
-                    <li>✓ İlk deneme miktarı çok küçük olmalıdır</li>
+                    <li>✓ İlk deneme miktarını çok küçük tutun</li>
                     <li>✓ Aynı alerjeni en az 3 gün üst üste gözlemleyin</li>
                     <li>✓ Şiddetli egzaması olan, daha önce reaksiyon geçirmiş veya ailesinde ciddi alerji öyküsü bulunan bebekler için doktorunuza danışın</li>
                   </ul>
@@ -392,7 +392,7 @@ export default function AlerjenPlanlayiciPage() {
                   </div>
                   <div>
                     <span className="font-bold text-slate-800 group-hover:text-purple-600 transition-colors">Alerji Belirtileri Rehberi</span>
-                    <p className="text-xs text-gray-500">Reaksiyonları tanıyın</p>
+                    <p className="text-xs text-gray-500">Reaksiyonları Tanıyın</p>
                   </div>
                 </Link>
               </div>

@@ -43,6 +43,8 @@ export default function AirQualityPage() {
       });
       setResult(analysisResult);
       setStage('result');
+      // Sayfanın en üstüne scroll yap
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error analyzing air quality:', error);
       toast.error('Analiz sırasında bir hata oluştu');
@@ -94,7 +96,7 @@ export default function AirQualityPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30">
         <Link href="/akilli-asistan" className="text-gray-600">
           <i className="fa-solid fa-arrow-left"></i>
         </Link>
@@ -113,7 +115,7 @@ export default function AirQualityPage() {
               </div>
               <h1 className="font-display font-bold text-3xl mb-2">Hava Kalitesi Rehberi</h1>
               <p className="text-sky-50">
-                Evinizin hava kalitesini değerlendirin ve öneriler alın
+                Evinizin hava kalitesini değerlendirin ve öneriler alın.
               </p>
             </div>
 

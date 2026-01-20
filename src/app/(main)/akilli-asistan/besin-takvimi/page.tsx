@@ -383,7 +383,7 @@ export default function BesinTakvimiPage() {
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="grid grid-cols-7 gap-px bg-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 gap-px bg-gray-200">
               {/* Header Row */}
               {dayNames.map((day, idx) => (
                 <div key={idx} className="bg-gray-50 p-3 text-center font-bold text-sm text-gray-700">
@@ -468,25 +468,6 @@ export default function BesinTakvimiPage() {
             </div>
           </div>
         )}
-
-        {/* Legend */}
-        <div className="mt-6 bg-white rounded-2xl border border-gray-100 p-6">
-          <h3 className="font-bold text-slate-800 mb-3">Açıklama</h3>
-          <div className="grid md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded"></div>
-              <span className="text-gray-700">🆕 Yeni Gıda</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded"></div>
-              <span className="text-gray-700">🔄 Tekrar</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded"></div>
-              <span className="text-gray-700">⚠️ Reaksiyon</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Add Trial Modal */}
