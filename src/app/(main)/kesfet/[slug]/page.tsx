@@ -362,8 +362,17 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast.success('Link kopyalandı!');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => {
+          toast.success('Link kopyalandı!');
+        })
+        .catch(() => {
+          toast.error('Link kopyalanamadı');
+        });
+    } else {
+      toast.error('Link kopyalama desteklenmiyor');
+    }
   };
 
   const shareMail = () => {
