@@ -62,6 +62,7 @@ export async function getDiscussions(params?: {
   per_page?: number;
   featured_only?: boolean;
   expert_answered?: boolean;
+  search?: string;
 }): Promise<DiscussionsResponse> {
   const searchParams = new URLSearchParams();
   
@@ -70,6 +71,7 @@ export async function getDiscussions(params?: {
   if (params?.per_page) searchParams.append('per_page', params.per_page.toString());
   if (params?.featured_only) searchParams.append('featured_only', '1');
   if (params?.expert_answered !== undefined) searchParams.append('expert_answered', params.expert_answered ? '1' : '0');
+  if (params?.search) searchParams.append('search', params.search);
   
   const query = searchParams.toString();
   const endpoint = query ? `${API_ENDPOINTS.DISCUSSIONS}?${query}` : API_ENDPOINTS.DISCUSSIONS;

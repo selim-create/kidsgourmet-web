@@ -76,22 +76,11 @@ export default function CommunityPage() {
     const timer = setTimeout(async () => {
       try {
         setLoading(true);
-        const searchParams = new URLSearchParams();
-        if (query.trim()) {
-          searchParams.append('search', query.trim());
-        }
-        if (selectedCircleId) {
-          searchParams.append('circle_id', selectedCircleId.toString());
-        }
-        searchParams.append('per_page', '20');
-        
-        const endpoint = searchParams.toString() 
-          ? `/kg/v1/community/discussions?${searchParams.toString()}`
-          : undefined;
         
         const discussionsData = await getDiscussions({
           circle_id: selectedCircleId || undefined,
-          per_page: 20
+          per_page: 20,
+          search: query.trim() || undefined
         });
         
         setDiscussions(discussionsData.discussions);
