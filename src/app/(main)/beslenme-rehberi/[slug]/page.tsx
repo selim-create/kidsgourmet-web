@@ -489,7 +489,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 && (
                           <div className="mt-8 text-center">
-                            <Link href={`/tarifler?malzeme=${ingredient.slug}`} className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
+                            <Link href={`/tarifler?ingredient=${ingredient.slug}`} className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
                               Tüm {decodeHTMLEntities(ingredient.name)} Tarifleri <i className="fa-solid fa-arrow-right"></i>
                             </Link>
                           </div>

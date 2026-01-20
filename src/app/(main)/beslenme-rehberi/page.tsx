@@ -41,7 +41,7 @@ const ITEMS_PER_PAGE = 12;
 
 export default function IngredientsGuidePage() {
   const [activeCategory, setActiveCategory] = useState("Tümü");
-  const [activeSeason, setActiveSeason] = useState("Tümü");
+  const [activeSeasons, setActiveSeasons] = useState<string[]>(["Tümü"]);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [categories, setCategories] = useState<string[]>(["Tümü"]);
   const [loading, setLoading] = useState(true);
@@ -218,12 +218,34 @@ export default function IngredientsGuidePage() {
     return SEASON_CONFIG[seasonStr] || SEASON_CONFIG['Tüm Yıl'];
   };
 
+  // Mevsim toggle handler for multi-select
+  const toggleSeason = (season: string) => {
+    if (season === "Tümü") {
+      setActiveSeasons(["Tümü"]);
+    } else {
+      setActiveSeasons(prev => {
+        // Remove "Tümü" if selecting a specific season
+        const filtered = prev.filter(s => s !== "Tümü");
+        
+        // Toggle the season
+        if (filtered.includes(season)) {
+          const newSeasons = filtered.filter(s => s !== season);
+          // If no seasons selected, default to "Tümü"
+          return newSeasons.length === 0 ? ["Tümü"] : newSeasons;
+        } else {
+          return [...filtered, season];
+        }
+      });
+    }
+  };
+
   // Filtreleme logic
   const displayedIngredients = searchQuery.trim().length >= 2 
     ? searchResults
     : ingredients.filter(ing => {
         const categoryMatch = activeCategory === "Tümü" || ing.category === activeCategory;
-        const seasonMatch = activeSeason === "Tümü" || ing.season?.includes(activeSeason);
+        const seasonMatch = activeSeasons.includes("Tümü") || 
+                          activeSeasons.some(season => ing.season?.includes(season));
         return categoryMatch && seasonMatch;
       });
 
@@ -296,22 +318,28 @@ export default function IngredientsGuidePage() {
                   </div>
               </div>
               
-              {/* Season Filter */}
+              {/* Season Filter - Multi-Select with Chips */}
               <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
                   <div className="flex gap-2 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
-                      {["Tümü", "Kış", "İlkbahar", "Yaz", "Sonbahar", "Tüm Yıl"].map((season) => (
-                          <button 
-                              key={season}
-                              onClick={() => setActiveSeason(season)}
-                              className={`px-3 py-1.5 rounded-full font-bold shadow-sm transition-all whitespace-nowrap text-sm ${
-                                  activeSeason === season 
-                                  ? "bg-green-500 text-white shadow-md transform scale-105" 
-                                  : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
-                              }`}
-                          >
-                              {season}
-                          </button>
-                      ))}
+                      {["Tümü", "Kış", "İlkbahar", "Yaz", "Sonbahar", "Tüm Yıl"].map((season) => {
+                          const isActive = activeSeasons.includes(season);
+                          return (
+                            <button 
+                                key={season}
+                                onClick={() => toggleSeason(season)}
+                                className={`px-3 py-1.5 rounded-full font-bold shadow-sm transition-all whitespace-nowrap text-sm flex items-center gap-1.5 ${
+                                    isActive
+                                    ? "bg-green-500 text-white shadow-md transform scale-105" 
+                                    : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
+                                }`}
+                            >
+                                {isActive && season !== "Tümü" && (
+                                  <i className="fa-solid fa-check text-xs"></i>
+                                )}
+                                {season}
+                            </button>
+                          );
+                      })}
                   </div>
               </div>
           </div>
