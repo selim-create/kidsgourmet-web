@@ -618,21 +618,21 @@ export default function Home() {
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">UZMAN GÖRÜŞÜ</h3>
                       <p className="text-gray-700 text-sm">Uzman yazılarını takip edin, çocuğunuzun sağlığı konusunda içiniz rahat olsun.</p>
                   </div>
-                   {/* Feature 2 */}
-                   <div className="bg-gray-50 p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
-                      <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                          🔍
+                   {/* Feature 2: GÜVENLİ İÇERİK */}
+                   <div className="bg-blue-100 p-8 rounded-[2rem] shadow-sm border border-blue-200 text-center hover:-translate-y-2 transition-transform duration-300">
+                      <div className="w-16 h-16 mx-auto mb-6 text-5xl text-blue-700 flex items-center justify-center">
+                          <i className="fa-solid fa-magnifying-glass"></i>
                       </div>
-                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">Güvenli İçerik</h3>
-                      <p className="text-gray-500 text-sm">Alerjen filtreleri ve yaşa uygun içerik denetimi ile içiniz rahat olsun.</p>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">GÜVENLİ İÇERİK</h3>
+                      <p className="text-gray-700 text-sm">Alerjen filtreleri ve yaşa uygun içerik denetimi ile aradığınızı kolayca bulun.</p>
                   </div>
-                   {/* Feature 3 */}
-                   <div className="bg-gray-50 p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
-                      <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                          🤝
+                   {/* Feature 3: K&G Topluluğu */}
+                   <div className="bg-amber-100 p-8 rounded-[2rem] shadow-sm border border-amber-200 text-center hover:-translate-y-2 transition-transform duration-300">
+                      <div className="w-16 h-16 mx-auto mb-6 text-5xl text-amber-700 flex items-center justify-center">
+                          <i className="fa-solid fa-heart"></i>
                       </div>
-                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">Anneler Topluluğu</h3>
-                      <p className="text-gray-500 text-sm">Diğer annelerin deneyimlerini okuyun, sorularınızı uzmanlara sorun.</p>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">K&amp;G Topluluğu</h3>
+                      <p className="text-gray-700 text-sm">Diğer annelerin deneyimlerini okuyun, sorularınızı uzmanlara sorun.</p>
                   </div>
               </div>
           </div>
