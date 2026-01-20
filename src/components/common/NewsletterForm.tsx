@@ -17,6 +17,28 @@ interface NewsletterFormProps {
   onError?: (message: string) => void;
 }
 
+// Consent Checkbox Component - defined outside to avoid recreation on render
+function ConsentCheckbox({ source, checked, onChange }: { source: string; checked: boolean; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+  return (
+    <div className="flex items-start gap-2 mt-3">
+      <input
+        type="checkbox"
+        id={`consent-${source}`}
+        checked={checked}
+        onChange={onChange}
+        className="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+      />
+      <label htmlFor={`consent-${source}`} className="text-xs text-gray-500 cursor-pointer">
+        Bültene üye olarak{' '}
+        <Link href="/aydinlatma-metni" className="text-orange-500 hover:underline font-medium">
+          Aydınlatma Metni
+        </Link>
+        &apos;ni okuduğumu ve kabul ettiğimi onaylıyorum.
+      </label>
+    </div>
+  );
+}
+
 export default function NewsletterForm({
   source,
   variant = 'default',
@@ -31,7 +53,7 @@ export default function NewsletterForm({
 }: NewsletterFormProps) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
-  const [agreed, setAgreed] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -45,9 +67,9 @@ export default function NewsletterForm({
       return;
     }
 
-    if (variant === 'compact' && !agreed) {
+    if (!consentChecked) {
       setStatus('error');
-      setMessage('Aydınlatma Metni\'ni kabul etmelisiniz.');
+      setMessage('Devam etmek için Aydınlatma Metni&apos;ni kabul etmelisiniz.');
       return;
     }
 
@@ -73,7 +95,7 @@ export default function NewsletterForm({
       setMessage(result.message || 'Başarıyla abone oldunuz! Onay e-postanızı kontrol edin.');
       setEmail('');
       setName('');
-      setAgreed(false);
+      setConsentChecked(false);
       onSuccess?.();
     } else {
       setStatus('error');
@@ -100,74 +122,104 @@ export default function NewsletterForm({
     );
   }
 
-  // Compact variant (with checkbox)
+  // Compact variant
   if (variant === 'compact') {
     return (
       <div className={className}>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="flex gap-2">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={placeholder}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors"
-              disabled={isLoading}
-              required
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !agreed}
-              className="bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <i className="fa-solid fa-spinner fa-spin"></i>
-              ) : (
-                <i className="fa-solid fa-paper-plane"></i>
-              )}
-            </button>
-          </div>
-          <div className="flex items-start gap-2">
-            <input
-              type="checkbox"
-              id="newsletter-agree"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
-              className="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-            />
-            <label htmlFor="newsletter-agree" className="text-xs text-gray-600 cursor-pointer">
-              Bültene üye olarak{' '}
-              <Link href="/aydinlatma-metni" className="text-orange-500 hover:text-orange-600 underline">
-                Aydınlatma Metni
-              </Link>
-              &apos;ni okuyup anladığımı kabul ediyorum.
-            </label>
-          </div>
-          {status === 'error' && (
-            <p className="text-red-500 text-xs">{message}</p>
-          )}
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={placeholder}
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors"
+            disabled={isLoading}
+            required
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !consentChecked}
+            className="bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm hover:bg-slate-700 transition-colors disabled:opacity-50"
+          >
+            {isLoading ? (
+              <i className="fa-solid fa-spinner fa-spin"></i>
+            ) : (
+              <i className="fa-solid fa-paper-plane"></i>
+            )}
+          </button>
         </form>
+        <ConsentCheckbox source={source} checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
+        {status === 'error' && (
+          <p className="text-red-500 text-xs mt-2">{message}</p>
+        )}
       </div>
     );
   }
 
-  // Inline variant (tek satır)
+  // Inline variant
   if (variant === 'inline') {
     return (
-      <form onSubmit={handleSubmit} className={`flex flex-col sm:flex-row gap-4 ${className}`}>
+      <div className={className}>
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder={placeholder}
+            className="flex-1 py-3 px-6 rounded-full border border-gray-200 outline-none focus:border-green-500 shadow-sm"
+            disabled={isLoading}
+            required
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !consentChecked}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors disabled:opacity-50"
+          >
+            {isLoading ? (
+              <>
+                <i className="fa-solid fa-spinner fa-spin mr-2"></i>
+                Gönderiliyor...
+              </>
+            ) : (
+              buttonText
+            )}
+          </button>
+        </form>
+        <ConsentCheckbox source={source} checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
+        {status === 'error' && (
+          <p className="text-red-500 text-sm text-center sm:text-left mt-2">{message}</p>
+        )}
+      </div>
+    );
+  }
+
+  // Default variant
+  return (
+    <div className={className}>
+      <form onSubmit={handleSubmit}>
+        {showNameField && (
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Adınız (opsiyonel)"
+            className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-orange-500"
+            disabled={isLoading}
+          />
+        )}
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 py-3 px-6 rounded-full border border-gray-200 outline-none focus:border-green-500 shadow-sm"
+          className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-orange-500"
           disabled={isLoading}
           required
         />
         <button
           type="submit"
-          disabled={isLoading}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors disabled:opacity-50"
+          disabled={isLoading || !consentChecked}
+          className={buttonClassName || "w-full bg-orange-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-orange-600 transition-colors disabled:opacity-50"}
         >
           {isLoading ? (
             <>
@@ -178,52 +230,11 @@ export default function NewsletterForm({
             buttonText
           )}
         </button>
-        {status === 'error' && (
-          <p className="text-red-500 text-sm text-center sm:text-left">{message}</p>
-        )}
       </form>
-    );
-  }
-
-  // Default variant
-  return (
-    <form onSubmit={handleSubmit} className={className}>
-      {showNameField && (
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Adınız (opsiyonel)"
-          className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-orange-500"
-          disabled={isLoading}
-        />
-      )}
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-orange-500"
-        disabled={isLoading}
-        required
-      />
-      <button
-        type="submit"
-        disabled={isLoading}
-        className={buttonClassName || "w-full bg-orange-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-orange-600 transition-colors disabled:opacity-50"}
-      >
-        {isLoading ? (
-          <>
-            <i className="fa-solid fa-spinner fa-spin mr-2"></i>
-            Gönderiliyor...
-          </>
-        ) : (
-          buttonText
-        )}
-      </button>
+      <ConsentCheckbox source={source} checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
       {status === 'error' && (
         <p className="text-red-500 text-xs mt-2">{message}</p>
       )}
-    </form>
+    </div>
   );
 }

@@ -1,4 +1,4 @@
-const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.kidsgourmet.com.tr').replace(/\/$/, '');
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'https://api.kidsgourmet.com.tr').replace(/\/+$/, '');
 
 export interface ContactFormData {
   name: string;
@@ -19,7 +19,7 @@ export const contactService = {
    */
   submit: async (data: ContactFormData): Promise<ContactResponse> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/wp-json/kg/v1/contact`, {
+      const response = await fetch(`${API_BASE_URL}/wp-json/kg/v1/contact/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
