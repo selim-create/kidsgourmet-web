@@ -438,6 +438,47 @@ function SearchContent() {
                         </Link>
                     </div>
 
+                    {/* Faydalı Araçlar (Random Tool Cards) */}
+                    <div className="space-y-4">
+                        <h3 className="font-bold text-slate-800 px-1">Faydalı Araçlar</h3>
+                        {(() => {
+                          // Smart Assistant Tools list
+                          const SMART_TOOLS = [
+                            { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-plate-utensils', color: 'from-purple-500 to-pink-500' },
+                            { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-book-sparkles', color: 'from-blue-500 to-indigo-500' },
+                            { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'from-green-500 to-teal-500' },
+                            { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-clipboard-check', color: 'from-orange-500 to-red-500' },
+                            { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-chart-line', color: 'from-indigo-500 to-purple-500' },
+                            { name: 'Su İhtiyacı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-droplet', color: 'from-cyan-500 to-blue-500' },
+                            { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-shield-virus', color: 'from-red-500 to-pink-500' },
+                            { name: 'Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby', color: 'from-pink-500 to-rose-500' },
+                          ];
+                          
+                          // Shuffle and pick 3 random tools
+                          const shuffled = [...SMART_TOOLS].sort(() => Math.random() - 0.5);
+                          const randomTools = shuffled.slice(0, 3);
+                          
+                          return randomTools.map((tool, index) => (
+                            <Link 
+                              key={index}
+                              href={tool.path}
+                              className={`block bg-gradient-to-br ${tool.color} p-4 rounded-2xl text-white hover:shadow-lg transition-all group`}
+                            >
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
+                                  <i className={`fa-solid ${tool.icon} text-lg`}></i>
+                                </div>
+                                <h4 className="font-bold text-sm">{tool.name}</h4>
+                              </div>
+                              <p className="text-xs text-white/80 mb-2">Yapay zeka destekli araç</p>
+                              <div className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                                Hemen Dene <i className="fa-solid fa-arrow-right"></i>
+                              </div>
+                            </Link>
+                          ));
+                        })()}
+                    </div>
+
                 </aside>
 
             </div>
