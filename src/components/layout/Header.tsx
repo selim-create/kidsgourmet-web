@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from 'next/link'; 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker';
 import UserDropdown from '@/components/ui/UserDropdown';
@@ -18,6 +18,7 @@ export default function Header() {
   const [expandedMobileItem, setExpandedMobileItem] = useState<string | null>(null);
   const { user, isAuthenticated, logout } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get role-based URLs using utility functions
@@ -163,7 +164,7 @@ export default function Header() {
                 </div>
                 <div className="hidden md:flex items-center gap-4 text-gray-500">
                     <Link href="/hakkimizda" className="hover:text-orange-500 transition-colors">Hakkımızda</Link>
-                    <Link href="/uzmanlar" className="hover:text-orange-500 transition-colors">Uzman Kadromuz</Link>
+                    <Link href="/uzmanlar" className="hover:text-orange-500 transition-colors">Uzmanlar</Link>
                     <Link href="/iletisim" className="hover:text-orange-500 transition-colors">İletişim & Reklam</Link>
                     <Link href="/yardim" className="hover:text-orange-500 transition-colors">Yardım & Destek</Link>
                     <span className="text-gray-300">|</span>
@@ -198,7 +199,10 @@ export default function Header() {
 
                     {/* Desktop Menu */}
                     <nav className="hidden lg:flex items-center space-x-1">
-                        {navigationItems.map((item) => (
+                        {navigationItems.map((item) => {
+                            const isActive = pathname === item.href || 
+                                           (item.children && item.children.some(child => pathname === child.href));
+                            return (
                             <div
                                 key={item.label}
                                 className="relative"
@@ -207,7 +211,9 @@ export default function Header() {
                             >
                                 <Link
                                     href={item.href}
-                                    className={`px-4 py-2 rounded-full text-slate-600 font-bold text-sm transition-all font-display ${getColorClasses(item.color)}`}
+                                    className={`px-4 py-2 rounded-full font-bold text-sm transition-all font-display ${
+                                        isActive ? 'text-orange-500' : 'text-slate-600'
+                                    } ${getColorClasses(item.color)}`}
                                 >
                                     {item.label}
                                     {item.children && (
@@ -244,7 +250,7 @@ export default function Header() {
                                     </div>
                                 )}
                             </div>
-                        ))}
+                        )})}
                     </nav>
 
                     {/* Right Actions */}
@@ -275,10 +281,15 @@ export default function Header() {
                             <UserDropdown />
                           </div>
                         ) : (
-                          <Link href="/login" className="hidden md:inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-bold rounded-full text-white bg-orange-500 hover:bg-orange-600 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-                              <i className="fa-solid fa-child mr-2"></i>
-                              Giriş Yap
-                          </Link>
+                          <div className="hidden md:flex items-center gap-3">
+                            <Link href="/login" className="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-bold rounded-full text-white bg-orange-500 hover:bg-orange-600 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                                <i className="fa-solid fa-child mr-2"></i>
+                                Giriş Yap
+                            </Link>
+                            <Link href="/register" className="inline-flex items-center px-5 py-2.5 border border-orange-500 text-sm font-bold rounded-full text-orange-500 bg-transparent hover:bg-orange-50 transition-all transform hover:-translate-y-0.5">
+                                Kayıt Ol
+                            </Link>
+                          </div>
                         )}
                         
                         {/* Mobile Menu Button */}

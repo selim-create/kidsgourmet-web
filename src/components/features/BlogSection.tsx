@@ -18,14 +18,14 @@ export default function BlogSection({ posts }: BlogSectionProps) {
     <div className="py-16 bg-white border-t border-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10 gap-4">
           <div>
-            <h2 className="font-sans font-bold text-3xl text-slate-800">Ebeveyn Rehberi</h2>
-            <p className="text-gray-500 mt-2">Uzmanlardan bilgiler ve ipuçları</p>
+            <h2 className="font-sans font-bold text-2xl sm:text-3xl text-slate-800">Ebeveyn Rehberi</h2>
+            <p className="text-gray-500 mt-2 text-sm">Uzmanlardan bilgiler, güncel rehberler, beslenme ipuçları ve gelişim notları.</p>
           </div>
           <Link 
             href="/kesfet" 
-            className="text-orange-500 font-bold hover:underline flex items-center gap-2"
+            className="text-orange-500 font-bold hover:underline flex items-center gap-2 whitespace-nowrap"
           >
             Tümünü Gör
             <i className="fa-solid fa-arrow-right"></i>
