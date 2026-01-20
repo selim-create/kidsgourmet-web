@@ -111,8 +111,8 @@ export default function FavoritesPage() {
         <main className="flex-1 w-full min-w-0">
             
             {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
-                <span className="font-display font-bold text-lg text-slate-800">Favorilerim</span>
+            <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
+                <span className="font-display font-bold text-lg text-slate-800">Favoriler</span>
                 <button 
                   onClick={() => setShowCreateModal(true)}
                   className="text-gray-500 text-xl"

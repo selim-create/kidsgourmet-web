@@ -25,7 +25,7 @@ export default function FavoriteBlogCard({ post }: FavoriteBlogCardProps) {
 
   return (
     <Link
-      href={`/blog/${post.slug}`}
+      href={`/kesfet/${post.slug}`}
       className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden flex flex-col relative"
     >
       <div className="absolute top-3 right-3 z-10">
