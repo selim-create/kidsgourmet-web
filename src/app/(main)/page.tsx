@@ -7,9 +7,11 @@ import { recipeService } from '@/services/recipe-service';
 import { blogService, BlogPost } from '@/services/blog-service';
 import { featuredService, FeaturedItem } from '@/services/featured-service';
 import { tariftenService } from '@/services/tariften-service';
+import { rejimdeService, RejimdeContent } from '@/services/rejimde-service';
 import { RecipeCard, TariftenRecipe } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
+import { useUser } from '@/hooks/use-user';
 import FeaturedSlider from '@/components/features/FeaturedSlider';
 import BlogSection from '@/components/features/BlogSection';
 import RecipeCardComponent from '@/components/ui/RecipeCard';
@@ -18,12 +20,14 @@ import RecipeCardComponent from '@/components/ui/RecipeCard';
 export default function Home() {
   const router = useRouter();
   const { ageGroups } = useAgeGroups();
+  const { isAuthenticated } = useUser();
   const [latestRecipes, setLatestRecipes] = useState<RecipeCard[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAge, setSelectedAge] = useState('');
   const [tariftenRecipe, setTariftenRecipe] = useState<TariftenRecipe | null>(null);
+  const [rejimdeContent, setRejimdeContent] = useState<RejimdeContent | null>(null);
 
   // Prepare featured content for slider
   const [featuredContent, setFeaturedContent] = useState<Array<{
@@ -38,15 +42,19 @@ export default function Home() {
     async function fetchData() {
       try {
         setLoading(true);
-        const [featuredData, latest, posts, randomRecipe] = await Promise.all([
+        const [featuredData, latest, posts, randomRecipe, randomRejimde] = await Promise.all([
           featuredService.getAll(5),
           recipeService.getAll({ perPage: 8 }),
           blogService.getAll(1, 12),
-          tariftenService.getRandom()
+          tariftenService.getRandom(),
+          rejimdeService.getRandom()
         ]);
         
         // Set Tariften recipe
         setTariftenRecipe(randomRecipe);
+        
+        // Set Rejimde content
+        setRejimdeContent(randomRejimde);
         
         // Prepare featured content - map FeaturedItem to content types
         const featured = (featuredData || []).map((item: FeaturedItem) => {
@@ -258,9 +266,11 @@ export default function Home() {
                             onChange={(e) => setSelectedAge(e.target.value)}
                           >
                               <option value="">Tüm Aylar</option>
-                              {ageGroups.map(ag => (
-                                <option key={ag.id} value={ag.slug}>{decodeEntities(ag.name)}</option>
-                              ))}
+                              <option value="0-6-ay">0-6 Ay (Hazırlık Evresi)</option>
+                              <option value="6-8-ay">6-8 Ay (Başlangıç & Tadım)</option>
+                              <option value="9-11-ay">9-11 Ay (Keşif & Pütürlüye Geçiş)</option>
+                              <option value="12-24-ay">12-24 Ay (Aile Sofrasına Geçiş)</option>
+                              <option value="2-yas">2+ Yaş (Çocuk Gurme)</option>
                           </select>
                       </div>
 
@@ -292,12 +302,34 @@ export default function Home() {
           </div>
       </div>
 
+      {/* MOBILE LOGIN/REGISTER SECTION */}
+      {!isAuthenticated && (
+        <div className="py-8 bg-gradient-to-r from-orange-50 to-amber-50 md:hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-4">
+              <p className="text-gray-600 font-medium">Özelleştirilmiş içerik için</p>
+            </div>
+            <div className="flex gap-3 justify-center">
+              <Link href="/login" className="flex-1 max-w-[200px] inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-full text-white bg-orange-500 hover:bg-orange-600 shadow-md transition-all">
+                Giriş Yap
+              </Link>
+              <Link href="/register" className="flex-1 max-w-[200px] inline-flex items-center justify-center px-6 py-3 border border-orange-500 text-sm font-bold rounded-full text-orange-500 bg-white hover:bg-orange-50 transition-all">
+                Kayıt Ol
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* RECIPES SECTION */}
       <div className="py-12 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-sans font-bold text-3xl text-slate-800">Minik Gurmelere Özel</h2>
-                  <Link href="/tarifler" className="text-orange-500 font-bold hover:underline">Tümünü Gör</Link>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-2">
+                  <div>
+                    <h2 className="font-sans font-bold text-2xl sm:text-3xl text-slate-800">Minik Gurmelere Özel</h2>
+                    <p className="text-gray-500 mt-1 text-sm">İştah açan besleyici tarifler</p>
+                  </div>
+                  <Link href="/tarifler" className="text-orange-500 font-bold hover:underline whitespace-nowrap">Tümünü Gör</Link>
               </div>
 
               {loading ? (
@@ -329,24 +361,25 @@ export default function Home() {
       {/* CROSS-SELL SECTION: Bizimkiler Ne Yiyecek? - Tariften.com */}
       <div className="py-12 bg-white relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="bg-purple-50 border border-purple-100 rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-100 rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
                   {/* Decorative Elements */}
                   <div className="absolute top-0 right-0 w-64 h-64 bg-purple-200 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none opacity-50"></div>
                   <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-100 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none opacity-50"></div>
 
                   <div className="relative z-10 max-w-2xl">
-                      <span className="text-purple-500 font-bold tracking-widest text-xs uppercase mb-2 block">Ebeveynlere Özel</span>
+                      <span className="text-purple-500 font-bold tracking-widest text-xs uppercase mb-2 block">EBEVEYNLERE ÖZEL</span>
                       <h2 className="font-sans font-bold text-3xl md:text-4xl text-slate-800 mb-4">Bizimkiler Ne Yiyecek?</h2>
                       {tariftenRecipe ? (
                         <p className="text-lg text-gray-600">
-                            Bebeğine tarif hazırlarken kendine de lezzetli bir yemek yap! 
-                            <Link href={tariftenRecipe.url} target="_blank" rel="noopener noreferrer" className="text-purple-500 font-bold underline decoration-dotted underline-offset-4 hover:text-purple-700 ml-1">
+                            Bebeğine sağlıklı tarifler hazırlarken kendini de unutma! Lezzetli bir{' '}
+                            <Link href={`https://www.tariften.com/recipe/${tariftenRecipe.slug}`} target="_blank" rel="noopener noreferrer" className="text-purple-500 font-bold underline decoration-dotted underline-offset-4 hover:text-purple-700">
                               {decodeEntities(tariftenRecipe.title)}
-                            </Link> tarifini dene.
+                            </Link>{' '}
+                            denemek ister misin?
                         </p>
                       ) : (
                         <p className="text-lg text-gray-600">
-                            Bebeğine tarif hazırlarken artan malzemelerle kendine harika yemekler yapabilirsin.
+                            Bebeğine sağlıklı tarifler hazırlarken kendini de unutma! Lezzetli tarifler için Tariften.com'u keşfet.
                         </p>
                       )}
                   </div>
@@ -360,17 +393,53 @@ export default function Home() {
           </div>
       </div>
 
+      {/* CROSS-SELL SECTION: Rejimde.com */}
+      <div className="py-12 bg-white relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-[2rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                  {/* Decorative Elements */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-green-200 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none opacity-50"></div>
+                  <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-100 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none opacity-50"></div>
+
+                  <div className="relative z-10 max-w-2xl">
+                      <span className="text-green-600 font-bold tracking-widest text-xs uppercase mb-2 block">EBEVEYNLERE ÖZEL</span>
+                      <h2 className="font-sans font-bold text-3xl md:text-4xl text-slate-800 mb-4">Sağlıklı Yaşamın Eğlenceli Hali</h2>
+                      {rejimdeContent ? (
+                        <p className="text-lg text-gray-600">
+                            Kanıtlanmış bilimsel verilerle, sürdürülebilir sağlıklı yaşam için size uygun{' '}
+                            <Link href={`https://www.rejimde.com/${rejimdeContent.type}/${rejimdeContent.slug}`} target="_blank" rel="noopener noreferrer" className="text-green-600 font-bold underline decoration-dotted underline-offset-4 hover:text-green-700">
+                              {decodeEntities(rejimdeContent.title)}
+                            </Link>{' '}
+                            {rejimdeContent.type === 'diet' ? 'diyet programını' : 'egzersiz programını'} hemen keşfedin!
+                        </p>
+                      ) : (
+                        <p className="text-lg text-gray-600">
+                            Kanıtlanmış bilimsel verilerle, sürdürülebilir sağlıklı yaşam için size uygun diyet ya da egzersiz programını hemen keşfedin!
+                        </p>
+                      )}
+                  </div>
+                  <div className="relative z-10 flex-shrink-0">
+                      <Link href="https://rejimde.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center bg-green-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-green-700 transition-all hover:-translate-y-1">
+                          Rejimde.com'da Keşfet
+                          <i className="fa-solid fa-arrow-up-right-from-square ml-3"></i>
+                      </Link>
+                  </div>
+              </div>
+          </div>
+      </div>
+
       {/* TOOLS SECTION */}
       <div className="py-16 bg-orange-50/30 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="text-center mb-12">
-                  <h2 className="font-sans font-bold text-3xl text-slate-800">Sadece Tarif Değil, <span className="text-orange-500">Akıllı Araçlar</span></h2>
+                  <h2 className="font-sans font-bold text-3xl text-slate-800"><span className="text-orange-500">Akıllı Asistan</span> ile Yanınızdayız!</h2>
                   <p className="text-gray-500 mt-2">Çocuğunuzun gelişimi ve güvenliği için veri odaklı çözümler.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="overflow-x-auto pb-8 -mx-4 px-4 md:overflow-visible">
+                <div className="flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 min-w-max md:min-w-0">
                   {/* Tool 1: BLW */}
-                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
                       <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
                           <i className="fa-solid fa-baby"></i>
                       </div>
@@ -382,19 +451,19 @@ export default function Home() {
                   </div>
 
                   {/* Tool 2: Search Engine */}
-                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
                       <div className="w-16 h-16 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
                           <i className="fa-solid fa-magnifying-glass"></i>
                       </div>
-                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Ek Gıda Arama Motoru</h3>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Ek Gıda Rehberi</h3>
                       <p className="text-gray-600 text-sm mb-6 flex-grow">"Bebekler bal yiyebilir mi?" gibi soruların cevabını anında bulun.</p>
-                      <Link href="/arama" className="text-orange-500 font-bold flex items-center hover:underline">
+                      <Link href="/akilli-asistan/ek-gida-rehberi" className="text-orange-500 font-bold flex items-center hover:underline">
                           Sorgula <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>
 
                   {/* Tool 3: Profile */}
-                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
                       <div className="w-16 h-16 bg-green-50 text-green-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
                           <i className="fa-solid fa-id-card"></i>
                       </div>
@@ -404,6 +473,127 @@ export default function Home() {
                           Profil Oluştur <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                   </div>
+
+                  {/* Tool 4: Vaccination Tracker */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-syringe"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Aşı Takvimi</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Çocuğunuzun aşı takvimini takip edin ve hatırlatıcı alın.</p>
+                      <Link href="/dashboard/saglik/asilar" className="text-red-500 font-bold flex items-center hover:underline">
+                          Takvimi Gör <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 5: Percentile Calculator */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-chart-line"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Persentil Hesaplama</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Boy, kilo ve baş çevresi persentillerini hesaplayın.</p>
+                      <Link href="/akilli-asistan/persentil-hesaplama" className="text-purple-500 font-bold flex items-center hover:underline">
+                          Hesapla <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 6: Water Calculator */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-cyan-50 text-cyan-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-droplet"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Su İhtiyacı Hesaplama</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Çocuğunuzun günlük su ihtiyacını öğrenin.</p>
+                      <Link href="/akilli-asistan/su-ihtiyaci" className="text-cyan-500 font-bold flex items-center hover:underline">
+                          Hesapla <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 7: Allergen Planner */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-triangle-exclamation"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Alerjen Planlayıcı</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">8 büyük alerjeni tanıtma planınızı oluşturun.</p>
+                      <Link href="/akilli-asistan/alerjen-planlayici" className="text-amber-600 font-bold flex items-center hover:underline">
+                          Plan Yap <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 8: Besin Takvimi */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-lime-50 text-lime-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-calendar-days"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Besin Takvimi</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Ayına göre hangi besinleri tanıtabileceğinizi görün.</p>
+                      <Link href="/akilli-asistan/besin-takvimi" className="text-lime-600 font-bold flex items-center hover:underline">
+                          Takvimi Gör <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 9: Meal Planner */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-calendar-week"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Haftalık Plan</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Haftalık beslenme planınızı otomatik oluşturun.</p>
+                      <Link href="/dashboard/haftalik-plan" className="text-teal-600 font-bold flex items-center hover:underline">
+                          Plan Oluştur <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 10: Shopping List */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-pink-50 text-pink-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-basket-shopping"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Alışveriş Listesi</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Akıllı alışveriş listenizi oluşturun ve yönetin.</p>
+                      <Link href="/alisveris-listesi" className="text-pink-500 font-bold flex items-center hover:underline">
+                          Liste Oluştur <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 11: Food Trial Calendar */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-clipboard-check"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Besin Deneme Takvimi</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Denediğiniz besinleri ve reaksiyonları kaydedin.</p>
+                      <Link href="/akilli-asistan/besin-deneme-takvimi" className="text-indigo-500 font-bold flex items-center hover:underline">
+                          Kayıt Tut <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 12: Bath Planner */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-sky-50 text-sky-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-bath"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Banyo Planlayıcı</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Bebeğiniz için ideal banyo rutini oluşturun.</p>
+                      <Link href="/akilli-asistan/banyo-planlayici" className="text-sky-500 font-bold flex items-center hover:underline">
+                          Plan Oluştur <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+
+                  {/* Tool 13: Diaper Calculator */}
+                  <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col w-[280px] md:w-auto flex-shrink-0">
+                      <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm">
+                          <i className="fa-solid fa-baby-carriage"></i>
+                      </div>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">Bez Hesaplayıcı</h3>
+                      <p className="text-gray-600 text-sm mb-6 flex-grow">Aylık bez ihtiyacınızı ve maliyetinizi hesaplayın.</p>
+                      <Link href="/akilli-asistan/bez-hesaplayici" className="text-rose-500 font-bold flex items-center hover:underline">
+                          Hesapla <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
+                      </Link>
+                  </div>
+                </div>
               </div>
           </div>
       </div>
@@ -412,28 +602,21 @@ export default function Home() {
       <BlogSection posts={filteredPosts} />
 
       {/* FEATURES SECTION ("NEDEN KIDSGOURMET") */}
-      <div className="py-16 bg-white relative overflow-hidden border-t border-gray-50">
-          {/* Blobs */}
-          <div className="absolute top-0 left-0 text-green-50 transform -translate-x-1/2 -translate-y-1/2">
-              <svg width="400" height="400" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                  <path fill="currentColor" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.2,-19.2,95.8,-5.2C93.5,8.9,82,22.1,70.9,33.4C59.8,44.7,49.1,54.1,37.3,61.9C25.5,69.7,12.7,75.9,-0.6,76.9C-13.9,77.9,-27.8,73.8,-40.3,66.6C-52.8,59.4,-63.9,49.1,-72.1,36.8C-80.3,24.5,-85.6,10.2,-83.8,-3.1C-82,-16.4,-73.1,-28.7,-63.3,-39.3C-53.5,-49.9,-42.8,-58.8,-31.3,-67.9C-19.8,-77,-7.4,-86.3,3.8,-92.9L15,-99.5L44.7,-76.4Z" transform="translate(100 100)" />
-              </svg>
-          </div>
-
+      <div className="py-16 bg-white relative border-t border-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
               <div className="text-center mb-12">
                   <h2 className="font-sans font-bold text-3xl text-slate-800">Neden KidsGourmet?</h2>
-                  <p className="text-gray-500 mt-2">Sadece tarif değil, sağlıklı bir gelecek için yanınızdayız.</p>
+                  <p className="text-gray-500 mt-2">Bebek ve çocuk beslenmesinde ebeveynlere güvenilir, bilimsel ve pratik rehberlik desteği sunmak için varız.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {/* Feature 1 */}
-                  <div className="bg-gray-50 p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
-                      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                          👩‍⚕️
+                  {/* Feature 1: UZMAN GÖRÜŞÜ */}
+                  <div className="bg-green-100 p-8 rounded-[2rem] shadow-sm border border-green-200 text-center hover:-translate-y-2 transition-transform duration-300">
+                      <div className="w-16 h-16 mx-auto mb-6 text-5xl text-green-700 flex items-center justify-center">
+                          <i className="fa-solid fa-glasses"></i>
                       </div>
-                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">Uzman Onaylı</h3>
-                      <p className="text-gray-500 text-sm">Tüm tarifler ve içerikler Rejimde.com uzman diyetisyenleri tarafından incelenir.</p>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">UZMAN GÖRÜŞÜ</h3>
+                      <p className="text-gray-700 text-sm">Uzman yazılarını takip edin, çocuğunuzun sağlığı konusunda içiniz rahat olsun.</p>
                   </div>
                    {/* Feature 2 */}
                    <div className="bg-gray-50 p-8 rounded-[2rem] shadow-sm border border-gray-100 text-center hover:-translate-y-2 transition-transform duration-300">
