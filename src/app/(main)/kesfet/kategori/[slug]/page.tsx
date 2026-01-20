@@ -276,31 +276,26 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                         </div>
                     )}
 
+                    {/* Newsletter Widget */}
+                    <div className="bg-green-50/50 p-6 rounded-3xl border border-green-100 text-center">
+                        <div className="w-12 h-12 bg-white text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-xl">
+                            <i className="fa-regular fa-envelope"></i>
+                        </div>
+                        <h3 className="font-bold text-slate-800 mb-2 font-sans">Çocuk Bülteni</h3>
+                        <p className="text-xs text-gray-600 mb-4">Bebeğinizin ayına özel beslenme ipuçları, yeni tarifler ve doktor önerileri güncel olarak mail kutunuzda!</p>
+                        <NewsletterForm 
+                            source="category"
+                            variant="default"
+                            placeholder="Mail Adresiniz"
+                            buttonText="Abone Ol"
+                            className=""
+                        />
+                    </div>
+
                 </aside>
 
             </div>
 
-        </div>
-
-        {/* NEWSLETTER BANNER */}
-        <div className="bg-green-50/50 border-y border-green-100 py-16 mt-12">
-            <div className="max-w-4xl mx-auto px-4 text-center">
-                <div className="w-16 h-16 bg-white text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm text-2xl">
-                    <i className="fa-regular fa-envelope"></i>
-                </div>
-                <h2 className="font-display font-bold text-3xl text-slate-800 mb-4 font-sans">Haftalık {categoryInfo?.name} Bülteni</h2>
-                <p className="text-gray-600 mb-8 max-w-xl mx-auto">
-                    Bebeğinizin ayına özel beslenme ipuçları, yeni tarifler ve doktor önerileri her hafta e-posta kutunuzda.
-                </p>
-                <NewsletterForm 
-                    source="category"
-                    variant="inline"
-                    placeholder="E-posta adresiniz"
-                    buttonText="Abone Ol"
-                    className="max-w-lg mx-auto"
-                />
-                <p className="text-xs text-gray-400 mt-4">Asla spam yapmayız. İstediğiniz zaman ayrılabilirsiniz.</p>
-            </div>
         </div>
 
     </div>

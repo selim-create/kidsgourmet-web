@@ -361,6 +361,15 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     window.open(`https://wa.me/?text=${encodeURIComponent(shareTitle + ' - ' + shareUrl)}`, '_blank');
   };
 
+  const copyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    toast.success('Link kopyalandı!');
+  };
+
+  const shareMail = () => {
+    window.open(`mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(shareUrl)}`, '_blank');
+  };
+
   const handleFavorite = async () => {
     if (!post) return;
     const isFav = isFavorite(post.id, 'post');
@@ -560,6 +569,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                     <button onClick={shareWhatsapp} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-green-500 hover:border-green-500 flex items-center justify-center transition-all shadow-sm">
                         <i className="fa-brands fa-whatsapp text-lg"></i>
                     </button>
+                    <button onClick={copyLink} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-orange-500 hover:border-orange-500 flex items-center justify-center transition-all shadow-sm">
+                        <i className="fa-solid fa-link"></i>
+                    </button>
+                    <button onClick={shareMail} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-purple-500 hover:border-purple-500 flex items-center justify-center transition-all shadow-sm">
+                        <i className="fa-regular fa-envelope"></i>
+                    </button>
                     <button onClick={handleFavorite} className={`w-10 h-10 rounded-full bg-white border flex items-center justify-center transition-all shadow-sm mt-4 ${isFav ? 'text-red-500 border-red-500 hover:text-red-600 hover:border-red-600' : 'border-gray-100 text-gray-400 hover:text-red-500 hover:border-red-500'}`}>
                         <i className={isFav ? "fa-solid fa-heart" : "fa-regular fa-heart"}></i>
                     </button>
@@ -581,7 +596,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
                         prose-h4:text-lg prose-h4:mt-6 prose-h4:mb-2
                         prose-p:mb-6 prose-p:text-gray-600
-                        prose-a:text-orange-500 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
+                        prose-a:text-orange-500 prose-a:font-medium prose-a:no-underline prose-a:transition-all prose-a:duration-300
+                        hover:prose-a:text-orange-600 hover:prose-a:underline
                         prose-img:rounded-2xl prose-img:shadow-lg prose-img:my-8
                         prose-blockquote:border-l-4 prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 prose-blockquote:rounded-r-xl prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:text-gray-700
                         prose-ul:my-6 prose-ul:space-y-2 prose-li:text-gray-600
@@ -610,40 +626,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         embeddedContent={post.embedded_content}
                       />
                     </div>
-
-                    {/* Sponsor CTA */}
-                    {isSponsored && sponsorData?.sponsor_url && (
-                      <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100">
-                        <div className="flex items-center gap-4">
-                          {(() => {
-                            const sponsorLogo = getSponsorLogo(sponsorData);
-                            return sponsorLogo ? (
-                              <img 
-                                src={sponsorLogo} 
-                                alt={sponsorData.sponsor_name}
-                                className="h-10 object-contain"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                }}
-                              />
-                            ) : null;
-                          })()}
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-600 mb-2">
-                              Bu içerik <strong>{sponsorData.sponsor_name}</strong> tarafından desteklenmektedir.
-                            </p>
-                            <a 
-                              href={sponsorData.sponsor_url}
-                              target="_blank"
-                              rel="noopener noreferrer sponsored"
-                              className="inline-flex items-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-amber-600 transition-colors"
-                            >
-                              Daha Fazla Bilgi <i className="fa-solid fa-external-link"></i>
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                     {/* Tags & Share (Mobile) */}
                     <div className="mt-12 pt-8 border-t border-gray-100">
@@ -814,7 +796,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             {randomIngredients.slice(0, 6).map((ingredient) => (
                               <Link
                                 key={ingredient.id}
-                                href={`/malzemeler/${ingredient.slug}`}
+                                href={`/beslenme-rehberi/${ingredient.slug}`}
                                 className="group bg-white rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all text-center"
                               >
                                 <div className="w-16 h-16 mx-auto mb-3 rounded-full overflow-hidden bg-gray-50">
@@ -918,12 +900,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             <div className="w-12 h-12 bg-white text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-xl">
                                 <i className="fa-regular fa-envelope"></i>
                             </div>
-                            <h3 className="font-bold text-slate-800 mb-2 font-sans">Haftalık Menü Cebine Gelsin</h3>
-                            <p className="text-xs text-gray-600 mb-4">Bebeğinin ayına uygun tarifler ve ipuçları her hafta e-postanda.</p>
+                            <h3 className="font-bold text-slate-800 mb-2 font-sans">İÇERİKLERİ KEŞFET!</h3>
+                            <p className="text-xs text-gray-600 mb-4">Ebeveyn Rehberi&apos;nden En Güncel İçerikler Mailine Gelsin.</p>
                             <NewsletterForm 
                                 source="blog" 
                                 variant="default"
-                                placeholder="E-posta adresin"
+                                placeholder="Mail Adresiniz"
                                 buttonText="Abone Ol"
                                 interests={['recipes', 'tips']}
                             />
