@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { getCircles, createDiscussion } from '@/lib/community';
 import type { Circle } from '@/lib/types';
@@ -11,6 +11,7 @@ import AuthRequiredBanner from '@/components/ui/AuthRequiredBanner';
 
 export default function AskQuestionPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated } = useUser();
   
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -21,6 +22,14 @@ export default function AskQuestionPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  // Initialize title from query parameter
+  useEffect(() => {
+    const konu = searchParams.get('konu');
+    if (konu) {
+      setTitle(konu);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     async function fetchCircles() {

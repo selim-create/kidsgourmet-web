@@ -1021,7 +1021,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         <h3 className="font-bold text-slate-800 mb-2">Aklınıza takılan mı var?</h3>
                         <p className="text-xs text-gray-600 mb-4">Bu tarifle ilgili sorunuzu topluluğumuza sorun.</p>
                         <Link 
-                          href={`/topluluk/yeni-soru?konu=${encodeURIComponent(recipe.title)}`}
+                          href={`/topluluk/soru-sor?konu=${encodeURIComponent(recipe.title)}`}
                           className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-5 rounded-xl transition-colors"
                         >
                           <i className="fa-solid fa-comment-dots"></i> Soru Sor

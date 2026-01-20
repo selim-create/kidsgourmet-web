@@ -93,17 +93,18 @@ function RecipesPageContent() {
     const dietType = searchParams.get('diet-type');
     const mealType = searchParams.get('meal-type');
     const ageGroup = searchParams.get('age-group');
+    const ingredient = searchParams.get('ingredient');
 
     const newFilters: FilterState = {
       ageGroups: ageGroup ? [ageGroup] : [],
       mealTypes: mealType ? [mealType] : [],
       dietTypes: dietType ? [dietType] : [],
       specialConditions: category ? [category] : [],
-      ingredientSearch: '',
+      ingredientSearch: ingredient || '',
     };
 
     // URL parametreleri varsa filtreleri güncelle ve fetch tetikle
-    if (category || dietType || mealType || ageGroup) {
+    if (category || dietType || mealType || ageGroup || ingredient) {
       setFilters(newFilters);
       setCurrentPage(1); // Sayfa 1'e reset et
     }
