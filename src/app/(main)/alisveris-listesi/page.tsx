@@ -39,7 +39,7 @@ const CATEGORY_CONFIG: Record<ShoppingCategory, { name: string; icon: string; co
 
 export default function ShoppingListPage() {
   const { user, isAuthenticated, isLoading: userLoading } = useUser();
-  const { items, isLoading, addItems, removeItem, toggleItem, shareWhatsapp } = useShoppingList();
+  const { items, isLoading, addItems, removeItem, toggleItem, shareWhatsapp, copyToClipboard } = useShoppingList();
   const [newItem, setNewItem] = useState("");
 
   // Kategorilere göre grupla
@@ -114,7 +114,7 @@ export default function ShoppingListPage() {
         <main className="flex-1 w-full min-w-0">
             
             {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
+            <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
                 <span className="font-display font-bold text-lg text-slate-800">Alışveriş Listesi</span>
                 <button onClick={shareWhatsapp} className="text-orange-500 text-xl">
                   <i className="fa-solid fa-share-nodes"></i>
@@ -140,8 +140,20 @@ export default function ShoppingListPage() {
                         >
                             <i className="fa-brands fa-whatsapp text-lg"></i> Paylaş
                         </button>
-                        <button className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2">
+                        <button 
+                          onClick={() => window.print()}
+                          className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                        >
                             <i className="fa-solid fa-print"></i> Yazdır
+                        </button>
+                        <button 
+                          onClick={() => {
+                            copyToClipboard();
+                            toast.success('Liste panoya kopyalandı');
+                          }}
+                          className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                        >
+                            <i className="fa-solid fa-copy"></i> Kopyala
                         </button>
                     </div>
                 </div>

@@ -25,7 +25,7 @@ export default function FavoriteIngredientCard({ ingredient }: FavoriteIngredien
 
   return (
     <Link
-      href={`/malzeme-rehberi/${ingredient.slug}`}
+      href={`/beslenme-rehberi/${ingredient.slug}`}
       className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-lg transition-all group overflow-hidden flex flex-col relative"
     >
       <div className="absolute top-3 right-3 z-10">

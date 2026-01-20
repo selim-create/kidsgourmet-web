@@ -228,7 +228,7 @@ function SearchContent() {
                             {searchData.categorized.ingredients.map((ingredient) => (
                                 <Link 
                                     key={ingredient.id}
-                                    href={`/malzeme-rehberi/${ingredient.slug}`} 
+                                    href={`/beslenme-rehberi/${ingredient.slug}`} 
                                     className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 flex flex-col sm:flex-row gap-6 hover:shadow-md transition-shadow group mb-4"
                                 >
                                     <div className="w-full sm:w-32 h-32 rounded-2xl bg-green-50 flex-shrink-0 overflow-hidden relative">
@@ -325,7 +325,7 @@ function SearchContent() {
                                     {searchData.categorized.posts.map((post) => (
                                         <Link 
                                             key={post.id}
-                                            href={`/blog/${post.slug}`} 
+                                            href={`/kesfet/${post.slug}`} 
                                             className="flex gap-4 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group"
                                         >
                                             <img 

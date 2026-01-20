@@ -220,7 +220,7 @@ export default function DashboardPage() {
         <main className="flex-1 overflow-y-auto lg:ml-0">
             
             {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white/80 backdrop-blur-xl px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30 border-b border-stone-100">
+            <div className="lg:hidden bg-white/80 backdrop-blur-xl px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30 border-b border-stone-100">
                 <div className="flex items-center gap-2">
                     {user?.avatar_url ? (
                       <img src={user.avatar_url} className="w-8 h-8 rounded-full border border-stone-100" alt="User" />
