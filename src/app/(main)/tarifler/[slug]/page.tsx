@@ -573,7 +573,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       </button>
                       
                       {/* Sosyal Paylaşım */}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <button 
                           onClick={shareWhatsapp} 
                           className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"

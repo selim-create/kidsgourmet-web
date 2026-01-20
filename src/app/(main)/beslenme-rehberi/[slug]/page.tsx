@@ -158,7 +158,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
         />
 
         {/* BREADCRUMB */}
-        <div className="bg-white border-b border-gray-100 pt-[80px]">
+        <div className="bg-white border-b border-gray-100 pt-[20px]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
                     <ol className="flex items-center space-x-2">
@@ -273,10 +273,10 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                   </button>
                                   <button 
                                     onClick={shareTwitter}
-                                    className="bg-sky-500 hover:bg-sky-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
-                                    title="Twitter'da Paylaş"
+                                    className="bg-black hover:bg-gray-800 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                                    title="X'te Paylaş"
                                   >
-                                    <i className="fa-brands fa-twitter text-xl"></i>
+                                    <i className="fa-brands fa-x-twitter text-xl"></i>
                                   </button>
                                   <button 
                                     onClick={copyLink}
@@ -460,7 +460,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         </h2>
                         
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 ? (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
                               {ingredient.related_recipes.slice(0, 6).map((recipe) => (
                                 <RecipeCard 
                                   key={recipe.id}
@@ -489,7 +489,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         
                         {ingredient.related_recipes && ingredient.related_recipes.length > 0 && (
                           <div className="mt-8 text-center">
-                            <Link href={`/tarifler?malzeme=${ingredient.slug}`} className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
+                            <Link href={`/tarifler?ingredient=${ingredient.slug}`} className="text-green-600 font-bold hover:underline flex items-center justify-center w-full sm:w-auto mx-auto gap-2">
                               Tüm {decodeHTMLEntities(ingredient.name)} Tarifleri <i className="fa-solid fa-arrow-right"></i>
                             </Link>
                           </div>

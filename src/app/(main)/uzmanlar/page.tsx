@@ -148,9 +148,9 @@ export default function ExpertsListPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="w-8 h-8 bg-sky-50 text-sky-500 rounded-lg flex items-center justify-center hover:bg-sky-100 transition-colors"
+                          className="w-8 h-8 bg-black/5 text-black rounded-lg flex items-center justify-center hover:bg-black/10 transition-colors"
                         >
-                          <i className="fa-brands fa-twitter"></i>
+                          <i className="fa-brands fa-x-twitter"></i>
                         </a>
                       )}
                       {expert.social_links.linkedin && (
