@@ -203,7 +203,7 @@ export default function PercentileCalculatorPage() {
               Persentil Hesaplayıcı
             </h1>
             <p className="text-xl text-slate-600">
-              WHO büyüme standartlarına göre bebeğinizin gelişimini takip edin
+              WHO büyüme standartlarına göre bebeğinizin gelişimini takip edin.
             </p>
           </div>
 
@@ -215,7 +215,7 @@ export default function PercentileCalculatorPage() {
               </div>
               <h3 className="font-bold text-slate-800 mb-2">Kilo Takibi</h3>
               <p className="text-slate-600 text-sm">
-                Bebeğinizin kilosunun yaşına göre persentil değerini öğrenin
+                Kilo ve yaşa göre Persentil değeri
               </p>
             </div>
 
@@ -225,7 +225,7 @@ export default function PercentileCalculatorPage() {
               </div>
               <h3 className="font-bold text-slate-800 mb-2">Boy Takibi</h3>
               <p className="text-slate-600 text-sm">
-                Bebeğinizin boyunun yaşına göre persentil değerini kontrol edin
+                Boy ve yaşa göre Persentil değeri
               </p>
             </div>
 
@@ -268,7 +268,7 @@ export default function PercentileCalculatorPage() {
               <div>
                 <h4 className="font-bold text-amber-900 mb-2">Önemli Uyarı</h4>
                 <p className="text-amber-800 text-sm">
-                  Bu hesaplama araç sadece bilgilendirme amaçlıdır ve tıbbi tanı yerine geçmez. 
+                  Bu hesaplama aracı sadece bilgilendirme amaçlıdır ve tıbbi tanı yerine geçmez. 
                   Bebeğinizin büyümesi hakkında endişeleriniz varsa, mutlaka pediatristinize danışın.
                 </p>
               </div>
