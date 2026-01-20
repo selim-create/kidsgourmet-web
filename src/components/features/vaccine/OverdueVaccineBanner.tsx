@@ -103,16 +103,9 @@ export default function OverdueVaccineBanner({ childId, childName }: OverdueVacc
 
             {/* Actions */}
             <div className="flex flex-wrap gap-2">
-              <Link
-                href="/dashboard/saglik/asilar"
-                className="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition-colors shadow-sm"
-              >
-                <i className="fa-solid fa-calendar-check"></i>
-                Aşı Takvimini Gör
-              </Link>
               <a
                 href="tel:182"
-                className="inline-flex items-center gap-2 bg-white text-red-600 border border-red-200 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-50 transition-colors"
+                className="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition-colors shadow-sm"
               >
                 <i className="fa-solid fa-phone"></i>
                 ALO 182 SABİM'i Ara

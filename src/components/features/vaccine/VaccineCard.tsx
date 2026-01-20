@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { VaccineRecord, VaccineStatus } from '@/lib/types';
 
 interface VaccineCardProps {
@@ -12,6 +12,7 @@ interface VaccineCardProps {
 
 export default function VaccineCard({ record, onMarkDone, onReportSideEffect, onViewDetails }: VaccineCardProps) {
   const { vaccine, status, scheduled_date, actual_date } = record;
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Calculate effective status if status is empty or unknown
   const getEffectiveStatus = (record: VaccineRecord): VaccineStatus => {
@@ -222,9 +223,37 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect, on
               <i className="fa-solid fa-check mr-1"></i>
               Yapıldı İşaretle
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-3 rounded-lg transition-colors">
-              <i className="fa-solid fa-ellipsis-vertical"></i>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+              >
+                <i className="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[150px]">
+                  <button
+                    onClick={() => {
+                      onViewDetails(record);
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs hover:bg-gray-100 transition-colors"
+                  >
+                    <i className="fa-solid fa-info-circle mr-2"></i>
+                    Detay Gör
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs hover:bg-gray-100 transition-colors text-red-600"
+                  >
+                    <i className="fa-solid fa-xmark mr-2"></i>
+                    İptal Et
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : effectiveStatus === 'done' ? (
           <>
@@ -235,9 +264,28 @@ export default function VaccineCard({ record, onMarkDone, onReportSideEffect, on
               <i className="fa-solid fa-notes-medical mr-1"></i>
               Yan Etki Bildir
             </button>
-            <button className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-3 rounded-lg transition-colors">
-              <i className="fa-solid fa-ellipsis-vertical"></i>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-bold py-2 px-3 rounded-lg transition-colors"
+              >
+                <i className="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 bottom-full mb-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[150px]">
+                  <button
+                    onClick={() => {
+                      onViewDetails(record);
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-xs hover:bg-gray-100 transition-colors"
+                  >
+                    <i className="fa-solid fa-info-circle mr-2"></i>
+                    Detay Gör
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <button 
