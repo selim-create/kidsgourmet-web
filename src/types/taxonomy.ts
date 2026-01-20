@@ -30,3 +30,10 @@ export interface MealType {
   description: string;
   meal_type_meta: MealTypeMeta;
 }
+
+export interface DietType {
+  id: number;
+  name: string;
+  slug: string;
+  count?: number;
+}
