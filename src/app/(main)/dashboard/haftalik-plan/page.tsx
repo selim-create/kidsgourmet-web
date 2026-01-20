@@ -479,7 +479,7 @@ export default function WeeklyPlanPage() {
                         <StatCard 
                           icon={<i className="fa-solid fa-triangle-exclamation"></i>}
                           label="Alerjen"
-                          value={`${stats.new_allergens_introduced.length} Yeni`}
+                          value={`${stats.new_allergens_introduced?.length || 0} Yeni`}
                           color="orange"
                         />
                     </div>
@@ -625,7 +625,7 @@ export default function WeeklyPlanPage() {
                   {selectedSlotId ? (
                     <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mb-4">
                       <p className="text-sm text-orange-800 font-bold flex items-center gap-2 mb-1">
-                        <i className="fa-solid fa-wand-magic-sparkles"></i> Slot Seçildi
+                        <i className="fa-solid fa-wand-magic-sparkles"></i> Öğün Seçildi
                       </p>
                       <p className="text-xs text-orange-600">Aşağıdaki listeden bir tarif seçerek plana ekle.</p>
                     </div>
