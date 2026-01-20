@@ -33,7 +33,7 @@ function ConsentCheckbox({ source, checked, onChange }: { source: string; checke
         <Link href="/aydinlatma-metni" className="text-orange-500 hover:underline font-medium">
           Aydınlatma Metni
         </Link>
-        &apos;ni okuduğumu ve kabul ettiğimi onaylıyorum.
+        &apos;ni okuyup anladığımı kabul ediyorum.
       </label>
     </div>
   );

@@ -13,7 +13,7 @@ export default function BlogListClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
-  const POSTS_PER_PAGE = 12;
+  const POSTS_PER_PAGE = 10;
 
   // Verileri çek
   useEffect(() => {
@@ -79,9 +79,9 @@ export default function BlogListClient() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-10">
             <span className="text-green-600 font-bold text-sm tracking-widest uppercase mb-2 block font-sans">Ebeveyn Kütüphanesi</span>
-            <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">Bilgili Ebeveynler, <br /> <span className="text-orange-500">Mutlu Çocuklar.</span></h1>
+            <h1 className="font-display font-bold text-4xl md:text-5xl text-slate-800 mb-4 font-sans">Bilgili Ebeveynler <br /> <span className="text-orange-500">Mutlu Çocuklar</span></h1>
             <p className="text-gray-600 text-lg">
-              Uzman doktor ve diyetisyenlerimiz tarafından hazırlanan güncel rehberler, beslenme ipuçları ve gelişim notları.
+              Uzmanlardan bilgiler, güncel rehberler, beslenme ipuçları ve gelişim notları.
             </p>
           </div>
 
