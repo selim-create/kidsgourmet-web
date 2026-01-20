@@ -127,7 +127,7 @@ export default function StainEncyclopediaClient() {
                 </div>
                 <h1 className="font-display font-bold text-3xl mb-2">Leke Ansiklopedisi</h1>
                 <p className="text-violet-50">
-                  Bebek kıyafetlerindeki lekeler için çözüm rehberi
+                  Bebek kıyafetlerindeki lekeler için çözüm rehberi.
                 </p>
               </div>
 
@@ -141,7 +141,7 @@ export default function StainEncyclopediaClient() {
                       setSearchQuery(e.target.value);
                       handleSearch(e.target.value);
                     }}
-                    placeholder="Leke türü ara... (örn: domates, çikolata, çim)"
+                    placeholder="Leke Türü Ara... (Örn: Domates, Çikolata, Çim)"
                     className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-transparent"
                   />
                   <i className="fa-solid fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
