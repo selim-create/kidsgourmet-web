@@ -6,7 +6,7 @@ export interface RejimdeContent {
   slug: string;
   excerpt: string;
   image: string;
-  url: string;
+  url?: string; // URL should be optional as we'll generate it
   type: 'diet' | 'exercise';
   meta: {
     difficulty?: string;
@@ -37,7 +37,23 @@ export const rejimdeService = {
       if (!response.ok) return { diets: [], exercises: [] };
       
       const data = await response.json();
-      return data.status === 'success' ? data.data : { diets: [], exercises: [] };
+      
+      if (data.status === 'success') {
+        // Map diets and exercises to include correct URLs
+        const diets = (data.data.diets || []).map((item: RejimdeContent) => ({
+          ...item,
+          url: `https://www.rejimde.com/diets/${item.slug}`
+        }));
+        
+        const exercises = (data.data.exercises || []).map((item: RejimdeContent) => ({
+          ...item,
+          url: `https://www.rejimde.com/exercises/${item.slug}`
+        }));
+        
+        return { diets, exercises };
+      }
+      
+      return { diets: [], exercises: [] };
     } catch {
       return { diets: [], exercises: [] };
     }
