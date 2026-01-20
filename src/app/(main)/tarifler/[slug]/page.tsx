@@ -13,7 +13,7 @@ import { useUser } from '@/hooks/use-user';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import { useSimilarSafeRecipes } from '@/hooks/useRecommendations';
 import { toast } from 'sonner';
-import { decodeHTMLEntities, calculatePortion, portionMultipliers } from '@/utils/helpers';
+import { decodeHTMLEntities, calculatePortion, portionMultipliers, sanitizeHTML } from '@/utils/helpers';
 import { slugify } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
 import CommentSection from '@/components/features/CommentSection';
@@ -501,9 +501,12 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       />
                     </div>
                     
-                    <p className="text-gray-600 mb-6 text-lg">
-                        {decodeHTMLEntities(recipe.excerpt || recipe.content)}
-                    </p>
+                    <div 
+                      className="text-gray-600 mb-6 text-lg prose prose-slate max-w-none"
+                      dangerouslySetInnerHTML={{ 
+                        __html: sanitizeHTML(recipe.excerpt || recipe.content) 
+                      }}
+                    />
 
                     {/* Extended Quick Info Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
@@ -557,7 +560,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         }`}
                       >
                         <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
-                        {isFavorite ? 'Kaydedildi' : 'Kaydet'}
+                        <span className="hidden md:inline">{isFavorite ? 'Kaydedildi' : 'Kaydet'}</span>
                       </button>
                       
                       {/* Haftalık Plana Ekle */}
@@ -566,7 +569,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         className="flex-1 min-w-[120px] bg-purple-500 hover:bg-purple-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
                       >
                         <i className="fa-solid fa-calendar-plus"></i>
-                        Plana Ekle
+                        <span className="hidden md:inline">Plana Ekle</span>
                       </button>
                       
                       {/* Sosyal Paylaşım */}
@@ -587,10 +590,10 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </button>
                         <button 
                           onClick={shareTwitter} 
-                          className="bg-sky-500 hover:bg-sky-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
-                          title="Twitter'da Paylaş"
+                          className="bg-black hover:bg-gray-800 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
+                          title="X'te Paylaş"
                         >
-                          <i className="fa-brands fa-twitter text-xl"></i>
+                          <i className="fa-brands fa-x-twitter text-xl"></i>
                         </button>
                         <button 
                           onClick={copyLink} 
@@ -778,35 +781,34 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
                     {/* Expert Approval - Moved here from header */}
                     {recipe.expert && recipe.expert.approved && (
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-5 mt-6">
-                        <div className="flex items-start gap-4">
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-4 md:p-5 mt-6">
+                        <div className="flex items-start gap-3 md:gap-4">
                           <div className="relative flex-shrink-0">
                             <img 
                               src={recipe.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} 
-                              className="w-14 h-14 rounded-full border-2 border-white shadow-sm object-cover" 
+                              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white shadow-sm object-cover" 
                               alt={recipe.expert.name || 'Uzman'} 
                             />
-                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] border border-white">
+                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[9px] md:text-[10px] border border-white">
                               <i className="fa-solid fa-check"></i>
                             </div>
                           </div>
                           <div className="flex-grow">
-                            <p className="text-sm text-slate-700 font-medium mb-2">
-                              Bu tarif{' '}
+                            <p className="text-xs md:text-sm text-slate-700 font-medium mb-2">
+                              Bu tarif ile ilgili Uzman Notu:{' '}
                               <Link 
                                 href={recipe.expert.slug ? `/uzman/${recipe.expert.slug}` : '#'} 
                                 className="text-green-600 underline decoration-dotted font-bold hover:text-green-700"
                               >
                                 {recipe.expert.title && `${recipe.expert.title} `}{recipe.expert.name}
                               </Link>
-                              {' '}tarafından onaylanmıştır.
                             </p>
                             {recipe.expert.note && (
-                              <div className="bg-white/70 rounded-xl p-3 mt-2">
-                                <p className="text-xs text-gray-500 font-medium mb-1">
+                              <div className="bg-white/70 rounded-xl p-2.5 md:p-3 mt-2">
+                                <p className="text-[10px] md:text-xs text-gray-500 font-medium mb-1">
                                   <i className="fa-solid fa-comment-medical text-green-500 mr-1"></i> Uzman Notu:
                                 </p>
-                                <p className="text-sm text-gray-700">{recipe.expert.note}</p>
+                                <p className="text-xs md:text-sm text-gray-700">{recipe.expert.note}</p>
                               </div>
                             )}
                           </div>
@@ -1030,23 +1032,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 </div>
             </div>
 
-            {/* RELATED RECIPES - 4 Cards with RecipeCard Component */}
-            {recipe.related_recipes && recipe.related_recipes.length > 0 && (
-              <div className="mt-10">
-                <h3 className="font-bold text-slate-800 mb-6 text-xl flex items-center">
-                  <i className="fa-solid fa-utensils text-orange-500 mr-2"></i> Benzer Tarifler
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {recipe.related_recipes.slice(0, 4).map((related) => (
-                    <RecipeCard 
-                      key={related.id}
-                      recipe={related}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* INGREDIENT CARDS - Malzemeler Bölümü */}
             {recipe.ingredients && recipe.ingredients.length > 0 && (
               <div className="mt-10">
@@ -1091,6 +1076,23 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       </Link>
                     );
                   })}
+                </div>
+              </div>
+            )}
+
+            {/* RELATED RECIPES - 4 Cards with RecipeCard Component */}
+            {recipe.related_recipes && recipe.related_recipes.length > 0 && (
+              <div className="mt-10">
+                <h3 className="font-bold text-slate-800 mb-6 text-xl flex items-center">
+                  <i className="fa-solid fa-utensils text-orange-500 mr-2"></i> Benzer Tarifler
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {recipe.related_recipes.slice(0, 4).map((related) => (
+                    <RecipeCard 
+                      key={related.id}
+                      recipe={related}
+                    />
+                  ))}
                 </div>
               </div>
             )}
