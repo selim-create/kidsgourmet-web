@@ -37,10 +37,6 @@ export default function Footer() {
                                 variant="compact" 
                                 placeholder="Mail Adresiniz"
                             />
-                            <p className="text-xs text-gray-400 text-center lg:text-left mt-3">
-                                <i className="fa-solid fa-lock mr-1"></i>
-                                Gizliliğinize saygı duyuyoruz.  Spam göndermeyiz.
-                            </p>
                         </div>
                     </div>
                 </div>
