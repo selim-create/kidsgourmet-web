@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from "next/link";
-import { getCircles, getDiscussions, getTopContributors } from '@/lib/community';
+import { toast } from 'sonner';
+import { getCircles, getDiscussions, getTopContributors, voteDiscussion } from '@/lib/community';
 import { formatRelativeTime } from '@/utils/helpers';
 import type { Circle, Discussion, TopContributor } from '@/lib/types';
+import { useFavorites } from '@/hooks/use-favorites';
 
 export default function CommunityPage() {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -13,6 +15,10 @@ export default function CommunityPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCircleId, setSelectedCircleId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchDebounceTimer, setSearchDebounceTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     async function fetchData() {
@@ -58,6 +64,63 @@ export default function CommunityPage() {
     }
   }
 
+  function handleSearch(query: string) {
+    setSearchQuery(query);
+    
+    // Clear existing timer
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    
+    // Set new timer for debounced search
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const searchParams = new URLSearchParams();
+        if (query.trim()) {
+          searchParams.append('search', query.trim());
+        }
+        if (selectedCircleId) {
+          searchParams.append('circle_id', selectedCircleId.toString());
+        }
+        searchParams.append('per_page', '20');
+        
+        const endpoint = searchParams.toString() 
+          ? `/kg/v1/community/discussions?${searchParams.toString()}`
+          : undefined;
+        
+        const discussionsData = await getDiscussions({
+          circle_id: selectedCircleId || undefined,
+          per_page: 20
+        });
+        
+        setDiscussions(discussionsData.discussions);
+      } catch (err) {
+        console.error('Error searching discussions:', err);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+    
+    setSearchDebounceTimer(timer);
+  }
+
+  async function handleVote(discussionId: number, voteType: 'like' | 'dislike') {
+    try {
+      const result = await voteDiscussion(discussionId, voteType);
+      
+      // Update the discussion in the list
+      setDiscussions(prev => prev.map(d => 
+        d.id === discussionId
+          ? { ...d, like_count: result.like_count, dislike_count: result.dislike_count, user_vote: result.user_vote as 'like' | 'dislike' | null }
+          : d
+      ));
+    } catch (err) {
+      console.error('Error voting on discussion:', err);
+      toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');
+    }
+  }
+
   const myCircles = circles.filter(c => c.is_following);
   
   // Helper function to get placeholder avatar colors for top contributors
@@ -70,7 +133,7 @@ export default function CommunityPage() {
     <div className="bg-gray-50 min-h-screen">
       
       {/* MOBILE HEADER (Sticky) */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
+      <div className="lg:hidden bg-white px-4 pt-[25px] py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
           <span className="font-display font-bold text-lg text-slate-800">Topluluk</span>
           <Link href="/topluluk/soru-sor" className="text-orange-500 text-xl">
             <i className="fa-solid fa-pen-to-square"></i>
@@ -100,18 +163,18 @@ export default function CommunityPage() {
                 {/* My Circles */}
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                        <h3 className="font-bold text-slate-800 text-sm">Çemberlerim</h3>
+                        <h3 className="font-bold text-slate-800 text-sm">Odaklarım</h3>
                     </div>
                     <nav className="p-2 space-y-1">
                         {loading ? (
                           <div className="px-3 py-2 text-gray-400 text-sm">Yükleniyor...</div>
                         ) : myCircles.length === 0 ? (
-                          <div className="px-3 py-2 text-gray-400 text-sm">Henüz takip ettiğiniz çember yok</div>
+                          <div className="px-3 py-2 text-gray-400 text-sm">Henüz takip ettiğiniz odak yok</div>
                         ) : (
                           myCircles.map((circle) => (
                             <Link 
                               key={circle.id}
-                              href={`/topluluk/cember/${circle.slug}`}
+                              href={`/topluluk/odak/${circle.slug}`}
                               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                                 selectedCircleId === circle.id
                                   ? 'bg-orange-50 text-orange-500 font-medium'
@@ -130,7 +193,7 @@ export default function CommunityPage() {
                 {circles.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                       <div className="p-4 border-b border-gray-50 bg-gray-50/50">
-                          <h3 className="font-bold text-slate-800 text-sm">Tüm Çemberler</h3>
+                          <h3 className="font-bold text-slate-800 text-sm">Tüm Odaklar</h3>
                       </div>
                       <nav className="p-2 space-y-1">
                           <button
@@ -209,6 +272,20 @@ export default function CommunityPage() {
                     <button className="text-orange-500 text-xl"><i className="fa-regular fa-image"></i></button>
                 </Link>
 
+                {/* Search Box */}
+                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="relative">
+                        <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => handleSearch(e.target.value)}
+                            placeholder="Sorularda ara..."
+                            className="w-full bg-gray-50 border border-gray-200 rounded-full pl-11 pr-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                        />
+                    </div>
+                </div>
+
                 {/* Loading State */}
                 {loading && (
                   <div className="text-center py-12">
@@ -240,7 +317,7 @@ export default function CommunityPage() {
                     }`}
                   >
                     {discussion.expert_answered && (
-                      <div className="absolute top-4 right-4 flex items-center gap-1 bg-green-50 text-green-600 px-2 py-1 rounded-lg text-[10px] font-bold border border-green-100">
+                      <div className="absolute top-6 right-4 flex items-center gap-1 bg-green-50 text-green-600 px-2 py-1 rounded-lg text-[10px] font-bold border border-green-100">
                           <i className="fa-solid fa-user-doctor"></i> Uzman Yanıtladı
                       </div>
                     )}
@@ -253,7 +330,12 @@ export default function CommunityPage() {
                               alt={discussion.author.name} 
                             />
                             <div>
-                                <h3 className="font-bold text-slate-800 text-sm">{discussion.author.name}</h3>
+                                <Link 
+                                  href={`/profil/${discussion.author.username || discussion.author.id}`} 
+                                  className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
+                                >
+                                  {discussion.author.name}
+                                </Link>
                                 <p className="text-xs text-gray-400">{formatRelativeTime(discussion.created_at)}</p>
                             </div>
                         </div>
@@ -284,8 +366,19 @@ export default function CommunityPage() {
 
                     <div className="flex items-center justify-between border-t border-gray-50 pt-3">
                         <div className="flex gap-4">
-                            <button className="flex items-center gap-1 text-gray-400 hover:text-red-500 text-sm transition-colors">
-                                <i className="fa-regular fa-heart"></i>
+                            <button 
+                              onClick={() => handleVote(discussion.id, 'like')} 
+                              className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'like' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'} transition-colors`}
+                            >
+                                <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+                                {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
+                            </button>
+                            <button 
+                              onClick={() => handleVote(discussion.id, 'dislike')} 
+                              className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-400 hover:text-red-500'} transition-colors`}
+                            >
+                                <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+                                {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
                             </button>
                             <Link 
                               href={`/topluluk/${discussion.slug}`}
@@ -294,8 +387,11 @@ export default function CommunityPage() {
                                 <i className="fa-regular fa-comment"></i> {discussion.comment_count} Cevap
                             </Link>
                         </div>
-                        <button className="text-gray-400 hover:text-slate-800">
-                          <i className="fa-regular fa-bookmark"></i>
+                        <button 
+                          onClick={() => toggleFavorite(discussion.id, 'discussion')}
+                          className="flex items-center gap-1 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <i className={`${isFavorite(discussion.id, 'discussion') ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
                         </button>
                     </div>
                   </div>
@@ -314,9 +410,11 @@ export default function CommunityPage() {
                     <ul className="text-xs text-gray-600 space-y-2">
                         <li className="flex items-start gap-2"><i className="fa-solid fa-check text-green-500 mt-0.5"></i> Nazik ve destekleyici olun.</li>
                         <li className="flex items-start gap-2"><i className="fa-solid fa-check text-green-500 mt-0.5"></i> Tıbbi tavsiye vermeyin.</li>
-                        <li className="flex items-start gap-2"><i className="fa-solid fa-check text-green-500 mt-0.5"></i> Reklam içerikli paylaşım yasaktır.</li>
+                        <li className="flex items-start gap-2"><i className="fa-solid fa-check text-green-500 mt-0.5"></i> Reklam içerikli paylaşım yapmayın.</li>
                     </ul>
-                    <button className="mt-3 text-xs text-orange-500 font-bold hover:underline">Tamamını Oku</button>
+                    <Link href="/kullanim-kosullari" className="mt-3 inline-block text-xs text-orange-500 font-bold hover:underline">
+                      Kullanıcı Sözleşmesini Okuyun
+                    </Link>
                 </div>
 
                 {/* Top Contributors */}
