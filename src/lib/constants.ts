@@ -12,6 +12,9 @@ export const WP_API_NAMESPACE = '/wp/v2';
 // Tariften.com API
 export const TARIFTEN_API_URL = 'https://api.tariften.com/wp-json/tariften/v1';
 
+// Rejimde.com API
+export const REJIMDE_API_URL = process.env.NEXT_PUBLIC_REJIMDE_API_URL || 'https://api.rejimde.com/wp-json/rejimde/v1';
+
 // API Endpoints
 export const API_ENDPOINTS = {
   // Recipes

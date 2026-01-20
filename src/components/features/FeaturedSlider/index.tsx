@@ -116,15 +116,15 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
         <div className="flex flex-col lg:flex-row lg:justify-between lg:items-end gap-4 mb-6 px-2">
           <div>
             <h2 className="font-display font-bold text-3xl text-slate-800">Günün Öne Çıkanları</h2>
-            <p className="text-gray-500 text-sm">Tarifler, rehberler, sorular ve sponsorlu öneriler tek akışta.</p>
+            <p className="text-gray-500 text-sm">Tarifler, Rehberler, Soru-Cevaplar ve Araçlar, hepsi burada!</p>
 
             {/* Filter Chips */}
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2 overflow-x-auto">
               <button
                 onClick={() => setFilter('all')}
                 className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
                   filter === 'all'
-                    ? 'border-orange-200 bg-orange-50 text-orange-500'
+                    ? 'border-orange-500 bg-white text-orange-500'
                     : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                 }`}
               >
@@ -136,7 +136,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
                   onClick={() => setFilter('recipe')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all ${
                     filter === 'recipe'
-                      ? 'border-orange-200 bg-orange-50 text-orange-500'
+                      ? 'border-orange-500 bg-orange-500 text-white'
                       : 'border-orange-200 bg-orange-50 text-orange-500 hover:bg-orange-100'
                   }`}
                 >
@@ -217,7 +217,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               <div className="ml-auto hidden sm:flex items-center gap-2 text-xs text-gray-400">
                 <span className="font-bold text-gray-500">{currentIndex + 1} / {filteredItems.length}</span>
                 <span>•</span>
-                <span>Kaydırarak keşfet</span>
+                <span>Kaydırarak Keşfet</span>
               </div>
             </div>
           </div>
