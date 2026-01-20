@@ -148,8 +148,13 @@ export default function ShoppingListPage() {
                         </button>
                         <button 
                           onClick={() => {
-                            copyToClipboard();
-                            toast.success('Liste panoya kopyalandı');
+                            try {
+                              copyToClipboard();
+                              toast.success('Liste panoya kopyalandı');
+                            } catch (error) {
+                              console.error('Clipboard error:', error);
+                              toast.error('Kopyalama başarısız oldu');
+                            }
                           }}
                           className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
                         >
