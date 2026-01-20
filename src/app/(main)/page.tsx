@@ -156,14 +156,19 @@ export default function Home() {
       { name: 'Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby-carriage', color: 'rose' },
     ];
     
-    const shuffled = [...allTools].sort(() => 0.5 - Math.random());
+    // Fisher-Yates shuffle algorithm for proper randomization
+    const shuffled = [...allTools];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
     setRandomTools(shuffled.slice(0, 4));
   }, []);
   
   // Click outside handler for age dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (isAgeDropdownOpen && !(e.target as Element).closest('.age-dropdown')) {
+      if (isAgeDropdownOpen && e.target && !(e.target as Element).closest('.age-dropdown')) {
         setIsAgeDropdownOpen(false);
       }
     };
@@ -210,7 +215,7 @@ export default function Home() {
     { value: '6-8-ay', label: '6-8 Ay (Başlangıç & Tadım)' },
     { value: '9-11-ay', label: '9-11 Ay (Keşif & Pütürlüye Geçiş)' },
     { value: '12-24-ay', label: '12-24 Ay (Aile Sofrasına Geçiş)' },
-    { value: '2-yas-ustu', label: '2+ Yaş (Çocuk Gurme)' },
+    { value: '2-yas-ve-uzeri', label: '2+ Yaş (Çocuk Gurme)' },
   ];
 
   // Dalgalı arka plan görseli (SVG)
