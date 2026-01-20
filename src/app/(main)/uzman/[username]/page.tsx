@@ -141,7 +141,7 @@ export default function ExpertPublicProfilePage() {
                   )}
                   {profile.social_links.twitter && (
                     <a href={profile.social_links.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/30 transition-colors">
-                      <i className="fa-brands fa-twitter"></i>
+                      <i className="fa-brands fa-x-twitter"></i>
                     </a>
                   )}
                   {profile.social_links.linkedin && (

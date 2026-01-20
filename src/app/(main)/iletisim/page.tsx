@@ -219,9 +219,9 @@ export default function IletisimPage() {
                   <i className="fa-brands fa-youtube text-xl"></i>
                   YouTube
                 </a>
-                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:text-blue-400 transition-colors">
-                  <i className="fa-brands fa-twitter text-xl"></i>
-                  Twitter
+                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-black hover:text-black transition-colors">
+                  <i className="fa-brands fa-x-twitter text-xl"></i>
+                  X (Twitter)
                 </a>
               </div>
             </div>

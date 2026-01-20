@@ -599,12 +599,12 @@ export default function ProfileSettingsPage() {
                             />
                           </div>
                           <div className="flex items-center gap-3">
-                            <i className="fa-brands fa-twitter text-blue-400 w-6"></i>
+                            <i className="fa-brands fa-x-twitter text-black w-6"></i>
                             <input
                               type="url"
                               value={socialLinks.twitter || ''}
                               onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
-                              placeholder="https://twitter.com/kullaniciadi"
+                              placeholder="https://x.com/kullaniciadi"
                               className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2"
                             />
                           </div>

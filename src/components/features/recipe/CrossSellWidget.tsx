@@ -143,7 +143,7 @@ export default function CrossSellWidget({ crossSell, ingredients, recipeTitle }:
             </div>
 
             <Link 
-              href={`https://tariften.com/tarifler/${suggestion.slug}`}
+              href={`https://www.tariften.com/recipe/${suggestion.slug}`}
               target="_blank" 
               className="block w-full bg-purple-600 hover:bg-purple-500 text-white text-center font-bold py-3 rounded-xl transition-colors"
             >

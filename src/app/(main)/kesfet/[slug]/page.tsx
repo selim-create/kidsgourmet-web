@@ -554,8 +554,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                     <button onClick={shareFacebook} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-blue-600 hover:border-blue-600 flex items-center justify-center transition-all shadow-sm">
                         <i className="fa-brands fa-facebook-f"></i>
                     </button>
-                    <button onClick={shareTwitter} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-blue-400 hover:border-blue-400 flex items-center justify-center transition-all shadow-sm">
-                        <i className="fa-brands fa-twitter"></i>
+                    <button onClick={shareTwitter} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-black hover:border-black flex items-center justify-center transition-all shadow-sm">
+                        <i className="fa-brands fa-x-twitter"></i>
                     </button>
                     <button onClick={shareWhatsapp} className="w-10 h-10 rounded-full bg-white border border-gray-100 text-gray-400 hover:text-green-500 hover:border-green-500 flex items-center justify-center transition-all shadow-sm">
                         <i className="fa-brands fa-whatsapp text-lg"></i>
