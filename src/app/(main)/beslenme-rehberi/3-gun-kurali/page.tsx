@@ -26,7 +26,7 @@ export default function ThreeDayRulePage() {
                 3 Gün Kuralı
               </h1>
               <p className="text-green-100 text-lg">
-                Güvenli besin tanıtımı için adım adım rehber
+                Güvenli besin tanıtımı için rehberimizi takip edebilirsiniz!
               </p>
             </div>
           </div>

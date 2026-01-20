@@ -26,7 +26,7 @@ export default function AlerjiBelirtileriPage() {
                 Alerji Belirtileri Rehberi
               </h1>
               <p className="text-green-100 text-lg">
-                Alerjik reaksiyonları tanıyın ve doğru tepkiyi verin
+                Alerjik reaksiyonları tanıyın ve doğru tepkiyi verin.
               </p>
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function AlerjiBelirtileriPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <i className="fa-solid fa-check text-blue-500 mt-1"></i>
-                      <span>Her çocuk farklıdır - aynı besine farklı tepkiler gösterebilir</span>
+                      <span>Her çocuk farklıdır, aynı besine farklı tepkiler gösterebilirler</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <i className="fa-solid fa-check text-blue-500 mt-1"></i>
@@ -189,7 +189,7 @@ export default function AlerjiBelirtileriPage() {
                   ACİL DURUM - HEMEN 112'Yİ ARAYIN!
                 </h3>
                 <p className="text-red-800 leading-relaxed font-bold text-lg">
-                  Aşağıdaki belirtilerden herhangi birini görürsenme, zaman kaybetmeden 112'yi 
+                  Aşağıdaki belirtilerden herhangi birini görürseniz, zaman kaybetmeden 112'yi 
                   arayın veya en yakın acil servise gidin. Anafilaksi (şiddetli alerjik reaksiyon) 
                   hayati tehlike oluşturabilir!
                 </p>
@@ -290,24 +290,24 @@ export default function AlerjiBelirtileriPage() {
                   Hafif Belirtilerde
                 </h3>
                 <ul className="space-y-3 text-amber-900">
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-amber-600 mt-1">1.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-amber-600 min-w-[20px]">1.</span>
                     <span>Besini hemen kesin ve bir daha vermeyin</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-amber-600 mt-1">2.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-amber-600 min-w-[20px]">2.</span>
                     <span>Belirtileri not alın (ne zaman başladı, ne kadar sürdü)</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-amber-600 mt-1">3.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-amber-600 min-w-[20px]">3.</span>
                     <span>Bebeğinizi gözlemlemeye devam edin</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-amber-600 mt-1">4.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-amber-600 min-w-[20px]">4.</span>
                     <span>Doktorunuzu arayın ve durumu bildirin</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-amber-600 mt-1">5.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-amber-600 min-w-[20px]">5.</span>
                     <span>Belirtiler kötüleşirse hemen acil servise gidin</span>
                   </li>
                 </ul>
@@ -320,24 +320,24 @@ export default function AlerjiBelirtileriPage() {
                   Ciddi Belirtilerde
                 </h3>
                 <ul className="space-y-3 text-red-900">
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-red-600 mt-1 text-lg">1.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-red-600 min-w-[20px] text-lg">1.</span>
                     <span className="font-bold">HEMEN 112'yi arayın</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-red-600 mt-1 text-lg">2.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-red-600 min-w-[20px] text-lg">2.</span>
                     <span>Bebeğinizi yatay pozisyonda tutun (bayılmadıysa)</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-red-600 mt-1 text-lg">3.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-red-600 min-w-[20px] text-lg">3.</span>
                     <span>Doktor önceden adrenalin kalemi (EpiPen) reçete ettiyse kullanın</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-red-600 mt-1 text-lg">4.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-red-600 min-w-[20px] text-lg">4.</span>
                     <span>Ambulans gelene kadar bebeğinizin yanından ayrılmayın</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-bold text-red-600 mt-1 text-lg">5.</span>
+                  <li className="flex items-center gap-2">
+                    <span className="font-bold text-red-600 min-w-[20px] text-lg">5.</span>
                     <span className="font-bold">PANİK YAPMAYIN - sakin kalın ve yardım bekleyin</span>
                   </li>
                 </ul>

@@ -237,7 +237,7 @@ export default function BesinTakvimiPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30 pt-[25px]">
         <button onClick={() => router.push('/araclar')} className="text-gray-500">
           <i className="fa-solid fa-arrow-left"></i>
         </button>
@@ -344,7 +344,7 @@ export default function BesinTakvimiPage() {
         {/* Calendar Grid */}
         {isLoading ? (
           <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-            <div className="grid grid-cols-7 gap-px bg-gray-200">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-px bg-gray-200">
               {/* Header skeleton */}
               {dayNames.map((day, idx) => (
                 <div key={idx} className="bg-gray-50 p-3 text-center">
@@ -353,7 +353,7 @@ export default function BesinTakvimiPage() {
               ))}
               {/* Date cells skeleton */}
               {Array(7).fill(0).map((_, idx) => (
-                <div key={idx} className="bg-white p-4 min-h-[140px]">
+                <div key={idx} className="bg-white p-2 sm:p-4 min-h-[100px] sm:min-h-[140px]">
                   <div className="h-4 w-6 bg-gray-200 rounded animate-pulse mb-3"></div>
                   <div className="space-y-2">
                     <div className="h-16 bg-gray-100 rounded-xl animate-pulse"></div>
@@ -399,7 +399,7 @@ export default function BesinTakvimiPage() {
                 return (
                   <div
                     key={idx}
-                    className={`bg-white p-4 min-h-[140px] hover:bg-gray-50 transition-colors cursor-pointer group ${
+                    className={`bg-white p-2 sm:p-4 min-h-[100px] sm:min-h-[140px] hover:bg-gray-50 transition-colors cursor-pointer group ${
                       isToday ? 'ring-2 ring-orange-400 ring-inset' : ''
                     }`}
                     onClick={() => {
@@ -475,15 +475,15 @@ export default function BesinTakvimiPage() {
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-blue-100 border border-blue-200 rounded"></div>
-              <span className="text-gray-700">🟢 Yeni Gıda</span>
+              <span className="text-gray-700">🆕 Yeni Gıda</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded"></div>
-              <span className="text-gray-700">🔵 Tekrar</span>
+              <span className="text-gray-700">🔄 Tekrar</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-yellow-100 border border-yellow-200 rounded"></div>
-              <span className="text-gray-700">🟡 Reaksiyon</span>
+              <span className="text-gray-700">⚠️ Reaksiyon</span>
             </div>
           </div>
         </div>

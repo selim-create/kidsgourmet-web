@@ -141,7 +141,7 @@ export default function EkGidaRehberiPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30 pt-[25px]">
         <button onClick={() => router.push('/araclar')} className="text-gray-500">
           <i className="fa-solid fa-arrow-left"></i>
         </button>
@@ -175,7 +175,7 @@ export default function EkGidaRehberiPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Örn: havuç, muz, yumurta..."
+                placeholder="Malzemeyi Yaz, Enter'a Bas!"
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
               />
             </div>
@@ -194,7 +194,7 @@ export default function EkGidaRehberiPage() {
                   max="60"
                   value={selectedAge || ''}
                   onChange={(e) => setSelectedAge(e.target.value ? parseInt(e.target.value) : null)}
-                  placeholder="Ay cinsinden"
+                  placeholder="Bebeğiniz Kaç Aylık"
                   className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 />
                 {selectedAge !== null && (
@@ -243,7 +243,7 @@ export default function EkGidaRehberiPage() {
         {/* Ingredients Grid */}
         {!isLoading && filteredIngredients.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredIngredients.map((ingredient) => {
+            {(searchQuery ? filteredIngredients : filteredIngredients.slice(-20)).map((ingredient) => {
               const minAge = parseAgeMonths(ingredient.start_age);
               const isAppropriate = selectedAge === null || selectedAge >= minAge;
               
@@ -332,7 +332,11 @@ export default function EkGidaRehberiPage() {
             <h4 className="font-bold text-slate-800 mb-1">Önemli Bilgi</h4>
             <p className="text-sm text-gray-600">
               Bu rehber genel bilgilendirme amaçlıdır. Bebeğinizin özel durumu için mutlaka pediatristinize danışın.
-              Alerji riski yüksek besinleri verirken dikkatli olun ve ilk defa verdiğinizde 3-5 gün bekleyin.
+              Alerji riski yüksek besinleri verirken dikkatli olun ve ilk defa verdiğinizde takip etmeyi ihmal etmeyin.
+              {' '}
+              <Link href="/beslenme-rehberi/3-gun-kurali" className="text-blue-600 hover:text-blue-700 font-medium underline">
+                3 Gün Kuralı
+              </Link>
             </p>
           </div>
         </div>
