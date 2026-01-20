@@ -52,10 +52,14 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
 
     setIsLoading(true);
     try {
+      // Find the selected icon and color details
+      const iconOption = iconOptions.find(opt => opt.value === selectedIcon);
+      const colorOption = colorOptions.find(opt => opt.value === selectedColor);
+      
       await onCreate({
         name: name.trim(),
-        icon: selectedIcon,
-        color: selectedColor,
+        icon: iconOption?.class || iconOptions[0].class, // Use full class name
+        color: colorOption?.hex || colorOptions[0].hex, // Use hex value
       });
       setName('');
       setSelectedIcon(iconOptions[0].value);
