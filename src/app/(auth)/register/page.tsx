@@ -182,7 +182,7 @@ export default function RegisterPage() {
                     <div>
                         <label htmlFor="fullname" className="block text-sm font-bold text-gray-700 mb-1">Ad Soyad</label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
                                 <i className="fa-regular fa-user"></i>
                             </div>
                             <input 
@@ -192,8 +192,9 @@ export default function RegisterPage() {
                               required 
                               value={name}
                               onChange={(e) => setName(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
-                              placeholder="Adınız Soyadınız" 
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              placeholder="Adınız Soyadınız"
+                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
                     </div>
@@ -201,7 +202,7 @@ export default function RegisterPage() {
                     <div>
                         <label htmlFor="username" className="block text-sm font-bold text-gray-700 mb-1">Kullanıcı Adı <span className="text-gray-400 font-normal">(opsiyonel)</span></label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
                                 <i className="fa-solid fa-at"></i>
                             </div>
                             <input 
@@ -210,8 +211,9 @@ export default function RegisterPage() {
                               type="text" 
                               value={username}
                               onChange={(e) => setUsername(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
-                              placeholder="kullaniciadi" 
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              placeholder="kullaniciadi"
+                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
                         <p className="mt-1 text-xs text-gray-500">Benzersiz bir kullanıcı adı seçin</p>
@@ -220,7 +222,7 @@ export default function RegisterPage() {
                     <div>
                         <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-1">E-Posta Adresi</label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
                                 <i className="fa-regular fa-envelope"></i>
                             </div>
                             <input 
@@ -230,8 +232,9 @@ export default function RegisterPage() {
                               required 
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
-                              placeholder="ornek@email.com" 
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              placeholder="ornek@email.com"
+                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
                     </div>
@@ -239,7 +242,7 @@ export default function RegisterPage() {
                     <div>
                         <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-1">Şifre</label>
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
                                 <i className="fa-solid fa-lock"></i>
                             </div>
                             <input 
@@ -249,8 +252,9 @@ export default function RegisterPage() {
                               required 
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors" 
-                              placeholder="En az 6 karakter" 
+                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              placeholder="En az 6 karakter"
+                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
                     </div>

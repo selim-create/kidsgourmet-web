@@ -361,7 +361,7 @@ export default function Header() {
                             {isAuthenticated && user ? (
                               <>
                                 <Link href={dashboardLink} onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-orange-50 text-orange-600 font-bold hover:bg-orange-100 transition-colors">
-                                    <i className="fa-solid fa-gauge-high"></i> Dashboard
+                                    <i className="fa-solid fa-gauge-high"></i> Ebeveyn Paneli
                                 </Link>
                                 <Link href="/profil" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 text-gray-700 font-medium hover:bg-gray-100 transition-colors">
                                     <i className="fa-solid fa-user-pen"></i> Profili Düzenle

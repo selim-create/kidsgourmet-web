@@ -3,18 +3,24 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
+import { useUser } from '@/hooks/use-user';
 import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { hasShownBirthDateToast, markBirthDateToastShown, shouldShowBirthDateToast } from '@/utils/helpers';
 
 export default function ChildBirthDatePicker() {
   const { profile, setChildBirthDate } = useChildProfile();
+  const { isAuthenticated } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
   const pathname = usePathname();
 
   // Show toast notification instead of modal (only once per session on specific pages)
+  // Only show to non-authenticated users
   useEffect(() => {
+    // Don't show to authenticated users
+    if (isAuthenticated) return;
+    
     if (!profile.birthDate && shouldShowBirthDateToast(pathname) && !hasShownBirthDateToast()) {
       // Delay toast slightly to avoid showing immediately on page load
       const timer = setTimeout(() => {
@@ -30,7 +36,7 @@ export default function ChildBirthDatePicker() {
       
       return () => clearTimeout(timer);
     }
-  }, [profile.birthDate, pathname]);
+  }, [profile.birthDate, pathname, isAuthenticated]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

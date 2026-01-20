@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 import { User, Child, UserEditUrls } from '@/lib/types';
 import { authService } from '@/services/auth-service';
 import { userService } from '@/services/user-service';
+import { getToken } from '@/lib/api';
 
 interface UserContextType {
   user: User | null;
@@ -36,6 +37,20 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+// Helper function to check if JWT token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload.exp) return false; // No expiry time
+    
+    // Check if token has expired (exp is in seconds)
+    return Date.now() >= payload.exp * 1000;
+  } catch (error) {
+    // If token is malformed or can't be decoded, consider it expired
+    return true;
+  }
+}
+
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,6 +60,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     if (authService.isAuthenticated()) {
       try {
+        // Check if token is expired
+        const token = getToken();
+        if (token && isTokenExpired(token)) {
+          // Token is expired, logout
+          authService.logout();
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+        
         // Tam profil bilgisini al (children dahil)
         const userData = await userService.getFullProfile();
         setUser(userData);

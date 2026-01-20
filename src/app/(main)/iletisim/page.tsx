@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { contactService } from '@/services/contact-service';
 
 export default function IletisimPage() {
   const [formData, setFormData] = useState({
@@ -18,14 +19,23 @@ export default function IletisimPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitStatus('success');
-      setFormData({ name: '', email: '', subject: '', message: '', requestType: 'general' });
+    try {
+      const result = await contactService.submit(formData);
+      
+      if (result.success) {
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '', requestType: 'general' });
+      } else {
+        setSubmitStatus('error');
+      }
       
       setTimeout(() => setSubmitStatus('idle'), 5000);
-    }, 1000);
+    } catch (error) {
+      setSubmitStatus('error');
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

@@ -153,7 +153,7 @@ export default function LoginPage() {
                         <div>
                             <label htmlFor="username" className="block text-sm font-bold text-gray-700 mb-1">E-posta veya Kullanıcı Adı</label>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
                                     <i className="fa-regular fa-envelope"></i>
                                 </div>
                                 <input 
@@ -163,8 +163,9 @@ export default function LoginPage() {
                                   required 
                                   value={username}
                                   onChange={(e) => setUsername(e.target.value)}
-                                  className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm transition-colors" 
-                                  placeholder="E-posta veya Kullanıcı Adı" 
+                                  className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm transition-colors z-0" 
+                                  placeholder="E-posta veya Kullanıcı Adı"
+                                  style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                                 />
                             </div>
                         </div>
@@ -174,7 +175,7 @@ export default function LoginPage() {
                                 <Link href="/forgot-password" className="text-xs font-bold text-brand-primary hover:text-orange-600">Şifremi Unuttum?</Link>
                             </div>
                             <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
                                     <i className="fa-solid fa-lock"></i>
                                 </div>
                                 <input 
@@ -184,21 +185,30 @@ export default function LoginPage() {
                                   required 
                                   value={password}
                                   onChange={(e) => setPassword(e.target.value)}
-                                  className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm transition-colors" 
-                                  placeholder="••••••••" 
+                                  className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-primary focus:border-brand-primary focus:z-10 sm:text-sm transition-colors z-0" 
+                                  placeholder="••••••••"
+                                  style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                                 />
                             </div>
                         </div>
                     </div>
 
                     <div>
-                        <button 
-                          type="submit" 
-                          disabled={isLoading || googleLoading}
-                          className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
-                        </button>
+                        <div className="flex gap-3">
+                          <button 
+                            type="submit" 
+                            disabled={isLoading || googleLoading}
+                            className="group relative flex-1 flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                              {isLoading ? "Giriş yapılıyor..." : "Giriş Yap"}
+                          </button>
+                          <Link
+                            href="/register"
+                            className="flex-1 flex justify-center items-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                          >
+                              Kayıt Ol
+                          </Link>
+                        </div>
                     </div>
                 </form>
             </div>
