@@ -631,7 +631,7 @@ export default function Home() {
                       <div className="w-16 h-16 mx-auto mb-6 text-5xl text-amber-700 flex items-center justify-center">
                           <i className="fa-solid fa-heart"></i>
                       </div>
-                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">K&amp;G Topluluğu</h3>
+                      <h3 className="font-sans font-bold text-xl text-slate-800 mb-3">K&G Topluluğu</h3>
                       <p className="text-gray-700 text-sm">Diğer annelerin deneyimlerini okuyun, sorularınızı uzmanlara sorun.</p>
                   </div>
               </div>
