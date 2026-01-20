@@ -175,17 +175,19 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           />
         </div>
         
-        {/* Age Group Badge - Top Left with asymmetric corners */}
-        <div 
-          className="absolute top-3 left-3 px-3 py-1.5 text-xs font-bold shadow-lg"
-          style={{
-            backgroundColor: ageGroupColor,
-            color: ageGroupTextColor,
-            borderRadius: BORDER_RADIUS.BADGE_ASYMMETRIC,
-          }}
-        >
-          {decodeEntities(recipe.age_group)}
-        </div>
+        {/* Age Group Badge - Top Left with asymmetric corners - Only render if age_group exists */}
+        {recipe.age_group && (
+          <div 
+            className="absolute top-3 left-3 px-3 py-1.5 text-xs font-bold shadow-lg"
+            style={{
+              backgroundColor: ageGroupColor,
+              color: ageGroupTextColor,
+              borderRadius: BORDER_RADIUS.BADGE_ASYMMETRIC,
+            }}
+          >
+            {decodeEntities(recipe.age_group)}
+          </div>
+        )}
         
         {/* Favorite Button - Top Right */}
         <button 
