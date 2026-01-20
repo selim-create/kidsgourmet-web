@@ -202,7 +202,7 @@ const defaultQuestions: BLWTestQuestion[] = [
     id: 'q5_grasp',
     category: 'physical_readiness',
     question: 'Bebeğiniz nesneleri kavrayıp ağzına götürebiliyor mu?',
-    description: 'El-göz koordinasyonu gelişmiş ve oyuncakları ağzına götürebiliyor olmalı.',
+    description: 'El-Göz-Ağız koordinasyonunu sağlayabiliyor mu?',
     icon: 'fa-solid fa-hand',
     weight: 10,
     options: [
@@ -243,21 +243,21 @@ const defaultQuestions: BLWTestQuestion[] = [
   {
     id: 'q8_medical',
     category: 'safety',
-    question: 'Bebeğinizde boğulma riskini artıran tıbbi bir durum var mı?',
-    description: 'Yutma güçlüğü, nörolojik sorunlar, prematürelik vb.',
+    question: 'Bebeğinizin beslenme konusunda tıbbi bir sorunu var mı?',
+    description: 'Reflü, yutma güçlüğü, prematüre doğum gibi konuları düşünerek cevaplayınız.',
     icon: 'fa-solid fa-notes-medical',
     weight: 10,
     options: [
       { id: 'medical_no', text: 'Hayır, bilinen bir sorun yok', value: 100 },
       { id: 'medical_mild', text: 'Küçük bir sorun var, doktora danıştık', value: 70 },
-      { id: 'medical_yes', text: 'Evet var, doktora henüz danışmadık', value: 0, is_red_flag: true, red_flag_message: 'Tıbbi bir durum varsa mutlaka doktorunuza danışın.' },
+      { id: 'medical_yes', text: 'Evet var, doktora henüz danışmadık', value: 0, is_red_flag: true, red_flag_message: 'Tıbbi bir durum varsa mutlaka doktorunuze danışın.' },
       { id: 'medical_uncertain', text: 'Emin değilim', value: 50 }
     ]
   },
   {
     id: 'q9_first_aid',
     category: 'safety',
-    question: 'Bebek ilk yardımı ve Heimlich manevrası hakkında bilginiz var mı?',
+    question: 'Boğulma durumunda Heimlich Manevrası yapabilir misiniz?',
     description: 'Boğulma durumunda ne yapmanız gerektiğini biliyor musunuz?',
     icon: 'fa-solid fa-kit-medical',
     weight: 5,
@@ -272,7 +272,7 @@ const defaultQuestions: BLWTestQuestion[] = [
     id: 'q10_supervision',
     category: 'environment',
     question: 'Bebek yemek yerken yanında olabilir misiniz?',
-    description: 'BLW\'de sürekli gözetim şarttır. Bebeği asla yalnız bırakmayın.',
+    description: 'Besleme sırasında yanından ayrılmadan gözetim sağlamanız gerekir.',
     icon: 'fa-solid fa-eye',
     weight: 0,
     options: [
@@ -291,7 +291,7 @@ const defaultResultBuckets: BLWResultBucket[] = [
     min_score: 80,
     max_score: 100,
     title: 'BLW\'ye Hazır Görünüyorsunuz! 🎉',
-    subtitle: 'Harika! Bebeğiniz ve siz hazırsınız',
+    subtitle: 'Harika! Bebeğiniz ve siz hazırsınız.',
     color: 'green',
     icon: 'fa-solid fa-circle-check',
     description: 'Bebeğiniz BLW (Baby-Led Weaning) yöntemine başlamak için gerekli tüm fiziksel ve gelişimsel işaretleri gösteriyor.',
@@ -589,7 +589,7 @@ export default function BLWTestPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 pt-[25px] z-30">
         <button onClick={() => router.push('/araclar')} className="text-gray-500">
           <i className="fa-solid fa-arrow-left"></i>
         </button>

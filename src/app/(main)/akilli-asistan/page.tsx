@@ -225,7 +225,7 @@ export default function ToolsPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 pt-[25px] z-30">
         <span className="font-display font-bold text-lg text-slate-800">Akıllı Asistan</span>
       </div>
 
@@ -237,7 +237,7 @@ export default function ToolsPage() {
           </div>
           <h1 className="font-display font-bold text-3xl text-slate-800 mb-2">Akıllı Asistan</h1>
           <p className="text-gray-500 max-w-xl mx-auto">
-            Bebek beslenmesi yolculuğunuzda size yardımcı olacak interaktif araçlar
+            Bebek beslenmesi yolculuğunu interaktif araçlarımız ile kolaylaştırıyoruz.
           </p>
         </div>
 
@@ -309,10 +309,9 @@ export default function ToolsPage() {
             <i className="fa-solid fa-circle-info"></i>
           </div>
           <div>
-            <h4 className="font-bold text-slate-800 mb-1">Uzman Kontrolünde İçerik</h4>
+            <h4 className="font-bold text-slate-800 mb-1">Güvenilir Kaynaklar</h4>
             <p className="text-sm text-gray-600">
-              Tüm araçlarımız pediatri uzmanları ve diyetisyenler tarafından kontrol edilmiştir. 
-              Ancak bu araçlar tıbbi tanı yerine geçmez, kesin bilgi için doktorunuza danışın.
+              Tüm araçlarımız ulusal ve uluslararası sağlık otoritelerinin kaynaklarına dayanmaktadır. Ancak bu araçlar tıbbi tanı yerine geçmez, kesin bilgi için doktorunuza danışın.
             </p>
           </div>
         </div>
