@@ -20,13 +20,13 @@ interface NewsletterFormProps {
 // Consent Checkbox Component - defined outside to avoid recreation on render
 function ConsentCheckbox({ source, checked, onChange }: { source: string; checked: boolean; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
   return (
-    <div className="flex items-start gap-2 mt-3">
+    <div className="flex items-center gap-2 mt-3">
       <input
         type="checkbox"
         id={`consent-${source}`}
         checked={checked}
         onChange={onChange}
-        className="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+        className="w-4 h-4 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
       />
       <label htmlFor={`consent-${source}`} className="text-xs text-gray-500 cursor-pointer">
         Bültene üye olarak{' '}
