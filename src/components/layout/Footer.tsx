@@ -25,17 +25,17 @@ export default function Footer() {
                                 <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
                                     <i className="fa-solid fa-envelope text-orange-500 text-xl"></i>
                                 </div>
-                                <h3 className="font-display font-bold text-2xl text-slate-800">Haftalık Bülten</h3>
+                                <h3 className="font-display font-bold text-2xl text-slate-800">K&amp;G Bülten</h3>
                             </div>
                             <p className="text-gray-500 max-w-md">
-                                Yeni tarifler, beslenme ipuçları ve özel içerikler her hafta e-postana gelsin.
+                                K&amp;G Bülten&apos;e abone ol, yeni tarifler, beslenme ipuçları ve özel içerikler e-postana gelsin!
                             </p>
                         </div>
                         <div className="w-full lg:w-auto lg:min-w-[380px]">
                             <NewsletterForm 
                                 source="footer" 
                                 variant="compact" 
-                                placeholder="E-posta adresiniz"
+                                placeholder="Mail Adresiniz"
                             />
                             <p className="text-xs text-gray-400 text-center lg:text-left mt-3">
                                 <i className="fa-solid fa-lock mr-1"></i>
@@ -70,11 +70,11 @@ export default function Footer() {
                             </div>
                         </Link>
                         <p className="text-gray-500 text-sm mb-6 leading-relaxed">
-                            Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman onaylı tarifler ve akıllı araçlarla yanınızdayız.
+                            Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman görüşleri, sağlıklı tarifler ve akıllı araçlarla yanınızdayız.
                         </p>
                         
-                        {/* Social Media - Pill Style */}
-                        <div className="flex flex-wrap gap-2">
+                        {/* Social Media - 3x2 Grid */}
+                        <div className="grid grid-cols-3 gap-2">
                             <Link 
                                 href="https://www.instagram.com/kidsgourmet/" 
                                 target="_blank" 
@@ -85,31 +85,13 @@ export default function Footer() {
                                 <i className="fa-brands fa-instagram text-sm"></i>
                             </Link>
                             <Link 
-                                href="https://www.youtube.com/channel/UCkXtLdtEfhl8Do1pPW4fgsQ" 
+                                href="https://www.facebook.com/kidsandgourmet" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                aria-label="YouTube"
-                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover: border-transparent transition-all shadow-sm"
+                                aria-label="Facebook"
+                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-youtube text-sm"></i>
-                            </Link>
-                            <Link 
-                                href="https://x.com/kidsandgourmet" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                aria-label="X (Twitter)"
-                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all shadow-sm"
-                            >
-                                <i className="fa-brands fa-twitter text-sm"></i>
-                            </Link>
-                            <Link 
-                                href="https://tiktok.com/@kidsgourmet" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                aria-label="TikTok"
-                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all shadow-sm"
-                            >
-                                <i className="fa-brands fa-tiktok text-sm"></i>
+                                <i className="fa-brands fa-facebook-f text-sm"></i>
                             </Link>
                             <Link 
                                 href="https://tr.pinterest.com/KidsandGourmet" 
@@ -121,13 +103,31 @@ export default function Footer() {
                                 <i className="fa-brands fa-pinterest text-sm"></i>
                             </Link>
                             <Link 
-                                href="https://www.facebook.com/kidsandgourmet" 
+                                href="https://www.youtube.com/channel/UCkXtLdtEfhl8Do1pPW4fgsQ" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                aria-label="Facebook"
-                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover: border-transparent transition-all shadow-sm"
+                                aria-label="YouTube"
+                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-facebook-f text-sm"></i>
+                                <i className="fa-brands fa-youtube text-sm"></i>
+                            </Link>
+                            <Link 
+                                href="https://tiktok.com/@kidsgourmet" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                aria-label="TikTok"
+                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all shadow-sm"
+                            >
+                                <i className="fa-brands fa-tiktok text-sm"></i>
+                            </Link>
+                            <Link 
+                                href="https://x.com/kidsandgourmet" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                aria-label="X (Twitter)"
+                                className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all shadow-sm"
+                            >
+                                <i className="fa-brands fa-x-twitter text-sm"></i>
                             </Link>
                         </div>
                     </div>
@@ -243,7 +243,7 @@ export default function Footer() {
                                 </li>
                                 <li>
                                     <Link href="/uzmanlar" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
-                                        Uzman Kadromuz
+                                        Uzmanlar
                                     </Link>
                                 </li>
                                 <li>
@@ -252,8 +252,7 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/reklam-verin" className="inline-flex items-center gap-1. 5 px-3 py-1.5 bg-orange-100 text-orange-600 rounded-full text-sm font-bold hover:bg-orange-500 hover:text-white transition-all">
-                                        <i className="fa-solid fa-bullhorn text-xs"></i> 
+                                    <Link href="/reklam-verin" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Reklam Verin
                                     </Link>
                                 </li>
@@ -267,7 +266,7 @@ export default function Footer() {
                             <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
                                 <i className="fa-solid fa-shield-halved text-blue-500 text-xs"></i>
                             </div>
-                            Yasal
+                            Bilgilendirme
                         </h4>
                         <nav aria-label="Yasal">
                             <ul className="space-y-3">
