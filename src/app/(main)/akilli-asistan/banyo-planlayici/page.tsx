@@ -151,7 +151,7 @@ export default function BathPlannerPage() {
   return (
     <div className="bg-gray-50 min-h-screen pb-12">
       {/* Mobile Header */}
-      <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30">
+      <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30">
         <Link href="/akilli-asistan" className="text-gray-600">
           <i className="fa-solid fa-arrow-left"></i>
         </Link>
@@ -182,7 +182,7 @@ export default function BathPlannerPage() {
               </div>
               <h1 className="font-display font-bold text-3xl mb-2">Banyo Rutini Planlayıcı</h1>
               <p className="text-blue-50">
-                Bebeğiniz için mevsime ve cilt tipine uygun banyo rutini oluşturun
+                Bebeğiniz için mevsime ve cilt tipine uygun banyo rutini oluşturun.
               </p>
               {config?.sponsor && (
                 <div className="mt-4 flex justify-center">
@@ -375,7 +375,7 @@ export default function BathPlannerPage() {
               {/* Weekly Schedule */}
               <div className="p-6">
                 <h3 className="font-bold text-lg text-slate-800 mb-4">Haftalık Takvim</h3>
-                <div className="grid grid-cols-7 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
                   {result.weekly_schedule.map((day, index) => (
                     <div
                       key={index}
