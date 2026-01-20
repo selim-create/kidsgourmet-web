@@ -62,6 +62,7 @@ export const API_ENDPOINTS = {
   // Taxonomies
   AGE_GROUPS: `${WP_API_NAMESPACE}/age-group`,
   MEAL_TYPES: `${WP_API_NAMESPACE}/meal-type`,
+  DIET_TYPES: `${WP_API_NAMESPACE}/diet-type`,
   
   // Community / Discussion Endpoints
   CIRCLES: `${KG_API_NAMESPACE}/circles`,

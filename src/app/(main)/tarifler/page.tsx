@@ -8,6 +8,7 @@ import { RecipeCard as RecipeCardType } from '@/lib/types';
 import { useChildProfile } from '@/contexts/ChildProfileContext';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import { useMealTypes } from '@/hooks/useMealTypes';
+import { useDietTypes } from '@/hooks/useDietTypes';
 import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
@@ -21,15 +22,6 @@ const AGE_GROUPS_ORDER = [
   { slug: '9-11-ay-kesif', label: '9-11 Ay (Keşif & Pütürlüye Geçiş)' },
   { slug: '12-24-ay-gecis', label: '12-24 Ay (Aile Sofrasına Geçiş)' },
   { slug: '2-yas-ve-uzeri', label: '2+ Yaş (Çocuk Gurme)' },
-];
-
-// Diyet Tipleri
-const DIET_TYPES = [
-  { id: 'glutensiz', label: 'Glutensiz' },
-  { id: 'laktozsuz', label: 'Laktozsuz' },
-  { id: 'vegan', label: 'Vegan' },
-  { id: 'vejetaryen', label: 'Vejetaryen' },
-  { id: 'sekersiz', label: 'Şekersiz' },
 ];
 
 // Özel Durumlar
@@ -83,6 +75,7 @@ function RecipesPageContent() {
   const { profile } = useChildProfile();
   const { ageGroups } = useAgeGroups();
   const { mealTypes } = useMealTypes();
+  const { dietTypes } = useDietTypes();
   const { activeChild } = useActiveChild();
   
   // Filtre state
@@ -100,26 +93,31 @@ function RecipesPageContent() {
     const dietType = searchParams.get('diet-type');
     const mealType = searchParams.get('meal-type');
     const ageGroup = searchParams.get('age-group');
+    const ingredient = searchParams.get('ingredient');
 
     const newFilters: FilterState = {
       ageGroups: ageGroup ? [ageGroup] : [],
       mealTypes: mealType ? [mealType] : [],
       dietTypes: dietType ? [dietType] : [],
       specialConditions: category ? [category] : [],
-      ingredientSearch: '',
+      ingredientSearch: ingredient || '',
     };
 
     // URL parametreleri varsa filtreleri güncelle ve fetch tetikle
-    if (category || dietType || mealType || ageGroup) {
+    if (category || dietType || mealType || ageGroup || ingredient) {
       setFilters(newFilters);
       setCurrentPage(1); // Sayfa 1'e reset et
     }
   }, [searchParams]);
   
   // Tarifleri getir
-  const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, order: string) => {
+  const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, orderBy: string) => {
     try {
       setLoading(true);
+      
+      // prep_time için özel order değeri
+      const orderValue = orderBy === 'prep_time' ? 'asc' : 'desc';
+      
       const data = await recipeService.getAll({
         page,
         perPage: RECIPES_PER_PAGE,
@@ -128,8 +126,8 @@ function RecipesPageContent() {
         dietType: currentFilters.dietTypes.join(','),
         specialCondition: currentFilters.specialConditions.join(','),
         ingredient: currentFilters.ingredientSearch,
-        orderBy: order as 'date' | 'popular' | 'prep_time',
-        order: 'desc',
+        orderBy: orderBy as 'date' | 'popular' | 'prep_time',
+        order: orderValue,
       });
       
       // Response kontrolü
@@ -271,7 +269,7 @@ function RecipesPageContent() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
           <h1 className="font-display font-bold text-3xl md:text-4xl text-slate-800 mb-2 font-sans">Sağlıklı Tarifler</h1>
-          <p className="text-gray-600">Minik gurmeniz için uzman onaylı, yaşa uygun lezzetler.</p>
+          <p className="text-gray-600">Minik gurmeniz için sağlıklı, lezzetli, yaşa uygun lezzetler.</p>
         </div>
       </div>
 
@@ -331,16 +329,16 @@ function RecipesPageContent() {
                 <i className="fa-solid fa-leaf text-emerald-500 mr-2"></i> Diyet Tipi
               </h3>
               <div className="space-y-2">
-                {DIET_TYPES.map((dietType) => (
+                {dietTypes.map((dietType) => (
                   <label key={dietType.id} className="flex items-center space-x-3 cursor-pointer group">
                     <input 
                       type="checkbox" 
                       className="w-5 h-5 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500 accent-emerald-500"
-                      checked={filters.dietTypes.includes(dietType.id)}
-                      onChange={() => handleFilterChange('dietTypes', dietType.id)}
+                      checked={filters.dietTypes.includes(dietType.slug)}
+                      onChange={() => handleFilterChange('dietTypes', dietType.slug)}
                     />
                     <span className="text-gray-600 group-hover:text-emerald-500 transition-colors text-sm">
-                      {dietType.label}
+                      {decodeEntities(dietType.name)}
                     </span>
                   </label>
                 ))}
@@ -412,7 +410,7 @@ function RecipesPageContent() {
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
               <h2 className="font-bold text-gray-800 font-sans">
-                <span className="text-orange-500">{totalRecipes}</span> tarif listeleniyor
+                <span className="text-orange-500">{totalRecipes}</span> Tarif Listeleniyor
               </h2>
               
               <div className="flex items-center gap-2">
@@ -424,7 +422,7 @@ function RecipesPageContent() {
                 >
                   <option value="date">En Yeniler</option>
                   <option value="popular">Popüler</option>
-                  <option value="prep_time">Hazırlama Süresi</option>
+                  <option value="prep_time">Hızlı Hazırla</option>
                 </select>
               </div>
             </div>
@@ -599,15 +597,15 @@ function RecipesPageContent() {
                   <i className="fa-solid fa-leaf text-emerald-500 mr-2"></i> Diyet Tipi
                 </h4>
                 <div className="space-y-2">
-                  {DIET_TYPES.map((dietType) => (
+                  {dietTypes.map((dietType) => (
                     <label key={dietType.id} className="flex items-center space-x-3 cursor-pointer">
                       <input 
                         type="checkbox" 
                         className="w-5 h-5 rounded border-gray-300 text-emerald-500 focus:ring-emerald-500 accent-emerald-500"
-                        checked={filters.dietTypes.includes(dietType.id)}
-                        onChange={() => handleFilterChange('dietTypes', dietType.id)}
+                        checked={filters.dietTypes.includes(dietType.slug)}
+                        onChange={() => handleFilterChange('dietTypes', dietType.slug)}
                       />
-                      <span className="text-gray-600 text-sm">{dietType.label}</span>
+                      <span className="text-gray-600 text-sm">{decodeEntities(dietType.name)}</span>
                     </label>
                   ))}
                 </div>
