@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from "next/link";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ import type { Circle } from '@/lib/types';
 import { useUser } from '@/hooks/use-user';
 import AuthRequiredBanner from '@/components/ui/AuthRequiredBanner';
 
-export default function AskQuestionPage() {
+function AskQuestionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useUser();
@@ -234,5 +234,17 @@ export default function AskQuestionPage() {
         </div>
 
     </div>
+  );
+}
+
+export default function AskQuestionPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
+    }>
+      <AskQuestionForm />
+    </Suspense>
   );
 }
