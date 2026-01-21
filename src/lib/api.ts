@@ -7,11 +7,33 @@ interface FetchOptions extends RequestInit {
 }
 
 export interface FetchErrorInfo {
-  type: 'network' | 'timeout' | 'cors' | 'auth' | 'server' | 'unknown';
+  type: 'network' | 'timeout' | 'cors' | 'auth' | 'server' | 'rate_limit' | 'unknown';
   message: string;
   userMessage: string;
   canRetry: boolean;
   statusCode?: number;
+}
+
+// Rate limit error type
+export interface RateLimitError {
+  code: 'rate_limit_exceeded';
+  message: string;
+  data: {
+    status: 429;
+    retry_after: number;
+    limit: number;
+    window: number;
+  };
+}
+
+// Check if error is rate limit
+export function isRateLimitError(error: unknown): error is RateLimitError {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as RateLimitError).code === 'rate_limit_exceeded'
+  );
 }
 
 // Token yönetimi için yardımcı fonksiyonlar
@@ -74,6 +96,17 @@ export function analyzeError(error: any, statusCode?: number): FetchErrorInfo {
       message: error.message,
       userMessage: 'Bağlantı hatası oluştu. Lütfen sayfayı yenileyip tekrar deneyin.',
       canRetry: true,
+    };
+  }
+  
+  // Rate limit errors (429)
+  if (statusCode === 429) {
+    return {
+      type: 'rate_limit',
+      message: 'Rate limit exceeded',
+      userMessage: 'Çok fazla istek gönderdiniz. Lütfen biraz bekleyin.',
+      canRetry: true,
+      statusCode: 429,
     };
   }
   
@@ -172,6 +205,24 @@ export async function fetchAPI<T>(
         console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
       }
       
+      // Handle rate limiting (429)
+      if (res.status === 429) {
+        const retryAfter = errorData.data?.retry_after || parseInt(res.headers.get('Retry-After') || '60');
+        
+        const rateLimitError: RateLimitError = {
+          code: 'rate_limit_exceeded',
+          message: `Çok fazla istek gönderdiniz. Lütfen ${retryAfter} saniye bekleyin.`,
+          data: {
+            status: 429,
+            retry_after: retryAfter,
+            limit: parseInt(res.headers.get('X-RateLimit-Limit') || '100'),
+            window: 60,
+          },
+        };
+        
+        throw rateLimitError;
+      }
+      
       if (res.status === 401) {
         handle401Error(token);
       }
@@ -254,6 +305,24 @@ export async function fetchAPIWithHeaders<T>(
       // Don't log errors for silent status codes
       if (!allSilentErrors.includes(res.status)) {
         console.error(`API Error: ${res.status} at ${endpoint}`, errorData);
+      }
+      
+      // Handle rate limiting (429)
+      if (res.status === 429) {
+        const retryAfter = errorData.data?.retry_after || parseInt(res.headers.get('Retry-After') || '60');
+        
+        const rateLimitError: RateLimitError = {
+          code: 'rate_limit_exceeded',
+          message: `Çok fazla istek gönderdiniz. Lütfen ${retryAfter} saniye bekleyin.`,
+          data: {
+            status: 429,
+            retry_after: retryAfter,
+            limit: parseInt(res.headers.get('X-RateLimit-Limit') || '100'),
+            window: 60,
+          },
+        };
+        
+        throw rateLimitError;
       }
       
       if (res.status === 401) {
