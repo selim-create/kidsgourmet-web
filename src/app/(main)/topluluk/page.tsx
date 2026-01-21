@@ -303,14 +303,54 @@ export default function CommunityPage() {
       console.log('Vote result:', result); // Debug için
       
       if (result.success) {
-        // Update the discussion in the list with API response values
+        // Update the discussion using optimistic update based on action
         setDiscussions(prev => prev.map(d => {
           if (d.id === discussionId) {
+            let newLikeCount = d.like_count;
+            let newDislikeCount = d.dislike_count;
+            let newUserVote: 'like' | 'dislike' | null = d.user_vote;
+            
+            // If API returns counts directly, use them
+            if (result.like_count !== undefined && result.dislike_count !== undefined) {
+              newLikeCount = result.like_count;
+              newDislikeCount = result.dislike_count;
+              newUserVote = result.user_vote as 'like' | 'dislike' | null;
+            } else if (result.action) {
+              // Optimistic update based on action
+              if (result.action === 'added') {
+                // New vote added
+                newUserVote = voteType;
+                if (voteType === 'like') {
+                  newLikeCount = d.like_count + 1;
+                } else {
+                  newDislikeCount = d.dislike_count + 1;
+                }
+              } else if (result.action === 'removed') {
+                // Vote removed (clicked same button again)
+                newUserVote = null;
+                if (voteType === 'like') {
+                  newLikeCount = Math.max(0, d.like_count - 1);
+                } else {
+                  newDislikeCount = Math.max(0, d.dislike_count - 1);
+                }
+              } else if (result.action === 'updated' || result.action === 'changed') {
+                // Vote changed (from like to dislike or vice versa)
+                newUserVote = voteType;
+                if (voteType === 'like') {
+                  newLikeCount = d.like_count + 1;
+                  newDislikeCount = Math.max(0, d.dislike_count - 1);
+                } else {
+                  newDislikeCount = d.dislike_count + 1;
+                  newLikeCount = Math.max(0, d.like_count - 1);
+                }
+              }
+            }
+            
             const updated = { 
               ...d, 
-              like_count: result.like_count ?? d.like_count, 
-              dislike_count: result.dislike_count ?? d.dislike_count, 
-              user_vote: result.user_vote as 'like' | 'dislike' | null 
+              like_count: newLikeCount, 
+              dislike_count: newDislikeCount, 
+              user_vote: newUserVote 
             };
             console.log('Updated discussion:', updated); // Debug
             return updated;
