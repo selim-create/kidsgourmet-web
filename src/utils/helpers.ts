@@ -253,7 +253,7 @@ export function getProfileUrl(author: {
   if (!username && author.name) {
     const slugified = slugify(author.name);
     // Validate slugified result (at least 2 chars, valid URL characters)
-    username = (slugified && slugified.length >= 2) ? slugified : null;
+    username = (slugified && slugified.length >= 2) ? slugified : undefined;
   }
   
   // Final fallback to ID
