@@ -20,6 +20,7 @@ export function useIngredients(filters?: IngredientsFilters) {
   const { fields, ...serviceFilters } = filters || {};
   
   // Build enhanced filters with sparse fieldsets
+  // Note: The 'fields' parameter is prepared for future backend support
   const enhancedFilters: ServiceIngredientFilters & { fields?: string } = {
     ...serviceFilters,
   };

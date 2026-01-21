@@ -56,7 +56,7 @@ const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoi
 /**
  * Create a rate limit error from response
  */
-function createRateLimitError(res: Response, errorData: any): RateLimitError {
+function createRateLimitError(res: Response, errorData: { data?: { retry_after?: number } }): RateLimitError {
   const retryAfter = errorData.data?.retry_after || parseInt(res.headers.get('Retry-After') || '60');
   
   return {
