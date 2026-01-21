@@ -174,7 +174,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             } else {
               newDislikeCount = Math.max(0, prev.dislike_count - 1);
             }
-          } else if (result.action === 'updated' || result.action === 'changed') {
+          } else if (result.action === 'changed') {
             // Vote changed (from like to dislike or vice versa)
             newUserVote = voteType;
             if (voteType === 'like') {
@@ -235,7 +235,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
             } else {
               newDislikeCount = Math.max(0, c.dislike_count - 1);
             }
-          } else if (result.action === 'updated' || result.action === 'changed') {
+          } else if (result.action === 'changed') {
             // Vote changed (from like to dislike or vice versa)
             newUserVote = voteType;
             if (voteType === 'like') {
