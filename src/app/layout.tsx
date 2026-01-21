@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   verification: {
-    google: 'your-google-verification-code', // Replace with actual verification code
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || 'your-google-verification-code',
   },
 };
 

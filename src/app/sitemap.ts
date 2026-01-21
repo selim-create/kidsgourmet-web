@@ -305,10 +305,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   try {
     // Fetch blog categories
+    interface CategoryType {
+      id: number;
+      slug: string;
+      count: number;
+      name: string;
+    }
+
     const categories = await blogService.getCategories();
     
     if (categories && categories.length > 0) {
-      categories.forEach((category: any) => {
+      categories.forEach((category: CategoryType) => {
         if (category.slug && category.count > 0) {
           sitemapEntries.push({
             url: `${BASE_URL}/kesfet/kategori/${category.slug}`,

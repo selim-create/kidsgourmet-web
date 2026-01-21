@@ -113,7 +113,43 @@ export function RecipeJsonLd(props: RecipeJsonLdProps) {
     datePublished,
   } = props;
 
-  const jsonLd: any = {
+  interface RecipeSchemaType {
+    '@context': string;
+    '@type': string;
+    name: string;
+    description: string;
+    image: string;
+    prepTime?: string;
+    cookTime?: string;
+    totalTime?: string;
+    recipeYield?: string;
+    recipeCategory?: string;
+    recipeCuisine?: string;
+    keywords?: string;
+    recipeIngredient?: string[];
+    recipeInstructions?: Array<{
+      '@type': string;
+      position: number;
+      text: string;
+      name: string;
+    }>;
+    nutrition?: {
+      '@type': string;
+      [key: string]: string | undefined;
+    };
+    aggregateRating?: {
+      '@type': string;
+      ratingValue: number;
+      ratingCount: number;
+    };
+    author?: {
+      '@type': string;
+      name: string;
+    };
+    datePublished?: string;
+  }
+
+  const jsonLd: RecipeSchemaType = {
     '@context': 'https://schema.org',
     '@type': 'Recipe',
     name,
@@ -189,8 +225,12 @@ interface ArticleJsonLdProps {
     type?: string;
   };
   publisher?: {
+    '@type'?: string;
     name: string;
-    logo: string;
+    logo?: {
+      '@type'?: string;
+      url: string;
+    };
   };
   keywords?: string[];
 }
@@ -207,7 +247,35 @@ export function ArticleJsonLd(props: ArticleJsonLdProps) {
     keywords,
   } = props;
 
-  const jsonLd: any = {
+  interface ArticleSchemaType {
+    '@context': string;
+    '@type': string;
+    headline: string;
+    description: string;
+    image: string;
+    datePublished: string;
+    dateModified: string;
+    author: {
+      '@type': string;
+      name: string;
+    };
+    publisher: {
+      '@type': string;
+      name: string;
+      logo?: {
+        '@type': string;
+        url: string;
+      };
+    };
+    keywords?: string;
+  }
+
+  const defaultLogo = {
+    '@type': 'ImageObject' as const,
+    url: 'https://kidsgourmet.com.tr/logo.png',
+  };
+
+  const jsonLd: ArticleSchemaType = {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline,
@@ -219,13 +287,13 @@ export function ArticleJsonLd(props: ArticleJsonLdProps) {
       '@type': author.type || 'Person',
       name: author.name,
     },
-    publisher: publisher || {
-      '@type': 'Organization',
-      name: 'KidsGourmet',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://kidsgourmet.com.tr/logo.png',
-      },
+    publisher: {
+      '@type': publisher?.['@type'] || 'Organization',
+      name: publisher?.name || 'KidsGourmet',
+      logo: publisher?.logo ? {
+        '@type': publisher.logo['@type'] || 'ImageObject',
+        url: publisher.logo.url,
+      } : defaultLogo,
     },
   };
 
