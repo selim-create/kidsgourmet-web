@@ -11,6 +11,8 @@ export default function RegisterPage() {
   const router = useRouter();
   const { refreshUser } = useUser();
   const { isScriptLoaded, initializeGoogleButton, isLoading: googleLoading, error: googleError } = useGoogleAuth();
+  
+  // Form State
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,9 +20,13 @@ export default function RegisterPage() {
   const [childName, setChildName] = useState("");
   const [childBirthDate, setChildBirthDate] = useState("");
   const [skipChild, setSkipChild] = useState(false);
+  
+  // Consents State
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
+  
+  // UI State
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
@@ -39,7 +45,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     
-    // Validate terms acceptance
     if (!termsAccepted) {
       setError("Devam etmek için Kullanıcı Sözleşmesi'ni kabul etmeniz gerekmektedir.");
       return;
@@ -48,32 +53,22 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const registerData: {
-        email: string;
-        password: string;
-        name: string;
-        username?: string;
-        child?: { name: string; birth_date: string };
-        consents?: {
-          terms_accepted: boolean;
-          terms_accepted_at: string;
-          marketing_consent: boolean;
-          marketing_consent_at: string | null;
-          sensitive_data_consent: boolean;
-          sensitive_data_consent_at: string | null;
-        };
-      } = {
+      const registerData: any = {
         email,
         password,
         name,
+        consents: {
+          terms_accepted: termsAccepted,
+          terms_accepted_at: new Date().toISOString(),
+          marketing_consent: marketingConsent,
+          marketing_consent_at: marketingConsent ? new Date().toISOString() : null,
+          sensitive_data_consent: sensitiveDataConsent,
+          sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
+        }
       };
 
-      // Add username if provided
-      if (username.trim()) {
-        registerData.username = username.trim();
-      }
+      if (username.trim()) registerData.username = username.trim();
 
-      // Add child profile if not skipped and fields are filled
       if (!skipChild && childName.trim() && childBirthDate) {
         registerData.child = {
           name: childName.trim(),
@@ -81,27 +76,13 @@ export default function RegisterPage() {
         };
       }
 
-      // Add consent data
-      registerData.consents = {
-        terms_accepted: termsAccepted,
-        terms_accepted_at: new Date().toISOString(),
-        marketing_consent: marketingConsent,
-        marketing_consent_at: marketingConsent ? new Date().toISOString() : null,
-        sensitive_data_consent: sensitiveDataConsent,
-        sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
-      };
-
       const response = await authService.register(registerData);
       await refreshUser();
       
-      // Rol tabanlı yönlendirme
-      if (response.redirect_url) {
-        router.push(response.redirect_url);
-      } else if (response.is_expert) {
-        router.push("/dashboard/expert");
-      } else {
-        router.push("/dashboard");
-      }
+      if (response.redirect_url) router.push(response.redirect_url);
+      else if (response.is_expert) router.push("/dashboard/expert");
+      else router.push("/dashboard");
+      
     } catch (err) {
       setError(err instanceof Error ? err.message : "Kayıt başarısız oldu");
     } finally {
@@ -110,325 +91,254 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white overflow-hidden mx-auto max-w-6xl">
+    <div className="flex min-h-screen bg-white">
         
-        {/* LEFT SIDE: DECORATIVE (Desktop) */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-50 via-brand-light to-orange-50 relative items-center justify-center p-12 overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-green-200 rounded-full blur-3xl -mr-16 -mt-16 opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-100 rounded-full blur-3xl -ml-10 -mb-10 opacity-70"></div>
+        {/* LEFT SIDE: DECORATIVE (Desktop Only) - SOFT VERSION */}
+        <div className="hidden lg:flex lg:w-5/12 bg-gradient-to-br from-orange-50 via-white to-yellow-50 relative items-center justify-center p-8 overflow-hidden border-r border-orange-50">
+            {/* Soft Background Blobs */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-orange-100/40 rounded-full blur-3xl -mr-20 -mt-20 mix-blend-multiply animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-yellow-100/50 rounded-full blur-3xl -ml-20 -mb-20 mix-blend-multiply"></div>
             
-            <div className="relative z-10 text-center max-w-lg">
-                {/* Decorative Illustration */}
-                <div className="mb-8 relative inline-block">
-                    <div className="w-64 h-64 bg-white/50 backdrop-blur-sm rounded-full shadow-2xl transform rotate-2 border-8 border-white flex items-center justify-center">
-                        <div className="text-center">
-                            <i className="fa-solid fa-child-reaching text-green-500 text-7xl mb-4"></i>
-                            <i className="fa-solid fa-sparkles text-yellow-400 text-4xl"></i>
+            <div className="relative z-10 text-center max-w-sm">
+                {/* Logo Icon with Soft Shadow */}
+                <div className="mb-8 inline-flex p-6 bg-white rounded-[2rem] shadow-xl shadow-orange-100/50 relative transform hover:scale-105 transition-transform duration-300">
+                   <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent rounded-[2rem] opacity-50"></div>
+                   <i className="fa-solid fa-carrot text-6xl text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-orange-500 relative z-10"></i>
+                </div>
+
+                <h2 className="font-display font-bold text-3xl mb-4 text-slate-800 leading-tight">
+                    Sağlıklı Nesiller,<br/>
+                    <span className="text-orange-500">Bilinçli Ebeveynler</span>
+                </h2>
+                
+                <p className="text-slate-600 text-base leading-relaxed mb-8">
+                    KidsGourmet ailesine katılarak çocuğunuzun beslenme yolculuğunu uzman rehberliğinde yönetin.
+                </p>
+                
+                {/* Feature List - Clean Look */}
+                <div className="space-y-4 text-left bg-white/60 p-6 rounded-2xl border border-orange-100/50 backdrop-blur-sm shadow-sm">
+                    <div className="flex items-center gap-3 group">
+                        <div className="w-8 h-8 rounded-full bg-green-50 group-hover:bg-green-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                            <i className="fa-solid fa-check text-green-500 text-sm"></i>
                         </div>
+                        <span className="text-slate-700 font-medium text-sm">Uzman onaylı tarifler</span>
                     </div>
-                    <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-lg flex items-center gap-3 animate-pulse">
-                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-brand-primary">
-                            <i className="fa-solid fa-gift"></i>
+                    <div className="flex items-center gap-3 group">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                            <i className="fa-solid fa-wand-magic-sparkles text-blue-500 text-sm"></i>
                         </div>
-                        <div className="text-left">
-                            <p className="text-xs text-gray-400 font-bold uppercase">Yeni Üyelere</p>
-                            <p className="font-bold text-slate-800">Özel Rehberler</p>
+                        <span className="text-slate-700 font-medium text-sm">Akıllı beslenme araçları</span>
+                    </div>
+                    <div className="flex items-center gap-3 group">
+                        <div className="w-8 h-8 rounded-full bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center flex-shrink-0 transition-colors">
+                            <i className="fa-solid fa-users text-purple-500 text-sm"></i>
                         </div>
+                        <span className="text-slate-700 font-medium text-sm">Güvenilir topluluk desteği</span>
                     </div>
                 </div>
-                <h2 className="font-display font-bold text-4xl text-slate-800 mb-4">Sağlıklı Bir Başlangıç.</h2>
-                <p className="text-gray-600 text-lg">KidsGourmet ailesine katılarak çocuğunuzun gelişimine en uygun beslenme yolculuğunu başlatın.</p>
             </div>
         </div>
 
-        {/* RIGHT SIDE: FORM */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-white overflow-y-auto">
-            <div className="w-full max-w-md space-y-8">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 cursor-pointer group mb-8">
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-orange-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                        <div className="relative w-12 h-12 flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                            <i className="fa-solid fa-carrot text-orange-500 text-4xl"></i>
-                        </div>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="font-display font-bold text-3xl tracking-tight text-slate-800 leading-none">
-                            Kids<span className="text-orange-500">Gourmet</span>
+        {/* RIGHT SIDE: FORM (Scrollable) */}
+        <div className="w-full lg:w-7/12 flex flex-col justify-center items-center p-4 py-8 lg:p-8 overflow-y-auto bg-white">
+            <div className="w-full max-w-lg space-y-6">
+                
+                {/* Mobile Logo & Header */}
+                <div className="text-center lg:text-left">
+                    <Link href="/" className="inline-flex items-center gap-2 mb-4 lg:mb-6 group">
+                         <span className="font-display font-bold text-2xl text-slate-800 group-hover:text-orange-500 transition-colors">
+                            Kids<span className="text-orange-500 group-hover:text-slate-800 transition-colors">Gourmet</span>
                         </span>
-                        <span className="text-xs text-gray-400 font-medium tracking-wide">Sağlıklı Nesiller</span>
-                    </div>
-                </Link>
-
-                <div>
-                    <h2 className="text-3xl font-display font-bold text-slate-800">Aramıza Katılın! 🚀</h2>
-                    <p className="mt-2 text-sm text-gray-500">
-                        Zaten hesabınız var mı? <Link href="/login" className="font-bold text-brand-secondary hover:text-green-600 transition-colors">Giriş Yap</Link>
+                    </Link>
+                    <h2 className="text-2xl font-bold text-slate-800">Hesap Oluşturun</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Zaten üye misiniz? <Link href="/login" className="font-bold text-orange-500 hover:text-orange-600 underline decoration-2 decoration-orange-200 underline-offset-2">Giriş Yap</Link>
                     </p>
                 </div>
 
-                {/* Google Sign-In Button */}
-                <div>
+                {/* Google Sign-In */}
+                <div className="space-y-3">
                     <div 
                       id="google-register-button" 
                       ref={googleButtonRef}
-                      className="w-full flex items-center justify-center"
+                      className="w-full flex justify-center h-[44px]"
                     >
-                      {/* Google SDK butonu buraya render edilecek */}
                       {!isScriptLoaded && (
-                        <button 
-                          disabled 
-                          className="w-full flex items-center justify-center gap-2 bg-gray-100 border border-gray-200 rounded-xl py-3 px-4 text-sm font-bold text-gray-400 cursor-not-allowed"
-                        >
-                          <i className="fa-brands fa-google text-lg"></i> Google ile Kayıt Ol
-                        </button>
+                        <div className="w-full h-11 bg-gray-50 border border-gray-200 rounded animate-pulse"></div>
                       )}
                     </div>
-                    {googleError && (
-                      <p className="text-red-500 text-sm mt-2 text-center">{googleError}</p>
-                    )}
-                </div>
-
-                {/* Divider */}
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-200"></div>
-                    </div>
-                    <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-gray-400 font-medium">veya e-posta ile kayıt</span>
+                    {googleError && <p className="text-red-500 text-xs text-center">{googleError}</p>}
+                    
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-100"></div></div>
+                        <div className="relative flex justify-center text-xs uppercase"><span className="px-2 bg-white text-gray-400">veya</span></div>
                     </div>
                 </div>
 
-                {/* Error Message */}
+                {/* Error Alert */}
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                  <div className="bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm flex items-center gap-2">
+                    <i className="fa-solid fa-circle-exclamation"></i>
                     {error}
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-                    <div>
-                        <label htmlFor="fullname" className="block text-sm font-bold text-gray-700 mb-1">Ad Soyad</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
-                                <i className="fa-regular fa-user"></i>
-                            </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Compact Grid for Name/Username */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Ad Soyad</label>
                             <input 
-                              id="fullname" 
-                              name="fullname" 
                               type="text" 
                               required 
                               value={name}
                               onChange={(e) => setName(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-sm transition-colors bg-gray-50/50 focus:bg-white"
                               placeholder="Adınız Soyadınız"
-                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
-                    </div>
-
-                    <div>
-                        <label htmlFor="username" className="block text-sm font-bold text-gray-700 mb-1">Kullanıcı Adı <span className="text-gray-400 font-normal">(opsiyonel)</span></label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
-                                <i className="fa-solid fa-at"></i>
-                            </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Kullanıcı Adı <span className="text-gray-400 font-normal">(Opsiyonel)</span></label>
                             <input 
-                              id="username" 
-                              name="username" 
                               type="text" 
                               value={username}
                               onChange={(e) => setUsername(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-sm transition-colors bg-gray-50/50 focus:bg-white"
                               placeholder="kullaniciadi"
-                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
-                        <p className="mt-1 text-xs text-gray-500">Benzersiz bir kullanıcı adı seçin</p>
                     </div>
 
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-1">E-Posta Adresi</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
-                                <i className="fa-regular fa-envelope"></i>
-                            </div>
+                    {/* Email & Password */}
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">E-Posta</label>
                             <input 
-                              id="email" 
-                              name="email" 
                               type="email" 
                               required 
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-sm transition-colors bg-gray-50/50 focus:bg-white"
                               placeholder="ornek@email.com"
-                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
-                    </div>
-
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-1">Şifre</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10">
-                                <i className="fa-solid fa-lock"></i>
-                            </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">Şifre</label>
                             <input 
-                              id="password" 
-                              name="password" 
                               type="password" 
                               required 
                               value={password}
                               onChange={(e) => setPassword(e.target.value)}
-                              className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors z-0" 
+                              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-sm transition-colors bg-gray-50/50 focus:bg-white"
                               placeholder="En az 6 karakter"
-                              style={{ WebkitBoxShadow: '0 0 0 1000px white inset' } as React.CSSProperties}
                             />
                         </div>
                     </div>
 
-                    {/* Child Profile Section */}
-                    <div className="border-t border-gray-200 pt-5">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                                <i className="fa-solid fa-baby text-green-500"></i>
-                                Çocuk Profili
-                                <span className="text-gray-400 font-normal">(opsiyonel)</span>
+                    {/* Child Profile Section (Compact & Soft) */}
+                    <div className="bg-orange-50/30 rounded-xl p-4 border border-orange-100/60">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-xs font-bold text-slate-700 flex items-center gap-2">
+                                <div className="w-5 h-5 rounded-full bg-orange-100 flex items-center justify-center">
+                                    <i className="fa-solid fa-baby text-orange-500 text-[10px]"></i>
+                                </div>
+                                Çocuk Profili Ekle
                             </h3>
-                            <button
-                              type="button"
-                              onClick={() => setSkipChild(!skipChild)}
-                              className="text-xs font-medium text-gray-500 hover:text-gray-700"
-                            >
-                              {skipChild ? "Ekle" : "Atla"}
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <label className="text-[10px] uppercase font-bold text-gray-400 cursor-pointer hover:text-orange-500 transition-colors" htmlFor="skipChild">
+                                    {skipChild ? "EKLE" : "ATLA"}
+                                </label>
+                                <button
+                                  type="button"
+                                  id="skipChild"
+                                  onClick={() => setSkipChild(!skipChild)}
+                                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${skipChild ? 'bg-gray-200' : 'bg-orange-400'}`}
+                                >
+                                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform shadow-sm ${skipChild ? 'translate-x-1' : 'translate-x-5'}`} />
+                                </button>
+                            </div>
                         </div>
 
                         {!skipChild && (
-                          <div className="space-y-4 bg-green-50 p-4 rounded-xl">
-                            <div>
-                              <label htmlFor="childName" className="block text-sm font-bold text-gray-700 mb-1">Çocuğunuzun Adı</label>
-                              <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                  <i className="fa-solid fa-child"></i>
-                                </div>
-                                <input 
-                                  id="childName" 
-                                  name="childName" 
-                                  type="text" 
-                                  value={childName}
-                                  onChange={(e) => setChildName(e.target.value)}
-                                  className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors bg-white" 
-                                  placeholder="Çocuğunuzun adı" 
-                                />
-                              </div>
-                            </div>
-
-                            <div>
-                              <label htmlFor="childBirthDate" className="block text-sm font-bold text-gray-700 mb-1">Doğum Tarihi</label>
-                              <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                                  <i className="fa-regular fa-calendar"></i>
-                                </div>
-                                <input 
-                                  id="childBirthDate" 
-                                  name="childBirthDate" 
-                                  type="date" 
-                                  value={childBirthDate}
-                                  onChange={(e) => setChildBirthDate(e.target.value)}
-                                  className="appearance-none rounded-xl relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-brand-secondary focus:border-brand-secondary focus:z-10 sm:text-sm transition-colors bg-white" 
-                                />
-                              </div>
-                            </div>
-
-                            <p className="text-xs text-gray-600 flex items-start gap-2">
-                              <i className="fa-solid fa-circle-info text-green-500 mt-0.5"></i>
-                              <span>Çocuk profilini daha sonra panelden de ekleyebilirsiniz.</span>
-                            </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <input 
+                              type="text" 
+                              value={childName}
+                              onChange={(e) => setChildName(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-orange-500 text-sm bg-white" 
+                              placeholder="Çocuğun Adı" 
+                            />
+                            <input 
+                              type="date" 
+                              value={childBirthDate}
+                              onChange={(e) => setChildBirthDate(e.target.value)}
+                              className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-orange-500 text-sm text-gray-600 bg-white" 
+                            />
                           </div>
                         )}
                     </div>
 
-                    {/* KVKK Compliance - Consent Section */}
-                    <div className="border-t border-gray-200 pt-5 space-y-4">
-                        {/* Aydınlatma Metni - Informational Link (NOT a checkbox) */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                            <div className="flex items-start gap-3">
-                                <i className="fa-solid fa-circle-info text-blue-500 text-lg mt-0.5"></i>
-                                <div className="text-sm text-gray-700">
-                                    <Link 
-                                      href="/aydinlatma-metni" 
-                                      target="_blank"
-                                      className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
-                                    >
-                                        Kişisel Verilerin İşlenmesi Hakkında Aydınlatma Metni&apos;ni okumak için tıklayınız
-                                    </Link>
-                                </div>
-                            </div>
+                    {/* Consents (Compact) */}
+                    <div className="space-y-3 pt-2">
+                        {/* Info Banner */}
+                        <div className="flex items-start gap-2 p-2.5 bg-blue-50/50 rounded-lg border border-blue-100/50">
+                            <i className="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
+                            <Link href="/aydinlatma-metni" target="_blank" className="text-xs text-blue-600/80 hover:text-blue-700 hover:underline leading-tight">
+                                Kişisel Verilerin İşlenmesi Hakkında Aydınlatma Metni&apos;ni okumak için tıklayınız
+                            </Link>
                         </div>
 
-                        {/* Required: Terms of Service */}
-                        <div className="flex items-start gap-3">
-                            <input
-                              type="checkbox"
-                              id="termsAccepted"
-                              checked={termsAccepted}
-                              onChange={(e) => setTermsAccepted(e.target.checked)}
-                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
-                            />
-                            <label htmlFor="termsAccepted" className="text-sm text-gray-700 cursor-pointer">
-                                <Link 
-                                  href="/kullanim-kosullari" 
-                                  target="_blank"
-                                  className="font-medium text-green-600 hover:text-green-700 hover:underline"
-                                >
-                                    Kullanıcı Sözleşmesi
-                                </Link>
-                                &apos;ni okudum ve kabul ediyorum. <span className="text-red-500">*</span>
-                                <p className="text-xs text-gray-500 mt-1">(Hizmetin ifası için zorunludur)</p>
+                        {/* Checkboxes */}
+                        <div className="space-y-2.5">
+                            <label className="flex items-start gap-2 cursor-pointer group select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={termsAccepted}
+                                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                                  className="mt-0.5 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 accent-orange-500"
+                                />
+                                <span className="text-xs text-gray-600 leading-tight group-hover:text-gray-800 transition-colors">
+                                    <Link href="/kullanim-kosullari" target="_blank" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">Kullanıcı Sözleşmesi</Link>&apos;ni okudum ve kabul ediyorum. <span className="text-red-500">*</span>
+                                </span>
                             </label>
-                        </div>
 
-                        {/* Optional: Marketing Consent (ETK) */}
-                        <div className="flex items-start gap-3">
-                            <input
-                              type="checkbox"
-                              id="marketingConsent"
-                              checked={marketingConsent}
-                              onChange={(e) => setMarketingConsent(e.target.checked)}
-                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
-                            />
-                            <label htmlFor="marketingConsent" className="text-sm text-gray-700 cursor-pointer">
-                                HİP Medya&apos;nın tarafıma kampanya, bülten ve tanıtım içerikli e-posta göndermesine izin veriyorum.
-                                <p className="text-xs text-gray-500 mt-1">(İsteğe bağlı - İstediğiniz zaman iptal edebilirsiniz)</p>
+                            <label className="flex items-start gap-2 cursor-pointer group select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={marketingConsent}
+                                  onChange={(e) => setMarketingConsent(e.target.checked)}
+                                  className="mt-0.5 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 accent-orange-500"
+                                />
+                                <span className="text-xs text-gray-500 leading-tight group-hover:text-gray-700 transition-colors">
+                                    Kampanya ve tanıtım e-postaları almak istiyorum. (İsteğe bağlı)
+                                </span>
                             </label>
-                        </div>
 
-                        {/* Optional: Sensitive Data Consent */}
-                        <div className="flex items-start gap-3">
-                            <input
-                              type="checkbox"
-                              id="sensitiveDataConsent"
-                              checked={sensitiveDataConsent}
-                              onChange={(e) => setSensitiveDataConsent(e.target.checked)}
-                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
-                            />
-                            <label htmlFor="sensitiveDataConsent" className="text-sm text-gray-700 cursor-pointer">
-                                Paylaşacağım içeriklerde yer alan (varsa) kendime veya çocuğuma ait sağlık verilerinin işlenmesine açık rıza veriyorum.
-                                <p className="text-xs text-gray-500 mt-1">(İsteğe bağlı - Sağlık verisi paylaşımı için gereklidir)</p>
+                            <label className="flex items-start gap-2 cursor-pointer group select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={sensitiveDataConsent}
+                                  onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+                                  className="mt-0.5 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 accent-orange-500"
+                                />
+                                <span className="text-xs text-gray-500 leading-tight group-hover:text-gray-700 transition-colors">
+                                    Paylaşacağım sağlık verilerinin (varsa) işlenmesine rıza gösteriyorum. (İsteğe bağlı)
+                                </span>
                             </label>
                         </div>
                     </div>
 
-                    <div>
-                        <button 
-                          type="submit" 
-                          disabled={isLoading || googleLoading || !termsAccepted}
-                          className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {isLoading ? "Kayıt yapılıyor..." : "Ücretsiz Kayıt Ol"}
-                        </button>
-                    </div>
+                    <button 
+                      type="submit" 
+                      disabled={isLoading || googleLoading || !termsAccepted}
+                      className="w-full bg-slate-800 text-white font-bold py-3.5 rounded-xl hover:bg-slate-900 hover:shadow-lg focus:ring-4 focus:ring-slate-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none text-sm mt-2"
+                    >
+                        {isLoading ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <i className="fa-solid fa-circle-notch fa-spin"></i> Kayıt Yapılıyor...
+                            </span>
+                        ) : "Ücretsiz Kayıt Ol"}
+                    </button>
                 </form>
             </div>
         </div>
