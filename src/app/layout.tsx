@@ -4,6 +4,7 @@ import { UserProvider } from "@/hooks/use-user";
 import { FavoritesProvider } from "@/contexts/favorites-context";
 import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
 import { ActiveChildProvider } from "@/contexts/ActiveChildContext";
+import { RateLimitProvider } from "@/contexts/rate-limit-context";
 import { SWRProvider } from "@/providers/swr-provider";
 import { Toaster } from "sonner";
 
@@ -28,8 +29,10 @@ export default function RootLayout({
             <FavoritesProvider>
               <ActiveChildProvider>
                 <ChildProfileProvider>
-                  {children}
-                  <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
+                  <RateLimitProvider>
+                    {children}
+                    <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
+                  </RateLimitProvider>
                 </ChildProfileProvider>
               </ActiveChildProvider>
             </FavoritesProvider>

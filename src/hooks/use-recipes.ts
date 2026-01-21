@@ -1,6 +1,11 @@
 import useSWR from 'swr';
-import { recipeService, RecipeFilters } from '@/services/recipe-service';
+import { recipeService, RecipeFilters as ServiceRecipeFilters } from '@/services/recipe-service';
 import { RecipeCard } from '@/lib/types';
+
+// Field definitions for different views
+const RECIPE_LIST_FIELDS = 'id,title,slug,image,prep_time,difficulty,rating,age_group,age_group_color';
+const RECIPE_CARD_FIELDS = 'id,title,slug,image,prep_time,rating,age_group_color';
+const RECIPE_DETAIL_FIELDS = ''; // Empty = all fields
 
 interface RecipesResponse {
   recipes: RecipeCard[];
@@ -10,12 +15,33 @@ interface RecipesResponse {
   total_pages: number;
 }
 
+export interface RecipeFilters extends ServiceRecipeFilters {
+  fields?: 'list' | 'card' | 'full';
+}
+
 export function useRecipes(filters?: RecipeFilters) {
-  const key = filters ? ['recipes', JSON.stringify(filters)] : ['recipes'];
+  const { fields, ...serviceFilters } = filters || {};
+  
+  // Build enhanced filters with sparse fieldsets
+  const enhancedFilters: ServiceRecipeFilters & { fields?: string } = {
+    ...serviceFilters,
+  };
+  
+  // Add sparse fieldsets if specified
+  if (fields) {
+    const fieldSet = fields === 'list' ? RECIPE_LIST_FIELDS : 
+                     fields === 'card' ? RECIPE_CARD_FIELDS : 
+                     RECIPE_DETAIL_FIELDS;
+    if (fieldSet) {
+      enhancedFilters.fields = fieldSet;
+    }
+  }
+  
+  const key = enhancedFilters ? ['recipes', JSON.stringify(enhancedFilters)] : ['recipes'];
   
   return useSWR<RecipesResponse>(
     key,
-    () => recipeService.getAll(filters || {}),
+    () => recipeService.getAll(enhancedFilters),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
