@@ -18,7 +18,7 @@ export default function KunyePage() {
             <span className="text-gray-800">Künye</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Künye</h1>
-          <p className="text-gray-600 mt-3">KidsGourmet hakkında yasal ve kurumsal bilgiler</p>
+          <p className="text-gray-600 mt-3">KidsGourmet Künye Bilgileri</p>
         </div>
       </div>
       
@@ -77,10 +77,10 @@ export default function KunyePage() {
                 <span>KidsGourmet Editör Ekibi</span>
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
-                <span className="font-semibold text-slate-700 md:w-48">Uzman Kadro:</span>
+                <span className="font-semibold text-slate-700 md:w-48">Uzmanlarımız:</span>
                 <span>
                   <Link href="/uzmanlar" className="text-orange-500 hover:underline">
-                    Uzman diyetisyen ve doktorlarımızı görüntüleyin
+                    Diyetisyen ve Doktorlarımızı Görüntüleyin
                   </Link>
                 </span>
               </div>
@@ -122,7 +122,7 @@ export default function KunyePage() {
                 <span className="font-semibold text-slate-700 md:w-48">İletişim Formu:</span>
                 <span>
                   <Link href="/iletisim" className="text-orange-500 hover:underline">
-                    İletişim sayfasını ziyaret edin
+                    İletişim Sayfası
                   </Link>
                 </span>
               </div>

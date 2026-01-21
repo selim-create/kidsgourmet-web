@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Reklam Verin | KidsGourmet',
     description: 'KidsGourmet ile markanızı binlerce anne-baba ile buluşturun.',
-    url: 'https://kidsgourmet.com. tr/reklam-verin',
+    url: 'https://kidsgourmet.com.tr/reklam-verin',
     siteName: 'KidsGourmet',
     type: 'website',
   },
@@ -39,7 +39,7 @@ export default function ReklamVerinPage() {
               <span className="text-yellow-200">Anne-Baba</span> ile Buluşturun
             </h1>
             <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed">
-              Bebek ve çocuk beslenmesinde Türkiye&apos;nin güvenilir platformu KidsGourmet ile hedef kitlenize doğrudan ulaşın.  Sponsorlu içerikler, akıllı araç entegrasyonları ve display reklamlarla markanızı öne çıkarın.
+              Bebek ve çocuk beslenmesinde Türkiye&apos;nin güvenilir platformu KidsGourmet ile hedef kitlenize doğrudan ulaşın. Sponsorlu içerikler, akıllı araç entegrasyonları ve display reklamlarla markanızı öne çıkarın.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link 
@@ -50,7 +50,7 @@ export default function ReklamVerinPage() {
                 Sponsorluk Modellerini İncele
               </Link>
               <Link 
-                href="/iletisim? requestType=advertising" 
+                href="/iletisim?requestType=advertising" 
                 className="inline-flex items-center px-8 py-4 bg-orange-600 text-white font-bold rounded-2xl hover:bg-orange-700 transition-colors"
               >
                 <i className="fa-solid fa-envelope mr-2"></i>
@@ -89,9 +89,9 @@ export default function ReklamVerinPage() {
       <div className="py-16 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Neden KidsGourmet? </h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Neden KidsGourmet?</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Anne-baba segmentine ulaşmak için en etkili ve güvenilir platform
+              Anne-Baba ve Ebeveyn segmentine ulaşmak için en etkili ve güvenilir platform.
             </p>
           </div>
           
@@ -100,9 +100,10 @@ export default function ReklamVerinPage() {
               <div className="w-16 h-16 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center text-2xl mb-6">
                 <i className="fa-solid fa-bullseye"></i>
               </div>
-              <h3 className="font-bold text-xl text-slate-800 mb-3">Hedefli Kitle</h3>
+              <h3 className="font-bold text-xl text-slate-800 mb-3">Doğru Hedefleme</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                0-6 yaş arası çocuğu olan, bilinçli ve satın alma gücü yüksek anne-babalar.  Bebek ürünleri, gıda, sağlık ve eğitim markalarınız için ideal hedef kitle.
+                0-6 yaş çocuk sahibi, bilinçli ve satın alma gücü yüksek anne-babalar!
+                Bebek ürünleri, gıda, sağlık ve eğitim markalarınız için ideal hedef kitleyi oluşturur.
               </p>
             </div>
             
@@ -112,7 +113,8 @@ export default function ReklamVerinPage() {
               </div>
               <h3 className="font-bold text-xl text-slate-800 mb-3">Güvenilir Platform</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Uzman diyetisyen onaylı içerikler, bilimsel temelli beslenme önerileri.  Markanız güvenilir bir ortamda konumlanır.
+                Uzman görüşleri ve bilimsel temelli beslenme önerileri!
+                Markanız güvenilir bir ortamda konumlanır.
               </p>
             </div>
             
@@ -122,7 +124,8 @@ export default function ReklamVerinPage() {
               </div>
               <h3 className="font-bold text-xl text-slate-800 mb-3">Ölçülebilir Sonuçlar</h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                GAM entegrasyonu ile detaylı raporlama.  Gösterim, tıklama ve dönüşüm metriklerini takip edin.
+                GAM entegrasyonu ile detaylı raporlama!
+                Gösterim, tıklama ve dönüşüm metriklerini takip edebilirsiniz.
               </p>
             </div>
           </div>
@@ -135,7 +138,7 @@ export default function ReklamVerinPage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-800 mb-4">Sponsorluk Modelleri</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Markanıza ve hedeflerinize uygun sponsorluk seçenekleri
+              Markanıza ve kampanya hedeflerinize en uygun sponsorluk modelleri KidsGourmet’de!
             </p>
           </div>
 
@@ -330,7 +333,8 @@ export default function ReklamVerinPage() {
                     Banner & Display Reklamlar
                   </h3>
                   <p className="text-gray-600 mb-6 leading-relaxed">
-                    Google Ad Manager (GAM) entegrasyonu ile yönetilen, yüksek görünürlüklü reklam alanları.  Tarif sayfaları, keşfet bölümü ve akıllı araçlarda stratejik konumlarda. 
+                    Google Ad Manager (GAM) entegrasyonu ile yönetilen, yüksek görünürlüklü reklam alanları.
+                    Tarif sayfaları, keşfet bölümü ve akıllı araçlarda stratejik konumlandırma.
                   </p>
                   
                   <div className="space-y-4 mb-8">
@@ -419,26 +423,26 @@ export default function ReklamVerinPage() {
       <div className="py-16 bg-gradient-to-br from-slate-800 to-slate-900">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Size Özel Teklif Alalım
+            Size Özel Teklif Çalışalım
           </h2>
           <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
-            Bütçenize ve hedeflerinize uygun özel paketler hazırlayalım. Medya kitimizi inceleyin veya doğrudan bizimle iletişime geçin.
+            Kampanya bütçenize ve hedeflemenize uygun özel paketler hazırlayalım.
+            Medya kitimizi inceleyin, sorularınız olursa doğrudan bizimle iletişime geçin.
           </p>
           
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
-              href="/iletisim? requestType=advertising" 
+              href="/iletisim?requestType=advertising" 
               className="inline-flex items-center px-8 py-4 bg-orange-500 text-white font-bold rounded-2xl hover:bg-orange-600 transition-colors"
             >
               <i className="fa-solid fa-envelope mr-2"></i>
               Teklif İste
             </Link>
             <a 
-              href="mailto:reklam@kidsgourmet.com. tr" 
+              href="mailto:reklam@kidsgourmet.com.tr" 
               className="inline-flex items-center px-8 py-4 bg-white/10 text-white font-bold rounded-2xl hover:bg-white/20 transition-colors"
             >
-              <i className="fa-solid fa-at mr-2"></i>
-              reklam@kidsgourmet. com.tr
+              reklam@kidsgourmet.com.tr
             </a>
           </div>
         </div>
@@ -448,8 +452,8 @@ export default function ReklamVerinPage() {
       <div className="py-16 bg-white">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Güvenilir Markalar Bizimle Çalışıyor</h2>
-            <p className="text-gray-500">Bebek ve çocuk sektörünün önde gelen markalarıyla iş birliği yapıyoruz</p>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Başarılı Markalar Bizimle Çalışıyor</h2>
+            <p className="text-gray-500">Sektörün önde gelen markalarıyla geçmişten bugüne iş birliği yapıyoruz.</p>
           </div>
           
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale">
@@ -476,7 +480,7 @@ export default function ReklamVerinPage() {
                 <i className="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
               </summary>
               <p className="mt-4 text-gray-600 text-sm leading-relaxed">
-                Sponsorlu içerikler için minimum 1 ay, araç sponsorlukları için minimum 3 ay süre öneriyoruz. Display reklamlarda esneklik sağlanabilir.
+                Sponsorlu içerikler için minimum 1 ay, Akıllı Asistan araçları sponsorlukları için minimum 3 ay süre öneriyoruz. Display reklamlarda esneklik sağlanabilir.
               </p>
             </details>
             
@@ -486,17 +490,17 @@ export default function ReklamVerinPage() {
                 <i className="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
               </summary>
               <p className="mt-4 text-gray-600 text-sm leading-relaxed">
-                Sponsorlu içerikler editöryal ekibimiz tarafından, markanızın mesajına uygun şekilde hazırlanır. İçerik onayı sizden alındıktan sonra yayınlanır.
+                Sponsorlu içerikler editöryal ekibimiz tarafından, markanızın mesajına uygun şekilde hazırlanır. İçerik onayı alındıktan sonra yayınlanır.
               </p>
             </details>
             
             <details className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 group">
               <summary className="font-bold text-slate-800 cursor-pointer flex items-center justify-between">
-                Hangi raporları alabiliyorum?
+                Hangi raporlamaları sunuyoruz?
                 <i className="fa-solid fa-chevron-down text-gray-400 group-open:rotate-180 transition-transform"></i>
               </summary>
               <p className="mt-4 text-gray-600 text-sm leading-relaxed">
-                Haftalık ve aylık performans raporları sunuyoruz:  Gösterim sayısı, benzersiz ziyaretçi, tıklama oranı (CTR), araç kullanım sayısı ve dönüşüm metrikleri.
+                Gösterim sayısı, benzersiz ziyaretçi, tıklama oranı (CTR), Akıllı Asistan araçları kullanım sayısı ve dönüşüm metrikleri gibi performans raporlarını haftalık ve aylık olarak sunuyoruz.
               </p>
             </details>
             
@@ -516,7 +520,7 @@ export default function ReklamVerinPage() {
       {/* Final CTA */}
       <div className="py-12 bg-white border-t border-gray-100">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <p className="text-gray-600 mb-4">Sorularınız mı var? </p>
+          <p className="mb-4 font-bold text-lg text-slate-800">Sorularınız mı var?</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link 
               href="/iletisim" 
@@ -527,10 +531,10 @@ export default function ReklamVerinPage() {
             </Link>
             <span className="text-gray-300">|</span>
             <a 
-              href="mailto:reklam@kidsgourmet. com.tr" 
+              href="mailto:reklam@kidsgourmet.com.tr" 
               className="text-orange-500 font-bold hover:underline"
             >
-              reklam@kidsgourmet. com.tr
+              reklam@kidsgourmet.com.tr
             </a>
           </div>
         </div>

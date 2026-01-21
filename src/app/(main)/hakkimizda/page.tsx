@@ -18,7 +18,7 @@ export default function HakkimizdaPage() {
             <span className="text-gray-800">Hakkımızda</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Hakkımızda</h1>
-          <p className="text-gray-600 mt-3">KidsGourmet ile tanışın</p>
+          <p className="text-gray-600 mt-3">KidsGourmet’den Merhaba!</p>
         </div>
       </div>
       
@@ -35,13 +35,13 @@ export default function HakkimizdaPage() {
           </div>
           <div className="prose prose-slate max-w-none">
             <p className="text-gray-600 leading-relaxed mb-4">
-              KidsGourmet, bebek ve çocuk beslenmesinde annelere ve babalara güvenilir, bilimsel ve pratik rehberlik sunmak amacıyla Hip Medya tarafından hayata geçirilmiş bir platformdur.
+              KidsGourmet, bebek ve çocuk beslenmesinde anne ve babalara güvenilir, bilimsel ve pratik rehberlik sunmak amacıyla hayata geçirilmiş bir platformdur.
             </p>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Ebeveyn olmak muhteşem ama bir o kadar da zorlayıcı bir yolculuk. Özellikle bebeğinizin ve çocuğunuzun sağlıklı beslenmesini sağlamak, doğru bilgiye ulaşmak ve uygun tarifleri bulmak bazen bunaltıcı olabiliyor. İşte tam da bu noktada KidsGourmet devreye giriyor.
+              Ebeveyn olmak muhteşem ama bir o kadar da zorlayıcı bir yolculuk. Özellikle bebeğinizin ve çocuğunuzun sağlıklı beslenmesini sağlamak, doğru bilgiye ulaşmak ve uygun tarifleri bulmak bazen bunaltıcı olabilir. İşte bu noktada KidsGourmet her zaman yanınızda!
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Uzman diyetisyenler ve çocuk doktorları tarafından onaylanmış içeriklerimiz, pratik tariflerimiz ve akıllı beslenme araçlarımızla çocuğunuzun her yaş döneminde ihtiyacı olan beslenme desteğini sağlıyoruz.
+              Uzman diyetisyen ve çocuk doktorlarının katkılarıyla hazırlanan içeriklerimiz, pratik tariflerimiz ve akıllı beslenme araçlarımızla çocuğunuzun her yaş döneminde ihtiyacı olan beslenme desteğini sağlıyoruz.
             </p>
           </div>
         </div>
@@ -54,7 +54,7 @@ export default function HakkimizdaPage() {
             </div>
             <h3 className="text-xl font-bold text-slate-800 mb-3">Misyonumuz</h3>
             <p className="text-gray-600 leading-relaxed">
-              Bebek ve çocukların sağlıklı beslenmesini desteklemek, ebeveynlere bilimsel ve güvenilir beslenme bilgisi sunmak, pratik çözümler üretmek.
+              Bebek ve çocukların sağlıklı beslenmesini desteklemek için ebeveynlere bilimsel ve güvenilir beslenme bilgisi sunuyor, pratik çözümler üretiyoruz.
             </p>
           </div>
           <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl shadow-sm border border-green-100 p-8">
@@ -63,7 +63,7 @@ export default function HakkimizdaPage() {
             </div>
             <h3 className="text-xl font-bold text-slate-800 mb-3">Vizyonumuz</h3>
             <p className="text-gray-600 leading-relaxed">
-              Türkiye'nin en güvenilir bebek ve çocuk beslenmesi platformu olmak, her ailenin sağlıklı beslenme yolculuğunda yanında olmak.
+              Türkiye'nin en güvenilir bebek ve çocuk beslenmesi platformu olmak amacıyla, her ailenin sağlıklı beslenme yolculuğuna eşlik etmek istiyoruz.
             </p>
           </div>
         </div>
@@ -72,57 +72,45 @@ export default function HakkimizdaPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12 mb-8">
           <h2 className="text-2xl font-bold text-slate-800 mb-6">Değerlerimiz</h2>
           <div className="grid md:grid-cols-2 gap-6">
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-lg text-blue-500 shrink-0">
                 <i className="fa-solid fa-shield-halved"></i>
               </div>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Güvenilirlik</h4>
-                <p className="text-sm text-gray-600">Tüm içeriklerimiz uzman denetiminden geçer</p>
-              </div>
+              <h4 className="font-bold text-slate-800">Güvenilirlik</h4>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-purple-100 rounded-lg text-purple-500 shrink-0">
                 <i className="fa-solid fa-flask"></i>
               </div>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Bilimsellik</h4>
-                <p className="text-sm text-gray-600">Kanıta dayalı beslenme bilgisi sunuyoruz</p>
-              </div>
+              <h4 className="font-bold text-slate-800">Bilimsellik</h4>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-orange-100 rounded-lg text-orange-500 shrink-0">
                 <i className="fa-solid fa-heart"></i>
               </div>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Empati</h4>
-                <p className="text-sm text-gray-600">Ebeveynlerin zorluklarını anlıyor ve çözüm üretiyoruz</p>
-              </div>
+              <h4 className="font-bold text-slate-800">Empati</h4>
             </div>
-            <div className="flex gap-4">
+            <div className="flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-green-100 rounded-lg text-green-500 shrink-0">
                 <i className="fa-solid fa-users"></i>
               </div>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Topluluk</h4>
-                <p className="text-sm text-gray-600">Aileleri bir araya getiriyor, deneyim paylaşımını destekliyoruz</p>
-              </div>
+              <h4 className="font-bold text-slate-800">Topluluk</h4>
             </div>
           </div>
         </div>
 
         {/* Uzman Kadro */}
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-sm border border-green-100 p-8 md:p-12 mb-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">Uzman Danışma Kurulumuz</h2>
+          <h2 className="text-2xl font-bold text-slate-800 mb-4">Uzmanlarımız</h2>
           <p className="text-gray-600 leading-relaxed mb-6">
-            KidsGourmet'deki tüm tarifler ve beslenme içerikleri, alanında uzman diyetisyenler ve çocuk doktorları tarafından incelenir ve onaylanır. Uzman kadromuz, çocuğunuzun sağlıklı büyümesi için bilimsel ve güncel bilgileri sizlere ulaştırır.
+            KidsGourmet'deki tarifler, beslenme içerikleri ve araçlar ulusal ve uluslararası sağlık oterite kaynaklarından yararlanır. Uzmanlarımız, çocuğunuzun sağlıklı büyümesi için bilimsel ve güncel bilgileri sizlere ulaştırır.
           </p>
           <Link 
             href="/uzmanlar"
             className="inline-flex items-center gap-2 bg-green-500 text-white font-bold px-6 py-3 rounded-xl hover:bg-green-600 transition-colors shadow-sm"
           >
             <i className="fa-solid fa-user-doctor"></i>
-            Uzman Kadromuzu Tanıyın
+            K&G Uzmanları
           </Link>
         </div>
 
@@ -130,40 +118,25 @@ export default function HakkimizdaPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12">
           <h2 className="text-2xl font-bold text-slate-800 mb-6">Neden KidsGourmet?</h2>
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <i className="fa-solid fa-check-circle text-orange-500 text-xl mt-1"></i>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Uzman Onaylı İçerikler</h4>
-                <p className="text-gray-600">Her tarif ve beslenme önerisi uzmanlarımız tarafından kontrol edilir</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <i className="fa-solid fa-check-circle text-orange-500 text-xl"></i>
+              <h4 className="font-bold text-slate-800">Uzman Görüşleri</h4>
             </div>
-            <div className="flex items-start gap-3">
-              <i className="fa-solid fa-check-circle text-orange-500 text-xl mt-1"></i>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Yaş Bazlı Tarifler</h4>
-                <p className="text-gray-600">0-12 ay, 1-3 yaş ve 3+ yaş gruplarına özel tarifler</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <i className="fa-solid fa-check-circle text-orange-500 text-xl"></i>
+              <h4 className="font-bold text-slate-800">Yaş Bazlı Tarifler</h4>
             </div>
-            <div className="flex items-start gap-3">
-              <i className="fa-solid fa-check-circle text-orange-500 text-xl mt-1"></i>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Akıllı Beslenme Araçları</h4>
-                <p className="text-gray-600">Büyüme izleme, besin değeri hesaplama ve menü planlama araçları</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <i className="fa-solid fa-check-circle text-orange-500 text-xl"></i>
+              <h4 className="font-bold text-slate-800">Akıllı Beslenme Araçları</h4>
             </div>
-            <div className="flex items-start gap-3">
-              <i className="fa-solid fa-check-circle text-orange-500 text-xl mt-1"></i>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Güçlü Topluluk</h4>
-                <p className="text-gray-600">Binlerce anne-baba ile deneyim paylaşımı ve destek</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <i className="fa-solid fa-check-circle text-orange-500 text-xl"></i>
+              <h4 className="font-bold text-slate-800">Güçlü Topluluk</h4>
             </div>
-            <div className="flex items-start gap-3">
-              <i className="fa-solid fa-check-circle text-orange-500 text-xl mt-1"></i>
-              <div>
-                <h4 className="font-bold text-slate-800 mb-1">Hip Medya Güvencesi</h4>
-                <p className="text-gray-600">Rejimde.com ve Tariften.com gibi başarılı platformların kardeş sitesi</p>
-              </div>
+            <div className="flex items-center gap-3">
+              <i className="fa-solid fa-check-circle text-orange-500 text-xl"></i>
+              <h4 className="font-bold text-slate-800">Rejimde.com ve Tariften.com Desteği</h4>
             </div>
           </div>
         </div>

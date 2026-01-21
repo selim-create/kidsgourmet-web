@@ -56,7 +56,9 @@ export default function IletisimPage() {
             <span className="text-gray-800">İletişim & Reklam</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">İletişim & Reklam</h1>
-          <p className="text-gray-600 mt-3">Bizimle iletişime geçin veya iş birliği fırsatlarını keşfedin</p>
+          <p className="text-gray-600 mt-3">
+            Görüşlerinizi paylaşmak ya da iş birliği fırsatlarını keşfetmek için bizimle iletişime geçin.
+          </p>
         </div>
       </div>
       
@@ -114,7 +116,7 @@ export default function IletisimPage() {
 
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-slate-700 mb-2">
-                  E-posta Adresiniz
+                  Mail Adresiniz
                 </label>
                 <input
                   type="email"
@@ -189,7 +191,7 @@ export default function IletisimPage() {
                     <i className="fa-solid fa-envelope"></i>
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-800 mb-1">E-posta</h4>
+                    <h4 className="font-bold text-slate-800 mb-1">Mail</h4>
                     <a href="mailto:iletisim@kidsgourmet.com.tr" className="text-gray-600 hover:text-orange-500 transition-colors">
                       iletisim@kidsgourmet.com.tr
                     </a>
@@ -201,7 +203,14 @@ export default function IletisimPage() {
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-800 mb-1">Kurumsal</h4>
-                    <p className="text-gray-600">Hip Medya</p>
+                    <a 
+                      href="https://hipmedya.com/tr/" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-gray-600 hover:text-orange-500 transition-colors"
+                    >
+                      Hip Medya
+                    </a>
                   </div>
                 </div>
               </div>
@@ -211,17 +220,59 @@ export default function IletisimPage() {
             <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl shadow-sm border border-orange-100 p-8">
               <h2 className="text-2xl font-bold text-slate-800 mb-6">Bizi Takip Edin</h2>
               <div className="flex flex-wrap gap-3">
-                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-orange-500 hover:text-orange-500 transition-colors">
+                <a 
+                  href="https://www.instagram.com/kidsgourmet/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-orange-500 hover:text-orange-500 transition-colors"
+                >
                   <i className="fa-brands fa-instagram text-xl"></i>
                   Instagram
                 </a>
-                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-red-500 hover:text-red-500 transition-colors">
-                  <i className="fa-brands fa-youtube text-xl"></i>
-                  YouTube
+                <a 
+                  href="https://www.facebook.com/kidsandgourmet" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-blue-600 hover:text-blue-600 transition-colors"
+                >
+                  <i className="fa-brands fa-facebook text-xl"></i>
+                  Facebook
                 </a>
-                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-black hover:text-black transition-colors">
+                <a 
+                  href="https://tr.pinterest.com/KidsandGourmet" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-red-600 hover:text-red-600 transition-colors"
+                >
+                  <i className="fa-brands fa-pinterest text-xl"></i>
+                  Pinterest
+                </a>
+                <a 
+                  href="https://www.youtube.com/channel/UCkXtLdtEfhl8Do1pPW4fgsQ" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-red-500 hover:text-red-500 transition-colors"
+                >
+                  <i className="fa-brands fa-youtube text-xl"></i>
+                  Youtube
+                </a>
+                <a 
+                  href="https://tiktok.com/@kidsgourmet" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-black hover:text-black transition-colors"
+                >
+                  <i className="fa-brands fa-tiktok text-xl"></i>
+                  Tiktok
+                </a>
+                <a 
+                  href="https://x.com/kidsandgourmet" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl hover:border-black hover:text-black transition-colors"
+                >
                   <i className="fa-brands fa-x-twitter text-xl"></i>
-                  X (Twitter)
+                  X
                 </a>
               </div>
             </div>
@@ -230,15 +281,15 @@ export default function IletisimPage() {
             <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl shadow-sm border border-green-100 p-8">
               <h2 className="text-xl font-bold text-slate-800 mb-3">Reklam & Sponsorluk</h2>
               <p className="text-gray-600 text-sm mb-4">
-                Markanızı binlerce anne-baba ile buluşturmak, KidsGourmet topluluğuna ulaşmak için bizimle iletişime geçin.
+                Markanızı binlerce anne-baba ile buluşturmak ve KidsGourmet topluluğuna ulaşmak için bizimle iletişime geçebilirsiniz.
               </p>
               <div className="flex items-center gap-2 text-sm text-green-600 font-semibold">
                 <i className="fa-solid fa-check-circle"></i>
-                <span>Hedefli kitle erişimi</span>
+                <span>Doğru Hedef Kitle</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-green-600 font-semibold mt-2">
                 <i className="fa-solid fa-check-circle"></i>
-                <span>Güvenilir platform</span>
+                <span>Güvenilir Platform</span>
               </div>
             </div>
 

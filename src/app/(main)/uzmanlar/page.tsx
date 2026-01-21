@@ -58,7 +58,7 @@ export default function ExpertsListPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto">
             <span className="text-green-600 font-bold text-sm tracking-widest uppercase mb-2 block">
-              Uzman Kadromuz
+              Uzmanlarımız
             </span>
             <h1 className="font-bold text-4xl md:text-5xl text-slate-800 mb-4">
               KidsGourmet <span className="text-green-500">Uzmanları</span>
