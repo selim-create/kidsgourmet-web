@@ -149,6 +149,16 @@ export async function fetchAPI<T>(
       next: { revalidate: options.next?.revalidate ?? 60 }
     });
 
+    // Check if response is JSON
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await res.text();
+      console.error('API returned non-JSON response:', text.substring(0, 200));
+      const error = new Error(`API returned ${contentType || 'unknown'} instead of JSON. Status: ${res.status}`);
+      (error as any).errorInfo = analyzeError(error, res.status);
+      throw error;
+    }
+
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       
@@ -222,6 +232,16 @@ export async function fetchAPIWithHeaders<T>(
       headers,
       next: { revalidate: options.next?.revalidate ?? 60 }
     });
+
+    // Check if response is JSON
+    const contentType = res.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await res.text();
+      console.error('API returned non-JSON response:', text.substring(0, 200));
+      const error = new Error(`API returned ${contentType || 'unknown'} instead of JSON. Status: ${res.status}`);
+      (error as any).errorInfo = analyzeError(error, res.status);
+      throw error;
+    }
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));

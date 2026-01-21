@@ -1,12 +1,202 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { toast } from 'sonner';
 import { getCircles, getDiscussions, getTopContributors, voteDiscussion } from '@/lib/community';
 import { formatRelativeTime } from '@/utils/helpers';
 import type { Circle, Discussion, TopContributor } from '@/lib/types';
 import { useFavorites } from '@/hooks/use-favorites';
+
+// Helper function to get profile URL based on user role
+function getProfileUrl(author: { 
+  id: number; 
+  username?: string; 
+  slug?: string; 
+  role?: string; 
+  roles?: string[] 
+}): string {
+  const username = author.username || author.slug || author.id.toString();
+  
+  // Check for expert roles
+  const expertRoles = ['kg_expert', 'kg-uzman', 'administrator', 'admin', 'editor'];
+  const userRoles = author.roles || (author.role ? [author.role] : []);
+  const isExpert = userRoles.some(role => expertRoles.includes(role.toLowerCase()));
+  
+  if (isExpert) {
+    return `/uzman/${username}`;
+  }
+  return `/profil/${username}`;
+}
+
+// Discussion Card Component
+function DiscussionCard({ 
+  discussion, 
+  onVote, 
+  toggleFavorite, 
+  isFavorite 
+}: { 
+  discussion: Discussion; 
+  onVote: (id: number, voteType: 'like' | 'dislike') => void;
+  toggleFavorite: (id: number, type: 'discussion') => void;
+  isFavorite: boolean;
+}) {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Click outside handler
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+
+    if (showMenu) {
+      // Small delay to allow dropdown to open
+      setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  const handleReport = () => {
+    setShowMenu(false);
+    toast.info('Raporlama özelliği yakında aktif olacak');
+  };
+
+  return (
+    <div 
+      className={`bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative ${
+        discussion.expert_answered
+          ? 'border-l-4 border-green-400'
+          : 'border border-gray-100'
+      }`}
+    >
+      {/* Circle tag (left side) and Expert badge (right side) */}
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex gap-2 items-center">
+          {discussion.circle && (
+            <Link 
+              href={`/topluluk/odak/${discussion.circle.slug}`}
+              className="inline-flex items-center gap-1.5 bg-orange-50 text-orange-600 px-2.5 py-1 rounded-full text-xs font-medium hover:bg-orange-100 transition-colors"
+            >
+              <span>{discussion.circle.icon || '📌'}</span>
+              <span>{discussion.circle.name}</span>
+            </Link>
+          )}
+        </div>
+        
+        <div className="flex gap-2 items-center">
+          {discussion.expert_answered && (
+            <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <i className="fa-solid fa-check-circle"></i>
+              Uzman Yanıtladı
+            </span>
+          )}
+          
+          {/* Dropdown menu */}
+          <div className="relative" ref={menuRef}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <i className="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+
+            {showMenu && (
+              <div 
+                className="absolute right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 py-2 min-w-[160px] z-50"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleReport();
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                >
+                  <i className="fa-solid fa-flag text-red-400"></i>
+                  <span>Raporla</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Author info */}
+      <div className="flex gap-3 mb-3">
+        <img 
+          src={discussion.author.avatar || `https://placehold.co/100x100/E1BEE7/8E24AA?text=${discussion.author.name.charAt(0)}`}
+          className="w-10 h-10 rounded-full border border-gray-100" 
+          alt={discussion.author.name} 
+        />
+        <div>
+          <Link 
+            href={getProfileUrl(discussion.author)} 
+            className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
+          >
+            {discussion.author.name}
+          </Link>
+          <p className="text-xs text-gray-400">{formatRelativeTime(discussion.created_at)}</p>
+        </div>
+      </div>
+      
+      {/* Title and excerpt */}
+      <h2 className="font-bold text-base text-slate-800 mb-2">
+        <Link 
+          href={`/topluluk/${discussion.slug}`}
+          className="hover:text-orange-500 transition-colors"
+        >
+          {discussion.title}
+        </Link>
+      </h2>
+      <p className="text-sm text-gray-600 mb-4">
+        {discussion.excerpt}
+      </p>
+
+      {/* Actions */}
+      <div className="flex items-center justify-between border-t border-gray-50 pt-3">
+        <div className="flex gap-4">
+          <button 
+            onClick={() => onVote(discussion.id, 'like')} 
+            className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'like' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'} transition-colors`}
+          >
+            <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+            {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
+          </button>
+          <button 
+            onClick={() => onVote(discussion.id, 'dislike')} 
+            className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-400 hover:text-red-500'} transition-colors`}
+          >
+            <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+            {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
+          </button>
+          <Link 
+            href={`/topluluk/${discussion.slug}`}
+            className="flex items-center gap-1 text-gray-400 hover:text-blue-500 text-sm transition-colors"
+          >
+            <i className="fa-regular fa-comment"></i> {discussion.comment_count} Cevap
+          </Link>
+        </div>
+        <button 
+          onClick={() => toggleFavorite(discussion.id, 'discussion')}
+          className="flex items-center gap-1 text-gray-400 hover:text-red-500 transition-colors"
+        >
+          <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function CommunityPage() {
   const [circles, setCircles] = useState<Circle[]>([]);
@@ -297,93 +487,13 @@ export default function CommunityPage() {
                 )}
 
                 {!loading && discussions.map((discussion) => (
-                  <div 
-                    key={discussion.id}
-                    className={`bg-white p-6 rounded-3xl shadow-sm hover:shadow-md transition-shadow relative ${
-                      discussion.expert_answered
-                        ? 'border-l-4 border-green-400'
-                        : 'border border-gray-100'
-                    }`}
-                  >
-                    {discussion.expert_answered && (
-                      <div className="absolute top-6 right-4 flex items-center gap-1 bg-green-50 text-green-600 px-2 py-1 rounded-lg text-[10px] font-bold border border-green-100">
-                          <i className="fa-solid fa-user-doctor"></i> Uzman Yanıtladı
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-start mb-3">
-                        <div className="flex gap-3">
-                            <img 
-                              src={discussion.author.avatar || `https://placehold.co/100x100/E1BEE7/8E24AA?text=${discussion.author.name.charAt(0)}`}
-                              className="w-10 h-10 rounded-full border border-gray-100" 
-                              alt={discussion.author.name} 
-                            />
-                            <div>
-                                <Link 
-                                  href={`/profil/${discussion.author.username || discussion.author.id}`} 
-                                  className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
-                                >
-                                  {discussion.author.name}
-                                </Link>
-                                <p className="text-xs text-gray-400">{formatRelativeTime(discussion.created_at)}</p>
-                            </div>
-                        </div>
-                        {discussion.circle && (
-                          <span 
-                            className="px-2 py-1 rounded-lg text-[10px] font-bold"
-                            style={{ 
-                              backgroundColor: `${discussion.circle.color_code}20`,
-                              color: discussion.circle.color_code
-                            }}
-                          >
-                            {discussion.circle.name}
-                          </span>
-                        )}
-                    </div>
-                    
-                    <h2 className="font-bold text-base text-slate-800 mb-2">
-                        <Link 
-                          href={`/topluluk/${discussion.slug}`}
-                          className="hover:text-orange-500 transition-colors"
-                        >
-                          {discussion.title}
-                        </Link>
-                    </h2>
-                    <p className="text-sm text-gray-600 mb-4">
-                        {discussion.excerpt}
-                    </p>
-
-                    <div className="flex items-center justify-between border-t border-gray-50 pt-3">
-                        <div className="flex gap-4">
-                            <button 
-                              onClick={() => handleVote(discussion.id, 'like')} 
-                              className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'like' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'} transition-colors`}
-                            >
-                                <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
-                                {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
-                            </button>
-                            <button 
-                              onClick={() => handleVote(discussion.id, 'dislike')} 
-                              className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-400 hover:text-red-500'} transition-colors`}
-                            >
-                                <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
-                                {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
-                            </button>
-                            <Link 
-                              href={`/topluluk/${discussion.slug}`}
-                              className="flex items-center gap-1 text-gray-400 hover:text-blue-500 text-sm transition-colors"
-                            >
-                                <i className="fa-regular fa-comment"></i> {discussion.comment_count} Cevap
-                            </Link>
-                        </div>
-                        <button 
-                          onClick={() => toggleFavorite(discussion.id, 'discussion')}
-                          className="flex items-center gap-1 text-gray-400 hover:text-red-500 transition-colors"
-                        >
-                          <i className={`${isFavorite(discussion.id, 'discussion') ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
-                        </button>
-                    </div>
-                  </div>
+                  <DiscussionCard 
+                    key={discussion.id} 
+                    discussion={discussion} 
+                    onVote={handleVote}
+                    toggleFavorite={toggleFavorite}
+                    isFavorite={isFavorite(discussion.id, 'discussion')}
+                  />
                 ))}
 
             </main>
