@@ -124,14 +124,16 @@ export async function getDiscussionComments(discussionId: number): Promise<Discu
   try {
     // Try with authentication first
     const response = await fetchAuthAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(
-      API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId)
+      API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId),
+      { cache: 'no-store' }
     );
     return normalizeCommentResponse(response);
   } catch (error) {
     // If auth fails (user not logged in), try without auth
     try {
       const response = await fetchAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(
-        API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId)
+        API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId),
+        { cache: 'no-store' }
       );
       return normalizeCommentResponse(response);
     } catch (fallbackError) {

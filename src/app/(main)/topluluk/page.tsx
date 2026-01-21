@@ -333,7 +333,7 @@ export default function CommunityPage() {
                 } else {
                   newDislikeCount = Math.max(0, d.dislike_count - 1);
                 }
-              } else if (result.action === 'updated' || result.action === 'changed') {
+              } else if (result.action === 'changed') {
                 // Vote changed (from like to dislike or vice versa)
                 newUserVote = voteType;
                 if (voteType === 'like') {
