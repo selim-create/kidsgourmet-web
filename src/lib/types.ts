@@ -340,6 +340,14 @@ export interface RegisterData {
     name: string;
     birth_date: string;
   };
+  consents?: {
+    terms_accepted: boolean;
+    terms_accepted_at: string;
+    marketing_consent: boolean;
+    marketing_consent_at: string | null;
+    sensitive_data_consent: boolean;
+    sensitive_data_consent_at: string | null;
+  };
 }
 
 // Favoriler

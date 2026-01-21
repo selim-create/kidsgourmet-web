@@ -18,6 +18,9 @@ export default function RegisterPage() {
   const [childName, setChildName] = useState("");
   const [childBirthDate, setChildBirthDate] = useState("");
   const [skipChild, setSkipChild] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
@@ -35,6 +38,13 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
+    // Validate terms acceptance
+    if (!termsAccepted) {
+      setError("Devam etmek için Kullanıcı Sözleşmesi'ni kabul etmeniz gerekmektedir.");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -44,6 +54,14 @@ export default function RegisterPage() {
         name: string;
         username?: string;
         child?: { name: string; birth_date: string };
+        consents?: {
+          terms_accepted: boolean;
+          terms_accepted_at: string;
+          marketing_consent: boolean;
+          marketing_consent_at: string | null;
+          sensitive_data_consent: boolean;
+          sensitive_data_consent_at: string | null;
+        };
       } = {
         email,
         password,
@@ -62,6 +80,16 @@ export default function RegisterPage() {
           birth_date: childBirthDate,
         };
       }
+
+      // Add consent data
+      registerData.consents = {
+        terms_accepted: termsAccepted,
+        terms_accepted_at: new Date().toISOString(),
+        marketing_consent: marketingConsent,
+        marketing_consent_at: marketingConsent ? new Date().toISOString() : null,
+        sensitive_data_consent: sensitiveDataConsent,
+        sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
+      };
 
       const response = await authService.register(registerData);
       await refreshUser();
@@ -321,10 +349,81 @@ export default function RegisterPage() {
                         )}
                     </div>
 
+                    {/* KVKK Compliance - Consent Section */}
+                    <div className="border-t border-gray-200 pt-5 space-y-4">
+                        {/* Aydınlatma Metni - Informational Link (NOT a checkbox) */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                            <div className="flex items-start gap-3">
+                                <i className="fa-solid fa-circle-info text-blue-500 text-lg mt-0.5"></i>
+                                <div className="text-sm text-gray-700">
+                                    <Link 
+                                      href="/aydinlatma-metni" 
+                                      target="_blank"
+                                      className="font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                                    >
+                                        Kişisel Verilerin İşlenmesi Hakkında Aydınlatma Metni&apos;ni okumak için tıklayınız
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Required: Terms of Service */}
+                        <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              id="termsAccepted"
+                              checked={termsAccepted}
+                              onChange={(e) => setTermsAccepted(e.target.checked)}
+                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
+                            />
+                            <label htmlFor="termsAccepted" className="text-sm text-gray-700 cursor-pointer">
+                                <Link 
+                                  href="/kullanim-kosullari" 
+                                  target="_blank"
+                                  className="font-medium text-green-600 hover:text-green-700 hover:underline"
+                                >
+                                    Kullanıcı Sözleşmesi
+                                </Link>
+                                &apos;ni okudum ve kabul ediyorum. <span className="text-red-500">*</span>
+                                <p className="text-xs text-gray-500 mt-1">(Hizmetin ifası için zorunludur)</p>
+                            </label>
+                        </div>
+
+                        {/* Optional: Marketing Consent (ETK) */}
+                        <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              id="marketingConsent"
+                              checked={marketingConsent}
+                              onChange={(e) => setMarketingConsent(e.target.checked)}
+                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
+                            />
+                            <label htmlFor="marketingConsent" className="text-sm text-gray-700 cursor-pointer">
+                                HİP Medya&apos;nın tarafıma kampanya, bülten ve tanıtım içerikli e-posta göndermesine izin veriyorum.
+                                <p className="text-xs text-gray-500 mt-1">(İsteğe bağlı - İstediğiniz zaman iptal edebilirsiniz)</p>
+                            </label>
+                        </div>
+
+                        {/* Optional: Sensitive Data Consent */}
+                        <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              id="sensitiveDataConsent"
+                              checked={sensitiveDataConsent}
+                              onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+                              className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
+                            />
+                            <label htmlFor="sensitiveDataConsent" className="text-sm text-gray-700 cursor-pointer">
+                                Paylaşacağım içeriklerde yer alan (varsa) kendime veya çocuğuma ait sağlık verilerinin işlenmesine açık rıza veriyorum.
+                                <p className="text-xs text-gray-500 mt-1">(İsteğe bağlı - Sağlık verisi paylaşımı için gereklidir)</p>
+                            </label>
+                        </div>
+                    </div>
+
                     <div>
                         <button 
                           type="submit" 
-                          disabled={isLoading || googleLoading}
+                          disabled={isLoading || googleLoading || !termsAccepted}
                           className="group relative w-full flex justify-center py-3.5 px-4 border border-transparent text-sm font-bold rounded-xl text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading ? "Kayıt yapılıyor..." : "Ücretsiz Kayıt Ol"}
