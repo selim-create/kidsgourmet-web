@@ -2,6 +2,8 @@ import { API_URL } from './constants';
 
 interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
+  revalidate?: number;
+  tags?: string[];
 }
 
 export interface FetchErrorInfo {

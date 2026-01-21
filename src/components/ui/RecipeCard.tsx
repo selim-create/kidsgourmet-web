@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
 import { useFavorites } from '@/hooks/use-favorites';
+import { prefetchRecipe } from '@/lib/prefetch';
 
 
 interface RecipeCardProps {
@@ -144,6 +145,11 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
     }
   };
 
+  const handleMouseEnter = () => {
+    // Hover'da veriyi önceden yükle
+    prefetchRecipe(recipe.slug);
+  };
+
   return (
     <Link 
       href={`/tarifler/${recipe.slug}`} 
@@ -154,6 +160,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         transition: 'all 0.3s ease',
       }}
       onMouseEnter={(e) => {
+        handleMouseEnter();
         e.currentTarget.style.transform = 'translateY(-10px)';
         e.currentTarget.style.boxShadow = `0 20px 40px ${shadowColor}`;
       }}
