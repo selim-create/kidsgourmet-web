@@ -42,13 +42,8 @@ const faqData: FAQItem[] = [
   },
   {
     category: 'recipes',
-    question: 'Kendi tarifimi paylaşabilir miyim?',
-    answer: 'Evet! Üye olduğunuzda "Tarif Ekle" butonunu kullanarak kendi tariflerinizi paylaşabilirsiniz. Uzman onayından geçen tarifler platformda yayınlanır.'
-  },
-  {
-    category: 'recipes',
     question: 'Tariflerdeki besin değerleri güvenilir mi?',
-    answer: 'Evet, tüm besin değerleri güncel besin veritabanlarından alınmakta ve uzman diyetisyenlerimiz tarafından kontrol edilmektedir.'
+    answer: 'Evet, tariflerdeki besin değerleri güncel veritabanlarından alınmaktadır. Ancak beslenme konusunda özel gereksinim durumunda hekiminize danışmanız gerekir.'
   },
   {
     category: 'technical',
@@ -73,7 +68,7 @@ const faqData: FAQItem[] = [
   {
     category: 'general',
     question: 'Uzmanlarınız kimler?',
-    answer: 'Uzman kadromuz diyetisyenler ve çocuk doktorlarından oluşmaktadır. Tüm uzmanlarımızı "Uzman Kadromuz" sayfasından görebilirsiniz.'
+    answer: 'İçeriklerimiz diyetisyenler ve çocuk doktorlarının katkılarıyla oluşmaktadır. Sitemize katkı sunan isimleri "Uzmanlarımız" sayfasından görebilirsiniz.'
   },
   {
     category: 'general',
@@ -118,7 +113,7 @@ export default function YardimPage() {
             <span className="text-gray-800">Yardım & Destek</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Yardım & Destek</h1>
-          <p className="text-gray-600 mt-3">Sıkça sorulan sorular ve destek kanalları</p>
+          <p className="text-gray-600 mt-3">KidsGourmet ile ilgili her konuda, tüm kanallardan bize ulaşabilirsiniz.</p>
         </div>
       </div>
       
@@ -131,13 +126,13 @@ export default function YardimPage() {
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="fa-solid fa-envelope text-orange-500 text-xl"></i>
             </div>
-            <h3 className="font-bold text-slate-800 mb-2">E-posta Desteği</h3>
-            <p className="text-sm text-gray-600 mb-4">7/24 yanıt süresi</p>
+            <h3 className="font-bold text-slate-800 mb-2">E-Posta Desteği</h3>
+            <p className="text-sm text-gray-600 mb-4">7/24 Ulaşın</p>
             <a 
-              href="mailto:destek@kidsgourmet.com.tr" 
+              href="mailto:iletisim@kidsgourmet.com.tr" 
               className="text-orange-500 hover:underline text-sm font-semibold"
             >
-              destek@kidsgourmet.com.tr
+              iletisim@kidsgourmet.com.tr
             </a>
           </div>
           
@@ -146,7 +141,7 @@ export default function YardimPage() {
               <i className="fa-solid fa-comments text-green-500 text-xl"></i>
             </div>
             <h3 className="font-bold text-slate-800 mb-2">Topluluk Forumu</h3>
-            <p className="text-sm text-gray-600 mb-4">Diğer kullanıcılarla paylaş</p>
+            <p className="text-sm text-gray-600 mb-4">Diğer Kullanıcılara Sorun</p>
             <Link 
               href="/topluluk" 
               className="text-green-500 hover:underline text-sm font-semibold"
@@ -160,9 +155,11 @@ export default function YardimPage() {
               <i className="fa-brands fa-instagram text-blue-500 text-xl"></i>
             </div>
             <h3 className="font-bold text-slate-800 mb-2">Sosyal Medya</h3>
-            <p className="text-sm text-gray-600 mb-4">Bizi takip edin</p>
+            <p className="text-sm text-gray-600 mb-4">Bizi Takip Edin</p>
             <a 
-              href="#" 
+              href="https://www.instagram.com/kidsgourmet/" 
+              target="_blank" 
+              rel="noopener noreferrer"
               className="text-blue-500 hover:underline text-sm font-semibold"
             >
               @kidsgourmet
