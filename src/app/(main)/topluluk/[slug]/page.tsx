@@ -299,7 +299,8 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                       >
                                         <i className="fa-solid fa-flag"></i> Raporla
                                       </button>
-                                  </div>
+                                    </div>
+                                  )}
                                 </div>
                             </div>
                         </div>
