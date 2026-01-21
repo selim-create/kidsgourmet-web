@@ -54,6 +54,24 @@ export const removeToken = (): void => {
 const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoint might not exist yet
 
 /**
+ * Create a rate limit error from response
+ */
+function createRateLimitError(res: Response, errorData: any): RateLimitError {
+  const retryAfter = errorData.data?.retry_after || parseInt(res.headers.get('Retry-After') || '60');
+  
+  return {
+    code: 'rate_limit_exceeded',
+    message: `Çok fazla istek gönderdiniz. Lütfen ${retryAfter} saniye bekleyin.`,
+    data: {
+      status: 429,
+      retry_after: retryAfter,
+      limit: parseInt(res.headers.get('X-RateLimit-Limit') || '100'),
+      window: 60,
+    },
+  };
+}
+
+/**
  * Handle 401 Unauthorized errors
  */
 function handle401Error(token: string | null): void {
@@ -207,20 +225,7 @@ export async function fetchAPI<T>(
       
       // Handle rate limiting (429)
       if (res.status === 429) {
-        const retryAfter = errorData.data?.retry_after || parseInt(res.headers.get('Retry-After') || '60');
-        
-        const rateLimitError: RateLimitError = {
-          code: 'rate_limit_exceeded',
-          message: `Çok fazla istek gönderdiniz. Lütfen ${retryAfter} saniye bekleyin.`,
-          data: {
-            status: 429,
-            retry_after: retryAfter,
-            limit: parseInt(res.headers.get('X-RateLimit-Limit') || '100'),
-            window: 60,
-          },
-        };
-        
-        throw rateLimitError;
+        throw createRateLimitError(res, errorData);
       }
       
       if (res.status === 401) {
@@ -309,20 +314,7 @@ export async function fetchAPIWithHeaders<T>(
       
       // Handle rate limiting (429)
       if (res.status === 429) {
-        const retryAfter = errorData.data?.retry_after || parseInt(res.headers.get('Retry-After') || '60');
-        
-        const rateLimitError: RateLimitError = {
-          code: 'rate_limit_exceeded',
-          message: `Çok fazla istek gönderdiniz. Lütfen ${retryAfter} saniye bekleyin.`,
-          data: {
-            status: 429,
-            retry_after: retryAfter,
-            limit: parseInt(res.headers.get('X-RateLimit-Limit') || '100'),
-            window: 60,
-          },
-        };
-        
-        throw rateLimitError;
+        throw createRateLimitError(res, errorData);
       }
       
       if (res.status === 401) {

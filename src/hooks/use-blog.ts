@@ -18,11 +18,18 @@ interface BlogResponse {
   totalPages: number;
 }
 
+interface BlogServiceFilters {
+  page?: number;
+  perPage?: number;
+  category?: number;
+  fields?: string;
+}
+
 export function useBlogPosts(filters?: BlogFilters) {
   const { page = 1, perPage = 12, category, fields } = filters || {};
   
   // Build enhanced filters with sparse fieldsets
-  const enhancedFilters: any = { page, perPage, category };
+  const enhancedFilters: BlogServiceFilters = { page, perPage, category };
   
   // Add sparse fieldsets if specified
   if (fields) {

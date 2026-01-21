@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component<Props, State> {
         hasError: true,
         error,
         isRateLimited: true,
-        retryAfter: (error as any).data?.retry_after || 60,
+        retryAfter: error.data.retry_after,
       };
     }
     return { hasError: true, error, isRateLimited: false, retryAfter: 0 };

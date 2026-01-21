@@ -1,18 +1,12 @@
 import useSWR from 'swr';
-import { ingredientService } from '@/services/ingredient-service';
+import { ingredientService, IngredientFilters as ServiceIngredientFilters } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 
 // Field definitions for different views
 const INGREDIENT_LIST_FIELDS = 'id,title,slug,image,start_age,allergy_risk';
 const INGREDIENT_CARD_FIELDS = 'id,title,slug,image,start_age';
 
-interface IngredientsFilters {
-  page?: number;
-  perPage?: number;
-  category?: string;
-  allergyRisk?: string;
-  season?: string;
-  startAge?: string;
+interface IngredientsFilters extends ServiceIngredientFilters {
   fields?: 'list' | 'card' | 'full';
 }
 
@@ -26,7 +20,7 @@ export function useIngredients(filters?: IngredientsFilters) {
   const { fields, ...serviceFilters } = filters || {};
   
   // Build enhanced filters with sparse fieldsets
-  const enhancedFilters: any = {
+  const enhancedFilters: ServiceIngredientFilters & { fields?: string } = {
     ...serviceFilters,
   };
   
