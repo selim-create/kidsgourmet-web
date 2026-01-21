@@ -79,6 +79,7 @@ export interface ExpertInfo {
   approved: boolean;
   note?: string;
   slug?: string;
+  user_id?: number | null;
 }
 
 export interface Substitute {
@@ -173,6 +174,7 @@ export interface Ingredient {
   nutrition_per_100g?: NutritionPer100g;
   prep_methods_list?: string[];
   seo?: SEOData;  // 🆕 RankMath SEO data
+  expert?: ExpertInfo;  // 🆕 Uzman notu
 }
 
 // 🆕 Yaşa göre hazırlama

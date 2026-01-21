@@ -636,6 +636,43 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                       />
                     </div>
 
+                    {/* Expert Approval - Uzman Notu */}
+                    {post.expert && post.expert.approved && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-4 md:p-5 mt-8">
+                        <div className="flex items-start gap-3 md:gap-4">
+                          <div className="relative flex-shrink-0">
+                            <img 
+                              src={post.expert.image || 'https://placehold.co/100x100/E8F5E9/455A64?text=Uzman'} 
+                              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white shadow-sm object-cover" 
+                              alt={post.expert.name || 'Uzman'} 
+                            />
+                            <div className="absolute -bottom-1 -right-1 bg-green-500 text-white w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center text-[9px] md:text-[10px] border-2 border-white">
+                              <i className="fa-solid fa-check"></i>
+                            </div>
+                          </div>
+                          <div className="flex-grow">
+                            <p className="text-xs md:text-sm text-slate-700 font-medium mb-2">
+                              Bu yazı ile ilgili Uzman Notu:{' '}
+                              <Link 
+                                href={post.expert.slug ? `/uzman/${post.expert.slug}` : '#'} 
+                                className="text-green-600 underline decoration-dotted font-bold hover:text-green-700"
+                              >
+                                {post.expert.title && `${post.expert.title} `}{post.expert.name}
+                              </Link>
+                            </p>
+                            {post.expert.note && (
+                              <div className="bg-white/70 rounded-xl p-2.5 md:p-3 mt-2">
+                                <p className="text-[10px] md:text-xs text-gray-500 font-medium mb-1">
+                                  <i className="fa-solid fa-comment-medical text-green-500 mr-1"></i> Uzman Notu:
+                                </p>
+                                <p className="text-xs md:text-sm text-gray-700">{post.expert.note}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Tags & Share (Mobile) */}
                     <div className="mt-12 pt-8 border-t border-gray-100">
                         {/* Etiketler (Tags) varsa göster */}
