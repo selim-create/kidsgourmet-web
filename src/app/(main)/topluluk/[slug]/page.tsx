@@ -63,11 +63,35 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         
         // First fetch discussion to get its ID
         const discussionData = await getDiscussionBySlug(slug);
-        setDiscussion(discussionData);
+        
+        // Ensure discussion has default values for vote counts
+        const discussionWithDefaults = {
+          ...discussionData,
+          like_count: discussionData.like_count ?? 0,
+          dislike_count: discussionData.dislike_count ?? 0,
+          user_vote: discussionData.user_vote ?? null,
+        };
+        
+        setDiscussion(discussionWithDefaults);
         
         // Then fetch comments with the discussion ID
-        const fetchedComments = await getDiscussionComments(discussionData.id);
-        setComments(fetchedComments);
+        const fetchedComments = await getDiscussionComments(discussionWithDefaults.id);
+        console.log('Fetched comments:', fetchedComments); // Debug
+        
+        // Handle both array and object response formats
+        const commentsArray = Array.isArray(fetchedComments) 
+          ? fetchedComments 
+          : (fetchedComments as any)?.comments || [];
+        
+        // Ensure all comments have default values for vote counts
+        const commentsWithDefaults = commentsArray.map((c: any) => ({
+          ...c,
+          like_count: c.like_count ?? 0,
+          dislike_count: c.dislike_count ?? 0,
+          user_vote: c.user_vote ?? null,
+        }));
+        
+        setComments(commentsWithDefaults);
         
         // Fetch related discussions from the same circle
         if (discussionData.circle) {
@@ -110,7 +134,22 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       
       // Refresh comments
       const updatedComments = await getDiscussionComments(discussion.id);
-      setComments(updatedComments);
+      console.log('Updated comments:', updatedComments); // Debug
+      
+      // Handle both array and object response formats
+      const commentsArray = Array.isArray(updatedComments) 
+        ? updatedComments 
+        : (updatedComments as any)?.comments || [];
+      
+      // Ensure all comments have default values for vote counts
+      const commentsWithDefaults = commentsArray.map((c: any) => ({
+        ...c,
+        like_count: c.like_count ?? 0,
+        dislike_count: c.dislike_count ?? 0,
+        user_vote: c.user_vote ?? null,
+      }));
+      
+      setComments(commentsWithDefaults);
       
       setCommentText('');
       setIsExpanded(false);
@@ -128,6 +167,8 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
     
     try {
       const result = await voteDiscussion(discussion.id, voteType);
+      console.log('Vote result (detail):', result); // Debug
+      
       setDiscussion(prev => prev ? {
         ...prev,
         like_count: result.like_count ?? prev.like_count,
@@ -143,6 +184,8 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   async function handleVoteComment(commentId: number, voteType: 'like' | 'dislike') {
     try {
       const result = await voteComment(commentId, voteType);
+      console.log('Comment vote result:', result); // Debug
+      
       setComments(prev => prev.map(c =>
         c.id === commentId
           ? { 
@@ -310,20 +353,32 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                         {/* Stats & Share */}
                         <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                             <div className="flex gap-6">
+                                {/* Like Button */}
                                 <button 
                                   onClick={() => handleVoteDiscussion('like')}
-                                  className={`flex items-center gap-2 ${discussion.user_vote === 'like' ? 'text-green-500' : 'text-gray-500 hover:text-green-500'} transition-colors font-medium`}
+                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-base transition-all duration-200 ${
+                                    discussion.user_vote === 'like' 
+                                      ? 'text-green-600 bg-green-50 font-medium' 
+                                      : 'text-gray-500 hover:text-green-500 hover:bg-green-50'
+                                  }`}
                                 >
                                     <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up text-xl`}></i>
-                                    {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
+                                    <span>{discussion.like_count || 0}</span>
                                 </button>
+                                
+                                {/* Dislike Button */}
                                 <button 
                                   onClick={() => handleVoteDiscussion('dislike')}
-                                  className={`flex items-center gap-2 ${discussion.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} transition-colors font-medium`}
+                                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-base transition-all duration-200 ${
+                                    discussion.user_vote === 'dislike' 
+                                      ? 'text-red-600 bg-red-50 font-medium' 
+                                      : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
+                                  }`}
                                 >
                                     <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down text-xl`}></i>
-                                    {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
+                                    <span>{discussion.dislike_count || 0}</span>
                                 </button>
+                                
                                 <button className="flex items-center gap-2 text-gray-500 hover:text-orange-500 transition-colors font-medium">
                                     <i className="fa-regular fa-comment text-xl"></i> {discussion.comment_count} Cevap
                                 </button>
@@ -407,27 +462,30 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                   className="text-sm text-gray-600 mb-3"
                                 />
                                 <div className="flex gap-4">
+                                    {/* Like Button */}
                                     <button 
                                       onClick={() => handleVoteComment(comment.id, 'like')}
-                                      className={`flex items-center gap-1.5 text-xs transition-colors ${
+                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
                                         comment.user_vote === 'like' 
-                                          ? 'text-green-500 font-medium' 
-                                          : 'text-gray-500 hover:text-green-500'
+                                          ? 'text-green-600 bg-green-50 font-medium' 
+                                          : 'text-gray-500 hover:text-green-500 hover:bg-green-50'
                                       }`}
                                     >
                                       <i className={`${comment.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
-                                      {comment.like_count > 0 && <span>{comment.like_count}</span>}
+                                      <span>{comment.like_count || 0}</span>
                                     </button>
+                                    
+                                    {/* Dislike Button */}
                                     <button 
                                       onClick={() => handleVoteComment(comment.id, 'dislike')}
-                                      className={`flex items-center gap-1.5 text-xs transition-colors ${
+                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
                                         comment.user_vote === 'dislike' 
-                                          ? 'text-red-500 font-medium' 
-                                          : 'text-gray-500 hover:text-red-500'
+                                          ? 'text-red-600 bg-red-50 font-medium' 
+                                          : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
                                       }`}
                                     >
                                       <i className={`${comment.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
-                                      {comment.dislike_count > 0 && <span>{comment.dislike_count}</span>}
+                                      <span>{comment.dislike_count || 0}</span>
                                     </button>
                                 </div>
                             </div>
