@@ -6,35 +6,15 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import { getDiscussionBySlug, getDiscussionComments, addComment, getDiscussions, voteDiscussion, voteComment } from '@/lib/community';
-import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
+import { formatRelativeTime, getProfileUrl, decodeHtmlEntities } from '@/utils/helpers';
 import type { Discussion, DiscussionComment } from '@/lib/types';
 import { EditButton } from '@/components/ui/EditButton';
 import ShareDropdown from '@/components/ui/ShareDropdown';
 import { useFavorites } from '@/hooks/use-favorites';
+import RichContent from '@/components/community/RichContent';
 
 const ReportModal = dynamic(() => import('@/components/ui/ReportModal'), { ssr: false });
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
-
-// Helper function to get profile URL based on user role
-function getProfileUrl(author: { 
-  id: number; 
-  username?: string; 
-  slug?: string; 
-  role?: string; 
-  roles?: string[] 
-}): string {
-  const username = author.username || author.slug || author.id.toString();
-  
-  // Check for expert roles
-  const expertRoles = ['kg_expert', 'kg-uzman', 'administrator', 'admin', 'editor'];
-  const userRoles = author.roles || (author.role ? [author.role] : []);
-  const isExpert = userRoles.some(role => expertRoles.includes(role.toLowerCase()));
-  
-  if (isExpert) {
-    return `/uzman/${username}`;
-  }
-  return `/profil/${username}`;
-}
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -150,8 +130,8 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       const result = await voteDiscussion(discussion.id, voteType);
       setDiscussion(prev => prev ? {
         ...prev,
-        like_count: result.like_count,
-        dislike_count: result.dislike_count,
+        like_count: result.like_count ?? prev.like_count,
+        dislike_count: result.dislike_count ?? prev.dislike_count,
         user_vote: result.user_vote as 'like' | 'dislike' | null
       } : null);
     } catch (err) {
@@ -165,7 +145,12 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       const result = await voteComment(commentId, voteType);
       setComments(prev => prev.map(c =>
         c.id === commentId
-          ? { ...c, like_count: result.like_count, dislike_count: result.dislike_count, user_vote: result.user_vote as 'like' | 'dislike' | null }
+          ? { 
+              ...c, 
+              like_count: result.like_count ?? c.like_count, 
+              dislike_count: result.dislike_count ?? c.dislike_count, 
+              user_vote: result.user_vote as 'like' | 'dislike' | null 
+            }
           : c
       ));
     } catch (err) {
@@ -217,7 +202,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         {/* MOBILE BACK HEADER */}
         <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-20 z-40">
             <Link href="/topluluk" className="text-gray-500 text-lg"><i className="fa-solid fa-arrow-left"></i></Link>
-            <span className="font-bold text-slate-800 text-sm truncate">{discussion.title}</span>
+            <span className="font-bold text-slate-800 text-sm truncate">{decodeHtmlEntities(discussion.title)}</span>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -308,7 +293,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                         {/* Content */}
                         <div className="flex items-start justify-between gap-3 mb-4">
                           <h1 className="font-display font-bold text-2xl md:text-3xl text-slate-800 leading-tight font-sans">
-                            {discussion.title}
+                            {decodeHtmlEntities(discussion.title)}
                           </h1>
                           <EditButton 
                             contentType="discussion" 
@@ -317,9 +302,9 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                             variant="icon"
                           />
                         </div>
-                        <div 
-                          className="text-gray-600 text-lg leading-relaxed mb-6 whitespace-pre-line"
-                          dangerouslySetInnerHTML={{ __html: sanitizeHTML(discussion.content || discussion.excerpt) }}
+                        <RichContent 
+                          html={discussion.content || discussion.excerpt} 
+                          className="text-gray-600 text-lg leading-relaxed mb-6"
                         />
 
                         {/* Stats & Share */}
@@ -377,9 +362,9 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                               </div>
                           </div>
 
-                          <div 
-                            className="prose prose-sm prose-green max-w-none text-slate-700"
-                            dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content) }}
+                          <RichContent 
+                            html={comment.content} 
+                            className="text-slate-700"
                           />
                       </div>
                     ))}
@@ -417,21 +402,29 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                       <i className="fa-solid fa-flag"></i>
                                     </button>
                                 </div>
-                                <div 
+                                <RichContent 
+                                  html={comment.content} 
                                   className="text-sm text-gray-600 mb-3"
-                                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content) }}
                                 />
                                 <div className="flex gap-4">
                                     <button 
                                       onClick={() => handleVoteComment(comment.id, 'like')}
-                                      className={`flex items-center gap-1 text-xs font-bold ${comment.user_vote === 'like' ? 'text-green-500' : 'text-gray-500 hover:text-green-500'} transition-colors`}
+                                      className={`flex items-center gap-1.5 text-xs transition-colors ${
+                                        comment.user_vote === 'like' 
+                                          ? 'text-green-500 font-medium' 
+                                          : 'text-gray-500 hover:text-green-500'
+                                      }`}
                                     >
                                       <i className={`${comment.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
                                       {comment.like_count > 0 && <span>{comment.like_count}</span>}
                                     </button>
                                     <button 
                                       onClick={() => handleVoteComment(comment.id, 'dislike')}
-                                      className={`flex items-center gap-1 text-xs font-bold ${comment.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} transition-colors`}
+                                      className={`flex items-center gap-1.5 text-xs transition-colors ${
+                                        comment.user_vote === 'dislike' 
+                                          ? 'text-red-500 font-medium' 
+                                          : 'text-gray-500 hover:text-red-500'
+                                      }`}
                                     >
                                       <i className={`${comment.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
                                       {comment.dislike_count > 0 && <span>{comment.dislike_count}</span>}
@@ -459,7 +452,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                 {index > 0 && <hr className="border-gray-50" />}
                                 <Link href={`/topluluk/${related.slug}`} className="block group">
                                   <h4 className="text-sm font-medium text-slate-700 group-hover:text-orange-500 transition-colors line-clamp-2">
-                                    {related.title}
+                                    {decodeHtmlEntities(related.title)}
                                   </h4>
                                   <p className="text-xs text-gray-400 mt-1">{related.comment_count} Cevap</p>
                                 </Link>

@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
-import { getCircles, getDiscussions, followCircle, unfollowCircle } from '@/lib/community';
-import { formatRelativeTime } from '@/utils/helpers';
+import { getCircles, getDiscussions, followCircle, unfollowCircle, voteDiscussion } from '@/lib/community';
+import { formatRelativeTime, getProfileUrl, decodeHtmlEntities } from '@/utils/helpers';
 import type { Circle, Discussion } from '@/lib/types';
+import { useFavorites } from '@/hooks/use-favorites';
 
 export default function CircleDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -16,6 +17,8 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [followLoading, setFollowLoading] = useState(false);
+  
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     async function fetchData() {
@@ -72,6 +75,27 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
       toast.error('İşlem başarısız oldu. Lütfen giriş yaptığınızdan emin olun.');
     } finally {
       setFollowLoading(false);
+    }
+  }
+
+  async function handleVote(discussionId: number, voteType: 'like' | 'dislike') {
+    try {
+      const result = await voteDiscussion(discussionId, voteType);
+      
+      // Update the discussion in the list with API response values
+      setDiscussions(prev => prev.map(d => 
+        d.id === discussionId
+          ? { 
+              ...d, 
+              like_count: result.like_count ?? d.like_count, 
+              dislike_count: result.dislike_count ?? d.dislike_count, 
+              user_vote: result.user_vote as 'like' | 'dislike' | null 
+            }
+          : d
+      ));
+    } catch (err) {
+      console.error('Error voting on discussion:', err);
+      toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');
     }
   }
 
@@ -190,7 +214,12 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
                                   alt={discussion.author.name} 
                                 />
                                 <div>
-                                    <h3 className="font-bold text-slate-800 text-sm">{discussion.author.name}</h3>
+                                    <Link 
+                                      href={getProfileUrl(discussion.author)}
+                                      className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
+                                    >
+                                      {discussion.author.name}
+                                    </Link>
                                     <p className="text-xs text-gray-400">{formatRelativeTime(discussion.created_at)}</p>
                                 </div>
                             </div>
@@ -201,17 +230,36 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
                               href={`/topluluk/${discussion.slug}`}
                               className="hover:text-brand-primary transition-colors"
                             >
-                              {discussion.title}
+                              {decodeHtmlEntities(discussion.title)}
                             </Link>
                         </h2>
                         <p className="text-sm text-gray-600 mb-4">
-                            {discussion.excerpt}
+                            {decodeHtmlEntities(discussion.excerpt)}
                         </p>
 
                         <div className="flex items-center justify-between border-t border-gray-50 pt-3">
                             <div className="flex gap-4">
-                                <button className="flex items-center gap-1 text-gray-400 hover:text-red-500 text-sm transition-colors">
-                                    <i className="fa-regular fa-heart"></i>
+                                <button 
+                                  onClick={() => handleVote(discussion.id, 'like')} 
+                                  className={`flex items-center gap-1.5 text-sm transition-colors ${
+                                    discussion.user_vote === 'like' 
+                                      ? 'text-green-500 font-medium' 
+                                      : 'text-gray-400 hover:text-green-500'
+                                  }`}
+                                >
+                                  <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+                                  {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
+                                </button>
+                                <button 
+                                  onClick={() => handleVote(discussion.id, 'dislike')} 
+                                  className={`flex items-center gap-1.5 text-sm transition-colors ${
+                                    discussion.user_vote === 'dislike' 
+                                      ? 'text-red-500 font-medium' 
+                                      : 'text-gray-400 hover:text-red-500'
+                                  }`}
+                                >
+                                  <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+                                  {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
                                 </button>
                                 <Link 
                                   href={`/topluluk/${discussion.slug}`}
@@ -220,8 +268,11 @@ export default function CircleDetailPage({ params }: { params: Promise<{ slug: s
                                     <i className="fa-regular fa-comment"></i> {discussion.comment_count} Cevap
                                 </Link>
                             </div>
-                            <button className="text-gray-400 hover:text-slate-800">
-                              <i className="fa-regular fa-bookmark"></i>
+                            <button 
+                              onClick={() => toggleFavorite(discussion.id, 'discussion')}
+                              className="text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                              <i className={`${isFavorite(discussion.id, 'discussion') ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
                             </button>
                         </div>
                     </div>

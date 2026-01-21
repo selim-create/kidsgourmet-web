@@ -4,30 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { toast } from 'sonner';
 import { getCircles, getDiscussions, getTopContributors, voteDiscussion } from '@/lib/community';
-import { formatRelativeTime } from '@/utils/helpers';
+import { formatRelativeTime, getProfileUrl, decodeHtmlEntities } from '@/utils/helpers';
 import type { Circle, Discussion, TopContributor } from '@/lib/types';
 import { useFavorites } from '@/hooks/use-favorites';
-
-// Helper function to get profile URL based on user role
-function getProfileUrl(author: { 
-  id: number; 
-  username?: string; 
-  slug?: string; 
-  role?: string; 
-  roles?: string[] 
-}): string {
-  const username = author.username || author.slug || author.id.toString();
-  
-  // Check for expert roles
-  const expertRoles = ['kg_expert', 'kg-uzman', 'administrator', 'admin', 'editor'];
-  const userRoles = author.roles || (author.role ? [author.role] : []);
-  const isExpert = userRoles.some(role => expertRoles.includes(role.toLowerCase()));
-  
-  if (isExpert) {
-    return `/uzman/${username}`;
-  }
-  return `/profil/${username}`;
-}
 
 // Discussion Card Component
 function DiscussionCard({ 
@@ -156,11 +135,11 @@ function DiscussionCard({
           href={`/topluluk/${discussion.slug}`}
           className="hover:text-orange-500 transition-colors"
         >
-          {discussion.title}
+          {decodeHtmlEntities(discussion.title)}
         </Link>
       </h2>
       <p className="text-sm text-gray-600 mb-4">
-        {discussion.excerpt}
+        {decodeHtmlEntities(discussion.excerpt)}
       </p>
 
       {/* Actions */}
@@ -168,14 +147,22 @@ function DiscussionCard({
         <div className="flex gap-4">
           <button 
             onClick={() => onVote(discussion.id, 'like')} 
-            className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'like' ? 'text-green-500' : 'text-gray-400 hover:text-green-500'} transition-colors`}
+            className={`flex items-center gap-1.5 text-sm transition-colors ${
+              discussion.user_vote === 'like' 
+                ? 'text-green-500 font-medium' 
+                : 'text-gray-400 hover:text-green-500'
+            }`}
           >
             <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
             {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
           </button>
           <button 
             onClick={() => onVote(discussion.id, 'dislike')} 
-            className={`flex items-center gap-1 text-sm ${discussion.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-400 hover:text-red-500'} transition-colors`}
+            className={`flex items-center gap-1.5 text-sm transition-colors ${
+              discussion.user_vote === 'dislike' 
+                ? 'text-red-500 font-medium' 
+                : 'text-gray-400 hover:text-red-500'
+            }`}
           >
             <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
             {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
@@ -288,10 +275,15 @@ export default function CommunityPage() {
     try {
       const result = await voteDiscussion(discussionId, voteType);
       
-      // Update the discussion in the list
+      // Update the discussion in the list with API response values
       setDiscussions(prev => prev.map(d => 
         d.id === discussionId
-          ? { ...d, like_count: result.like_count, dislike_count: result.dislike_count, user_vote: result.user_vote as 'like' | 'dislike' | null }
+          ? { 
+              ...d, 
+              like_count: result.like_count ?? d.like_count, 
+              dislike_count: result.dislike_count ?? d.dislike_count, 
+              user_vote: result.user_vote as 'like' | 'dislike' | null 
+            }
           : d
       ));
     } catch (err) {

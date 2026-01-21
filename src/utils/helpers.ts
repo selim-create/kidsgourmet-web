@@ -1,13 +1,16 @@
 import DOMPurify from 'isomorphic-dompurify';
 
 /**
- * Decode HTML entities like &amp; to &
+ * Decode HTML entities including emojis
+ * Handles &#x1f970; format (hex) and &#128512; format (decimal)
  * Works on both client and server side
  */
-export function decodeHTMLEntities(text: string): string {
+export function decodeHtmlEntities(text: string): string {
   if (typeof window === 'undefined') {
-    // Server-side: use simple regex replacement for common entities
+    // Server-side: use regex replacement
     return text
+      .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+      .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(parseInt(dec, 10)))
       .replace(/&amp;/g, '&')
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -15,11 +18,17 @@ export function decodeHTMLEntities(text: string): string {
       .replace(/&#039;/g, "'")
       .replace(/&nbsp;/g, ' ');
   } else {
-    // Client-side: use textarea element
-    const textArea = document.createElement('textarea');
-    textArea.innerHTML = text;
-    return textArea.value;
+    // Client-side: use DOMParser for better handling, but only body content
+    const doc = new DOMParser().parseFromString(text, 'text/html');
+    return doc.body.textContent || text;
   }
+}
+
+/**
+ * Legacy alias for backward compatibility
+ */
+export function decodeHTMLEntities(text: string): string {
+  return decodeHtmlEntities(text);
 }
 
 /**
@@ -201,4 +210,78 @@ export function getPublicProfileUrl(user: { is_expert?: boolean; role?: string; 
   
   // Username is already validated to be safe, use directly
   return isUserExpert(user) ? `/uzman/${user.username}` : `/profil/${user.username}`;
+}
+
+/**
+ * Slugify text for URLs
+ * Handles Turkish characters (ğ, ü, ş, ı, ö, ç)
+ */
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+/**
+ * Get profile URL for discussion/comment authors
+ * Uses username if available, falls back to slugified name, or ID
+ * 
+ * @param author - Author object from discussion or comment
+ * @returns Profile URL path
+ */
+export function getProfileUrl(author: {
+  id: number;
+  username?: string;
+  slug?: string;
+  user_login?: string;
+  name?: string;
+  role?: string;
+  roles?: string[];
+  is_expert?: boolean;
+}): string {
+  // Find username - try different field names
+  let username = author.username || author.slug || author.user_login;
+  
+  // If no username, try to generate from name
+  if (!username && author.name) {
+    const slugified = slugify(author.name);
+    // Validate slugified result (at least 2 chars, valid URL characters)
+    username = (slugified && slugified.length >= 2) ? slugified : null;
+  }
+  
+  // Final fallback to ID
+  username = username || author.id.toString();
+  
+  // Check if user is expert (normalize roles for consistent comparison)
+  const expertRoles = ['kg_expert', 'kg-uzman', 'administrator', 'admin', 'editor'];
+  const userRoles = author.roles || (author.role ? [author.role] : []);
+  const normalizedUserRoles = userRoles.map(role => role.toLowerCase().replace(/[_-]/g, ''));
+  const normalizedExpertRoles = expertRoles.map(role => role.replace(/[_-]/g, ''));
+  const isExpert = author.is_expert || normalizedUserRoles.some(role => 
+    normalizedExpertRoles.includes(role)
+  );
+  
+  if (isExpert) {
+    return `/uzman/${username}`;
+  }
+  return `/profil/${username}`;
+}
+
+/**
+ * Strip HTML tags from text
+ * Useful for creating excerpts from HTML content
+ */
+export function stripHtml(html: string): string {
+  if (typeof window === 'undefined') {
+    return html.replace(/<[^>]*>/g, '');
+  }
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
 }
