@@ -18,9 +18,9 @@ export function decodeHtmlEntities(text: string): string {
       .replace(/&#039;/g, "'")
       .replace(/&nbsp;/g, ' ');
   } else {
-    // Client-side: use DOMParser for better handling
+    // Client-side: use DOMParser for better handling, but only body content
     const doc = new DOMParser().parseFromString(text, 'text/html');
-    return doc.documentElement.textContent || text;
+    return doc.body.textContent || text;
   }
 }
 
@@ -247,17 +247,25 @@ export function getProfileUrl(author: {
   is_expert?: boolean;
 }): string {
   // Find username - try different field names
-  const username = author.username 
-    || author.slug 
-    || author.user_login 
-    || (author.name ? slugify(author.name) : null)
-    || author.id.toString();
+  let username = author.username || author.slug || author.user_login;
   
-  // Check if user is expert
+  // If no username, try to generate from name
+  if (!username && author.name) {
+    const slugified = slugify(author.name);
+    // Validate slugified result (at least 2 chars, valid URL characters)
+    username = (slugified && slugified.length >= 2) ? slugified : null;
+  }
+  
+  // Final fallback to ID
+  username = username || author.id.toString();
+  
+  // Check if user is expert (normalize roles for consistent comparison)
   const expertRoles = ['kg_expert', 'kg-uzman', 'administrator', 'admin', 'editor'];
   const userRoles = author.roles || (author.role ? [author.role] : []);
-  const isExpert = author.is_expert || userRoles.some(role => 
-    expertRoles.includes(role.toLowerCase().replace('_', '-'))
+  const normalizedUserRoles = userRoles.map(role => role.toLowerCase().replace(/[_-]/g, ''));
+  const normalizedExpertRoles = expertRoles.map(role => role.replace(/[_-]/g, ''));
+  const isExpert = author.is_expert || normalizedUserRoles.some(role => 
+    normalizedExpertRoles.includes(role)
   );
   
   if (isExpert) {

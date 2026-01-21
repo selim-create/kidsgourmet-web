@@ -11,14 +11,15 @@ interface RichContentProps {
 /**
  * RichContent component
  * Safely renders HTML content with emoji decoding and XSS protection
+ * Note: Allows semantic text formatting only, not structural HTML elements
  */
 export default function RichContent({ html, className = '' }: RichContentProps) {
   // Decode HTML entities (including emojis)
   const decodedHtml = decodeHtmlEntities(html);
   
-  // Sanitize HTML to prevent XSS
+  // Sanitize HTML to prevent XSS - only allow semantic text formatting tags
   const cleanHtml = DOMPurify.sanitize(decodedHtml, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li', 'a', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'ul', 'ol', 'li', 'a', 'span'],
     ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
   });
 
