@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -78,12 +79,16 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <main className="flex-grow pt-24 w-full">
-        {children}
-      </main>
-      <Footer />
-    </div>
+    <>
+      <OrganizationJsonLd />
+      <WebSiteJsonLd />
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow pt-24 w-full">
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 }
