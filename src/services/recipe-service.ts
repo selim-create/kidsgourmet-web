@@ -14,6 +14,7 @@ export interface RecipeFilters {
   search?: string;
   orderBy?: 'date' | 'popular' | 'prep_time';  // YENİ
   order?: 'asc' | 'desc';      // YENİ
+  expertApproved?: boolean;    // YENİ
 }
 
 // Transform function for WordPress REST API format to RecipeCard
@@ -189,7 +190,8 @@ export const recipeService = {
       ingredient,
       search,
       orderBy = 'date',
-      order = 'desc'
+      order = 'desc',
+      expertApproved
     } = filters;
     
     const params = new URLSearchParams({
@@ -205,6 +207,7 @@ export const recipeService = {
     if (specialCondition) params.append('special-condition', specialCondition);
     if (ingredient) params.append('ingredient', ingredient);
     if (search) params.append('search', search);
+    if (expertApproved) params.append('expert_approved', '1');
     
     try {
       // Önce özel kg/v1 endpoint'ini dene

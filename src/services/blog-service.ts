@@ -77,6 +77,15 @@ export interface BlogPost {
   sponsor_data?: SponsorData | null;
   seo?: SEOData;
   embedded_content?: EmbedData[];
+  expert?: {
+    name: string;
+    title: string;
+    image?: string;
+    approved: boolean;
+    note?: string;
+    slug?: string;
+    user_id?: number | null;
+  };
   _embedded?: {
     'wp:featuredmedia'?: Array<{
       source_url: string;

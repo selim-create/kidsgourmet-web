@@ -197,6 +197,13 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
         </button>
         
+        {/* Expert Approved Badge - Top Right, below Favorite */}
+        {recipe.expert?.approved && (
+          <div className="absolute top-16 right-3 bg-green-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm" title="Uzman Onaylı">
+            <i className="fa-solid fa-user-check text-[10px]"></i>
+          </div>
+        )}
+        
         {/* Prep Time Badge - Bottom Right with glassmorphism */}
         {recipe.prep_time && (
           <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-lg text-white text-xs font-semibold shadow-lg">

@@ -39,6 +39,7 @@ interface FilterState {
   dietTypes: string[];
   specialConditions: string[];
   ingredientSearch: string;
+  expertApproved: boolean;
 }
 
 // Age Group with Display Label
@@ -85,6 +86,7 @@ function RecipesPageContent() {
     dietTypes: [],
     specialConditions: [],
     ingredientSearch: '',
+    expertApproved: false,
   });
 
   // Initialize filters from URL parameters
@@ -101,6 +103,7 @@ function RecipesPageContent() {
       dietTypes: dietType ? [dietType] : [],
       specialConditions: category ? [category] : [],
       ingredientSearch: ingredient || '',
+      expertApproved: false,
     };
 
     // URL parametreleri varsa filtreleri güncelle ve fetch tetikle
@@ -128,6 +131,7 @@ function RecipesPageContent() {
         ingredient: currentFilters.ingredientSearch,
         orderBy: orderBy as 'date' | 'popular' | 'prep_time',
         order: orderValue,
+        expertApproved: currentFilters.expertApproved,
       });
       
       // Response kontrolü
@@ -188,6 +192,7 @@ function RecipesPageContent() {
       dietTypes: [],
       specialConditions: [],
       ingredientSearch: '',
+      expertApproved: false,
     });
     setCurrentPage(1);
   };
@@ -365,6 +370,24 @@ function RecipesPageContent() {
                   </label>
                 ))}
               </div>
+            </div>
+
+            {/* Filter Group: Expert Approved */}
+            <div className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm">
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center font-sans">
+                <i className="fa-solid fa-user-doctor text-green-500 mr-2"></i> Uzman Onayı
+              </h3>
+              <label className="flex items-center space-x-3 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  className="w-5 h-5 rounded border-gray-300 text-green-500 focus:ring-green-500 accent-green-500"
+                  checked={filters.expertApproved}
+                  onChange={() => setFilters(prev => ({ ...prev, expertApproved: !prev.expertApproved }))}
+                />
+                <span className="text-gray-600 group-hover:text-green-500 transition-colors text-sm">
+                  Sadece Uzman Onaylı Tarifler
+                </span>
+              </label>
             </div>
 
             {/* Filter Group: Ingredient Search */}
@@ -629,6 +652,22 @@ function RecipesPageContent() {
                     </label>
                   ))}
                 </div>
+              </div>
+
+              {/* Expert Approved */}
+              <div>
+                <h4 className="font-bold text-sm text-gray-700 mb-3 flex items-center">
+                  <i className="fa-solid fa-user-doctor text-green-500 mr-2"></i> Uzman Onayı
+                </h4>
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="w-5 h-5 rounded border-gray-300 text-green-500 focus:ring-green-500 accent-green-500"
+                    checked={filters.expertApproved}
+                    onChange={() => setFilters(prev => ({ ...prev, expertApproved: !prev.expertApproved }))}
+                  />
+                  <span className="text-gray-600 text-sm">Sadece Uzman Onaylı Tarifler</span>
+                </label>
               </div>
 
               {/* Ingredient Search */}
