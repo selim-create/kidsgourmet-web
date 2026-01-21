@@ -488,6 +488,9 @@ export interface DiscussionAuthor {
   name: string;
   avatar: string | null;
   username?: string;
+  slug?: string;
+  role?: string;
+  roles?: string[];
 }
 
 export interface DiscussionCircle {

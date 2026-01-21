@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
@@ -14,6 +14,27 @@ import { useFavorites } from '@/hooks/use-favorites';
 
 const ReportModal = dynamic(() => import('@/components/ui/ReportModal'), { ssr: false });
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
+
+// Helper function to get profile URL based on user role
+function getProfileUrl(author: { 
+  id: number; 
+  username?: string; 
+  slug?: string; 
+  role?: string; 
+  roles?: string[] 
+}): string {
+  const username = author.username || author.slug || author.id.toString();
+  
+  // Check for expert roles
+  const expertRoles = ['kg_expert', 'kg-uzman', 'administrator', 'admin', 'editor'];
+  const userRoles = author.roles || (author.role ? [author.role] : []);
+  const isExpert = userRoles.some(role => expertRoles.includes(role.toLowerCase()));
+  
+  if (isExpert) {
+    return `/uzman/${username}`;
+  }
+  return `/profil/${username}`;
+}
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -29,8 +50,30 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState<{type: 'discussion' | 'comment', id: number} | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   
   const { toggleFavorite, isFavorite } = useFavorites();
+
+  // Click outside handler for dropdown menu
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+
+    if (showMenu) {
+      // Small delay to allow dropdown to open
+      setTimeout(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+      }, 100);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   useEffect(() => {
     async function fetchData() {
@@ -210,7 +253,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                 />
                                 <div>
                                     <Link 
-                                      href={`/profil/${discussion.author.username || discussion.author.id}`}
+                                      href={getProfileUrl(discussion.author)}
                                       className="font-bold text-slate-800 text-base hover:text-orange-500 transition-colors"
                                     >
                                       {discussion.author.name}
@@ -220,27 +263,42 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                             </div>
                             <div className="flex gap-2 items-center">
                                 {discussion.circle && (
-                                  <span 
-                                    className="px-3 py-1 rounded-full text-xs font-bold"
+                                  <Link
+                                    href={`/topluluk/odak/${discussion.circle.slug}`}
+                                    className="px-3 py-1 rounded-full text-xs font-bold hover:opacity-80 transition-opacity"
                                     style={{ 
                                       backgroundColor: `${discussion.circle.color_code}20`,
                                       color: discussion.circle.color_code
                                     }}
                                   >
                                     {discussion.circle.name}
-                                  </span>
+                                  </Link>
                                 )}
-                                <div className="relative group/menu">
-                                  <button className="text-gray-400 hover:text-slate-800 px-2">
+                                <div className="relative" ref={menuRef}>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowMenu(!showMenu);
+                                    }}
+                                    className="text-gray-400 hover:text-slate-800 px-2"
+                                  >
                                     <i className="fa-solid fa-ellipsis"></i>
                                   </button>
-                                  <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 py-2 min-w-[150px] z-50 hidden group-hover/menu:block">
-                                    <button 
-                                      onClick={() => handleReport('discussion', discussion.id)}
-                                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm text-gray-700"
+                                  {showMenu && (
+                                    <div 
+                                      className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 py-2 min-w-[150px] z-50"
+                                      onClick={(e) => e.stopPropagation()}
                                     >
-                                      <i className="fa-solid fa-flag"></i> Raporla
-                                    </button>
+                                      <button 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setShowMenu(false);
+                                          handleReport('discussion', discussion.id);
+                                        }}
+                                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm text-gray-700"
+                                      >
+                                        <i className="fa-solid fa-flag"></i> Raporla
+                                      </button>
                                   </div>
                                 </div>
                             </div>
@@ -343,7 +401,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                         />
                                         <div>
                                             <Link 
-                                              href={`/profil/${comment.author.username || comment.author.id}`}
+                                              href={getProfileUrl(comment.author)}
                                               className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
                                             >
                                               {comment.author.name}
