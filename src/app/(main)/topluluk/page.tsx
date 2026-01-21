@@ -145,27 +145,44 @@ function DiscussionCard({
       {/* Actions */}
       <div className="flex items-center justify-between border-t border-gray-50 pt-3">
         <div className="flex gap-4">
-          <button 
-            onClick={() => onVote(discussion.id, 'like')} 
-            className={`flex items-center gap-1.5 text-sm transition-colors ${
-              discussion.user_vote === 'like' 
-                ? 'text-green-500 font-medium' 
-                : 'text-gray-400 hover:text-green-500'
-            }`}
+          {/* Like Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onVote(discussion.id, 'like');
+            }}
+            className={`
+              flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm transition-all duration-200
+              ${discussion.user_vote === 'like'
+                ? 'text-green-600 bg-green-50 font-medium'
+                : 'text-gray-400 hover:text-green-500 hover:bg-green-50'
+              }
+            `}
           >
             <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
-            {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
+            <span>{discussion.like_count || 0}</span>
           </button>
-          <button 
-            onClick={() => onVote(discussion.id, 'dislike')} 
-            className={`flex items-center gap-1.5 text-sm transition-colors ${
-              discussion.user_vote === 'dislike' 
-                ? 'text-red-500 font-medium' 
-                : 'text-gray-400 hover:text-red-500'
-            }`}
+
+          {/* Dislike Button */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onVote(discussion.id, 'dislike');
+            }}
+            className={`
+              flex items-center gap-1.5 px-2 py-1 rounded-lg text-sm transition-all duration-200
+              ${discussion.user_vote === 'dislike'
+                ? 'text-red-600 bg-red-50 font-medium'
+                : 'text-gray-400 hover:text-red-500 hover:bg-red-50'
+              }
+            `}
           >
             <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
-            {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
+            <span>{discussion.dislike_count || 0}</span>
           </button>
           <Link 
             href={`/topluluk/${discussion.slug}`}
@@ -209,8 +226,16 @@ export default function CommunityPage() {
           getTopContributors(3)
         ]);
         
+        // Ensure all discussions have default values for vote counts
+        const discussionsWithDefaults = discussionsData.discussions.map(d => ({
+          ...d,
+          like_count: d.like_count ?? 0,
+          dislike_count: d.dislike_count ?? 0,
+          user_vote: d.user_vote ?? null,
+        }));
+        
         setCircles(circlesData);
-        setDiscussions(discussionsData.discussions);
+        setDiscussions(discussionsWithDefaults);
         setTopContributors(contributorsData);
       } catch (err) {
         console.error('Error fetching community data:', err);
@@ -233,7 +258,15 @@ export default function CommunityPage() {
         per_page: 20
       });
       
-      setDiscussions(discussionsData.discussions);
+      // Ensure all discussions have default values for vote counts
+      const discussionsWithDefaults = discussionsData.discussions.map(d => ({
+        ...d,
+        like_count: d.like_count ?? 0,
+        dislike_count: d.dislike_count ?? 0,
+        user_vote: d.user_vote ?? null,
+      }));
+      
+      setDiscussions(discussionsWithDefaults);
     } catch (err) {
       console.error('Error filtering discussions:', err);
     } finally {
@@ -260,7 +293,15 @@ export default function CommunityPage() {
           search: query.trim() || undefined
         });
         
-        setDiscussions(discussionsData.discussions);
+        // Ensure all discussions have default values for vote counts
+        const discussionsWithDefaults = discussionsData.discussions.map(d => ({
+          ...d,
+          like_count: d.like_count ?? 0,
+          dislike_count: d.dislike_count ?? 0,
+          user_vote: d.user_vote ?? null,
+        }));
+        
+        setDiscussions(discussionsWithDefaults);
       } catch (err) {
         console.error('Error searching discussions:', err);
       } finally {
@@ -274,18 +315,24 @@ export default function CommunityPage() {
   async function handleVote(discussionId: number, voteType: 'like' | 'dislike') {
     try {
       const result = await voteDiscussion(discussionId, voteType);
+      console.log('Vote result:', result); // Debug için
       
-      // Update the discussion in the list with API response values
-      setDiscussions(prev => prev.map(d => 
-        d.id === discussionId
-          ? { 
+      if (result.success) {
+        // Update the discussion in the list with API response values
+        setDiscussions(prev => prev.map(d => {
+          if (d.id === discussionId) {
+            const updated = { 
               ...d, 
               like_count: result.like_count ?? d.like_count, 
               dislike_count: result.dislike_count ?? d.dislike_count, 
               user_vote: result.user_vote as 'like' | 'dislike' | null 
-            }
-          : d
-      ));
+            };
+            console.log('Updated discussion:', updated); // Debug
+            return updated;
+          }
+          return d;
+        }));
+      }
     } catch (err) {
       console.error('Error voting on discussion:', err);
       toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');

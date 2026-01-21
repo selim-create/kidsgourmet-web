@@ -183,6 +183,7 @@ export async function voteDiscussion(
   voteType: 'like' | 'dislike'
 ): Promise<{
   success: boolean; 
+  action?: 'added' | 'removed' | 'changed';
   like_count: number; 
   dislike_count: number; 
   user_vote: string | null
@@ -201,6 +202,7 @@ export async function voteComment(
   voteType: 'like' | 'dislike'
 ): Promise<{
   success: boolean; 
+  action?: 'added' | 'removed' | 'changed';
   like_count: number; 
   dislike_count: number; 
   user_vote: string | null
