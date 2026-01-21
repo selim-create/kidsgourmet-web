@@ -62,6 +62,7 @@ export async function getDiscussions(params?: {
   per_page?: number;
   featured_only?: boolean;
   expert_answered?: boolean;
+  search?: string;
 }): Promise<DiscussionsResponse> {
   const searchParams = new URLSearchParams();
   
@@ -70,6 +71,7 @@ export async function getDiscussions(params?: {
   if (params?.per_page) searchParams.append('per_page', params.per_page.toString());
   if (params?.featured_only) searchParams.append('featured_only', '1');
   if (params?.expert_answered !== undefined) searchParams.append('expert_answered', params.expert_answered ? '1' : '0');
+  if (params?.search) searchParams.append('search', params.search);
   
   const query = searchParams.toString();
   const endpoint = query ? `${API_ENDPOINTS.DISCUSSIONS}?${query}` : API_ENDPOINTS.DISCUSSIONS;
@@ -171,4 +173,60 @@ export async function getTopContributors(limit: number = 3): Promise<TopContribu
     // Return empty array on error to prevent UI breaking
     return [];
   }
+}
+
+/**
+ * Tartışmaya oy ver (like/dislike toggle)
+ */
+export async function voteDiscussion(
+  discussionId: number, 
+  voteType: 'like' | 'dislike'
+): Promise<{
+  success: boolean; 
+  like_count: number; 
+  dislike_count: number; 
+  user_vote: string | null
+}> {
+  return fetchAuthAPI(`/kg/v1/community/discussions/${discussionId}/vote`, {
+    method: 'POST',
+    body: JSON.stringify({ vote_type: voteType }),
+  });
+}
+
+/**
+ * Yoruma oy ver (like/dislike toggle)
+ */
+export async function voteComment(
+  commentId: number, 
+  voteType: 'like' | 'dislike'
+): Promise<{
+  success: boolean; 
+  like_count: number; 
+  dislike_count: number; 
+  user_vote: string | null
+}> {
+  return fetchAuthAPI(`/kg/v1/community/comments/${commentId}/vote`, {
+    method: 'POST',
+    body: JSON.stringify({ vote_type: voteType }),
+  });
+}
+
+/**
+ * İçerik raporla (discussion veya comment)
+ */
+export async function reportContent(
+  contentType: 'discussion' | 'comment',
+  contentId: number,
+  reason: string,
+  description?: string
+): Promise<{ success: boolean; message: string }> {
+  return fetchAuthAPI('/kg/v1/community/report', {
+    method: 'POST',
+    body: JSON.stringify({ 
+      content_type: contentType, 
+      content_id: contentId, 
+      reason, 
+      description 
+    }),
+  });
 }

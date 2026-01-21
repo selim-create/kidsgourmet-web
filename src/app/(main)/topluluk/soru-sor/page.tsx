@@ -4,10 +4,16 @@ import React, { useState, useEffect, Suspense } from 'react';
 import Link from "next/link";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import dynamic from 'next/dynamic';
 import { getCircles, createDiscussion } from '@/lib/community';
 import type { Circle } from '@/lib/types';
 import { useUser } from '@/hooks/use-user';
 import AuthRequiredBanner from '@/components/ui/AuthRequiredBanner';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Placeholder from '@tiptap/extension-placeholder';
+
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
 function AskQuestionForm() {
   const router = useRouter();
@@ -22,6 +28,20 @@ function AskQuestionForm() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Durumu detaylıca anlatın, diğer annelerin tecrübelerine ihtiyacınız var...',
+      }),
+    ],
+    content: content,
+    onUpdate: ({ editor }) => {
+      setContent(editor.getHTML());
+    },
+  });
 
   // Initialize title from query parameter
   useEffect(() => {
@@ -102,7 +122,7 @@ function AskQuestionForm() {
     <div className="bg-gray-50 min-h-screen pb-24 lg:pb-12">
         
         {/* MOBILE BACK HEADER */}
-        <div className="lg:hidden bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-20 z-40">
+        <div className="lg:hidden bg-white border-b border-gray-100 px-4 pt-[25px] py-3 flex items-center gap-3 sticky top-20 z-40">
             <Link href="/topluluk" className="text-gray-500 text-lg"><i className="fa-solid fa-arrow-left"></i></Link>
             <span className="font-bold text-slate-800 text-sm">Soru Sor</span>
         </div>
@@ -126,18 +146,18 @@ function AskQuestionForm() {
                         {/* Circle Selection */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-3">
-                              İlgili Çemberi Seçin <span className="text-red-500">*</span>
+                              İlgili Odağı Seçin <span className="text-red-500">*</span>
                             </label>
                             {loading ? (
-                              <div className="text-sm text-gray-500">Çemberler yükleniyor...</div>
+                              <div className="text-sm text-gray-500">Odaklar yükleniyor...</div>
                             ) : (
-                              <div className="flex flex-wrap gap-3">
+                              <div className="flex gap-3 overflow-x-auto pb-2 hide-scroll">
                                   {circles.map((circle) => (
                                       <button
                                           key={circle.id}
                                           type="button"
                                           onClick={() => setSelectedCircleId(circle.id)}
-                                          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all border ${
+                                          className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all border ${
                                               selectedCircleId === circle.id
                                               ? 'border-orange-500 bg-orange-50 ring-2 ring-offset-1 ring-orange-500'
                                               : "border-gray-200 bg-white text-gray-600 hover:bg-gray-50"
@@ -177,21 +197,57 @@ function AskQuestionForm() {
                             )}
                         </div>
 
-                        {/* Content Input */}
+                        {/* Content Input with TipTap */}
                         <div>
-                            <label htmlFor="content" className="block text-sm font-bold text-gray-700 mb-2">
+                            <label className="block text-sm font-bold text-gray-700 mb-2">
                               Detaylar <span className="text-red-500">*</span>
                             </label>
-                            <textarea 
-                                id="content" 
-                                rows={6}
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                                placeholder="Durumu detaylıca anlatın, diğer annelerin tecrübelerine ihtiyacınız var..." 
-                                className={`w-full px-4 py-3 rounded-xl border ${
-                                  errors.content ? 'border-red-500' : 'border-gray-200'
-                                } focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 transition-all text-slate-800 placeholder-gray-400 resize-none`}
-                            ></textarea>
+                            <div className={`border ${errors.content ? 'border-red-500' : 'border-gray-200'} rounded-xl overflow-hidden`}>
+                              <div className="flex gap-1 p-2 bg-gray-50 border-b border-gray-200">
+                                <button 
+                                  type="button" 
+                                  onClick={() => editor?.chain().focus().toggleBold().run()} 
+                                  className={`p-2 rounded transition-colors ${editor?.isActive('bold') ? 'bg-orange-100 text-orange-500' : 'hover:bg-gray-100'}`}
+                                >
+                                  <i className="fa-solid fa-bold"></i>
+                                </button>
+                                <button 
+                                  type="button" 
+                                  onClick={() => editor?.chain().focus().toggleItalic().run()} 
+                                  className={`p-2 rounded transition-colors ${editor?.isActive('italic') ? 'bg-orange-100 text-orange-500' : 'hover:bg-gray-100'}`}
+                                >
+                                  <i className="fa-solid fa-italic"></i>
+                                </button>
+                                <button 
+                                  type="button" 
+                                  onClick={() => editor?.chain().focus().toggleBulletList().run()} 
+                                  className={`p-2 rounded transition-colors ${editor?.isActive('bulletList') ? 'bg-orange-100 text-orange-500' : 'hover:bg-gray-100'}`}
+                                >
+                                  <i className="fa-solid fa-list-ul"></i>
+                                </button>
+                                <div className="relative">
+                                  <button 
+                                    type="button" 
+                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)} 
+                                    className="p-2 rounded hover:bg-gray-100 transition-colors"
+                                  >
+                                    <i className="fa-regular fa-face-smile"></i>
+                                  </button>
+                                  {showEmojiPicker && (
+                                    <div className="absolute left-0 top-full mt-2 z-50">
+                                      <EmojiPicker onEmojiClick={(emoji) => {
+                                        editor?.chain().focus().insertContent(emoji.emoji).run();
+                                        setShowEmojiPicker(false);
+                                      }} />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <EditorContent 
+                                editor={editor} 
+                                className="p-4 min-h-[150px] prose prose-sm max-w-none focus:outline-none"
+                              />
+                            </div>
                             {errors.content && (
                               <p className="mt-2 text-sm text-red-600">{errors.content}</p>
                             )}

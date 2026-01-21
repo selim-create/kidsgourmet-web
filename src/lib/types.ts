@@ -487,6 +487,7 @@ export interface DiscussionAuthor {
   id: number;
   name: string;
   avatar: string | null;
+  username?: string;
 }
 
 export interface DiscussionCircle {
@@ -511,6 +512,15 @@ export interface Discussion {
   comment_count: number;
   created_at: string;
   type: 'discussion';
+  like_count: number;
+  dislike_count: number;
+  user_vote: 'like' | 'dislike' | null;
+  seo?: {
+    title: string;
+    description: string;
+    og_image: string;
+    canonical_url: string;
+  };
 }
 
 export interface DiscussionComment {
@@ -520,10 +530,14 @@ export interface DiscussionComment {
     id: number;
     name: string;
     avatar: string;
+    username?: string;
   };
   is_expert_comment: boolean;
   parent_id: number;
   created_at: string;
+  like_count: number;
+  dislike_count: number;
+  user_vote: 'like' | 'dislike' | null;
 }
 
 export interface DiscussionsResponse {

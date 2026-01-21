@@ -4,10 +4,16 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
-import { getDiscussionBySlug, getDiscussionComments, addComment, getDiscussions } from '@/lib/community';
+import dynamic from 'next/dynamic';
+import { getDiscussionBySlug, getDiscussionComments, addComment, getDiscussions, voteDiscussion, voteComment } from '@/lib/community';
 import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
 import type { Discussion, DiscussionComment } from '@/lib/types';
 import { EditButton } from '@/components/ui/EditButton';
+import ShareDropdown from '@/components/ui/ShareDropdown';
+import { useFavorites } from '@/hooks/use-favorites';
+
+const ReportModal = dynamic(() => import('@/components/ui/ReportModal'), { ssr: false });
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -19,6 +25,12 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const [error, setError] = useState<string | null>(null);
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState<{type: 'discussion' | 'comment', id: number} | null>(null);
+  
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     async function fetchData() {
@@ -78,6 +90,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       setComments(updatedComments);
       
       setCommentText('');
+      setIsExpanded(false);
       toast.success('Yorumunuz eklendi');
     } catch (err) {
       console.error('Error submitting comment:', err);
@@ -85,6 +98,42 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
     } finally {
       setSubmittingComment(false);
     }
+  }
+
+  async function handleVoteDiscussion(voteType: 'like' | 'dislike') {
+    if (!discussion) return;
+    
+    try {
+      const result = await voteDiscussion(discussion.id, voteType);
+      setDiscussion(prev => prev ? {
+        ...prev,
+        like_count: result.like_count,
+        dislike_count: result.dislike_count,
+        user_vote: result.user_vote as 'like' | 'dislike' | null
+      } : null);
+    } catch (err) {
+      console.error('Error voting on discussion:', err);
+      toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');
+    }
+  }
+
+  async function handleVoteComment(commentId: number, voteType: 'like' | 'dislike') {
+    try {
+      const result = await voteComment(commentId, voteType);
+      setComments(prev => prev.map(c =>
+        c.id === commentId
+          ? { ...c, like_count: result.like_count, dislike_count: result.dislike_count, user_vote: result.user_vote as 'like' | 'dislike' | null }
+          : c
+      ));
+    } catch (err) {
+      console.error('Error voting on comment:', err);
+      toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');
+    }
+  }
+
+  function handleReport(type: 'discussion' | 'comment', id: number) {
+    setReportTarget({ type, id });
+    setShowReportModal(true);
   }
 
   // Separate expert and non-expert comments
@@ -141,7 +190,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                             <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                             {discussion.circle && (
                               <>
-                                <li><Link href={`/topluluk/cember/${discussion.circle.slug}`} className="hover:text-orange-500">{discussion.circle.name}</Link></li>
+                                <li><Link href={`/topluluk/odak/${discussion.circle.slug}`} className="hover:text-orange-500">{discussion.circle.name}</Link></li>
                                 <li><i className="fa-solid fa-chevron-right text-xs text-gray-300"></i></li>
                               </>
                             )}
@@ -160,11 +209,16 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                   alt={discussion.author.name} 
                                 />
                                 <div>
-                                    <h3 className="font-bold text-slate-800 text-base">{discussion.author.name}</h3>
+                                    <Link 
+                                      href={`/profil/${discussion.author.username || discussion.author.id}`}
+                                      className="font-bold text-slate-800 text-base hover:text-orange-500 transition-colors"
+                                    >
+                                      {discussion.author.name}
+                                    </Link>
                                     <p className="text-xs text-gray-400">{formatRelativeTime(discussion.created_at)}</p>
                                 </div>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center">
                                 {discussion.circle && (
                                   <span 
                                     className="px-3 py-1 rounded-full text-xs font-bold"
@@ -176,7 +230,19 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                     {discussion.circle.name}
                                   </span>
                                 )}
-                                <button className="text-gray-400 hover:text-slate-800 px-2"><i className="fa-solid fa-ellipsis"></i></button>
+                                <div className="relative group/menu">
+                                  <button className="text-gray-400 hover:text-slate-800 px-2">
+                                    <i className="fa-solid fa-ellipsis"></i>
+                                  </button>
+                                  <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 py-2 min-w-[150px] z-50 hidden group-hover/menu:block">
+                                    <button 
+                                      onClick={() => handleReport('discussion', discussion.id)}
+                                      className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 text-sm text-gray-700"
+                                    >
+                                      <i className="fa-solid fa-flag"></i> Raporla
+                                    </button>
+                                  </div>
+                                </div>
                             </div>
                         </div>
                         
@@ -200,16 +266,34 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                         {/* Stats & Share */}
                         <div className="flex items-center justify-between pt-6 border-t border-gray-50">
                             <div className="flex gap-6">
-                                <button className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors font-medium">
-                                    <i className="fa-regular fa-heart text-xl"></i>
+                                <button 
+                                  onClick={() => handleVoteDiscussion('like')}
+                                  className={`flex items-center gap-2 ${discussion.user_vote === 'like' ? 'text-green-500' : 'text-gray-500 hover:text-green-500'} transition-colors font-medium`}
+                                >
+                                    <i className={`${discussion.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up text-xl`}></i>
+                                    {discussion.like_count > 0 && <span>{discussion.like_count}</span>}
+                                </button>
+                                <button 
+                                  onClick={() => handleVoteDiscussion('dislike')}
+                                  className={`flex items-center gap-2 ${discussion.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} transition-colors font-medium`}
+                                >
+                                    <i className={`${discussion.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down text-xl`}></i>
+                                    {discussion.dislike_count > 0 && <span>{discussion.dislike_count}</span>}
                                 </button>
                                 <button className="flex items-center gap-2 text-gray-500 hover:text-orange-500 transition-colors font-medium">
                                     <i className="fa-regular fa-comment text-xl"></i> {discussion.comment_count} Cevap
                                 </button>
+                                <button 
+                                  onClick={() => toggleFavorite(discussion.id, 'discussion')}
+                                  className={`flex items-center gap-2 ${isFavorite(discussion.id, 'discussion') ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} transition-colors font-medium`}
+                                >
+                                    <i className={`${isFavorite(discussion.id, 'discussion') ? 'fa-solid' : 'fa-regular'} fa-heart text-xl`}></i>
+                                </button>
                             </div>
-                            <button className="text-gray-400 hover:text-brand-secondary transition-colors">
-                                <i className="fa-solid fa-share-nodes text-xl"></i>
-                            </button>
+                            <ShareDropdown 
+                              url={typeof window !== 'undefined' ? window.location.href : ''} 
+                              title={discussion.title}
+                            />
                         </div>
                     </div>
 
@@ -258,20 +342,41 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                           alt={comment.author.name} 
                                         />
                                         <div>
-                                            <h4 className="font-bold text-slate-800 text-sm">{comment.author.name}</h4>
+                                            <Link 
+                                              href={`/profil/${comment.author.username || comment.author.id}`}
+                                              className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
+                                            >
+                                              {comment.author.name}
+                                            </Link>
                                             <p className="text-xs text-gray-400">{formatRelativeTime(comment.created_at)}</p>
                                         </div>
                                     </div>
+                                    <button 
+                                      onClick={() => handleReport('comment', comment.id)}
+                                      className="text-gray-400 hover:text-slate-800 text-sm"
+                                    >
+                                      <i className="fa-solid fa-flag"></i>
+                                    </button>
                                 </div>
                                 <div 
                                   className="text-sm text-gray-600 mb-3"
                                   dangerouslySetInnerHTML={{ __html: sanitizeHTML(comment.content) }}
                                 />
                                 <div className="flex gap-4">
-                                    <button className="text-xs font-bold text-gray-500 hover:text-orange-500">
-                                      <i className="fa-regular fa-thumbs-up mr-1"></i> Beğen
+                                    <button 
+                                      onClick={() => handleVoteComment(comment.id, 'like')}
+                                      className={`flex items-center gap-1 text-xs font-bold ${comment.user_vote === 'like' ? 'text-green-500' : 'text-gray-500 hover:text-green-500'} transition-colors`}
+                                    >
+                                      <i className={`${comment.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+                                      {comment.like_count > 0 && <span>{comment.like_count}</span>}
                                     </button>
-                                    <button className="text-xs font-bold text-gray-500 hover:text-orange-500">Yanıtla</button>
+                                    <button 
+                                      onClick={() => handleVoteComment(comment.id, 'dislike')}
+                                      className={`flex items-center gap-1 text-xs font-bold ${comment.user_vote === 'dislike' ? 'text-red-500' : 'text-gray-500 hover:text-red-500'} transition-colors`}
+                                    >
+                                      <i className={`${comment.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+                                      {comment.dislike_count > 0 && <span>{comment.dislike_count}</span>}
+                                    </button>
                                 </div>
                             </div>
                           ))}
@@ -361,30 +466,70 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                     <form onSubmit={handleSubmitComment} className="bg-white lg:p-0 rounded-2xl flex gap-3 items-center">
                         <img src="https://placehold.co/100x100/FFCC80/ffffff?text=Siz" className="w-10 h-10 rounded-full bg-gray-100 hidden lg:block" alt="You" />
                         <div className="flex-1 relative">
-                            <input 
-                              type="text" 
-                              value={commentText}
-                              onChange={(e) => setCommentText(e.target.value)}
-                              disabled={submittingComment}
-                              placeholder="Bir cevap yaz..." 
-                              className="w-full bg-gray-50 border border-gray-200 rounded-full py-3 px-5 pr-12 text-sm focus:outline-none focus:border-orange-500 transition-colors disabled:opacity-50" 
-                            />
-                            <button 
-                              type="submit"
-                              disabled={submittingComment || !commentText.trim()}
-                              className="absolute right-2 top-1.5 text-orange-500 hover:bg-orange-50 p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {submittingComment ? (
-                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
-                                ) : (
-                                  <i className="fa-solid fa-paper-plane"></i>
+                            {isExpanded ? (
+                              <>
+                                <textarea
+                                  value={commentText}
+                                  onChange={(e) => setCommentText(e.target.value)}
+                                  placeholder="Bir cevap yaz..."
+                                  rows={4}
+                                  disabled={submittingComment}
+                                  className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 pr-24 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50"
+                                />
+                                <div className="absolute bottom-2 right-2 flex gap-2">
+                                  <button 
+                                    type="button" 
+                                    onClick={() => setShowEmojiPicker(!showEmojiPicker)} 
+                                    className="text-gray-400 hover:text-orange-500 p-2 transition-colors"
+                                  >
+                                    <i className="fa-regular fa-face-smile"></i>
+                                  </button>
+                                  <button 
+                                    type="submit" 
+                                    disabled={submittingComment || !commentText.trim()}
+                                    className="text-orange-500 hover:bg-orange-50 p-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    {submittingComment ? (
+                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
+                                    ) : (
+                                      <i className="fa-solid fa-paper-plane"></i>
+                                    )}
+                                  </button>
+                                </div>
+                                {showEmojiPicker && (
+                                  <div className="absolute bottom-full right-0 mb-2 z-50">
+                                    <EmojiPicker onEmojiClick={(emoji) => {
+                                      setCommentText(prev => prev + emoji.emoji);
+                                      setShowEmojiPicker(false);
+                                    }} />
+                                  </div>
                                 )}
-                            </button>
+                              </>
+                            ) : (
+                              <input 
+                                type="text" 
+                                onClick={() => setIsExpanded(true)}
+                                placeholder="Bir cevap yaz..." 
+                                className="w-full bg-gray-50 border border-gray-200 rounded-full py-3 px-5 pr-12 text-sm focus:outline-none focus:border-orange-500 transition-colors" 
+                              />
+                            )}
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+
+        {/* Report Modal */}
+        {showReportModal && reportTarget && (
+          <ReportModal
+            contentType={reportTarget.type}
+            contentId={reportTarget.id}
+            onClose={() => {
+              setShowReportModal(false);
+              setReportTarget(null);
+            }}
+          />
+        )}
 
     </div>
   );
