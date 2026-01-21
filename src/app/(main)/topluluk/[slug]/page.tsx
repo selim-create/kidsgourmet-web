@@ -73,13 +73,8 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         const fetchedComments = await getDiscussionComments(discussionWithDefaults.id);
         console.log('Fetched comments:', fetchedComments); // Debug
         
-        // Handle both array and object response formats
-        const commentsArray: DiscussionComment[] = Array.isArray(fetchedComments) 
-          ? fetchedComments 
-          : (fetchedComments as { comments?: DiscussionComment[] })?.comments || [];
-        
         // Ensure all comments have default values for vote counts
-        const commentsWithDefaults = commentsArray.map(ensureCommentDefaults);
+        const commentsWithDefaults = fetchedComments.map(ensureCommentDefaults);
         
         setComments(commentsWithDefaults);
         
@@ -126,13 +121,8 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       const updatedComments = await getDiscussionComments(discussion.id);
       console.log('Updated comments:', updatedComments); // Debug
       
-      // Handle both array and object response formats
-      const commentsArray: DiscussionComment[] = Array.isArray(updatedComments) 
-        ? updatedComments 
-        : (updatedComments as { comments?: DiscussionComment[] })?.comments || [];
-      
       // Ensure all comments have default values for vote counts
-      const commentsWithDefaults = commentsArray.map(ensureCommentDefaults);
+      const commentsWithDefaults = updatedComments.map(ensureCommentDefaults);
       
       setComments(commentsWithDefaults);
       
@@ -154,12 +144,56 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       const result = await voteDiscussion(discussion.id, voteType);
       console.log('Vote result (detail):', result); // Debug
       
-      setDiscussion(prev => prev ? {
-        ...prev,
-        like_count: result.like_count ?? prev.like_count,
-        dislike_count: result.dislike_count ?? prev.dislike_count,
-        user_vote: result.user_vote as 'like' | 'dislike' | null
-      } : null);
+      setDiscussion(prev => {
+        if (!prev) return null;
+        
+        let newLikeCount = prev.like_count;
+        let newDislikeCount = prev.dislike_count;
+        let newUserVote: 'like' | 'dislike' | null = prev.user_vote;
+        
+        // If API returns counts directly, use them
+        if (result.like_count !== undefined && result.dislike_count !== undefined) {
+          newLikeCount = result.like_count;
+          newDislikeCount = result.dislike_count;
+          newUserVote = result.user_vote as 'like' | 'dislike' | null;
+        } else if (result.action) {
+          // Optimistic update based on action
+          if (result.action === 'added') {
+            // New vote added
+            newUserVote = voteType;
+            if (voteType === 'like') {
+              newLikeCount = prev.like_count + 1;
+            } else {
+              newDislikeCount = prev.dislike_count + 1;
+            }
+          } else if (result.action === 'removed') {
+            // Vote removed (clicked same button again)
+            newUserVote = null;
+            if (voteType === 'like') {
+              newLikeCount = Math.max(0, prev.like_count - 1);
+            } else {
+              newDislikeCount = Math.max(0, prev.dislike_count - 1);
+            }
+          } else if (result.action === 'updated' || result.action === 'changed') {
+            // Vote changed (from like to dislike or vice versa)
+            newUserVote = voteType;
+            if (voteType === 'like') {
+              newLikeCount = prev.like_count + 1;
+              newDislikeCount = Math.max(0, prev.dislike_count - 1);
+            } else {
+              newDislikeCount = prev.dislike_count + 1;
+              newLikeCount = Math.max(0, prev.like_count - 1);
+            }
+          }
+        }
+        
+        return {
+          ...prev,
+          like_count: newLikeCount,
+          dislike_count: newDislikeCount,
+          user_vote: newUserVote
+        };
+      });
     } catch (err) {
       console.error('Error voting on discussion:', err);
       toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');
@@ -171,16 +205,56 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       const result = await voteComment(commentId, voteType);
       console.log('Comment vote result:', result); // Debug
       
-      setComments(prev => prev.map(c =>
-        c.id === commentId
-          ? { 
-              ...c, 
-              like_count: result.like_count ?? c.like_count, 
-              dislike_count: result.dislike_count ?? c.dislike_count, 
-              user_vote: result.user_vote as 'like' | 'dislike' | null 
+      setComments(prev => prev.map(c => {
+        if (c.id !== commentId) return c;
+        
+        let newLikeCount = c.like_count;
+        let newDislikeCount = c.dislike_count;
+        let newUserVote: 'like' | 'dislike' | null = c.user_vote;
+        
+        // If API returns counts directly, use them
+        if (result.like_count !== undefined && result.dislike_count !== undefined) {
+          newLikeCount = result.like_count;
+          newDislikeCount = result.dislike_count;
+          newUserVote = result.user_vote as 'like' | 'dislike' | null;
+        } else if (result.action) {
+          // Optimistic update based on action
+          if (result.action === 'added') {
+            // New vote added
+            newUserVote = voteType;
+            if (voteType === 'like') {
+              newLikeCount = c.like_count + 1;
+            } else {
+              newDislikeCount = c.dislike_count + 1;
             }
-          : c
-      ));
+          } else if (result.action === 'removed') {
+            // Vote removed (clicked same button again)
+            newUserVote = null;
+            if (voteType === 'like') {
+              newLikeCount = Math.max(0, c.like_count - 1);
+            } else {
+              newDislikeCount = Math.max(0, c.dislike_count - 1);
+            }
+          } else if (result.action === 'updated' || result.action === 'changed') {
+            // Vote changed (from like to dislike or vice versa)
+            newUserVote = voteType;
+            if (voteType === 'like') {
+              newLikeCount = c.like_count + 1;
+              newDislikeCount = Math.max(0, c.dislike_count - 1);
+            } else {
+              newDislikeCount = c.dislike_count + 1;
+              newLikeCount = Math.max(0, c.like_count - 1);
+            }
+          }
+        }
+        
+        return {
+          ...c,
+          like_count: newLikeCount,
+          dislike_count: newDislikeCount,
+          user_vote: newUserVote
+        };
+      }));
     } catch (err) {
       console.error('Error voting on comment:', err);
       toast.error('Oy kullanırken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');

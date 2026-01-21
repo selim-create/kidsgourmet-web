@@ -101,7 +101,23 @@ export async function getDiscussionBySlug(slug: string): Promise<Discussion> {
  * Bir tartışmanın yorumlarını getir
  */
 export async function getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
-  return fetchAPI<DiscussionComment[]>(API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId));
+  const response = await fetchAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(
+    API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId)
+  );
+  
+  // Handle both array and object response formats
+  if (Array.isArray(response)) {
+    return response;
+  }
+  
+  // If response is an object with comments property
+  if (response && typeof response === 'object' && 'comments' in response) {
+    return response.comments || [];
+  }
+  
+  // Fallback to empty array
+  console.warn('Unexpected comment response format:', response);
+  return [];
 }
 
 /**

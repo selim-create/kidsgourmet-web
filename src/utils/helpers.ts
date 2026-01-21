@@ -230,6 +230,21 @@ export function slugify(text: string): string {
 }
 
 /**
+ * Slugify for usernames - removes spaces instead of converting to hyphens
+ */
+export function slugifyUsername(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/ğ/g, 'g')
+    .replace(/ü/g, 'u')
+    .replace(/ş/g, 's')
+    .replace(/ı/g, 'i')
+    .replace(/ö/g, 'o')
+    .replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]/g, ''); // Remove all non-alphanumeric characters (including spaces)
+}
+
+/**
  * Get profile URL for discussion/comment authors
  * Uses username if available, falls back to slugified name, or ID
  * 
@@ -249,9 +264,9 @@ export function getProfileUrl(author: {
   // Find username - try different field names
   let username = author.username || author.slug || author.user_login;
   
-  // If no username, try to generate from name
+  // If no username, try to generate from name (remove spaces, don't use hyphens)
   if (!username && author.name) {
-    const slugified = slugify(author.name);
+    const slugified = slugifyUsername(author.name);
     // Validate slugified result (at least 2 chars, valid URL characters)
     username = (slugified && slugified.length >= 2) ? slugified : undefined;
   }
