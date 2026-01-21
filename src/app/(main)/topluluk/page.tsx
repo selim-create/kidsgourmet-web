@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from "next/link";
 import { toast } from 'sonner';
 import { getCircles, getDiscussions, getTopContributors, voteDiscussion } from '@/lib/community';
-import { formatRelativeTime, getProfileUrl, decodeHtmlEntities } from '@/utils/helpers';
+import { formatRelativeTime, getProfileUrl, decodeHtmlEntities, ensureDiscussionDefaults } from '@/utils/helpers';
 import type { Circle, Discussion, TopContributor } from '@/lib/types';
 import { useFavorites } from '@/hooks/use-favorites';
 
@@ -227,12 +227,7 @@ export default function CommunityPage() {
         ]);
         
         // Ensure all discussions have default values for vote counts
-        const discussionsWithDefaults = discussionsData.discussions.map(d => ({
-          ...d,
-          like_count: d.like_count ?? 0,
-          dislike_count: d.dislike_count ?? 0,
-          user_vote: d.user_vote ?? null,
-        }));
+        const discussionsWithDefaults = discussionsData.discussions.map(ensureDiscussionDefaults);
         
         setCircles(circlesData);
         setDiscussions(discussionsWithDefaults);
@@ -259,12 +254,7 @@ export default function CommunityPage() {
       });
       
       // Ensure all discussions have default values for vote counts
-      const discussionsWithDefaults = discussionsData.discussions.map(d => ({
-        ...d,
-        like_count: d.like_count ?? 0,
-        dislike_count: d.dislike_count ?? 0,
-        user_vote: d.user_vote ?? null,
-      }));
+      const discussionsWithDefaults = discussionsData.discussions.map(ensureDiscussionDefaults);
       
       setDiscussions(discussionsWithDefaults);
     } catch (err) {
@@ -294,12 +284,7 @@ export default function CommunityPage() {
         });
         
         // Ensure all discussions have default values for vote counts
-        const discussionsWithDefaults = discussionsData.discussions.map(d => ({
-          ...d,
-          like_count: d.like_count ?? 0,
-          dislike_count: d.dislike_count ?? 0,
-          user_vote: d.user_vote ?? null,
-        }));
+        const discussionsWithDefaults = discussionsData.discussions.map(ensureDiscussionDefaults);
         
         setDiscussions(discussionsWithDefaults);
       } catch (err) {

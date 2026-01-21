@@ -285,3 +285,35 @@ export function stripHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   return doc.body.textContent || '';
 }
+
+/**
+ * Ensure discussion has default values for vote counts
+ */
+export function ensureDiscussionDefaults<T extends { 
+  like_count?: number | null; 
+  dislike_count?: number | null; 
+  user_vote?: string | null;
+}>(discussion: T): T {
+  return {
+    ...discussion,
+    like_count: discussion.like_count ?? 0,
+    dislike_count: discussion.dislike_count ?? 0,
+    user_vote: discussion.user_vote ?? null,
+  };
+}
+
+/**
+ * Ensure comment has default values for vote counts
+ */
+export function ensureCommentDefaults<T extends { 
+  like_count?: number | null; 
+  dislike_count?: number | null; 
+  user_vote?: string | null;
+}>(comment: T): T {
+  return {
+    ...comment,
+    like_count: comment.like_count ?? 0,
+    dislike_count: comment.dislike_count ?? 0,
+    user_vote: comment.user_vote ?? null,
+  };
+}

@@ -6,7 +6,7 @@ import { use } from 'react';
 import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import { getDiscussionBySlug, getDiscussionComments, addComment, getDiscussions, voteDiscussion, voteComment } from '@/lib/community';
-import { formatRelativeTime, getProfileUrl, decodeHtmlEntities } from '@/utils/helpers';
+import { formatRelativeTime, getProfileUrl, decodeHtmlEntities, ensureDiscussionDefaults, ensureCommentDefaults } from '@/utils/helpers';
 import type { Discussion, DiscussionComment } from '@/lib/types';
 import { EditButton } from '@/components/ui/EditButton';
 import ShareDropdown from '@/components/ui/ShareDropdown';
@@ -65,12 +65,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         const discussionData = await getDiscussionBySlug(slug);
         
         // Ensure discussion has default values for vote counts
-        const discussionWithDefaults = {
-          ...discussionData,
-          like_count: discussionData.like_count ?? 0,
-          dislike_count: discussionData.dislike_count ?? 0,
-          user_vote: discussionData.user_vote ?? null,
-        };
+        const discussionWithDefaults = ensureDiscussionDefaults(discussionData);
         
         setDiscussion(discussionWithDefaults);
         
@@ -79,17 +74,12 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
         console.log('Fetched comments:', fetchedComments); // Debug
         
         // Handle both array and object response formats
-        const commentsArray = Array.isArray(fetchedComments) 
+        const commentsArray: DiscussionComment[] = Array.isArray(fetchedComments) 
           ? fetchedComments 
-          : (fetchedComments as any)?.comments || [];
+          : (fetchedComments as { comments?: DiscussionComment[] })?.comments || [];
         
         // Ensure all comments have default values for vote counts
-        const commentsWithDefaults = commentsArray.map((c: any) => ({
-          ...c,
-          like_count: c.like_count ?? 0,
-          dislike_count: c.dislike_count ?? 0,
-          user_vote: c.user_vote ?? null,
-        }));
+        const commentsWithDefaults = commentsArray.map(ensureCommentDefaults);
         
         setComments(commentsWithDefaults);
         
@@ -137,17 +127,12 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       console.log('Updated comments:', updatedComments); // Debug
       
       // Handle both array and object response formats
-      const commentsArray = Array.isArray(updatedComments) 
+      const commentsArray: DiscussionComment[] = Array.isArray(updatedComments) 
         ? updatedComments 
-        : (updatedComments as any)?.comments || [];
+        : (updatedComments as { comments?: DiscussionComment[] })?.comments || [];
       
       // Ensure all comments have default values for vote counts
-      const commentsWithDefaults = commentsArray.map((c: any) => ({
-        ...c,
-        like_count: c.like_count ?? 0,
-        dislike_count: c.dislike_count ?? 0,
-        user_vote: c.user_vote ?? null,
-      }));
+      const commentsWithDefaults = commentsArray.map(ensureCommentDefaults);
       
       setComments(commentsWithDefaults);
       
