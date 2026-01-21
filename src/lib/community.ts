@@ -99,25 +99,54 @@ export async function getDiscussionBySlug(slug: string): Promise<Discussion> {
 
 /**
  * Bir tartışmanın yorumlarını getir
+ * Try fetchAuthAPI first (for authenticated users), fallback to fetchAPI (for guests)
  */
 export async function getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
-  const response = await fetchAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(
-    API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId)
-  );
-  
-  // Handle both array and object response formats
-  if (Array.isArray(response)) {
-    return response;
+  try {
+    // Try with authentication first
+    const response = await fetchAuthAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(
+      API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId)
+    );
+    
+    // Handle both array and object response formats
+    if (Array.isArray(response)) {
+      return response;
+    }
+    
+    // If response is an object with comments property
+    if (response && typeof response === 'object' && 'comments' in response) {
+      return response.comments || [];
+    }
+    
+    // Fallback to empty array
+    console.warn('Unexpected comment response format:', response);
+    return [];
+  } catch (error) {
+    // If auth fails (user not logged in), try without auth
+    try {
+      const response = await fetchAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(
+        API_ENDPOINTS.DISCUSSION_COMMENTS(discussionId)
+      );
+      
+      // Handle both array and object response formats
+      if (Array.isArray(response)) {
+        return response;
+      }
+      
+      // If response is an object with comments property
+      if (response && typeof response === 'object' && 'comments' in response) {
+        return response.comments || [];
+      }
+      
+      // Fallback to empty array
+      console.warn('Unexpected comment response format:', response);
+      return [];
+    } catch (fallbackError) {
+      // If both fail, log and return empty array
+      console.error('Error fetching comments:', fallbackError);
+      return [];
+    }
   }
-  
-  // If response is an object with comments property
-  if (response && typeof response === 'object' && 'comments' in response) {
-    return response.comments || [];
-  }
-  
-  // Fallback to empty array
-  console.warn('Unexpected comment response format:', response);
-  return [];
 }
 
 /**
