@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { blogService, BlogPost } from '@/services/blog-service';
 import BlogCard from '@/components/features/BlogCard';
+import { InContentAd } from '@/components/ads';
 
 export default function BlogListClient() {
   const [activeCategory, setActiveCategory] = useState<number | "Tümü">("Tümü");
@@ -139,14 +140,21 @@ export default function BlogListClient() {
 
             {/* BLOG GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
+              {posts.map((post, index) => (
                 // Featured post'u listede tekrar gösterme (sadece "Tümü" sekmesinde ve ilk sayfada)
                 (activeCategory !== "Tümü" || currentPage !== 1 || post.id !== featuredPost?.id) && (
-                  <BlogCard 
-                    key={post.id}
-                    post={post}
-                    categories={categories}
-                  />
+                  <React.Fragment key={post.id}>
+                    <BlogCard 
+                      post={post}
+                      categories={categories}
+                    />
+                    {/* Insert ad after every 6 posts */}
+                    {(index + 1) % 6 === 0 && index < posts.length - 1 && (
+                      <div className="col-span-full">
+                        <InContentAd />
+                      </div>
+                    )}
+                  </React.Fragment>
                 )
               ))}
             </div>
