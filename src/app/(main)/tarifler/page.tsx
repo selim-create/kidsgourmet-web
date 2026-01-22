@@ -14,6 +14,7 @@ import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import RecipeCard from '@/components/ui/RecipeCard';
+import { InContentAd } from '@/components/ads';
 
 // Yaş Grubu Sıralaması
 const AGE_GROUPS_ORDER = [
@@ -464,11 +465,18 @@ function RecipesPageContent() {
                       <span className="text-green-500">✓</span> Çocuğunuz için Önerilen Tarifler
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {suitableRecipes.map((recipe) => (
-                        <RecipeCard 
-                          key={recipe.id} 
-                          recipe={recipe}
-                        />
+                      {suitableRecipes.map((recipe, index) => (
+                        <React.Fragment key={recipe.id}>
+                          <RecipeCard 
+                            recipe={recipe}
+                          />
+                          {/* Insert ad after every 6 recipes */}
+                          {(index + 1) % 6 === 0 && index < suitableRecipes.length - 1 && (
+                            <div className="col-span-full">
+                              <InContentAd />
+                            </div>
+                          )}
+                        </React.Fragment>
                       ))}
                     </div>
                   </section>
@@ -479,11 +487,18 @@ function RecipesPageContent() {
                   <section>
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Diğer Tarifler</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {otherRecipes.map((recipe) => (
-                        <RecipeCard 
-                          key={recipe.id} 
-                          recipe={recipe}
-                        />
+                      {otherRecipes.map((recipe, index) => (
+                        <React.Fragment key={recipe.id}>
+                          <RecipeCard 
+                            recipe={recipe}
+                          />
+                          {/* Insert ad after every 6 recipes */}
+                          {(index + 1) % 6 === 0 && index < otherRecipes.length - 1 && (
+                            <div className="col-span-full">
+                              <InContentAd />
+                            </div>
+                          )}
+                        </React.Fragment>
                       ))}
                     </div>
                   </section>
@@ -492,11 +507,18 @@ function RecipesPageContent() {
                 {/* All Recipes (when no profile) */}
                 {!profile.birthDate && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recipes.map((recipe) => (
-                      <RecipeCard 
-                        key={recipe.id} 
-                        recipe={recipe}
-                      />
+                    {recipes.map((recipe, index) => (
+                      <React.Fragment key={recipe.id}>
+                        <RecipeCard 
+                          recipe={recipe}
+                        />
+                        {/* Insert ad after every 6 recipes */}
+                        {(index + 1) % 6 === 0 && index < recipes.length - 1 && (
+                          <div className="col-span-full">
+                            <InContentAd />
+                          </div>
+                        )}
+                      </React.Fragment>
                     ))}
                   </div>
                 )}

@@ -16,6 +16,7 @@ import NewsletterForm from '@/components/common/NewsletterForm';
 import RecipeCard from '@/components/ui/RecipeCard';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
 import ContentWithEmbeds from '@/components/embeds/ContentWithEmbeds';
+import { SidebarAds, InContentAd } from '@/components/ads';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -636,6 +637,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                       />
                     </div>
 
+                    {/* In-Content Ad after main content */}
+                    <InContentAd className="my-8" />
+
                     {/* Expert Approval - Uzman Notu */}
                     {post.expert && post.expert.approved && (
                       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-4 md:p-5 mt-8">
@@ -876,6 +880,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 {/* RIGHT: SIDEBAR (Sticky) */}
                 <aside className="hidden lg:block w-80 flex-shrink-0">
                     <div className="sticky top-24 space-y-8">
+                        
+                        {/* Sidebar Ads */}
+                        <SidebarAds />
                         
                         {/* Table of Contents (Dynamic) */}
                         {headings.length > 0 && (

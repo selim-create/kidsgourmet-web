@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
+import { InContentAd } from '@/components/ads';
 
 export default function ExpertsListPage() {
   const router = useRouter();
@@ -74,11 +75,11 @@ export default function ExpertsListPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {experts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {experts.map((expert) => (
-              <div
-                key={expert.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group cursor-pointer"
-                onClick={() => router.push(`/uzman/${expert.username}`)}
+            {experts.map((expert, index) => (
+              <React.Fragment key={expert.id}>
+                <div
+                  className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all overflow-hidden group cursor-pointer"
+                  onClick={() => router.push(`/uzman/${expert.username}`)}
               >
                 {/* Header with Avatar */}
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 text-center border-b border-gray-100">
@@ -224,6 +225,13 @@ export default function ExpertsListPage() {
                   </div>
                 </div>
               </div>
+              {/* Insert ad after every 6 experts */}
+              {(index + 1) % 6 === 0 && index < experts.length - 1 && (
+                <div className="col-span-full">
+                  <InContentAd />
+                </div>
+              )}
+            </React.Fragment>
             ))}
           </div>
         ) : (

@@ -15,6 +15,7 @@ import { useUser } from '@/hooks/use-user';
 import FeaturedSlider from '@/components/features/FeaturedSlider';
 import BlogSection from '@/components/features/BlogSection';
 import RecipeCardComponent from '@/components/ui/RecipeCard';
+import { InContentAd } from '@/components/ads';
 
 // --- HOME PAGE ---
 export default function Home() {
@@ -309,6 +310,9 @@ export default function Home() {
         </div>
       )}
 
+      {/* In-Content Ad after FeaturedSlider */}
+      <InContentAd className="my-6" />
+
       {/* QUICK SEARCH (With Age Filter) */}
       <div className="bg-white -mt-6 relative z-10 rounded-t-[3rem] shadow-[0_-10px_40px_rgba(0,0,0,0.02)]">
           <div className="max-w-7xl mx-auto px-4 py-8">
@@ -539,6 +543,9 @@ export default function Home() {
               </div>
           </div>
       </div>
+
+      {/* In-Content Ad before BlogSection */}
+      <InContentAd className="my-6" />
 
       {/* BLOG SECTION */}
       <BlogSection posts={filteredPosts} />
