@@ -13,19 +13,52 @@ import { AdSlot } from './AdSlot';
 interface AdZoneProps {
   placement: AdPlacement;
   className?: string;
+  style?: React.CSSProperties;
+  debug?: boolean;
   limit?: number;
 }
 
-export function AdZone({ placement, className = '', limit }: AdZoneProps) {
-  const { getSlotsByPlacement, loading, initialized, isDebugMode, adsEnabled } = useAds();
+export function AdZone({ placement, className = '', style, debug = false, limit }: AdZoneProps) {
+  const { getSlotsByPlacement, loading, initialized, isDebugMode, adsEnabled, config } = useAds();
   const deviceType = useDeviceType();
 
-  // Don't render anything if ads are disabled
-  if (!adsEnabled) {
+  // Show debug info if debug mode is enabled globally or via prop
+  const showDebug = debug || isDebugMode;
+
+  // Debug logging
+  if (showDebug) {
+    console.log(`🔧 [AdZone:${placement}] adsEnabled=${adsEnabled}, initialized=${initialized}, loading=${loading}`);
+  }
+
+  // Don't render anything if ads are disabled (but show debug if debug mode)
+  if (!adsEnabled && !showDebug) {
     return null;
   }
 
-  // Don't render anything while loading or before initialization
+  // Show loading/debug state
+  if (showDebug && (loading || !initialized)) {
+    return (
+      <div 
+        className={`ad-zone-debug ${className}`}
+        style={{
+          padding: '20px',
+          backgroundColor: '#e3f2fd',
+          border: '2px dashed #1976d2',
+          borderRadius: '4px',
+          textAlign: 'center',
+          fontFamily: 'monospace',
+          fontSize: '12px',
+          ...style,
+        }}
+      >
+        <div>🔄 Loading ads... (placement: {placement})</div>
+        <div>adsEnabled: {String(adsEnabled)}</div>
+        <div>initialized: {String(initialized)}</div>
+      </div>
+    );
+  }
+
+  // Don't render anything while loading or before initialization (non-debug)
   if (loading || !initialized) {
     return null;
   }
@@ -65,13 +98,13 @@ export function AdZone({ placement, className = '', limit }: AdZoneProps) {
     return (
       <div 
         className={`ad-zone ad-zone-mobile-sticky fixed bottom-0 left-0 right-0 z-40 bg-white shadow-lg ${className}`.trim()}
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)', ...style }}
       >
         {displaySlots.map((slot) => (
           <AdSlot
             key={slot.slot_id || slot.slotId || slot.id}
             slotId={slot.slot_id || slot.slotId || slot.id}
-            debug={isDebugMode}
+            debug={showDebug}
           />
         ))}
       </div>
@@ -86,12 +119,12 @@ export function AdZone({ placement, className = '', limit }: AdZoneProps) {
     }
     
     return (
-      <div className={`ad-zone ad-zone-sidebar-sticky sticky top-24 ${className}`.trim()}>
+      <div className={`ad-zone ad-zone-sidebar-sticky sticky top-24 ${className}`.trim()} style={style}>
         {displaySlots.map((slot) => (
           <AdSlot
             key={slot.slot_id || slot.slotId || slot.id}
             slotId={slot.slot_id || slot.slotId || slot.id}
-            debug={isDebugMode}
+            debug={showDebug}
           />
         ))}
       </div>
@@ -100,12 +133,12 @@ export function AdZone({ placement, className = '', limit }: AdZoneProps) {
 
   // Default rendering
   return (
-    <div className={`ad-zone ad-zone-${placement} ${className}`.trim()}>
+    <div className={`ad-zone ad-zone-${placement} ${className}`.trim()} style={style}>
       {displaySlots.map((slot) => (
         <AdSlot
           key={slot.slot_id || slot.slotId || slot.id}
           slotId={slot.slot_id || slot.slotId || slot.id}
-          debug={isDebugMode}
+          debug={showDebug}
         />
       ))}
     </div>
