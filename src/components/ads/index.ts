@@ -9,3 +9,6 @@ export { ResponsiveAdSlot } from './ResponsiveAdSlot';
 export { StickyAd } from './StickyAd';
 export { InContentAd } from './InContentAd';
 export { AdZone } from './AdZone';
+export { PageAdWrapper } from './PageAdWrapper';
+export { SidebarAds } from './SidebarAds';
+export { ContentWithAds } from './ContentWithAds';

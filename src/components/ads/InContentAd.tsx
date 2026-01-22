@@ -5,13 +5,15 @@
  */
 
 import React from 'react';
+import { useDeviceType } from '@/hooks/useDeviceType';
+import { useAds } from '@/contexts/AdContext';
 import { useAdSlot } from '@/hooks/useAdSlot';
 import { AdPlaceholder } from './AdPlaceholder';
 import { DebugAdSlot } from './DebugAdSlot';
 import { AD_TEXT } from '@/lib/ads/constants';
 
 interface InContentAdProps {
-  slotId: string;
+  slotId?: string;
   className?: string;
   style?: React.CSSProperties;
   debug?: boolean;
@@ -25,8 +27,23 @@ export function InContentAd({
   debug = false,
   lazyLoad = true,
 }: InContentAdProps) {
+  const detectedDevice = useDeviceType();
+  const { getSlotsByPlacement } = useAds();
+  
+  // If no slotId provided, find an in-content slot automatically
+  let actualSlotId = slotId;
+  if (!actualSlotId) {
+    const inContentSlots = getSlotsByPlacement('in-content');
+    const compatibleSlots = inContentSlots.filter((slot) =>
+      slot.devices.includes(detectedDevice)
+    );
+    if (compatibleSlots.length > 0) {
+      actualSlotId = compatibleSlots[0].slot_id;
+    }
+  }
+  
   const { slotRef, slotConfig, isDebugMode } = useAdSlot({
-    slotId,
+    slotId: actualSlotId || '',
     lazyLoad,
   });
 

@@ -73,12 +73,15 @@ declare const googletag: GoogleTagInstance;
 export type AdPlacement = 
   | 'header'
   | 'sidebar'
+  | 'sidebar-sticky'
   | 'content-top'
   | 'content-middle'
   | 'content-bottom'
+  | 'in-content'
   | 'footer'
   | 'sticky-bottom'
-  | 'sticky-top';
+  | 'sticky-top'
+  | 'mobile-sticky';
 
 export type DeviceType = 'mobile' | 'tablet' | 'desktop';
 
@@ -137,4 +140,5 @@ export interface AdZoneProps {
   className?: string;
   style?: React.CSSProperties;
   debug?: boolean;
+  limit?: number;
 }

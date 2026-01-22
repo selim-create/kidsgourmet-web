@@ -1,6 +1,8 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
+import { AdZone } from "@/components/ads";
+import { AdProvider } from "@/contexts/AdContext";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -79,16 +81,31 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <AdProvider>
       <OrganizationJsonLd />
       <WebSiteJsonLd />
       <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow pt-24 w-full">
+        
+        {/* Masthead Banner - Header altı */}
+        <div className="w-full flex justify-center py-2 bg-gray-50/50">
+          <AdZone placement="header" />
+        </div>
+        
+        <main className="flex-grow pt-4 w-full">
           {children}
         </main>
+        
+        {/* Footer Banner */}
+        <div className="w-full flex justify-center py-4 bg-gray-50/50">
+          <AdZone placement="footer" />
+        </div>
+        
         <Footer />
+        
+        {/* Mobile Sticky Bottom - Sadece mobilde */}
+        <AdZone placement="mobile-sticky" />
       </div>
-    </>
+    </AdProvider>
   );
 }

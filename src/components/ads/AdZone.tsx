@@ -16,6 +16,7 @@ export function AdZone({
   className = '',
   style,
   debug,
+  limit,
 }: AdZoneProps) {
   const detectedDevice = useDeviceType();
   const { getSlotsByPlacement } = useAds();
@@ -35,12 +36,14 @@ export function AdZone({
     return null;
   }
 
-  // Use the first compatible slot
-  const slot = compatibleSlots[0];
+  // Limit the number of slots to render
+  const slotsToRender = limit ? compatibleSlots.slice(0, limit) : compatibleSlots.slice(0, 1);
 
   return (
     <div className={`ad-zone ad-zone-${placement} ${className}`} style={style}>
-      <AdSlot slotId={slot.slot_id} debug={debug} />
+      {slotsToRender.map((slot) => (
+        <AdSlot key={slot.slot_id} slotId={slot.slot_id} debug={debug} />
+      ))}
     </div>
   );
 }
