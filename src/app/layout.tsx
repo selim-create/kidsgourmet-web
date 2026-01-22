@@ -6,6 +6,7 @@ import { FavoritesProvider } from "@/contexts/favorites-context";
 import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
 import { ActiveChildProvider } from "@/contexts/ActiveChildContext";
 import { RateLimitProvider } from "@/contexts/rate-limit-context";
+import { AdProvider } from "@/contexts/AdContext";
 import { SWRProvider } from "@/providers/swr-provider";
 import { Toaster } from "sonner";
 
@@ -106,8 +107,10 @@ export default function RootLayout({
               <ActiveChildProvider>
                 <ChildProfileProvider>
                   <RateLimitProvider>
-                    {children}
-                    <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
+                    <AdProvider>
+                      {children}
+                      <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
+                    </AdProvider>
                   </RateLimitProvider>
                 </ChildProfileProvider>
               </ActiveChildProvider>
