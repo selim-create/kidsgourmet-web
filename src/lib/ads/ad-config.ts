@@ -51,6 +51,9 @@ function normalizeConfig(data: Record<string, unknown>): AdConfig {
   const lazyLoadConfig = data.lazyLoadConfig as Record<string, unknown> | undefined;
   const debug = data.debug as Record<string, unknown> | undefined;
 
+  // Get ads_enabled value - default to true
+  const adsEnabled = data.ads_enabled ?? data.adsEnabled ?? true;
+
   return {
     network_code: String(data.network_code || data.networkCode || ''),
     networkCode: String(data.networkCode || data.network_code || ''),
@@ -68,6 +71,9 @@ function normalizeConfig(data: Record<string, unknown>): AdConfig {
     enable_services: Boolean(data.enable_services ?? data.enableServices ?? true),
     debug_mode: Boolean(data.debug_mode ?? data.debugMode ?? debug?.enabled ?? false),
     debug: debug as AdConfig['debug'],
+    // Support both formats: ads_enabled and adsEnabled
+    ads_enabled: Boolean(adsEnabled),
+    adsEnabled: Boolean(adsEnabled),
     slots,
   };
 }
@@ -180,6 +186,8 @@ function getDefaultConfig(): AdConfig {
     single_request: true,
     enable_services: true,
     debug_mode: false,
+    ads_enabled: true,
+    adsEnabled: true,
     slots: [],
   };
 }

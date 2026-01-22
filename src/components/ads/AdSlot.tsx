@@ -12,13 +12,16 @@ interface AdSlotProps {
 }
 
 export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
-  const { getSlotById, config, initialized, adsEnabled } = useAds();
+  const { getSlotById, config, initialized, adsEnabled, isDebugMode } = useAds();
   const deviceType = useDeviceType();
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const slot = getSlotById(slotId);
+
+  // Use debug prop OR global debug mode
+  const showDebug = debug || isDebugMode;
 
   useEffect(() => {
     // Reset rendered state when slot changes
@@ -27,7 +30,7 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
   }, [slotId]);
 
   useEffect(() => {
-    if (!adsEnabled || !initialized || !slot || !containerRef.current || rendered || debug) {
+    if (!adsEnabled || !initialized || !slot || !containerRef.current || rendered || showDebug) {
       return;
     }
 
@@ -54,10 +57,10 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
         // Ignore cleanup errors
       }
     };
-  }, [adsEnabled, initialized, slot, slotId, rendered, config, debug]);
+  }, [adsEnabled, initialized, slot, slotId, rendered, config, showDebug]);
 
-  // Don't render if ads disabled
-  if (!adsEnabled) {
+  // Don't render if ads disabled and not in debug mode
+  if (!adsEnabled && !showDebug) {
     return null;
   }
 
@@ -77,7 +80,7 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
   const minHeight = getMinHeight();
 
   // Debug mode - show placeholder with slot info
-  if (debug) {
+  if (showDebug) {
     const sizesLabel = slot.sizes?.map((s) => `${s.width}x${s.height}`).join(', ') || 'N/A';
     const devicesLabel = Array.isArray(slot.devices) ? slot.devices.join(', ') : (slot.device || 'all');
     

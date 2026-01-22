@@ -39,6 +39,18 @@ export function AdProvider({ children }: AdProviderProps) {
       try {
         setLoading(true);
         const adConfig = await fetchAdConfig();
+        
+        // Debug logging
+        if (process.env.NODE_ENV === 'development' || adConfig?.debug_mode) {
+          console.log('🔧 [AdContext] Config loaded:', {
+            ads_enabled: adConfig?.ads_enabled,
+            adsEnabled: adConfig?.adsEnabled,
+            debug_mode: adConfig?.debug_mode,
+            network_code: adConfig?.network_code,
+            slotsCount: adConfig?.slots?.length || 0,
+          });
+        }
+        
         setConfig(adConfig);
 
         // Only initialize ad manager if ads are enabled and we have valid config
