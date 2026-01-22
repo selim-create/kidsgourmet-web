@@ -116,6 +116,11 @@ export interface AdSlot {
   refreshInterval?: number;
   min_height?: number;
   minHeight?: number;
+  responsive_min_height?: {
+    mobile: number;
+    tablet: number;
+    desktop: number;
+  };
   enabled?: boolean;
   status?: string;
   priority?: number;
@@ -155,6 +160,8 @@ export interface AdConfig {
     timestamp?: string;
     slotsCount?: number;
   };
+  ads_enabled?: boolean;
+  adsEnabled?: boolean;
   slots: AdSlot[];
 }
 

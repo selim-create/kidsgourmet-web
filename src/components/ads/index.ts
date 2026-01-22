@@ -12,3 +12,4 @@ export { AdZone } from './AdZone';
 export { PageAdWrapper } from './PageAdWrapper';
 export { SidebarAds } from './SidebarAds';
 export { ContentWithAds } from './ContentWithAds';
+export { useDeviceType } from '@/hooks/useDeviceType';
