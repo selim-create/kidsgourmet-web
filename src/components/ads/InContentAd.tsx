@@ -39,11 +39,14 @@ export function InContentAd({
     );
     if (compatibleSlots.length > 0) {
       actualSlotId = compatibleSlots[0].slot_id;
+    } else {
+      // No compatible slot found, return null
+      return null;
     }
   }
   
   const { slotRef, slotConfig, isDebugMode } = useAdSlot({
-    slotId: actualSlotId || '',
+    slotId: actualSlotId,
     lazyLoad,
   });
 

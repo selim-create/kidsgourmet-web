@@ -2,6 +2,8 @@
 
 /**
  * Page Ad Wrapper - Wraps page content with AdProvider
+ * Note: Currently AdProvider doesn't support pageType/category/tags parameters
+ * These are defined for future enhancements but not used yet
  */
 
 import { ReactNode } from 'react';
@@ -9,16 +11,10 @@ import { AdProvider } from '@/contexts/AdContext';
 
 interface PageAdWrapperProps {
   children: ReactNode;
-  pageType?: string;
-  category?: string;
-  tags?: string[];
 }
 
 export function PageAdWrapper({ 
-  children, 
-  pageType,
-  category, 
-  tags 
+  children,
 }: PageAdWrapperProps) {
   return (
     <AdProvider>
