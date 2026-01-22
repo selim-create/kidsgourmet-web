@@ -7,6 +7,7 @@ import { getCircles, getDiscussions, getTopContributors, voteDiscussion } from '
 import { formatRelativeTime, getProfileUrl, decodeHtmlEntities, ensureDiscussionDefaults } from '@/utils/helpers';
 import type { Circle, Discussion, TopContributor } from '@/lib/types';
 import { useFavorites } from '@/hooks/use-favorites';
+import { InContentAd } from '@/components/ads';
 
 // Discussion Card Component
 function DiscussionCard({ 
@@ -550,14 +551,19 @@ export default function CommunityPage() {
                   </div>
                 )}
 
-                {!loading && discussions.map((discussion) => (
-                  <DiscussionCard 
-                    key={discussion.id} 
-                    discussion={discussion} 
-                    onVote={handleVote}
-                    toggleFavorite={toggleFavorite}
-                    isFavorite={isFavorite(discussion.id, 'discussion')}
-                  />
+                {!loading && discussions.map((discussion, index) => (
+                  <React.Fragment key={discussion.id}>
+                    <DiscussionCard 
+                      discussion={discussion} 
+                      onVote={handleVote}
+                      toggleFavorite={toggleFavorite}
+                      isFavorite={isFavorite(discussion.id, 'discussion')}
+                    />
+                    {/* Insert ad after every 5 discussions */}
+                    {(index + 1) % 5 === 0 && index < discussions.length - 1 && (
+                      <InContentAd />
+                    )}
+                  </React.Fragment>
                 ))}
 
             </main>

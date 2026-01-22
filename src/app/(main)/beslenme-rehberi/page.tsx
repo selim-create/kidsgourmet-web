@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from "next/link";
 import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
+import { InContentAd } from '@/components/ads';
 
 // Kategori icon mapping'i genişlet
 const categoryIcons: Record<string, string> = {
@@ -352,12 +353,13 @@ export default function IngredientsGuidePage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
                 </div>
               ) : displayedIngredients.length > 0 ? (
-                displayedIngredients.map((ingredient) => {
+                displayedIngredients.map((ingredient, index) => {
                   const ageGroupColor = getAgeGroupColor(ingredient.start_age);
                   const seasonBadge = getSeasonBadge(ingredient.season);
                   
                   return (
-                    <Link key={ingredient.id} href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
+                    <React.Fragment key={ingredient.id}>
+                      <Link href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
                         <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
                             <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={ingredient.name} />
                             
@@ -413,6 +415,13 @@ export default function IngredientsGuidePage() {
                           </span>
                         </div>
                     </Link>
+                    {/* Insert ad after every 8 ingredients */}
+                    {(index + 1) % 8 === 0 && index < displayedIngredients.length - 1 && (
+                      <div className="col-span-full">
+                        <InContentAd />
+                      </div>
+                    )}
+                  </React.Fragment>
                   );
                 })
               ) : (
