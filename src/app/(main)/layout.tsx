@@ -87,23 +87,27 @@ export default function MainLayout({
       <div className="flex flex-col min-h-screen">
         <Header />
         
-        {/* Masthead Banner - Header altı */}
-        <div className="w-full flex justify-center py-2 bg-gray-50/50">
-          <AdZone placement="header" />
+        {/* Masthead Banner - Header altı, proper spacing */}
+        <div className="w-full flex justify-center py-3 bg-gray-50/50 mt-[72px] lg:mt-[80px]">
+          <div className="container mx-auto px-4">
+            <AdZone placement="header" />
+          </div>
         </div>
         
-        <main className="flex-grow pt-4 w-full">
+        <main className="flex-grow w-full">
           {children}
         </main>
         
-        {/* Footer Banner */}
+        {/* Footer Banner - Footer üstü */}
         <div className="w-full flex justify-center py-4 bg-gray-50/50">
-          <AdZone placement="footer" />
+          <div className="container mx-auto px-4">
+            <AdZone placement="footer" />
+          </div>
         </div>
         
         <Footer />
         
-        {/* Mobile Sticky Bottom - Sadece mobilde */}
+        {/* Mobile Sticky Bottom - Sadece mobilde, AdZone içinde handle ediliyor */}
         <AdZone placement="mobile-sticky" />
       </div>
     </AdProvider>

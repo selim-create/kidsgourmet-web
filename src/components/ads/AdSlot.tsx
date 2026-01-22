@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useAds } from '@/contexts/AdContext';
+import { useDeviceType } from '@/hooks/useDeviceType';
 import adManager from '@/lib/ads/ad-manager';
 
 interface AdSlotProps {
@@ -11,7 +12,8 @@ interface AdSlotProps {
 }
 
 export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
-  const { getSlotById, config, initialized } = useAds();
+  const { getSlotById, config, initialized, adsEnabled } = useAds();
+  const deviceType = useDeviceType();
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,15 +21,22 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
   const slot = getSlotById(slotId);
 
   useEffect(() => {
-    if (!initialized || !slot || !containerRef.current || rendered) {
+    // Reset rendered state when slot changes
+    setRendered(false);
+    setError(null);
+  }, [slotId]);
+
+  useEffect(() => {
+    if (!adsEnabled || !initialized || !slot || !containerRef.current || rendered || debug) {
       return;
     }
 
     try {
       const containerId = `ad-slot-${slotId}`;
+      const networkCode = config?.network_code || config?.networkCode;
       
       // Only render if ad manager is ready and we have valid config
-      if (config?.network_code && config.network_code !== '0') {
+      if (networkCode && networkCode !== '0' && networkCode !== '') {
         adManager.defineSlot(slot, containerId);
         adManager.display(containerId);
         setRendered(true);
@@ -45,16 +54,33 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
         // Ignore cleanup errors
       }
     };
-  }, [initialized, slot, slotId, rendered, config]);
+  }, [adsEnabled, initialized, slot, slotId, rendered, config, debug]);
+
+  // Don't render if ads disabled
+  if (!adsEnabled) {
+    return null;
+  }
 
   // Don't render if no slot found
   if (!slot) {
     return null;
   }
 
-  // Debug mode - show placeholder
+  // Get responsive min height
+  const getMinHeight = (): number => {
+    if (slot.responsive_min_height) {
+      return slot.responsive_min_height[deviceType] || slot.min_height || slot.minHeight || 90;
+    }
+    return slot.min_height || slot.minHeight || 90;
+  };
+
+  const minHeight = getMinHeight();
+
+  // Debug mode - show placeholder with slot info
   if (debug) {
-    const minHeight = slot.min_height || slot.minHeight || 100;
+    const sizesLabel = slot.sizes?.map((s) => `${s.width}x${s.height}`).join(', ') || 'N/A';
+    const devicesLabel = Array.isArray(slot.devices) ? slot.devices.join(', ') : (slot.device || 'all');
+    
     return (
       <div
         className={`ad-slot-debug ${className}`.trim()}
@@ -62,30 +88,38 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
           minHeight,
           backgroundColor: '#fff3cd',
           border: '2px dashed #856404',
+          borderRadius: '4px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           flexDirection: 'column',
-          padding: '16px',
+          padding: '12px',
           fontFamily: 'monospace',
-          fontSize: '12px',
+          fontSize: '11px',
           color: '#856404',
+          margin: '4px 0',
         }}
       >
-        <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>🔧 DEBUG MODE</div>
-        <div>Slot ID: {slot.slot_id || slot.slotId}</div>
-        <div>Placement: {slot.placement}</div>
-        <div>Sizes: {slot.sizes?.map((s) => `${s.width}x${s.height}`).join(', ') || 'N/A'}</div>
+        <div style={{ fontWeight: 'bold', marginBottom: '6px', fontSize: '13px' }}>
+          🔧 AD DEBUG
+        </div>
+        <div style={{ textAlign: 'center', lineHeight: 1.4 }}>
+          <div><strong>Slot:</strong> {slot.slot_id || slot.slotId}</div>
+          <div><strong>Name:</strong> {slot.name || 'N/A'}</div>
+          <div><strong>Placement:</strong> {slot.placement}</div>
+          <div><strong>Sizes:</strong> {sizesLabel}</div>
+          <div><strong>Devices:</strong> {devicesLabel}</div>
+          <div><strong>Current:</strong> {deviceType}</div>
+          <div><strong>Min Height:</strong> {minHeight}px</div>
+        </div>
       </div>
     );
   }
 
-  // Error state
+  // Error state - silently fail
   if (error) {
-    return null; // Silently fail - don't show broken ads
+    return null;
   }
-
-  const minHeight = slot.min_height || slot.minHeight || 0;
 
   return (
     <div
