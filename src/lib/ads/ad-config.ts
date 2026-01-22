@@ -47,6 +47,10 @@ function normalizeConfig(data: Record<string, unknown>): AdConfig {
     ? data.slots.map((slot: Record<string, unknown>) => normalizeSlot(slot))
     : [];
 
+  const lazyLoad = data.lazy_load as Record<string, unknown> | undefined;
+  const lazyLoadConfig = data.lazyLoadConfig as Record<string, unknown> | undefined;
+  const debug = data.debug as Record<string, unknown> | undefined;
+
   return {
     network_code: String(data.network_code || data.networkCode || ''),
     networkCode: String(data.networkCode || data.network_code || ''),
@@ -54,16 +58,16 @@ function normalizeConfig(data: Record<string, unknown>): AdConfig {
     site_name: String(data.site_name || data.siteName || ''),
     siteName: String(data.siteName || data.site_name || ''),
     lazy_load: {
-      enabled: Boolean(data.lazy_load?.enabled ?? data.lazyLoadConfig?.enabled ?? true),
-      fetch_margin: Number(data.lazy_load?.fetch_margin ?? data.lazyLoadConfig?.fetchMarginPercent ?? 500),
-      render_margin: Number(data.lazy_load?.render_margin ?? data.lazyLoadConfig?.renderMarginPercent ?? 200),
-      mobile_scaling: Number(data.lazy_load?.mobile_scaling ?? data.lazyLoadConfig?.mobileScaling ?? 2.0),
+      enabled: Boolean(lazyLoad?.enabled ?? lazyLoadConfig?.enabled ?? true),
+      fetch_margin: Number(lazyLoad?.fetch_margin ?? lazyLoadConfig?.fetchMarginPercent ?? 500),
+      render_margin: Number(lazyLoad?.render_margin ?? lazyLoadConfig?.renderMarginPercent ?? 200),
+      mobile_scaling: Number(lazyLoad?.mobile_scaling ?? lazyLoadConfig?.mobileScaling ?? 2.0),
     },
     collapse_empty: Boolean(data.collapse_empty ?? data.collapseEmpty ?? true),
     single_request: Boolean(data.single_request ?? data.singleRequest ?? data.enableSingleRequest ?? true),
     enable_services: Boolean(data.enable_services ?? data.enableServices ?? true),
-    debug_mode: Boolean(data.debug_mode ?? data.debugMode ?? data.debug?.enabled ?? false),
-    debug: data.debug as AdConfig['debug'],
+    debug_mode: Boolean(data.debug_mode ?? data.debugMode ?? debug?.enabled ?? false),
+    debug: debug as AdConfig['debug'],
     slots,
   };
 }

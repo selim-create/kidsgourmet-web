@@ -13,21 +13,27 @@ interface DebugAdSlotProps {
 }
 
 export function DebugAdSlot({ slotConfig, className = '' }: DebugAdSlotProps) {
+  const minHeight = slotConfig.min_height || slotConfig.minHeight || 250;
+  const slotId = slotConfig.slot_id || slotConfig.slotId || slotConfig.id;
+  const adUnitPath = slotConfig.ad_unit_path || slotConfig.adUnitPath || '';
+  const devices = slotConfig.devices || (slotConfig.device ? [slotConfig.device] : []);
+  const refreshInterval = slotConfig.refresh_interval || slotConfig.refreshInterval;
+
   return (
     <div
       className={`debug-ad-slot border-2 border-dashed border-blue-500 bg-blue-50 p-4 ${className}`}
-      style={{ minHeight: `${slotConfig.min_height || 250}px` }}
+      style={{ minHeight: `${minHeight}px` }}
     >
       <div className="text-xs font-mono space-y-1">
         <div className="font-bold text-blue-700 mb-2">DEBUG MODE</div>
-        <div><strong>Slot ID:</strong> {slotConfig.slot_id}</div>
+        <div><strong>Slot ID:</strong> {slotId}</div>
         <div><strong>Name:</strong> {slotConfig.name}</div>
         <div><strong>Placement:</strong> {slotConfig.placement}</div>
-        <div><strong>Ad Unit:</strong> {slotConfig.ad_unit_path}</div>
+        <div><strong>Ad Unit:</strong> {adUnitPath}</div>
         <div><strong>Sizes:</strong> {slotConfig.sizes.map(s => `${s.width}x${s.height}`).join(', ')}</div>
-        <div><strong>Devices:</strong> {slotConfig.devices.join(', ')}</div>
-        {slotConfig.refresh_interval && (
-          <div><strong>Refresh:</strong> {slotConfig.refresh_interval}s</div>
+        <div><strong>Devices:</strong> {devices.join(', ')}</div>
+        {refreshInterval && (
+          <div><strong>Refresh:</strong> {refreshInterval}s</div>
         )}
         {slotConfig.targeting && Object.keys(slotConfig.targeting).length > 0 && (
           <div>

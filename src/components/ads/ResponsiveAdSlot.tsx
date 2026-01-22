@@ -20,7 +20,6 @@ interface ResponsiveAdSlotProps {
 export function ResponsiveAdSlot({
   placement,
   className,
-  style,
   debug,
 }: ResponsiveAdSlotProps) {
   const deviceType = useDeviceType();
@@ -30,7 +29,12 @@ export function ResponsiveAdSlot({
   const slots = getSlotsByPlacement(placement);
 
   // Find the first slot that supports the current device
-  const slot = slots.find((s) => s.devices.includes(deviceType));
+  const slot = slots.find((s) => {
+    if (Array.isArray(s.devices)) {
+      return s.devices.includes(deviceType);
+    }
+    return s.device === deviceType || s.device === 'all';
+  });
 
   if (!slot) {
     return null;
@@ -38,9 +42,8 @@ export function ResponsiveAdSlot({
 
   return (
     <AdSlot
-      slotId={slot.slot_id}
+      slotId={slot.slot_id || slot.slotId || ''}
       className={className}
-      style={style}
       debug={debug}
     />
   );
