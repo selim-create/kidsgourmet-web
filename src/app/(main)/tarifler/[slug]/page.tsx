@@ -20,6 +20,7 @@ import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
 import Image from 'next/image';
 import RecipeCard from '@/components/ui/RecipeCard';
+import { SidebarAds, InContentAd } from '@/components/ads';
 
 // Age group color mapping (matching RecipeCard.tsx)
 const AGE_GROUP_COLORS: { [key: string]: string } = {
@@ -779,6 +780,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         </div>
                     </div>
 
+                    {/* In-Content Ad after instructions */}
+                    <InContentAd className="my-8" />
+
                     {/* Expert Approval - Moved here from header */}
                     {recipe.expert && recipe.expert.approved && (
                       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-4 md:p-5 mt-6">
@@ -973,6 +977,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 {/* RIGHT COLUMN (Sidebar) - Sticky */}
                 <div className="lg:col-span-1">
                     <div className="sticky top-24 space-y-6">
+                    
+                    {/* Sidebar Ads */}
+                    <SidebarAds />
                     
                     {/* ECOSYSTEM CROSS-SELL */}
                     <CrossSellWidget 
