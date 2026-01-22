@@ -10,7 +10,7 @@ class AdManager {
   private slots: Map<string, Slot> = new Map();
   private scriptLoaded = false;
   private scriptLoading = false;
-  private refreshIntervals: Map<string, NodeJS.Timeout> = new Map();
+  private refreshIntervals: Map<string, ReturnType<typeof setInterval>> = new Map();
 
   private constructor() {}
 

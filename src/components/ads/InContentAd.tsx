@@ -8,6 +8,7 @@ import React from 'react';
 import { useAdSlot } from '@/hooks/useAdSlot';
 import { AdPlaceholder } from './AdPlaceholder';
 import { DebugAdSlot } from './DebugAdSlot';
+import { AD_TEXT } from '@/lib/ads/constants';
 
 interface InContentAdProps {
   slotId: string;
@@ -47,7 +48,7 @@ export function InContentAd({
 
   return (
     <div className={`in-content-ad my-8 ${className}`} style={style}>
-      <div className="text-xs text-gray-400 text-center mb-2">Sponsorlu İçerik</div>
+      <div className="text-xs text-gray-400 text-center mb-2">{AD_TEXT.SPONSORED_CONTENT}</div>
       <div
         id={slotConfig.slot_id}
         ref={slotRef}

@@ -9,6 +9,7 @@ const HIP_ADS_API_NAMESPACE = '/hip-ads/v1';
 
 /**
  * Fetch ad configuration from backend
+ * Note: Uses standard fetch caching. For server-side usage, Next.js revalidate can be applied.
  */
 export async function fetchAdConfig(): Promise<AdConfig> {
   try {
@@ -17,9 +18,7 @@ export async function fetchAdConfig(): Promise<AdConfig> {
       headers: {
         'Content-Type': 'application/json',
       },
-      next: {
-        revalidate: 3600, // Cache for 1 hour
-      },
+      cache: 'default', // Use browser cache
     });
 
     if (!response.ok) {
@@ -72,6 +71,7 @@ export async function fetchSlots(filters?: {
 
 /**
  * Fetch ads.txt content
+ * Note: This function is designed to be called from Server Components or API routes
  */
 export async function fetchAdsTxt(): Promise<string> {
   try {

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { AD_TEXT } from '@/lib/ads/constants';
 
 interface AdPlaceholderProps {
   minHeight?: number;
@@ -17,7 +18,7 @@ export function AdPlaceholder({ minHeight = 250, className = '' }: AdPlaceholder
       className={`ad-placeholder bg-gray-100 flex items-center justify-center ${className}`}
       style={{ minHeight: `${minHeight}px` }}
     >
-      <div className="text-gray-400 text-sm">Reklam Alanı</div>
+      <div className="text-gray-400 text-sm">{AD_TEXT.PLACEHOLDER}</div>
     </div>
   );
 }
