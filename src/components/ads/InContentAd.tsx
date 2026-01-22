@@ -34,15 +34,20 @@ export function InContentAd({
   let actualSlotId = slotId;
   if (!actualSlotId) {
     const inContentSlots = getSlotsByPlacement('in-content');
-    const compatibleSlots = inContentSlots.filter((slot) =>
-      slot.devices.includes(detectedDevice)
-    );
+    const compatibleSlots = inContentSlots.filter((slot) => {
+      if (Array.isArray(slot.devices)) {
+        return slot.devices.includes(detectedDevice);
+      }
+      return slot.device === detectedDevice || slot.device === 'all';
+    });
     if (compatibleSlots.length > 0) {
-      actualSlotId = compatibleSlots[0].slot_id;
-    } else {
-      // No compatible slot found, return null
-      return null;
+      actualSlotId = compatibleSlots[0].slot_id || compatibleSlots[0].slotId || '';
     }
+  }
+
+  // If still no slot found, return null
+  if (!actualSlotId) {
+    return null;
   }
   
   const { slotRef, slotConfig, isDebugMode } = useAdSlot({
@@ -64,13 +69,13 @@ export function InContentAd({
     );
   }
 
-  const minHeight = slotConfig.min_height || 250;
+  const minHeight = slotConfig.min_height || slotConfig.minHeight || 250;
 
   return (
     <div className={`in-content-ad my-8 ${className}`} style={style}>
       <div className="text-xs text-gray-400 text-center mb-2">{AD_TEXT.SPONSORED_CONTENT}</div>
       <div
-        id={slotConfig.slot_id}
+        id={slotConfig.slot_id || slotConfig.slotId}
         ref={slotRef}
         className="ad-slot"
         style={{ minHeight: `${minHeight}px` }}

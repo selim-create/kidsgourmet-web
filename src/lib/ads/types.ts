@@ -96,34 +96,65 @@ export interface SizeMapping {
 }
 
 export interface AdSlot {
+  // Support both snake_case and camelCase
   id: string;
-  slot_id: string;
+  slot_id?: string;
+  slotId?: string;
   name: string;
-  ad_unit_path: string;
+  ad_unit_path?: string;
+  adUnitPath?: string;
   sizes: AdSize[];
   size_mapping?: SizeMapping[];
+  sizeMappings?: SizeMapping[];
   placement: AdPlacement;
-  devices: DeviceType[];
+  devices?: DeviceType[];
+  device?: string;
   targeting?: Record<string, string | string[]>;
   lazy_load?: boolean;
+  lazyLoad?: boolean;
   refresh_interval?: number;
+  refreshInterval?: number;
   min_height?: number;
-  enabled: boolean;
+  minHeight?: number;
+  enabled?: boolean;
+  status?: string;
+  priority?: number;
 }
 
 export interface AdConfig {
-  network_code: string;
-  property_code: string;
-  lazy_load: {
+  // Support both snake_case and camelCase
+  network_code?: string;
+  networkCode?: string;
+  property_code?: string;
+  propertyCode?: string;
+  site_name?: string;
+  siteName?: string;
+  lazy_load?: {
     enabled: boolean;
     fetch_margin: number;
     render_margin: number;
     mobile_scaling: number;
   };
-  collapse_empty: boolean;
-  single_request: boolean;
-  enable_services: boolean;
-  debug_mode: boolean;
+  lazyLoadConfig?: {
+    enabled: boolean;
+    fetchMarginPercent: number;
+    renderMarginPercent: number;
+    mobileScaling: number;
+  };
+  collapse_empty?: boolean;
+  collapseEmpty?: boolean;
+  single_request?: boolean;
+  singleRequest?: boolean;
+  enableSingleRequest?: boolean;
+  enable_services?: boolean;
+  enableServices?: boolean;
+  debug_mode?: boolean;
+  debugMode?: boolean;
+  debug?: {
+    enabled: boolean;
+    timestamp?: string;
+    slotsCount?: number;
+  };
   slots: AdSlot[];
 }
 

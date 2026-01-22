@@ -14,6 +14,7 @@ interface AdContextValue {
   slots: AdSlot[];
   loading: boolean;
   error: Error | null;
+  initialized: boolean;
   getSlotsByPlacement: (placement: AdPlacement) => AdSlot[];
   getSlotsByDevice: (device: DeviceType) => AdSlot[];
   getSlotById: (slotId: string) => AdSlot | undefined;
@@ -30,6 +31,7 @@ export function AdProvider({ children }: AdProviderProps) {
   const [config, setConfig] = useState<AdConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     async function initializeAds() {
@@ -38,13 +40,18 @@ export function AdProvider({ children }: AdProviderProps) {
         const adConfig = await fetchAdConfig();
         setConfig(adConfig);
 
-        // Initialize ad manager
-        await adManager.initialize(adConfig);
+        // Only initialize ad manager if we have valid config
+        if (adConfig && adConfig.network_code && adConfig.network_code !== '0') {
+          await adManager.initialize(adConfig);
+        }
 
         setError(null);
+        setInitialized(true);
       } catch (err) {
         console.error('Failed to initialize ads:', err);
         setError(err instanceof Error ? err : new Error('Failed to initialize ads'));
+        // Still mark as initialized to prevent infinite loading
+        setInitialized(true);
       } finally {
         setLoading(false);
       }
@@ -53,34 +60,48 @@ export function AdProvider({ children }: AdProviderProps) {
     initializeAds();
   }, []);
 
+  // Safe getter with null checks
   const getSlotsByPlacement = (placement: AdPlacement): AdSlot[] => {
-    if (!config) return [];
+    if (!config?.slots || !Array.isArray(config.slots)) return [];
     return config.slots.filter(
-      (slot) => slot.placement === placement && slot.enabled
+      (slot) => slot?.placement === placement && slot?.enabled !== false
     );
   };
 
+  // Safe getter with null checks
   const getSlotsByDevice = (device: DeviceType): AdSlot[] => {
-    if (!config) return [];
+    if (!config?.slots || !Array.isArray(config.slots)) return [];
     return config.slots.filter(
-      (slot) => slot.devices.includes(device) && slot.enabled
+      (slot) => {
+        if (!slot || slot.enabled === false) return false;
+        // Support both 'devices' array and 'device' string
+        if (Array.isArray(slot.devices)) {
+          return slot.devices.includes(device);
+        }
+        if (slot.device) {
+          return slot.device === device || slot.device === 'all';
+        }
+        return true; // Default to showing on all devices
+      }
     );
   };
 
+  // Safe getter with null checks
   const getSlotById = (slotId: string): AdSlot | undefined => {
-    if (!config) return undefined;
-    return config.slots.find((slot) => slot.slot_id === slotId);
+    if (!config?.slots || !Array.isArray(config.slots)) return undefined;
+    return config.slots.find((slot) => slot?.slot_id === slotId || slot?.slotId === slotId);
   };
 
   const value: AdContextValue = {
     config,
-    slots: config?.slots || [],
+    slots: config?.slots && Array.isArray(config.slots) ? config.slots : [],
     loading,
     error,
+    initialized,
     getSlotsByPlacement,
     getSlotsByDevice,
     getSlotById,
-    isDebugMode: config?.debug_mode || false,
+    isDebugMode: config?.debug_mode || config?.debugMode || false,
   };
 
   return <AdContext.Provider value={value}>{children}</AdContext.Provider>;

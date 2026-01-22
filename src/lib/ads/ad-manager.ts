@@ -35,24 +35,29 @@ class AdManager {
       window.googletag.cmd.push(() => {
         const pubads = window.googletag.pubads();
 
-        // Configure based on config
-        if (this.config?.single_request) {
+        // Configure based on config - support both naming conventions
+        const singleRequest = this.config?.single_request ?? this.config?.singleRequest ?? this.config?.enableSingleRequest;
+        if (singleRequest) {
           pubads.enableSingleRequest();
         }
 
-        if (this.config?.collapse_empty) {
+        const collapseEmpty = this.config?.collapse_empty ?? this.config?.collapseEmpty;
+        if (collapseEmpty) {
           pubads.collapseEmptyDivs();
         }
 
-        if (this.config?.lazy_load?.enabled) {
+        // Support both lazy_load and lazyLoadConfig
+        const lazyLoadEnabled = this.config?.lazy_load?.enabled ?? this.config?.lazyLoadConfig?.enabled;
+        if (lazyLoadEnabled) {
           pubads.enableLazyLoad({
-            fetchMarginPercent: this.config.lazy_load.fetch_margin,
-            renderMarginPercent: this.config.lazy_load.render_margin,
-            mobileScaling: this.config.lazy_load.mobile_scaling,
+            fetchMarginPercent: this.config?.lazy_load?.fetch_margin ?? this.config?.lazyLoadConfig?.fetchMarginPercent ?? 500,
+            renderMarginPercent: this.config?.lazy_load?.render_margin ?? this.config?.lazyLoadConfig?.renderMarginPercent ?? 200,
+            mobileScaling: this.config?.lazy_load?.mobile_scaling ?? this.config?.lazyLoadConfig?.mobileScaling ?? 2.0,
           });
         }
 
-        if (this.config?.enable_services) {
+        const enableServices = this.config?.enable_services ?? this.config?.enableServices;
+        if (enableServices) {
           window.googletag.enableServices();
         }
       });
@@ -110,30 +115,36 @@ class AdManager {
   /**
    * Define an ad slot
    */
-  defineSlot(slotConfig: AdSlot): void {
+  defineSlot(slotConfig: AdSlot, containerId?: string): void {
     if (typeof window === 'undefined' || !window.googletag) {
       return;
     }
 
     window.googletag.cmd.push(() => {
       const sizes = slotConfig.sizes.map((size) => [size.width, size.height] as [number, number]);
+      
+      // Support both ad_unit_path and adUnitPath
+      const adUnitPath = slotConfig.ad_unit_path || slotConfig.adUnitPath || '';
+      // Support both slot_id, slotId and custom containerId
+      const slotId = containerId || slotConfig.slot_id || slotConfig.slotId || '';
 
       const slot = window.googletag.defineSlot(
-        slotConfig.ad_unit_path,
+        adUnitPath,
         sizes,
-        slotConfig.slot_id
+        slotId
       );
 
       if (!slot) {
-        console.error(`Failed to define slot: ${slotConfig.slot_id}`);
+        console.error(`Failed to define slot: ${slotId}`);
         return;
       }
 
       // Add size mapping if configured
-      if (slotConfig.size_mapping && slotConfig.size_mapping.length > 0) {
+      const sizeMapping = slotConfig.size_mapping || slotConfig.sizeMappings;
+      if (sizeMapping && sizeMapping.length > 0) {
         const mapping = window.googletag.sizeMapping();
         
-        slotConfig.size_mapping.forEach((map) => {
+        sizeMapping.forEach((map) => {
           const sizes = map.sizes === 'fluid' 
             ? 'fluid' 
             : map.sizes.map((s) => [s.width, s.height] as [number, number]);
@@ -152,8 +163,8 @@ class AdManager {
 
       slot.addService(window.googletag.pubads());
 
-      // Store slot reference
-      this.slots.set(slotConfig.slot_id, slot);
+      // Store slot reference using the actual slot ID used
+      this.slots.set(slotId, slot);
     });
   }
 
@@ -168,6 +179,13 @@ class AdManager {
     window.googletag.cmd.push(() => {
       window.googletag.display(slotId);
     });
+  }
+
+  /**
+   * Display an ad slot (alias for displaySlot)
+   */
+  display(slotId: string): void {
+    this.displaySlot(slotId);
   }
 
   /**
@@ -250,6 +268,13 @@ class AdManager {
   }
 
   /**
+   * Destroy a single slot (alias for destroySlots with single ID)
+   */
+  destroySlot(slotId: string): void {
+    this.destroySlots([slotId]);
+  }
+
+  /**
    * Get configuration
    */
   getConfig(): AdConfig | null {
@@ -260,7 +285,7 @@ class AdManager {
    * Check if debug mode is enabled
    */
   isDebugMode(): boolean {
-    return this.config?.debug_mode || false;
+    return this.config?.debug_mode || this.config?.debugMode || this.config?.debug?.enabled || false;
   }
 }
 
