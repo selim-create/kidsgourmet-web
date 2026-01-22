@@ -5,44 +5,58 @@
  */
 
 import React from 'react';
-import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAds } from '@/contexts/AdContext';
+import type { AdPlacement, DeviceType } from '@/lib/ads/types';
 import { AdSlot } from './AdSlot';
-import type { AdZoneProps } from '@/lib/ads/types';
 
-export function AdZone({
-  placement,
-  deviceType,
-  className = '',
-  style,
-  debug,
-  limit,
-}: AdZoneProps) {
-  const detectedDevice = useDeviceType();
-  const { getSlotsByPlacement } = useAds();
+interface AdZoneProps {
+  placement: AdPlacement;
+  deviceType?: DeviceType;
+  className?: string;
+  limit?: number;
+}
 
-  // Use provided device type or detected one
-  const targetDevice = deviceType || detectedDevice;
+export function AdZone({ placement, deviceType, className = '', limit }: AdZoneProps) {
+  const { getSlotsByPlacement, loading, initialized, isDebugMode } = useAds();
 
-  // Get all slots for this placement
-  const slots = getSlotsByPlacement(placement);
-
-  // Find slots that support the target device
-  const compatibleSlots = slots.filter((slot) =>
-    slot.devices.includes(targetDevice)
-  );
-
-  if (compatibleSlots.length === 0) {
+  // Don't render anything while loading or before initialization
+  if (loading || !initialized) {
     return null;
   }
 
-  // Limit the number of slots to render
-  const slotsToRender = limit ? compatibleSlots.slice(0, limit) : compatibleSlots.slice(0, 1);
+  // Safely get slots
+  const slots = getSlotsByPlacement(placement);
+
+  // If no slots for this placement, render nothing
+  if (!slots || slots.length === 0) {
+    return null;
+  }
+
+  // Apply limit if specified
+  const displaySlots = limit ? slots.slice(0, limit) : slots;
+
+  // Filter by device type if specified
+  const filteredSlots = deviceType
+    ? displaySlots.filter((slot) => {
+        if (Array.isArray(slot.devices)) {
+          return slot.devices.includes(deviceType);
+        }
+        return slot.device === deviceType || slot.device === 'all';
+      })
+    : displaySlots;
+
+  if (filteredSlots.length === 0) {
+    return null;
+  }
 
   return (
-    <div className={`ad-zone ad-zone-${placement} ${className}`} style={style}>
-      {slotsToRender.map((slot) => (
-        <AdSlot key={slot.slot_id} slotId={slot.slot_id} debug={debug} />
+    <div className={`ad-zone ad-zone-${placement} ${className}`.trim()}>
+      {filteredSlots.map((slot) => (
+        <AdSlot
+          key={slot.slot_id || slot.slotId || slot.id}
+          slotId={slot.slot_id || slot.slotId || slot.id}
+          debug={isDebugMode}
+        />
       ))}
     </div>
   );
