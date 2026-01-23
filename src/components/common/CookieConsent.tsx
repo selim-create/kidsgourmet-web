@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-interface CookiePreferences {
-  necessary: boolean; // Her zaman true
+export interface CookiePreferences {
+  necessary: boolean;
   analytics: boolean;
   functional: boolean;
   marketing: boolean;
@@ -19,40 +19,36 @@ const DEFAULT_PREFERENCES: CookiePreferences = {
   timestamp: '',
 };
 
-export function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      const saved = localStorage.getItem('cookie_consent');
-      return !saved;
-    } catch {
-      return true; // Show banner if localStorage fails
-    }
-  });
-  const [showDetails, setShowDetails] = useState(false);
-  const [preferences, setPreferences] = useState<CookiePreferences>(() => {
-    if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
-    try {
-      const saved = localStorage.getItem('cookie_consent');
-      if (saved) {
-        return JSON.parse(saved) as CookiePreferences;
-      }
-    } catch {
-      // Invalid JSON, ignore and return defaults
-    }
-    return DEFAULT_PREFERENCES;
-  });
+const COOKIE_CONSENT_KEY = 'cookie_consent';
 
+export function CookieConsent() {
+  // Add mounted state to prevent hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [preferences, setPreferences] = useState<CookiePreferences>(DEFAULT_PREFERENCES);
+
+  // First useEffect: Mark component as mounted (client-side only)
   useEffect(() => {
-    // Dispatch event for other components to react on mount if consent exists
+    setMounted(true);
+  }, []);
+
+  // Second useEffect: Check consent after mounting
+  useEffect(() => {
+    if (!mounted) return;
+    
     try {
-      const saved = localStorage.getItem('cookie_consent');
-      if (saved) {
+      const saved = localStorage.getItem(COOKIE_CONSENT_KEY);
+      if (!saved) {
+        setShowBanner(true);
+      } else {
         const parsed = JSON.parse(saved) as CookiePreferences;
+        setPreferences(parsed);
         window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: parsed }));
       }
-    } catch {
-      // Invalid JSON, ignore
+    } catch (e) {
+      // If localStorage fails, show the banner
+      setShowBanner(true);
     }
 
     // Listen for reset event from footer link
@@ -64,19 +60,23 @@ export function CookieConsent() {
 
     window.addEventListener('cookieConsentReset', handleReset);
     return () => window.removeEventListener('cookieConsentReset', handleReset);
-  }, []);
+  }, [mounted]);
 
   const savePreferences = (prefs: CookiePreferences) => {
     const withTimestamp = { ...prefs, timestamp: new Date().toISOString() };
-    localStorage.setItem('cookie_consent', JSON.stringify(withTimestamp));
+    
+    try {
+      localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(withTimestamp));
+    } catch (e) {
+      console.error('Failed to save cookie preferences:', e);
+    }
+    
     setPreferences(withTimestamp);
     setShowBanner(false);
     setShowDetails(false);
-    
-    // Dispatch event for analytics to load
+
     window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: withTimestamp }));
-    
-    // Update Google Consent Mode
+
     if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('consent', 'update', {
         'analytics_storage': prefs.analytics ? 'granted' : 'denied',
@@ -94,7 +94,7 @@ export function CookieConsent() {
       necessary: true,
       analytics: true,
       functional: true,
-      marketing: false, // Meta Pixel kullanılmıyor
+      marketing: false,
       timestamp: '',
     });
   };
@@ -113,7 +113,15 @@ export function CookieConsent() {
     savePreferences(preferences);
   };
 
-  if (!showBanner) return null;
+  // Don't render anything until mounted (prevents hydration mismatch)
+  if (!mounted) {
+    return null;
+  }
+
+  // Don't render if banner shouldn't be shown
+  if (!showBanner) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white border-t border-gray-200 shadow-lg md:p-6">
@@ -159,6 +167,7 @@ export function CookieConsent() {
               <button
                 onClick={() => setShowDetails(false)}
                 className="text-gray-500 hover:text-gray-700"
+                aria-label="Kapat"
               >
                 <i className="fa-solid fa-xmark text-xl"></i>
               </button>
@@ -169,7 +178,9 @@ export function CookieConsent() {
               <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-bold text-slate-800">Zorunlu Çerezler</span>
-                  <span className="text-xs text-green-600 font-medium bg-green-100 px-2 py-1 rounded">Her Zaman Aktif</span>
+                  <span className="text-xs text-green-600 font-medium bg-green-100 px-2 py-1 rounded">
+                    Her Zaman Aktif
+                  </span>
                 </div>
                 <p className="text-sm text-gray-600">
                   Web sitesinin çalışması için gerekli temel çerezler. Devre dışı bırakılamaz.
@@ -238,17 +249,18 @@ export function CookieConsent() {
 
 // Hook for other components to check consent status
 export function useCookieConsent() {
-  const [consent, setConsent] = useState<CookiePreferences | null>(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const saved = localStorage.getItem('cookie_consent');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null; // Invalid JSON, return null
-    }
-  });
+  const [consent, setConsent] = useState<CookiePreferences | null>(null);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(COOKIE_CONSENT_KEY);
+      if (saved) {
+        setConsent(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error('Failed to read cookie consent:', e);
+    }
+
     const handleUpdate = (e: CustomEvent<CookiePreferences>) => {
       setConsent(e.detail);
     };
@@ -262,7 +274,10 @@ export function useCookieConsent() {
 
 // Re-open cookie preferences (for footer link)
 export function openCookiePreferences() {
-  localStorage.removeItem('cookie_consent');
-  // Dispatch event to trigger banner re-display
-  window.dispatchEvent(new CustomEvent('cookieConsentReset'));
+  try {
+    localStorage.removeItem(COOKIE_CONSENT_KEY);
+  } catch (e) {
+    console.error('Failed to remove cookie consent:', e);
+  }
+  window.location.reload();
 }
