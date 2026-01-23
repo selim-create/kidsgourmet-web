@@ -105,6 +105,12 @@ export default function RootLayout({
               'wait_for_update': 500
             });
             
+            // Enable cookieless tracking for modeling data
+            // Bu ayarlar consent olmadan da anonim ping gönderir
+            // Google bu verileri kullanarak modelleme yapar (%70-85 doğruluk)
+            gtag('set', 'url_passthrough', true);
+            gtag('set', 'ads_data_redaction', true);
+            
             // Check for existing consent
             try {
               const savedConsent = localStorage.getItem('cookie_consent');
