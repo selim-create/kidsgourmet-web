@@ -106,8 +106,8 @@ export default function RootLayout({
             });
             
             // Enable cookieless tracking for modeling data
-            // Bu ayarlar consent olmadan da anonim ping gönderir
-            // Google bu verileri kullanarak modelleme yapar (%70-85 doğruluk)
+            // These settings allow anonymous pings even without consent
+            // Google uses this data for conversion modeling (70-85% accuracy)
             gtag('set', 'url_passthrough', true);
             gtag('set', 'ads_data_redaction', true);
             
