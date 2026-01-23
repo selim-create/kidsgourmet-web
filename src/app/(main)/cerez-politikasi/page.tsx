@@ -18,7 +18,7 @@ export default function CerezPolitikasiPage() {
             <span className="text-gray-800">Çerez Politikası</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Çerez Politikası</h1>
-          <p className="text-gray-600 mt-3">KidsGourmet'de kullanılan çerezler ve yönetimi hakkında bilgiler</p>
+          <p className="text-gray-600 mt-3">KidsGourmet&apos;de kullanılan çerezler ve yönetimi hakkında bilgiler</p>
         </div>
       </div>
       

@@ -20,19 +20,26 @@ const DEFAULT_PREFERENCES: CookiePreferences = {
 };
 
 export function CookieConsent() {
-  const [showBanner, setShowBanner] = useState(false);
+  const [showBanner, setShowBanner] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('cookie_consent');
+    return !saved;
+  });
   const [showDetails, setShowDetails] = useState(false);
-  const [preferences, setPreferences] = useState<CookiePreferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState<CookiePreferences>(() => {
+    if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
+    const saved = localStorage.getItem('cookie_consent');
+    if (saved) {
+      return JSON.parse(saved) as CookiePreferences;
+    }
+    return DEFAULT_PREFERENCES;
+  });
 
   useEffect(() => {
-    // Check if user has already made a choice
+    // Dispatch event for other components to react on mount if consent exists
     const saved = localStorage.getItem('cookie_consent');
-    if (!saved) {
-      setShowBanner(true);
-    } else {
+    if (saved) {
       const parsed = JSON.parse(saved) as CookiePreferences;
-      setPreferences(parsed);
-      // Dispatch event for other components to react
       window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: parsed }));
     }
   }, []);
@@ -209,14 +216,13 @@ export function CookieConsent() {
 
 // Hook for other components to check consent status
 export function useCookieConsent() {
-  const [consent, setConsent] = useState<CookiePreferences | null>(null);
+  const [consent, setConsent] = useState<CookiePreferences | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem('cookie_consent');
+    return saved ? JSON.parse(saved) : null;
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem('cookie_consent');
-    if (saved) {
-      setConsent(JSON.parse(saved));
-    }
-
     const handleUpdate = (e: CustomEvent<CookiePreferences>) => {
       setConsent(e.detail);
     };
