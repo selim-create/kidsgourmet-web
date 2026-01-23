@@ -265,6 +265,4 @@ export function openCookiePreferences() {
   localStorage.removeItem('cookie_consent');
   // Dispatch event to trigger banner re-display
   window.dispatchEvent(new CustomEvent('cookieConsentReset'));
-  // Fallback: reload if event doesn't work
-  setTimeout(() => window.location.reload(), 100);
 }
