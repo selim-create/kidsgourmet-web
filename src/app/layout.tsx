@@ -105,6 +105,12 @@ export default function RootLayout({
               'wait_for_update': 500
             });
             
+            // Enable cookieless tracking for modeling data
+            // These settings allow anonymous pings even without consent
+            // Google uses this data for conversion modeling (70-85% accuracy)
+            gtag('set', 'url_passthrough', true);
+            gtag('set', 'ads_data_redaction', true);
+            
             // Check for existing consent
             try {
               const savedConsent = localStorage.getItem('cookie_consent');
