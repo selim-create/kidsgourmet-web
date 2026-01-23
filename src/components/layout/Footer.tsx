@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import NewsletterForm from '@/components/common/NewsletterForm'; 
+import NewsletterForm from '@/components/common/NewsletterForm';
+import { openCookiePreferences } from '@/components/common/CookieConsent'; 
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -280,6 +281,14 @@ export default function Footer() {
                                     <Link href="/cerez-politikasi" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Çerez Politikası
                                     </Link>
+                                </li>
+                                <li>
+                                    <button 
+                                        onClick={openCookiePreferences}
+                                        className="text-gray-600 hover:text-orange-500 transition-colors text-sm"
+                                    >
+                                        Çerez Tercihleri
+                                    </button>
                                 </li>
                                 <li>
                                     <Link href="/kvkk" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">

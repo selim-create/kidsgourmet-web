@@ -18,7 +18,7 @@ export default function CerezPolitikasiPage() {
             <span className="text-gray-800">Çerez Politikası</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Çerez Politikası</h1>
-          <p className="text-gray-600 mt-3">KidsGourmet'de kullanılan çerezler ve yönetimi hakkında bilgiler</p>
+          <p className="text-gray-600 mt-3">KidsGourmet&apos;de kullanılan çerezler ve yönetimi hakkında bilgiler</p>
         </div>
       </div>
       
@@ -161,18 +161,6 @@ export default function CerezPolitikasiPage() {
                 </thead>
                 <tbody className="text-gray-600">
                   <tr className="border-b border-gray-100">
-                    <td className="px-4 py-3 font-mono text-xs">session_id</td>
-                    <td className="px-4 py-3">Zorunlu</td>
-                    <td className="px-4 py-3">Kullanıcı oturumunu yönetir</td>
-                    <td className="px-4 py-3">Oturum</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
-                    <td className="px-4 py-3 font-mono text-xs">csrf_token</td>
-                    <td className="px-4 py-3">Zorunlu</td>
-                    <td className="px-4 py-3">Güvenlik (CSRF saldırılarını önler)</td>
-                    <td className="px-4 py-3">Oturum</td>
-                  </tr>
-                  <tr className="border-b border-gray-100">
                     <td className="px-4 py-3 font-mono text-xs">cookie_consent</td>
                     <td className="px-4 py-3">Zorunlu</td>
                     <td className="px-4 py-3">Çerez tercihlerinizi saklar</td>
@@ -185,16 +173,16 @@ export default function CerezPolitikasiPage() {
                     <td className="px-4 py-3">2 yıl</td>
                   </tr>
                   <tr className="border-b border-gray-100">
-                    <td className="px-4 py-3 font-mono text-xs">user_prefs</td>
-                    <td className="px-4 py-3">Fonksiyonel</td>
-                    <td className="px-4 py-3">Kullanıcı tercihlerini saklar</td>
-                    <td className="px-4 py-3">6 ay</td>
+                    <td className="px-4 py-3 font-mono text-xs">_gid</td>
+                    <td className="px-4 py-3">Analitik</td>
+                    <td className="px-4 py-3">Google Analytics - Günlük ziyaretçi analizi</td>
+                    <td className="px-4 py-3">24 saat</td>
                   </tr>
                   <tr className="border-b border-gray-100">
-                    <td className="px-4 py-3 font-mono text-xs">_fbp</td>
-                    <td className="px-4 py-3">Pazarlama</td>
-                    <td className="px-4 py-3">Facebook Pixel - Reklam hedefleme</td>
-                    <td className="px-4 py-3">3 ay</td>
+                    <td className="px-4 py-3 font-mono text-xs">_ga_*</td>
+                    <td className="px-4 py-3">Analitik</td>
+                    <td className="px-4 py-3">Google Analytics 4 - Oturum durumu</td>
+                    <td className="px-4 py-3">2 yıl</td>
                   </tr>
                 </tbody>
               </table>
@@ -257,7 +245,6 @@ export default function CerezPolitikasiPage() {
               </p>
               <ul className="list-disc list-inside space-y-2 ml-4">
                 <li><strong className="text-slate-700">Google Analytics:</strong> Site kullanımını analiz etmek için</li>
-                <li><strong className="text-slate-700">Facebook Pixel:</strong> Reklam kampanyalarını optimize etmek için</li>
                 <li><strong className="text-slate-700">YouTube:</strong> Video içerik göstermek için</li>
               </ul>
               <p className="leading-relaxed mt-4">
