@@ -46,6 +46,7 @@ export default function PercentileCalculatorPage() {
   const [regPassword, setRegPassword] = useState('');
   const [regChildName, setRegChildName] = useState('');
   const [regChildBirthDate, setRegChildBirthDate] = useState('');
+  const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
 
   // Eğer kayıtlı kullanıcı ve aktif çocuk varsa bilgileri otomatik doldur
   useEffect(() => {
@@ -151,6 +152,11 @@ export default function PercentileCalculatorPage() {
       return;
     }
 
+    if (!sensitiveDataConsent) {
+      toast.error('Devam etmek için Açık Rıza Metni\'ni kabul etmeniz gerekmektedir.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await toolService.savePercentileWithRegistration(result, {
@@ -159,6 +165,10 @@ export default function PercentileCalculatorPage() {
         name: regName,
         child_name: regChildName,
         child_birth_date: regChildBirthDate,
+        consents: {
+          sensitive_data_consent: sensitiveDataConsent,
+          sensitive_data_consent_at: new Date().toISOString(),
+        }
       });
 
       // Set token and refresh user
@@ -654,6 +664,25 @@ export default function PercentileCalculatorPage() {
                   </div>
                 </div>
 
+                {/* Sensitive Data Consent */}
+                <div className="flex items-start gap-3 mt-4">
+                  <input
+                    type="checkbox"
+                    id="sensitive-data-consent"
+                    checked={sensitiveDataConsent}
+                    onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+                    className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                    required
+                  />
+                  <label htmlFor="sensitive-data-consent" className="text-sm text-gray-600 cursor-pointer">
+                    Çocuğuma ait sağlık ve gelişim verilerinin, kişiselleştirilmiş hizmet sunulması amacıyla işlenmesine{' '}
+                    <Link href="/acik-riza-metni" className="text-orange-500 hover:underline font-medium">
+                      Açık Rıza Metni
+                    </Link>
+                    &apos;nde belirtilen şartlarla onay veriyorum.
+                  </label>
+                </div>
+
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
@@ -664,8 +693,8 @@ export default function PercentileCalculatorPage() {
                   </button>
                   <button
                     type="submit"
-                    disabled={isLoading}
-                    className="flex-1 bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors disabled:bg-gray-400"
+                    disabled={isLoading || !sensitiveDataConsent}
+                    className="flex-1 bg-blue-500 text-white py-3 rounded-xl font-bold hover:bg-blue-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isLoading ? 'Kaydediliyor...' : 'Kaydet'}
                   </button>

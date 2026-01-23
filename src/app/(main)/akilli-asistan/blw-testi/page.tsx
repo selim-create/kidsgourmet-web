@@ -377,6 +377,7 @@ export default function BLWTestPage() {
   const [regPassword, setRegPassword] = useState('');
   const [regChildName, setRegChildName] = useState('');
   const [regChildBirthDate, setRegChildBirthDate] = useState('');
+  const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
   
   // Child selector
   const [selectedChildId, setSelectedChildId] = useState<string>('');
@@ -490,6 +491,11 @@ export default function BLWTestPage() {
     e.preventDefault();
     if (!result) return;
     
+    if (!sensitiveDataConsent) {
+      toast.error('Devam etmek için Açık Rıza Metni\'ni kabul etmeniz gerekmektedir.');
+      return;
+    }
+    
     setIsLoading(true);
     try {
       const response = await toolService.submitBLWTestWithRegistration(
@@ -499,7 +505,11 @@ export default function BLWTestPage() {
           password: regPassword,
           name: regName,
           child_name: regChildName,
-          child_birth_date: regChildBirthDate
+          child_birth_date: regChildBirthDate,
+          consents: {
+            sensitive_data_consent: sensitiveDataConsent,
+            sensitive_data_consent_at: new Date().toISOString(),
+          }
         }
       );
       
@@ -946,10 +956,29 @@ export default function BLWTestPage() {
                 />
               </div>
               
+              {/* Sensitive Data Consent */}
+              <div className="flex items-start gap-3 mt-4">
+                <input
+                  type="checkbox"
+                  id="sensitive-data-consent"
+                  checked={sensitiveDataConsent}
+                  onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+                  className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                  required
+                />
+                <label htmlFor="sensitive-data-consent" className="text-sm text-gray-600 cursor-pointer">
+                  Çocuğuma ait sağlık ve gelişim verilerinin, kişiselleştirilmiş hizmet sunulması amacıyla işlenmesine{' '}
+                  <Link href="/acik-riza-metni" className="text-orange-500 hover:underline font-medium">
+                    Açık Rıza Metni
+                  </Link>
+                  &apos;nde belirtilen şartlarla onay veriyorum.
+                </label>
+              </div>
+              
               <button 
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50"
+                disabled={isLoading || !sensitiveDataConsent}
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Kaydediliyor...' : 'Kayıt Ol ve Sonucu Gör'}
               </button>
