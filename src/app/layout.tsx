@@ -9,6 +9,7 @@ import { RateLimitProvider } from "@/contexts/rate-limit-context";
 import { AdProvider } from "@/contexts/AdContext";
 import { SWRProvider } from "@/providers/swr-provider";
 import { Toaster } from "sonner";
+import { CookieConsent } from "@/components/common/CookieConsent";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kidsgourmet.com.tr';
 
@@ -87,15 +88,48 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
       </head>
       <body className="bg-gray-50 text-brand-dark font-sans antialiased">
-        {/* Google Analytics 4 */}
+        {/* Google Consent Mode v2 - MUST load before gtag */}
+        <Script id="google-consent-mode" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            
+            // Default consent state - deny all until user consents
+            gtag('consent', 'default', {
+              'analytics_storage': 'denied',
+              'ad_storage': 'denied',
+              'ad_user_data': 'denied',
+              'ad_personalization': 'denied',
+              'functionality_storage': 'denied',
+              'personalization_storage': 'denied',
+              'wait_for_update': 500
+            });
+            
+            // Check for existing consent
+            try {
+              const savedConsent = localStorage.getItem('cookie_consent');
+              if (savedConsent) {
+                const prefs = JSON.parse(savedConsent);
+                gtag('consent', 'update', {
+                  'analytics_storage': prefs.analytics ? 'granted' : 'denied',
+                  'ad_storage': prefs.marketing ? 'granted' : 'denied',
+                  'ad_user_data': prefs.marketing ? 'granted' : 'denied',
+                  'ad_personalization': prefs.marketing ? 'granted' : 'denied',
+                  'functionality_storage': prefs.functional ? 'granted' : 'denied',
+                  'personalization_storage': prefs.functional ? 'granted' : 'denied',
+                });
+              }
+            } catch (e) {}
+          `}
+        </Script>
+
+        {/* Google Analytics 4 - loads with consent mode */}
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
           {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', '${gaId}');
           `}
@@ -109,6 +143,7 @@ export default function RootLayout({
                   <RateLimitProvider>
                     <AdProvider>
                       {children}
+                      <CookieConsent />
                       <Toaster position="top-right" richColors toastOptions={{ style: { marginTop: '120px' } }} />
                     </AdProvider>
                   </RateLimitProvider>
