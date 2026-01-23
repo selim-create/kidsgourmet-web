@@ -22,26 +22,48 @@ const DEFAULT_PREFERENCES: CookiePreferences = {
 export function CookieConsent() {
   const [showBanner, setShowBanner] = useState(() => {
     if (typeof window === 'undefined') return false;
-    const saved = localStorage.getItem('cookie_consent');
-    return !saved;
+    try {
+      const saved = localStorage.getItem('cookie_consent');
+      return !saved;
+    } catch {
+      return true; // Show banner if localStorage fails
+    }
   });
   const [showDetails, setShowDetails] = useState(false);
   const [preferences, setPreferences] = useState<CookiePreferences>(() => {
     if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
-    const saved = localStorage.getItem('cookie_consent');
-    if (saved) {
-      return JSON.parse(saved) as CookiePreferences;
+    try {
+      const saved = localStorage.getItem('cookie_consent');
+      if (saved) {
+        return JSON.parse(saved) as CookiePreferences;
+      }
+    } catch {
+      // Invalid JSON, ignore and return defaults
     }
     return DEFAULT_PREFERENCES;
   });
 
   useEffect(() => {
     // Dispatch event for other components to react on mount if consent exists
-    const saved = localStorage.getItem('cookie_consent');
-    if (saved) {
-      const parsed = JSON.parse(saved) as CookiePreferences;
-      window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: parsed }));
+    try {
+      const saved = localStorage.getItem('cookie_consent');
+      if (saved) {
+        const parsed = JSON.parse(saved) as CookiePreferences;
+        window.dispatchEvent(new CustomEvent('cookieConsentUpdate', { detail: parsed }));
+      }
+    } catch {
+      // Invalid JSON, ignore
     }
+
+    // Listen for reset event from footer link
+    const handleReset = () => {
+      setShowBanner(true);
+      setShowDetails(false);
+      setPreferences(DEFAULT_PREFERENCES);
+    };
+
+    window.addEventListener('cookieConsentReset', handleReset);
+    return () => window.removeEventListener('cookieConsentReset', handleReset);
   }, []);
 
   const savePreferences = (prefs: CookiePreferences) => {
@@ -218,8 +240,12 @@ export function CookieConsent() {
 export function useCookieConsent() {
   const [consent, setConsent] = useState<CookiePreferences | null>(() => {
     if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem('cookie_consent');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('cookie_consent');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null; // Invalid JSON, return null
+    }
   });
 
   useEffect(() => {
@@ -237,5 +263,8 @@ export function useCookieConsent() {
 // Re-open cookie preferences (for footer link)
 export function openCookiePreferences() {
   localStorage.removeItem('cookie_consent');
-  window.location.reload();
+  // Dispatch event to trigger banner re-display
+  window.dispatchEvent(new CustomEvent('cookieConsentReset'));
+  // Fallback: reload if event doesn't work
+  setTimeout(() => window.location.reload(), 100);
 }
