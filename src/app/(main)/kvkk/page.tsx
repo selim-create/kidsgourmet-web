@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'KVKK Aydınlatma Metni | KidsGourmet',
-  description: 'KidsGourmet Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında aydınlatma metni.',
+  description: 'KidsGourmet Kişisel Verilerin Korunması Kanunu (KVKK) kapsamında aydınlatma metni ve veri işleme politikası.',
 };
 
 export default function KVKKPage() {
@@ -17,8 +17,8 @@ export default function KVKKPage() {
             <span>/</span>
             <span className="text-gray-800">KVKK Aydınlatma Metni</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">KVKK Aydınlatma Metni</h1>
-          <p className="text-gray-600 mt-3">Kişisel Verilerin Korunması Kanunu kapsamında bilgilendirme</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Kişisel Verilerin Korunması Kanunu Aydınlatma Metni</h1>
+          <p className="text-gray-600 mt-3">6698 sayılı Kanun kapsamında veri işleme faaliyetlerimiz hakkında bilgilendirme</p>
         </div>
       </div>
 
@@ -30,10 +30,10 @@ export default function KVKKPage() {
           <div className="flex items-start gap-3">
             <i className="fa-solid fa-shield-halved text-blue-500 text-2xl mt-1"></i>
             <div>
-              <h3 className="font-bold text-slate-800 mb-2">KVKK Uyumlu</h3>
+              <h3 className="font-bold text-slate-800 mb-2">Veri Sorumlusu Bilgilendirmesi</h3>
               <p className="text-sm text-gray-600">
-                Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK) 
-                uyarınca hazırlanmıştır ve kişisel verilerinizin işlenmesi hakkında sizi bilgilendirmek amacıyla sunulmaktadır.
+                Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;KVKK&quot;) 
+                madde 10 kapsamında hazırlanmıştır.
               </p>
             </div>
           </div>
@@ -42,266 +42,247 @@ export default function KVKKPage() {
         {/* Content Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12 mb-8">
           
-          {/* Veri Sorumlusu */}
+          {/* 1. Veri Sorumlusu */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 flex items-center justify-center bg-orange-100 rounded-full text-orange-500">
                 <i className="fa-solid fa-building text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">1. Veri Sorumlusu</h2>
+              <h2 className="text-2xl font-bold text-slate-800">1. Veri Sorumlusunun Kimliği</h2>
             </div>
-            <p className="text-gray-600 leading-relaxed">
-              6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında, kişisel verileriniz; 
-              veri sorumlusu olarak <strong>Hip Medya Dijital Yayıncılık ve Teknoloji A.Ş.</strong> 
-              ("KidsGourmet" veya "Şirket") tarafından aşağıda açıklanan kapsamda işlenebilecektir.
+            <p className="text-gray-600 leading-relaxed mb-4">
+              6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;Kanun&quot; veya &quot;KVKK&quot;) madde 10 kapsamında; 
+              www.kidsgourmet.com.tr alan adlı internet sitesinin (&quot;Platform&quot;) işleticisi ve içerik sağlayıcısı olan 
+              HİP Medya (bundan sonra &quot;Şirket&quot; olarak anılacaktır), kişisel verilerinizin işlenmesi süreçlerinde 
+              &quot;Veri Sorumlusu&quot; sıfatını haizdir.
             </p>
+            
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-sm text-gray-700">
+              <h4 className="font-bold text-slate-800 mb-3 border-b border-gray-200 pb-2">İletişim Bilgileri:</h4>
+              <ul className="space-y-2">
+                <li><strong className="text-slate-900">Unvan:</strong> HİP Medya (Umut Kaan Özdemir)</li>
+                <li><strong className="text-slate-900">Vergi Kimlik No:</strong> 6810178450</li>
+                <li><strong className="text-slate-900">Adres:</strong> Fatih Mah. Çapraz Sok. No:11/2 K.Çekmece-İstanbul</li>
+                <li><strong className="text-slate-900">E-Posta:</strong> iletisim@kidsgourmet.com.tr</li>
+              </ul>
+            </div>
           </div>
 
           <hr className="border-gray-200 my-8" />
 
-          {/* Kişisel Verilerin İşlenme Amacı */}
+          {/* 2. İşlenen Veriler ve Kategorizasyon */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 flex items-center justify-center bg-purple-100 rounded-full text-purple-500">
+                <i className="fa-solid fa-layer-group text-xl"></i>
+              </div>
+              <h2 className="text-2xl font-bold text-slate-800">2. İşlenen Kişisel Verileriniz ve Kategorizasyon</h2>
+            </div>
+            <p className="text-gray-600 leading-relaxed mb-6">
+              Platformumuzu ziyaretiniz, üyelik işlemleriniz, bülten aboneliğiniz veya içeriklerle etkileşiminiz sırasında, 
+              aşağıda kategorize edilen kişisel verileriniz işlenmektedir.
+            </p>
+            
+            <div className="overflow-x-auto border border-gray-200 rounded-xl">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-gray-700 font-bold border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 w-1/3">Veri Kategorisi</th>
+                    <th className="px-4 py-3">Veri İçeriği ve Örnekler</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 text-gray-600">
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Kimlik Bilgileri</td>
+                    <td className="px-4 py-3">Ad, Soyad, Kullanıcı Adı, (Yarışma/etkinlik katılımı halinde) T.C. Kimlik No, Doğum Tarihi.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">İletişim Bilgileri</td>
+                    <td className="px-4 py-3">E-posta adresi, (Tercihen paylaşılması halinde) Cep telefonu numarası, Adres bilgisi.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">İşlem Güvenliği</td>
+                    <td className="px-4 py-3">IP adresi, giriş-çıkış kayıtları, şifre bilgileri (kriptolanmış), cihaz ID, tarayıcı bilgileri.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Müşteri İşlem</td>
+                    <td className="px-4 py-3">Talep ve şikayet bilgileri, e-bülten tercihleri, anket cevapları.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Görsel/İşitsel Kayıtlar</td>
+                    <td className="px-4 py-3">Profil fotoğrafları, yarışma veya "Sizden Gelenler" için gönderilen çocuk fotoğrafları/videoları.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Pazarlama Bilgileri</td>
+                    <td className="px-4 py-3">Çerez kayıtları, site içi hareketler, ilgi alanları, kampanya katılım geçmişi.</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Özel Nitelikli Veriler</td>
+                    <td className="px-4 py-3">Yorumlarda veya formlarda paylaşılan sağlık verileri (alerji, diyet vb.).</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <hr className="border-gray-200 my-8" />
+
+          {/* 3. İşlenme Amaçları */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-full text-blue-500">
                 <i className="fa-solid fa-bullseye text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">2. Kişisel Verilerin İşlenme Amacı</h2>
+              <h2 className="text-2xl font-bold text-slate-800">3. Kişisel Verilerin İşlenme Amaçları</h2>
             </div>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Toplanan kişisel verileriniz, KVKK'nın 5. ve 6. maddelerinde belirtilen kişisel veri işleme şartları çerçevesinde aşağıdaki amaçlarla işlenebilecektir:
-            </p>
-            <ul className="space-y-2 text-gray-600">
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span>Üyelik işlemlerinin gerçekleştirilmesi ve yönetilmesi</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span>Hizmetlerimizin sunulması ve iyileştirilmesi</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span>İletişim faaliyetlerinin yürütülmesi</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span>Bülten ve kampanya bilgilendirmelerinin yapılması</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span>Yasal yükümlülüklerin yerine getirilmesi</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span>Çocuk beslenmesi konusunda kişiselleştirilmiş içerik sunulması</span>
-              </li>
-            </ul>
-          </div>
+            
+            <div className="space-y-6 text-gray-600">
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h4 className="font-bold text-slate-700 mb-3">3.1. Hizmetlerin Sunulması ve Operasyonel Süreçler</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm ml-2">
+                  <li>Kullanıcı Sözleşmesi&apos;nin ifası, üyelik kaydının oluşturulması.</li>
+                  <li>İçeriklerin (makale, video, tarif) erişilebilirliğinin sağlanması.</li>
+                  <li>İçerik akışının kişiselleştirilmesi.</li>
+                  <li>Soru, talep ve şikayetlerin yanıtlanması.</li>
+                </ul>
+              </div>
 
-          <hr className="border-gray-200 my-8" />
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h4 className="font-bold text-slate-700 mb-3">3.2. Hukuki ve Teknik Güvenlik</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm ml-2">
+                  <li>5651 sayılı Kanun gereği trafik kayıtlarının (log) tutulması.</li>
+                  <li>Siber güvenliğin sağlanması, yetkisiz erişimlerin önlenmesi.</li>
+                  <li>Resmi makamların taleplerinin karşılanması.</li>
+                </ul>
+              </div>
 
-          {/* İşlenen Kişisel Veriler */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 flex items-center justify-center bg-purple-100 rounded-full text-purple-500">
-                <i className="fa-solid fa-database text-xl"></i>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-800">3. İşlenen Kişisel Veriler</h2>
-            </div>
-            <p className="text-gray-600 leading-relaxed mb-4">Tarafımızca işlenen kişisel veri kategorileri şunlardır:</p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="font-semibold text-slate-700 mb-2">
-                  <i className="fa-solid fa-id-card text-orange-500 mr-2"></i>
-                  Kimlik Bilgileri
-                </h4>
-                <p className="text-sm text-gray-600">Ad, soyad</p>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="font-semibold text-slate-700 mb-2">
-                  <i className="fa-solid fa-envelope text-orange-500 mr-2"></i>
-                  İletişim Bilgileri
-                </h4>
-                <p className="text-sm text-gray-600">E-posta adresi</p>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="font-semibold text-slate-700 mb-2">
-                  <i className="fa-solid fa-baby text-orange-500 mr-2"></i>
-                  Çocuk Bilgileri
-                </h4>
-                <p className="text-sm text-gray-600">Çocuk adı, doğum tarihi, alerjen bilgileri (ebeveyn onayı ile)</p>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="font-semibold text-slate-700 mb-2">
-                  <i className="fa-solid fa-chart-line text-orange-500 mr-2"></i>
-                  Kullanım Verileri
-                </h4>
-                <p className="text-sm text-gray-600">Site kullanım istatistikleri, tercihler</p>
+              <div className="bg-gray-50 rounded-xl p-5">
+                <h4 className="font-bold text-slate-700 mb-3">3.3. Pazarlama ve İletişim (Açık Rıza Dahilinde)</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm ml-2">
+                  <li>E-bülten ve bilgilendirme maillerinin gönderilmesi.</li>
+                  <li>Hedefli reklam ve tanıtım faaliyetleri.</li>
+                  <li>Çekiliş ve yarışma süreçlerinin yönetilmesi.</li>
+                </ul>
               </div>
             </div>
           </div>
 
           <hr className="border-gray-200 my-8" />
 
-          {/* Kişisel Verilerin Aktarılması */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full text-green-500">
-                <i className="fa-solid fa-share-nodes text-xl"></i>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-800">4. Kişisel Verilerin Aktarılması</h2>
-            </div>
-            <p className="text-gray-600 leading-relaxed">
-              Kişisel verileriniz, yukarıda belirtilen amaçların gerçekleştirilmesi doğrultusunda; 
-              iş ortaklarımıza, tedarikçilerimize, hizmet sağlayıcılarımıza ve yasal olarak yetkili 
-              kamu kurumlarına KVKK'nın 8. ve 9. maddelerinde belirtilen kişisel veri işleme şartları 
-              çerçevesinde aktarılabilecektir.
-            </p>
-          </div>
-
-          <hr className="border-gray-200 my-8" />
-
-          {/* Veri Toplamanın Yöntemi ve Hukuki Sebebi */}
+          {/* 4. Toplama Yöntemi ve Hukuki Sebep */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 flex items-center justify-center bg-indigo-100 rounded-full text-indigo-500">
                 <i className="fa-solid fa-scale-balanced text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">5. Kişisel Veri Toplamanın Yöntemi ve Hukuki Sebebi</h2>
+              <h2 className="text-2xl font-bold text-slate-800">4. Toplanma Yöntemi ve Hukuki Sebebi</h2>
             </div>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Kişisel verileriniz, web sitemiz, mobil uygulamamız ve elektronik ortamlar aracılığıyla 
-              otomatik veya otomatik olmayan yöntemlerle toplanmaktadır. Kişisel verileriniz KVKK'nın 
-              5. maddesinde belirtilen aşağıdaki hukuki sebeplerine dayalı olarak işlenmektedir:
+              Kişisel verileriniz, Platforma giriş yapmanız, formları doldurmanız ve çerezleri kabul etmeniz suretiyle 
+              dijital ortamda toplanmaktadır. İşleme faaliyetlerimiz KVKK Madde 5 ve 6&apos;ya dayanmaktadır:
             </p>
-            <ul className="space-y-2 text-gray-600">
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-circle-check text-blue-500 mt-1"></i>
-                <span>Açık rızanızın bulunması</span>
+            <ul className="space-y-3 text-gray-600">
+              <li className="flex gap-3">
+                <span className="font-bold text-indigo-500 min-w-[20px]">1.</span>
+                <span><strong>Kanunlarda Açıkça Öngörülmesi (Md. 5/2-a, ç):</strong> Trafik loglarının tutulması, fatura işlemleri.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-circle-check text-blue-500 mt-1"></i>
-                <span>Bir sözleşmenin kurulması veya ifasıyla doğrudan ilgili olması</span>
+              <li className="flex gap-3">
+                <span className="font-bold text-indigo-500 min-w-[20px]">2.</span>
+                <span><strong>Sözleşmenin İfası (Md. 5/2-c):</strong> Üyelik sözleşmesi gereği kimlik/iletişim verilerinin işlenmesi.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-circle-check text-blue-500 mt-1"></i>
-                <span>Veri sorumlusunun hukuki yükümlülüğünü yerine getirebilmesi için zorunlu olması</span>
+              <li className="flex gap-3">
+                <span className="font-bold text-indigo-500 min-w-[20px]">3.</span>
+                <span><strong>Meşru Menfaat (Md. 5/2-f):</strong> Site güvenliği, zorunlu çerezler, hizmet kalitesi analizleri.</span>
               </li>
-              <li className="flex items-start gap-2">
-                <i className="fa-solid fa-circle-check text-blue-500 mt-1"></i>
-                <span>Veri sorumlusunun meşru menfaatleri için veri işlenmesinin zorunlu olması</span>
+              <li className="flex gap-3">
+                <span className="font-bold text-indigo-500 min-w-[20px]">4.</span>
+                <span><strong>Açık Rıza (Md. 5/1 ve 6/2):</strong> E-bülten gönderimi, pazarlama çerezleri, özel nitelikli verilerin işlenmesi ve çocuk görsel verilerinin yayınlanması.</span>
               </li>
             </ul>
           </div>
 
           <hr className="border-gray-200 my-8" />
 
-          {/* KVKK Kapsamındaki Haklar */}
+          {/* 5. Aktarım */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full text-red-500">
-                <i className="fa-solid fa-user-shield text-xl"></i>
+              <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full text-green-500">
+                <i className="fa-solid fa-share-nodes text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">6. KVKK Kapsamındaki Haklarınız</h2>
+              <h2 className="text-2xl font-bold text-slate-800">5. Kişisel Verilerin Aktarılması</h2>
             </div>
-            <p className="text-gray-600 leading-relaxed mb-4">KVKK'nın 11. maddesi uyarınca aşağıdaki haklara sahipsiniz:</p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">Kişisel verilerinizin işlenip işlenmediğini öğrenme</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">İşlenmişse bilgi talep etme</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">Yurt içi/dışı aktarım bilgisi</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">Eksik veya yanlış işlenmiş ise düzeltme talep etme</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">Silinmesini veya yok edilmesini isteme</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">Otomatik sistemlerle analiz edilmesine itiraz etme</span>
-              </div>
-              <div className="bg-gray-50 rounded-xl p-4">
-                <i className="fa-solid fa-check text-green-500 mr-2"></i>
-                <span className="text-sm text-gray-700">Kanuna aykırı işlemeden dolayı zararın giderilmesini talep etme</span>
-              </div>
+            <p className="text-gray-600 mb-4">Verileriniz, KVKK 8. ve 9. maddelere uygun olarak şu gruplara aktarılabilir:</p>
+            <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6 ml-2">
+              <li><strong>Yetkili Kamu Kurumları:</strong> Emniyet, Savcılık, Mahkemeler, BTK (talep halinde).</li>
+              <li><strong>Tedarikçiler:</strong> Sunucu, e-posta gönderim ve altyapı sağlayıcıları.</li>
+              <li><strong>Danışmanlar:</strong> Hukuk ve mali müşavirler.</li>
+            </ul>
+
+            <div className="bg-orange-50 border border-orange-200 rounded-xl p-5">
+              <h4 className="font-bold text-orange-800 mb-2">5.1. Yurt Dışına Aktarım</h4>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Sunucu altyapıları veya analitik araçların (Google Analytics vb.) yurt dışında olması durumunda; 
+                verileriniz, Kurul tarafından ilan edilen standart sözleşmelere, güvenli ülke listelerine veya 
+                Açık Rızanıza dayalı olarak yurt dışına aktarılmaktadır.
+              </p>
             </div>
           </div>
 
           <hr className="border-gray-200 my-8" />
 
-          {/* Başvuru Yöntemi */}
+          {/* 6. Haklar */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 flex items-center justify-center bg-teal-100 rounded-full text-teal-500">
-                <i className="fa-solid fa-paper-plane text-xl"></i>
+              <div className="w-12 h-12 flex items-center justify-center bg-red-100 rounded-full text-red-500">
+                <i className="fa-solid fa-user-shield text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">7. Başvuru Yöntemi</h2>
+              <h2 className="text-2xl font-bold text-slate-800">6. Veri Sahibi Olarak Haklarınız (Madde 11)</h2>
             </div>
-            <p className="text-gray-600 leading-relaxed">
-              Yukarıda belirtilen haklarınızı kullanmak için{' '}
-              <a href="mailto:kvkk@kidsgourmet.com.tr" className="text-orange-500 hover:underline font-semibold">
-                kvkk@kidsgourmet.com.tr
-              </a>{' '}
-              adresine e-posta göndererek veya{' '}
-              <Link href="/iletisim" className="text-orange-500 hover:underline font-semibold">
-                iletişim formu
-              </Link>{' '}
-              aracılığıyla başvuruda bulunabilirsiniz.
-            </p>
+            <p className="text-gray-600 leading-relaxed mb-6">Şirketimize başvurarak aşağıdaki haklarınızı kullanabilirsiniz:</p>
+            
+            <div className="grid md:grid-cols-2 gap-4 mb-8">
+              {[
+                "Kişisel verilerinizin işlenip işlenmediğini öğrenme",
+                "İşlenmişse bilgi talep etme",
+                "İşlenme amacını ve amacına uygun kullanılıp kullanılmadığını öğrenme",
+                "Yurt içi/dışı aktarım yapılan kişileri bilme",
+                "Eksik/yanlış işlemelerin düzeltilmesini isteme",
+                "Verilerin silinmesini veya yok edilmesini isteme",
+                "Düzeltme/silme işlemlerinin üçüncü kişilere bildirilmesini isteme",
+                "Otomatik analiz sonuçlarına itiraz etme",
+                "Kanuna aykırı işlemeyle oluşan zararın giderilmesini talep etme"
+              ].map((item, i) => (
+                <div key={i} className="bg-gray-50 rounded-lg p-3 flex items-start gap-2">
+                  <i className="fa-solid fa-check text-green-500 mt-1 text-xs"></i>
+                  <span className="text-sm text-gray-700">{item}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-6">
+              <h4 className="font-bold text-slate-800 mb-3">Başvuru Usulü</h4>
+              <p className="text-sm text-gray-700 mb-4">
+                Taleplerinizi yazılı olarak, KEP adresi, güvenli elektronik imza, mobil imza veya sistemimizde kayıtlı 
+                e-postanız aracılığıyla <strong className="text-orange-600">iletisim@kidsgourmet.com.tr</strong> adresine iletebilirsiniz.
+              </p>
+              <Link 
+                href="/basvuru-formu" 
+                className="inline-flex items-center justify-center gap-2 bg-orange-500 text-white font-bold px-6 py-3 rounded-xl hover:bg-orange-600 transition-colors shadow-sm w-full sm:w-auto"
+              >
+                <i className="fa-solid fa-file-signature"></i>
+                Yazılı Başvuru Formu İçin Tıklayınız
+              </Link>
+            </div>
           </div>
 
           {/* Son Güncelleme */}
           <div className="pt-4 border-t border-gray-100">
             <p className="text-sm text-gray-500">
-              Son güncelleme: Ocak 2025
+              Son güncelleme: Ocak 2026
             </p>
           </div>
 
         </div>
-
-        {/* Veri Sorumlusu İletişim Kartı */}
-        <div className="bg-gradient-to-r from-slate-50 to-gray-50 rounded-2xl shadow-sm border border-gray-200 p-8 md:p-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 flex items-center justify-center bg-slate-700 rounded-full text-white">
-              <i className="fa-solid fa-address-card text-xl"></i>
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800">Veri Sorumlusu ve İletişim</h2>
-          </div>
-          <div className="space-y-3 text-gray-600">
-            <p><strong className="text-slate-800">Şirket:</strong> Hip Medya Dijital Yayıncılık ve Teknoloji A.Ş.</p>
-            <p>
-              <strong className="text-slate-800">E-posta:</strong>{' '}
-              <a href="mailto:kvkk@kidsgourmet.com.tr" className="text-orange-500 hover:underline">
-                kvkk@kidsgourmet.com.tr
-              </a>
-            </p>
-            <p>
-              <strong className="text-slate-800">Web:</strong>{' '}
-              <a href="https://kidsgourmet.com.tr" className="text-orange-500 hover:underline">
-                kidsgourmet.com.tr
-              </a>
-            </p>
-            <p className="text-sm mt-4 bg-white border border-gray-200 rounded-lg p-4">
-              <i className="fa-solid fa-info-circle text-blue-500 mr-2"></i>
-              Haklarınızı kullanmak veya sorularınız için yukarıdaki iletişim bilgilerini kullanabilirsiniz.
-            </p>
-          </div>
-        </div>
-
       </div>
     </div>
   );
