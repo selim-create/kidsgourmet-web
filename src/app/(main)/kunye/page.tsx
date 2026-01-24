@@ -77,7 +77,7 @@ export default function KunyePage() {
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Marka:</span>
-                <span>KidsGourmet bir HİP medya markasıdır.</span>
+                <span>KidsGourmet bir HİP Medya markasıdır.</span>
               </div>
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function KunyePage() {
                   <strong className="text-slate-700">3. Yer Sağlayıcı Bildirimi:</strong>
                 </p>
                 <p className="leading-relaxed">
-                  Kids Gourmet, 5651 sayılı &quot;İnternet Ortamında Yapılan Yayınların Düzenlenmesi ve Bu Yayınlar Yoluyla İşlenen Suçlarla Mücadele Edilmesi Hakkında Kanun&quot; kapsamında &quot;İçerik Sağlayıcı&quot; ve kullanıcı yorumları bakımından &quot;Yer Sağlayıcı&quot; olarak faaliyet göstermektedir.
+                  KidsGourmet, 5651 sayılı &quot;İnternet Ortamında Yapılan Yayınların Düzenlenmesi ve Bu Yayınlar Yoluyla İşlenen Suçlarla Mücadele Edilmesi Hakkında Kanun&quot; kapsamında &quot;İçerik Sağlayıcı&quot; ve kullanıcı yorumları bakımından &quot;Yer Sağlayıcı&quot; olarak faaliyet göstermektedir.
                 </p>
               </div>
               <div>
