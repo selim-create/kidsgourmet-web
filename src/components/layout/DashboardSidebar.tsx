@@ -4,7 +4,7 @@ import React from 'react';
 import Link from "next/link";
 
 interface DashboardSidebarProps {
-  activePage: 'dashboard' | 'haftalik-plan' | 'favoriler' | 'alisveris-listesi' | 'asilar' | 'buyume' | 'akilli-asistan' | 'blw-testi' | 'profil';
+  activePage: 'dashboard' | 'haftalik-plan' | 'favoriler' | 'alisveris-listesi' | 'asilar' | 'buyume' | 'akilli-asistan' | 'blw-testi' | 'profil' | 'rizalarim';
 }
 
 export default function DashboardSidebar({ activePage }: DashboardSidebarProps) {
@@ -86,6 +86,11 @@ export default function DashboardSidebar({ activePage }: DashboardSidebarProps) 
         <Link href="/profil" className={linkClasses('profil')}>
           <i className={`fa-solid fa-user-gear ${iconClasses('profil')}`}></i>
           <span className="text-sm font-semibold">Profil Düzenleme</span>
+        </Link>
+
+        <Link href="/dashboard/rizalarim" className={linkClasses('rizalarim')}>
+          <i className={`fa-solid fa-shield-halved ${iconClasses('rizalarim')}`}></i>
+          <span className="text-sm font-semibold">Rıza Yönetimi</span>
         </Link>
       </nav>
     </aside>
