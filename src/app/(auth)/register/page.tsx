@@ -56,6 +56,11 @@ export default function RegisterPage() {
       setError("Çocuk profili eklemek için veli/vasi beyanını onaylamanız gerekmektedir.");
       return;
     }
+
+    if (!skipChild && childName.trim() && childBirthDate && !sensitiveDataConsent) {
+      setError("Çocuk profili eklemek için açık rıza metnini onaylamanız gerekmektedir.");
+      return;
+    }
     
     setIsLoading(true);
 
@@ -122,7 +127,7 @@ export default function RegisterPage() {
                 </div>
 
                 <h2 className="font-display font-bold text-3xl mb-4 text-slate-800 leading-tight">
-                    Sağlıklı Nesiller,<br/>
+                    Sağlıklı Nesiller<br/>
                     <span className="text-orange-500">Bilinçli Ebeveynler</span>
                 </h2>
                 
@@ -136,19 +141,19 @@ export default function RegisterPage() {
                         <div className="w-8 h-8 rounded-full bg-green-50 group-hover:bg-green-100 flex items-center justify-center flex-shrink-0 transition-colors">
                             <i className="fa-solid fa-check text-green-500 text-sm"></i>
                         </div>
-                        <span className="text-slate-700 font-medium text-sm">Uzman onaylı tarifler</span>
+                        <span className="text-slate-700 font-medium text-sm">Uzman Görüşleri</span>
                     </div>
                     <div className="flex items-center gap-3 group">
                         <div className="w-8 h-8 rounded-full bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center flex-shrink-0 transition-colors">
                             <i className="fa-solid fa-wand-magic-sparkles text-blue-500 text-sm"></i>
                         </div>
-                        <span className="text-slate-700 font-medium text-sm">Akıllı beslenme araçları</span>
+                        <span className="text-slate-700 font-medium text-sm">Akıllı Asistan Desteği</span>
                     </div>
                     <div className="flex items-center gap-3 group">
                         <div className="w-8 h-8 rounded-full bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center flex-shrink-0 transition-colors">
                             <i className="fa-solid fa-users text-purple-500 text-sm"></i>
                         </div>
-                        <span className="text-slate-700 font-medium text-sm">Güvenilir topluluk desteği</span>
+                        <span className="text-slate-700 font-medium text-sm">Güçlü Topluluk</span>
                     </div>
                 </div>
             </div>
@@ -308,6 +313,7 @@ export default function RegisterPage() {
                               value={childBirthDate}
                               onChange={(e) => setChildBirthDate(e.target.value)}
                               className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-orange-500 text-sm text-gray-600 bg-white" 
+                              placeholder="Çocuğunuzun Doğum Tarihi"
                             />
                           </div>
                         )}
@@ -315,19 +321,39 @@ export default function RegisterPage() {
 
                     {/* Guardian Declaration - Required when adding child */}
                     {!skipChild && (
-                      <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
-                        <input
-                          type="checkbox"
-                          id="guardian-declaration"
-                          checked={guardianDeclaration}
-                          onChange={(e) => setGuardianDeclaration(e.target.checked)}
-                          className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
-                        />
-                        <label htmlFor="guardian-declaration" className="text-sm text-gray-700 cursor-pointer">
-                          <strong>18 yaşından büyük olduğumu</strong> ve bu platformda paylaşacağım çocuk bilgilerini{' '}
-                          <strong>yasal veli/vasi sıfatıyla</strong> paylaştığımı beyan ederim.
-                        </label>
-                      </div>
+                      <>
+                        <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                          <input
+                            type="checkbox"
+                            id="guardian-declaration"
+                            checked={guardianDeclaration}
+                            onChange={(e) => setGuardianDeclaration(e.target.checked)}
+                            className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                          />
+                          <label htmlFor="guardian-declaration" className="text-sm text-gray-700 cursor-pointer">
+                            <strong>18 yaşından büyük olduğumu</strong> ve bu platformda paylaşacağım çocuk bilgilerini{' '}
+                            <strong>yasal veli/vasi sıfatıyla</strong> paylaştığımı beyan ederim.
+                          </label>
+                        </div>
+
+                        {/* Sensitive Data Consent - Required when adding child */}
+                        <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                          <input
+                            type="checkbox"
+                            id="sensitive-data-consent-required"
+                            checked={sensitiveDataConsent}
+                            onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+                            className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                          />
+                          <label htmlFor="sensitive-data-consent-required" className="text-sm text-gray-700 cursor-pointer">
+                            Çocuğuma ait sağlık ve gelişim verilerinin işlenmesine{' '}
+                            <Link href="/acik-riza-metni" className="text-orange-500 hover:underline font-medium">
+                              Açık Rıza Metni
+                            </Link>
+                            &apos;nde belirtilen şartlarla <strong>onay veriyorum</strong>.
+                          </label>
+                        </div>
+                      </>
                     )}
 
                     {/* Consents (Compact) */}
@@ -374,22 +400,6 @@ export default function RegisterPage() {
                                 />
                                 <span className="text-xs text-gray-500 leading-tight group-hover:text-gray-700 transition-colors">
                                     Kampanya ve tanıtım e-postaları almak istiyorum. (İsteğe bağlı)
-                                </span>
-                            </label>
-
-                            <label className="flex items-start gap-2 cursor-pointer group select-none">
-                                <input
-                                  type="checkbox"
-                                  checked={sensitiveDataConsent}
-                                  onChange={(e) => setSensitiveDataConsent(e.target.checked)}
-                                  className="mt-0.5 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 accent-orange-500"
-                                />
-                                <span className="text-xs text-gray-500 leading-tight group-hover:text-gray-700 transition-colors">
-                                    Çocuğuma ait sağlık ve gelişim verilerinin işlenmesine{' '}
-                                    <Link href="/acik-riza-metni" className="text-orange-500 hover:underline font-medium">
-                                        Açık Rıza Metni
-                                    </Link>
-                                    &apos;nde belirtilen şartlarla onay veriyorum. (İsteğe bağlı)
                                 </span>
                             </label>
                         </div>
