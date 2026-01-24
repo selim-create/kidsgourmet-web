@@ -280,7 +280,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     while (hasMorePosts && currentPage <= MAX_SITEMAP_PAGES) {
       try {
-        // Hafif endpoint kullan - sadece id, slug, date çeker
+        // Use lightweight endpoint - only fetches id, slug, date
         const blogResponse = await blogService.getSitemapPosts(currentPage, SITEMAP_POSTS_PER_PAGE);
 
         if (blogResponse.posts && blogResponse.posts.length > 0) {
