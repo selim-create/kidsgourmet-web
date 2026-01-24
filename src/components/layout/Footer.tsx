@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image'; // Image import edildi
 import NewsletterForm from '@/components/common/NewsletterForm';
 import { openCookiePreferences } from '@/components/common/CookieConsent'; 
 
@@ -12,16 +13,15 @@ export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-100 relative z-10 mt-auto">
         
-        {/* Newsletter Section - KidsGourmet Style */}
+        {/* Newsletter Section */}
         <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-white py-12 relative overflow-hidden">
-            {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-orange-100 rounded-full blur-3xl -mr-32 -mt-32 opacity-50"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-100 rounded-full blur-3xl -ml-24 -mb-24 opacity-50"></div>
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg: px-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="bg-white rounded-[2rem] p-8 md:p-10 shadow-sm border border-gray-100">
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
-                        <div className="text-center lg: text-left flex-1">
+                        <div className="text-center lg:text-left flex-1">
                             <div className="flex items-center justify-center lg:justify-start gap-3 mb-3">
                                 <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center">
                                     <i className="fa-solid fa-envelope text-orange-500 text-xl"></i>
@@ -48,30 +48,26 @@ export default function Footer() {
         <div className="bg-gray-50 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-12">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-8">
                     
                     {/* Brand Column */}
-                    <div className="col-span-2 md:col-span-3 lg:col-span-1">
-                        <Link href="/" className="flex items-center gap-2 mb-5 group" aria-label="KidsGourmet Ana Sayfa">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-orange-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                                <div className="relative w-10 h-10 flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                                    <i className="fa-solid fa-carrot text-orange-500 text-2xl"></i>
-                                </div>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="font-display font-bold text-xl tracking-tight text-slate-800 leading-none">
-                                    Kids<span className="text-orange-500">Gourmet</span>
-                                </span>
-                                <span className="text-[10px] text-gray-400 font-medium tracking-wide">Sağlıklı Nesiller</span>
-                            </div>
+                    <div className="col-span-2 md:col-span-3 lg:col-span-1 flex flex-col">
+                        <Link href="/" className="flex items-center mb-5 group" aria-label="KidsGourmet Ana Sayfa">
+                             {/* Logo Update: Using the full SVG logo */}
+                             <Image 
+                                src="/kidsgourmet-logo.svg" 
+                                alt="KidsGourmet Logo" 
+                                width={160} 
+                                height={44} 
+                                className="h-10 w-auto object-contain"
+                            />
                         </Link>
                         <p className="text-gray-500 text-sm mb-6 leading-relaxed">
                             Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman görüşleri, sağlıklı tarifler ve akıllı araçlarla yanınızdayız.
                         </p>
                         
-                        {/* Social Media - 3x2 Grid */}
-                        <div className="grid grid-cols-3 gap-2">
+                        {/* Social Media - Grid System (Fixed Size & Layout) */}
+                        <div className="grid grid-cols-6 lg:grid-cols-3 gap-2 w-fit mt-auto">
                             <Link 
                                 href="https://www.instagram.com/kidsgourmet/" 
                                 target="_blank" 
@@ -88,7 +84,7 @@ export default function Footer() {
                                 aria-label="Facebook"
                                 className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-facebook-f text-sm"></i>
+                                <i className="fa-brands fa-facebook-f text-xs"></i>
                             </Link>
                             <Link 
                                 href="https://tr.pinterest.com/KidsandGourmet" 
@@ -97,7 +93,7 @@ export default function Footer() {
                                 aria-label="Pinterest"
                                 className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-pinterest text-sm"></i>
+                                <i className="fa-brands fa-pinterest text-xs"></i>
                             </Link>
                             <Link 
                                 href="https://www.youtube.com/channel/UCkXtLdtEfhl8Do1pPW4fgsQ" 
@@ -106,7 +102,7 @@ export default function Footer() {
                                 aria-label="YouTube"
                                 className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-red-500 hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-youtube text-sm"></i>
+                                <i className="fa-brands fa-youtube text-xs"></i>
                             </Link>
                             <Link 
                                 href="https://tiktok.com/@kidsgourmet" 
@@ -115,7 +111,7 @@ export default function Footer() {
                                 aria-label="TikTok"
                                 className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-tiktok text-sm"></i>
+                                <i className="fa-brands fa-tiktok text-xs"></i>
                             </Link>
                             <Link 
                                 href="https://x.com/kidsandgourmet" 
@@ -124,12 +120,12 @@ export default function Footer() {
                                 aria-label="X (Twitter)"
                                 className="w-9 h-9 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-black hover:text-white hover:border-transparent transition-all shadow-sm"
                             >
-                                <i className="fa-brands fa-x-twitter text-sm"></i>
+                                <i className="fa-brands fa-x-twitter text-xs"></i>
                             </Link>
                         </div>
                     </div>
                     
-                    {/* Tarifler - With Icons */}
+                    {/* Tarifler (6 Madde) */}
                     <div className="col-span-1">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center">
@@ -140,38 +136,32 @@ export default function Footer() {
                         <nav aria-label="Tarif kategorileri">
                             <ul className="space-y-3">
                                 <li>
-                                    <Link href="/tarifler" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
-                                        <i className="fa-solid fa-bowl-food text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
+                                    <Link href="/tarifler" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Tüm Tarifler
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler?meal-type=kahvalti" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
-                                        <i className="fa-solid fa-egg text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
+                                    <Link href="/tarifler?meal-type=kahvalti" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Kahvaltı
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler?meal-type=ana-yemek" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
-                                        <i className="fa-solid fa-plate-wheat text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
+                                    <Link href="/tarifler?meal-type=ana-yemek" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Ana Yemekler
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler?meal-type=ara-ogun" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
-                                        <i className="fa-solid fa-cookie-bite text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
+                                    <Link href="/tarifler?meal-type=ara-ogun" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Ara Öğün
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler?meal-type=corba" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
-                                        <i className="fa-solid fa-mug-hot text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
+                                    <Link href="/tarifler?meal-type=corba" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Çorbalar
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/tarifler?meal-type=tatli" className="flex items-center gap-2 text-gray-600 hover:text-orange-500 transition-colors text-sm group">
-                                        <i className="fa-solid fa-ice-cream text-gray-300 group-hover:text-orange-400 text-xs w-4"></i>
+                                    <Link href="/tarifler?meal-type=tatli" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Tatlılar
                                     </Link>
                                 </li>
@@ -179,7 +169,7 @@ export default function Footer() {
                         </nav>
                     </div>
 
-                    {/* Keşfet */}
+                    {/* Keşfet (6 Madde) */}
                     <div className="col-span-1">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
@@ -191,7 +181,7 @@ export default function Footer() {
                             <ul className="space-y-3">
                                 <li>
                                     <Link href="/kesfet" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
-                                        Keşfet
+                                        Keşfet Ana Sayfa
                                     </Link>
                                 </li>
                                 <li>
@@ -202,6 +192,11 @@ export default function Footer() {
                                 <li>
                                     <Link href="/akilli-asistan" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Akıllı Asistan
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/akilli-asistan/persentil" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
+                                        Persentil Hesaplama
                                     </Link>
                                 </li>
                                 <li>
@@ -218,7 +213,7 @@ export default function Footer() {
                         </nav>
                     </div>
 
-                    {/* Kurumsal */}
+                    {/* Kurumsal (6 Madde) */}
                     <div className="col-span-1">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
@@ -249,6 +244,11 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link href="/yardim" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
+                                        Yardım & Destek
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link href="/reklam-verin" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Reklam Verin
                                     </Link>
@@ -257,7 +257,7 @@ export default function Footer() {
                         </nav>
                     </div>
 
-                    {/* Yasal & Destek */}
+                    {/* Bilgilendirme (6 Madde) */}
                     <div className="col-span-1">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -285,7 +285,7 @@ export default function Footer() {
                                 <li>
                                     <button 
                                         onClick={openCookiePreferences}
-                                        className="text-gray-600 hover:text-orange-500 transition-colors text-sm"
+                                        className="text-gray-600 hover:text-orange-500 transition-colors text-sm text-left"
                                     >
                                         Çerez Tercihleri
                                     </button>
@@ -296,8 +296,8 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/yardim" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
-                                        Yardım & Destek
+                                    <Link href="/aydinlatma-metni" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
+                                        Aydınlatma Metni
                                     </Link>
                                 </li>
                             </ul>
@@ -327,7 +327,7 @@ export default function Footer() {
                             href="https://rejimde.com" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-sm text-gray-500 hover: text-green-600 transition-colors"
+                            className="flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition-colors"
                         >
                             <i className="fa-solid fa-user-doctor text-green-500"></i>
                             <span className="font-medium">Rejimde.com</span>
@@ -336,7 +336,7 @@ export default function Footer() {
                             href="https://tariften.com" 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 text-sm text-gray-500 hover: text-purple-600 transition-colors"
+                            className="flex items-center gap-2 text-sm text-gray-500 hover:text-purple-600 transition-colors"
                         >
                             <i className="fa-solid fa-utensils text-purple-500"></i>
                             <span className="font-medium">Tariften.com</span>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from 'next/link'; 
+import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
 import ChildBirthDatePicker from '@/components/features/age/ChildBirthDatePicker';
@@ -181,21 +182,19 @@ export default function Header() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-20 items-center">
                     
-                    {/* Logo */}
-                    <Link href="/" className="flex-shrink-0 flex items-center gap-2 cursor-pointer group">
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-orange-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-                            <div className="relative w-10 h-10 flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                                <i className="fa-solid fa-carrot text-orange-500 text-3xl"></i>
-                            </div>
-                        </div>
-                        <div className="flex flex-col">
-                            <span className="font-display font-bold text-2xl tracking-tight text-slate-800 leading-none">
-                                Kids<span className="text-orange-500">Gourmet</span>
-                            </span>
-                            <span className="text-[10px] text-gray-400 font-medium tracking-wide">Sağlıklı Nesiller</span>
-                        </div>
-                    </Link>
+                    {/* Logo - Eşit Yükseklik Ayarı Yapıldı */}
+                  <Link href="/" className="flex-shrink-0 flex items-start gap-2 cursor-pointer group">
+                    <div className="flex flex-col">
+                      <Image
+                        src="/kidsgourmet-text.svg"
+                        alt="KidsGourmet"
+                        width={140}
+                        height={36}
+                        priority
+                        className="h-9 w-auto object-contain"
+                      />
+                    </div>
+                  </Link>
 
                     {/* Desktop Menu */}
                     <nav className="hidden lg:flex items-center space-x-1">

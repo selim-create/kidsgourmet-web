@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image"; // Image import edildi
 import { useRouter, useSearchParams } from "next/navigation";
 import { authService } from "@/services/auth-service";
 
@@ -86,20 +87,33 @@ function ResetPasswordForm() {
       {/* RIGHT SIDE: FORM */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-8 bg-white overflow-y-auto">
         <div className="w-full max-w-md space-y-8">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 cursor-pointer group mb-8">
-            <div className="relative">
-              <div className="absolute inset-0 bg-orange-400 rounded-full blur opacity-40 group-hover:opacity-60 transition-opacity"></div>
-              <div className="relative w-12 h-12 flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                <i className="fa-solid fa-carrot text-orange-500 text-4xl"></i>
+          {/* Logo - Updated with Split SVGs and Hover Animation */}
+          <Link href="/" className="flex items-center gap-3 cursor-pointer group mb-8 justify-center lg:justify-start">
+              
+              {/* 1. Part: Carrot Icon (Animated) */}
+              <div className="relative flex items-center justify-center">
+                  <Image 
+                      src="/kidsgourmet-icon.svg" 
+                      alt="KidsGourmet İkon" 
+                      width={48} 
+                      height={48} 
+                      priority
+                      className="w-12 h-12 object-contain transition-transform duration-300 ease-in-out group-hover:rotate-12"
+                  />
               </div>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-display font-bold text-3xl tracking-tight text-slate-800 leading-none">
-                Kids<span className="text-orange-500">Gourmet</span>
-              </span>
-              <span className="text-xs text-gray-400 font-medium tracking-wide">Sağlıklı Nesiller</span>
-            </div>
+
+              {/* 2. Part: Text Logo (Static) */}
+              <div className="flex flex-col justify-center">
+                  <Image 
+                      src="/kidsgourmet-text.svg" 
+                      alt="KidsGourmet" 
+                      width={180} 
+                      height={48} 
+                      priority
+                      className="h-12 w-auto object-contain"
+                  />
+              </div>
+
           </Link>
 
           <div>

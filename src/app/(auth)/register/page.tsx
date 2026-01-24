@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image"; // Image import edildi
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
@@ -108,10 +109,16 @@ export default function RegisterPage() {
             <div className="absolute bottom-0 left-0 w-72 h-72 bg-yellow-100/50 rounded-full blur-3xl -ml-20 -mb-20 mix-blend-multiply"></div>
             
             <div className="relative z-10 text-center max-w-sm">
-                {/* Logo Icon with Soft Shadow */}
+                {/* Logo Icon with Soft Shadow (Only Icon Here) */}
                 <div className="mb-8 inline-flex p-6 bg-white rounded-[2rem] shadow-xl shadow-orange-100/50 relative transform hover:scale-105 transition-transform duration-300">
                    <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-transparent rounded-[2rem] opacity-50"></div>
-                   <i className="fa-solid fa-carrot text-6xl text-transparent bg-clip-text bg-gradient-to-br from-orange-400 to-orange-500 relative z-10"></i>
+                   <Image 
+                      src="/kidsgourmet-icon.svg" 
+                      alt="KidsGourmet İkon" 
+                      width={80} 
+                      height={80} 
+                      className="w-20 h-20 object-contain relative z-10"
+                   />
                 </div>
 
                 <h2 className="font-display font-bold text-3xl mb-4 text-slate-800 leading-tight">
@@ -151,12 +158,32 @@ export default function RegisterPage() {
         <div className="w-full lg:w-7/12 flex flex-col justify-center items-center p-4 py-8 lg:p-8 overflow-y-auto bg-white">
             <div className="w-full max-w-lg space-y-6">
                 
-                {/* Mobile Logo & Header */}
+                {/* Mobile Logo & Header - Updated with Split SVGs and Animation */}
                 <div className="text-center lg:text-left">
-                    <Link href="/" className="inline-flex items-center gap-2 mb-4 lg:mb-6 group">
-                         <span className="font-display font-bold text-2xl text-slate-800 group-hover:text-orange-500 transition-colors">
-                            Kids<span className="text-orange-500 group-hover:text-slate-800 transition-colors">Gourmet</span>
-                        </span>
+                    <Link href="/" className="flex items-center gap-3 mb-4 lg:mb-6 group justify-center lg:justify-start">
+                        {/* 1. Part: Carrot Icon (Animated) */}
+                        <div className="relative flex items-center justify-center">
+                            <Image 
+                                src="/kidsgourmet-icon.svg" 
+                                alt="KidsGourmet İkon" 
+                                width={48} 
+                                height={48} 
+                                priority
+                                className="w-12 h-12 object-contain transition-transform duration-300 ease-in-out group-hover:rotate-12"
+                            />
+                        </div>
+
+                        {/* 2. Part: Text Logo (Static) */}
+                        <div className="flex flex-col justify-center">
+                            <Image 
+                                src="/kidsgourmet-text.svg" 
+                                alt="KidsGourmet" 
+                                width={180} 
+                                height={48} 
+                                priority
+                                className="h-12 w-auto object-contain"
+                            />
+                        </div>
                     </Link>
                     <h2 className="text-2xl font-bold text-slate-800">Hesap Oluşturun</h2>
                     <p className="text-sm text-gray-500 mt-1">
