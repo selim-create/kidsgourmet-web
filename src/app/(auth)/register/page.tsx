@@ -17,6 +17,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [childName, setChildName] = useState("");
   const [childBirthDate, setChildBirthDate] = useState("");
@@ -264,14 +265,24 @@ export default function RegisterPage() {
                         </div>
                         <div>
                             <label className="block text-xs font-bold text-gray-700 mb-1">Şifre</label>
-                            <input 
-                              type="password" 
-                              required 
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-sm transition-colors bg-gray-50/50 focus:bg-white"
-                              placeholder="En az 6 karakter"
-                            />
+                            <div className="relative">
+                              <input 
+                                type={showPassword ? "text" : "password"}
+                                required 
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full px-3 py-2.5 pr-10 rounded-lg border border-gray-200 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 text-sm transition-colors bg-gray-50/50 focus:bg-white"
+                                placeholder="En az 6 karakter"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                                aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
+                              >
+                                <i className={`fa-solid ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                              </button>
+                            </div>
                         </div>
                     </div>
 

@@ -9,27 +9,61 @@ export const metadata: Metadata = {
 export default function GizlilikPolitikasiPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-white border-b border-gray-100 py-12">
-        <div className="max-w-4xl mx-auto px-4">
-          <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-            <Link href="/" className="hover:text-orange-500 transition-colors">Ana Sayfa</Link>
+      {/* Hero Section - Modern Design */}
+      <div className="relative bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 overflow-hidden py-16">
+        {/* Decorative Background Blobs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
+        
+        <div className="max-w-4xl mx-auto px-4 relative z-10">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-2 text-sm text-blue-100 mb-6">
+            <Link href="/" className="hover:text-white transition-colors">Ana Sayfa</Link>
             <span>/</span>
-            <span className="text-gray-800">Gizlilik Politikası</span>
+            <span className="text-white font-medium">Gizlilik Politikası</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">GİZLİLİK POLİTİKASI</h1>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-4 text-sm text-gray-600">
-            <span className="flex items-center gap-2">
-              <i className="fa-regular fa-calendar"></i>
-              Son Güncelleme Tarihi: Ocak 2026
-            </span>
-            <span className="hidden sm:inline">|</span>
-            <span className="flex items-center gap-2">
-              <i className="fa-solid fa-building-user"></i>
-              Veri Sorumlusu: HİP Medya (Umut Kaan Özdemir)
-            </span>
+          
+          {/* Main Content */}
+          <div className="flex flex-col md:flex-row md:items-center gap-8">
+            {/* Icon Side */}
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 md:w-32 md:h-32 bg-white/10 backdrop-blur-sm rounded-3xl border-4 border-white/20 flex items-center justify-center shadow-2xl">
+                <i className="fa-solid fa-shield-halved text-white text-5xl md:text-6xl"></i>
+              </div>
+            </div>
+            
+            {/* Text Side */}
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                Gizlilik Politikası
+              </h1>
+              <p className="text-blue-50 text-lg mb-6">
+                Kişisel verilerinizin korunması ve mahremiyetiniz bizim için en öncelikli değerdir.
+              </p>
+              
+              {/* Meta Info Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+                  <div className="flex items-center gap-3 text-white">
+                    <i className="fa-regular fa-calendar text-xl"></i>
+                    <div>
+                      <p className="text-xs text-blue-100 uppercase tracking-wide font-semibold">Son Güncelleme</p>
+                      <p className="font-bold">Ocak 2026</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
+                  <div className="flex items-center gap-3 text-white">
+                    <i className="fa-solid fa-building-user text-xl"></i>
+                    <div>
+                      <p className="text-xs text-blue-100 uppercase tracking-wide font-semibold">Veri Sorumlusu</p>
+                      <p className="font-bold">HİP Medya</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-gray-600 mt-2 font-medium">Platform: www.kidsgourmet.com.tr</p>
         </div>
       </div>
       
