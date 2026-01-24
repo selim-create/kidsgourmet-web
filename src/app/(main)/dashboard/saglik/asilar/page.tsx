@@ -258,7 +258,7 @@ export default function VaccinePage() {
             className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 transition-colors"
           >
             <i className="fa-solid fa-arrow-left"></i>
-            <span className="text-sm font-medium">Dashboard'a Dön</span>
+            <span className="text-sm font-medium">Ebeveyn Paneli'ne Dön</span>
           </Link>
           
           <div className="flex items-center justify-between mb-2">

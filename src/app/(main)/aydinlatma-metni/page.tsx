@@ -18,7 +18,6 @@ export default function AydinlatmaMetniPage() {
             <span className="text-gray-800">Aydınlatma Metni</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">KİŞİSEL VERİLERİN KORUNMASI VE İŞLENMESİ AYDINLATMA METNİ</h1>
-          <p className="text-gray-600 mt-3">6698 sayılı Kanun kapsamında veri güvenliği ve mahremiyet bilgilendirmesi</p>
         </div>
       </div>
 

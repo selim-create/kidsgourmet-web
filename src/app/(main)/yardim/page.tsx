@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
+// Interface güncellendi: answer artık HTML/JSX içeriği de kabul ediyor
 interface FAQItem {
   question: string;
-  answer: string;
+  answer: string | React.ReactNode;
   category: 'account' | 'recipes' | 'technical' | 'general';
 }
 
@@ -79,6 +80,36 @@ const faqData: FAQItem[] = [
     category: 'general',
     question: 'İçerikleriniz tıbbi tavsiye midir?',
     answer: 'Hayır, KidsGourmet\'deki içerikler genel bilgilendirme amaçlıdır ve tıbbi tavsiye yerine geçmez. Çocuğunuzun sağlığıyla ilgili sorularınız için mutlaka bir sağlık profesyoneline danışmalısınız.'
+  },
+  // --- YENİ EKLENEN ODAK SORULARI ---
+  {
+    category: 'general',
+    question: 'Topluluk sayfasında Odak nedir?',
+    answer: 'Odaklar, Topluluk sayfasındaki tartışmaları konu bazlı kategorilere ayıran bir sistemdir. Esasen bir forum alt kategorisi/ilgi grubu mantığında çalışır. Topluluk içeriğini organize eden ve kullanıcıların ilgi alanlarına göre içerik keşfetmesini kolaylaştıran bir sistemidir.'
+  },
+  {
+    category: 'general',
+    question: 'Odakların amacı nedir?',
+    answer: (
+      <ul className="list-none space-y-2">
+        <li>
+          <strong className="block text-slate-700">İçerik Organizasyonu:</strong>
+          Tartışmaları belirli konulara göre gruplandırır.
+        </li>
+        <li>
+          <strong className="block text-slate-700">Kişiselleştirilmiş Deneyim:</strong>
+          Kullanıcılar ilgilendiği odakları takip edebilir, böylece sadece ilgili konuları görür.
+        </li>
+        <li>
+          <strong className="block text-slate-700">Filtreleme:</strong>
+          Ana topluluk sayfasında tartışmaları odaklara göre filtreleme imkanı sağlar.
+        </li>
+        <li>
+          <strong className="block text-slate-700">Soru Sorma:</strong>
+          Yeni tartışma açarken zorunlu olarak bir odak seçilir.
+        </li>
+      </ul>
+    )
   }
 ];
 
@@ -210,8 +241,9 @@ export default function YardimPage() {
                     activeIndex === index ? 'max-h-96' : 'max-h-0'
                   }`}
                 >
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                    <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                  {/* Düzenleme: <p> etiketi <div> yapıldı, böylece içeride <ul> kullanılabilir */}
+                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 text-gray-600 leading-relaxed">
+                    {faq.answer}
                   </div>
                 </div>
               </div>

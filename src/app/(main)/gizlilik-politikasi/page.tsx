@@ -20,7 +20,6 @@ export default function GizlilikPolitikasiPage() {
             <span className="text-gray-800">Gizlilik Politikası</span>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-800">GİZLİLİK POLİTİKASI</h1>
-          <p className="text-gray-600 mt-3">Kişisel verilerinizin işlenmesi, korunması ve mahremiyet haklarınız hakkında aydınlatma metni.</p>
         </div>
       </div>
       

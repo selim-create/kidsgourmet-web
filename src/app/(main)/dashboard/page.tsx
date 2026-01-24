@@ -506,8 +506,8 @@ export default function DashboardPage() {
                               <i className="fa-solid fa-robot text-purple-500 text-lg"></i>
                           </div>
                           <div className="flex-1">
-                              <p className="text-sm font-bold text-stone-800">AI Asistan</p>
-                              <p className="text-xs text-stone-500">Sohbet et</p>
+                              <p className="text-sm font-bold text-stone-800">Akıllı Asistan</p>
+                              <p className="text-xs text-stone-500">İnteraktif Araçlar</p>
                           </div>
                       </Link>
                   </div>

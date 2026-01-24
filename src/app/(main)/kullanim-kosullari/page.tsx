@@ -17,8 +17,7 @@ export default function KullanimKosullariPage() {
             <span>/</span>
             <span className="text-gray-800">Kullanıcı Sözleşmesi</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Kullanıcı Sözleşmesi ve Hukuki Şartlar</h1>
-          <p className="text-gray-600 mt-3">KidsGourmet platformunu kullanırken uymanız gereken yasal düzenlemeler</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">KULLANICI SÖZLEŞMESİ VE HUKUKİ ŞARTLAR</h1>
         </div>
       </div>
       
