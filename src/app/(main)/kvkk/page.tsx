@@ -262,8 +262,11 @@ export default function KVKKPage() {
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-6">
               <h4 className="font-bold text-slate-800 mb-3">Başvuru Usulü</h4>
               <p className="text-sm text-gray-700 mb-4">
-                Taleplerinizi yazılı olarak, KEP adresi, güvenli elektronik imza, mobil imza veya sistemimizde kayıtlı 
-                e-postanız aracılığıyla <strong className="text-orange-600">iletisim@kidsgourmet.com.tr</strong> adresine iletebilirsiniz.
+               Yukarıda belirtilen haklarınızı kullanmak için taleplerinizi, yazılı olarak veya kayıtlı elektronik posta (KEP) adresi, 
+                güvenli elektronik imza, mobil imza ya da Şirketimize daha önce bildirdiğiniz ve sistemimizde kayıtlı bulunan elektronik 
+                posta adresinizi kullanmak suretiyle <strong className="text-orange-600">iletisim@kidsgourmet.com.tr</strong>adresine 
+                iletebilirsiniz. Başvurunuzda; Ad, Soyad, T.C. Kimlik No, tebligata esas yerleşim yeri adresi, iletişim bilgileri ve talep 
+                konusunun bulunması zorunludur.
               </p>
               <Link 
                 href="/basvuru-formu" 
