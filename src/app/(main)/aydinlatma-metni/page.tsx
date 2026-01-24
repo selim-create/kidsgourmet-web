@@ -17,7 +17,7 @@ export default function AydinlatmaMetniPage() {
             <span>/</span>
             <span className="text-gray-800">Aydınlatma Metni</span>
           </nav>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">Kişisel Verilerin Korunması ve İşlenmesi Aydınlatma Metni</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">KİŞİSEL VERİLERİN KORUNMASI VE İŞLENMESİ AYDINLATMA METNİ</h1>
           <p className="text-gray-600 mt-3">6698 sayılı Kanun kapsamında veri güvenliği ve mahremiyet bilgilendirmesi</p>
         </div>
       </div>
@@ -32,8 +32,7 @@ export default function AydinlatmaMetniPage() {
             <div>
               <h3 className="font-bold text-slate-800 mb-2">Veri Sorumlusu Bilgilendirmesi</h3>
               <p className="text-sm text-gray-600">
-                Bu aydınlatma metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;Kanun&quot;) madde 10 ve 
-                &quot;Aydınlatma Yükümlülüğünün Yerine Getirilmesinde Uyulacak Usul ve Esaslar Hakkında Tebliğ&quot; uyarınca hazırlanmıştır.
+                İşbu Aydınlatma Metni, 6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;Kanun&quot;) m. 10 ve &quot;Aydınlatma Yükümlülüğünün Yerine Getirilmesinde Uyulacak Usul ve Esaslar Hakkında Tebliğ&quot; uyarınca hazırlanmıştır.
               </p>
             </div>
           </div>
@@ -51,16 +50,15 @@ export default function AydinlatmaMetniPage() {
               <h2 className="text-2xl font-bold text-slate-800">Veri Sorumlusu</h2>
             </div>
             <p className="text-gray-600 leading-relaxed mb-6">
-              HİP Medya (&quot;Şirket&quot;) olarak, www.kidsgourmet.com.tr (&quot;Platform&quot;) üzerinden sunduğumuz hizmetlerden yararlanan kullanıcılarımızın (&quot;Kullanıcı&quot;), 
-              ziyaretçilerimizin ve ebeveynlerin kişisel verilerinin güvenliğine ve mahremiyetine azami özen göstermekteyiz.
+              HİP Medya (&quot;Şirket&quot;) olarak, www.kidsgourmet.com.tr (&quot;Platform&quot;) üzerinden sunduğumuz hizmetlerden yararlanan kullanıcılarımızın (&quot;Kullanıcı&quot;), ziyaretçilerimizin ve ebeveynlerin kişisel verilerinin güvenliğine ve mahremiyetine azami özen göstermekteyiz.
             </p>
             
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 text-sm text-gray-700">
               <ul className="space-y-2">
-                <li><strong className="text-slate-900">Unvan:</strong> HİP Medya (Umut Kaan Özdemir)</li>
+                <li><strong className="text-slate-900">Veri Sorumlusu:</strong> HİP Medya (Umut Kaan Özdemir)</li>
                 <li><strong className="text-slate-900">Vergi Kimlik No:</strong> 6810178450</li>
-                <li><strong className="text-slate-900">Adres:</strong> Fatih Mah. Çapraz Sok. No:11/2 K.Çekmece-İstanbul</li>
-                <li><strong className="text-slate-900">E-Posta:</strong> iletisim@kidsgourmet.com.tr</li>
+                <li><strong className="text-slate-900">Adres:</strong> Fatih Mah. Çapraz Sok. No11/2 K.Çekmece-İstanbul</li>
+                <li><strong className="text-slate-900">E-posta:</strong> iletisim@kidsgourmet.com.tr</li>
               </ul>
             </div>
           </div>
@@ -76,7 +74,7 @@ export default function AydinlatmaMetniPage() {
               <h2 className="text-2xl font-bold text-slate-800">1. İşlenen Kişisel Verileriniz ve Kategorileri</h2>
             </div>
             <p className="text-gray-600 leading-relaxed mb-6">
-              Platformu kullanımınız sürecinde, aşağıdaki kategorilerde yer alan kişisel verileriniz işlenmektedir:
+              Platformu kullanımınız sürecinde, aşağıdaki kategorilerde yer alan kişisel verileriniz, belirtilen amaçlarla sınırlı olarak işlenmektedir:
             </p>
             
             <div className="overflow-x-auto border border-gray-200 rounded-xl">
@@ -97,16 +95,16 @@ export default function AydinlatmaMetniPage() {
                     <td className="px-4 py-3">E-posta adresi, (varsa) telefon numarası, iletişim adresi.</td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-3 font-semibold text-slate-700">İşlem Güvenliği</td>
-                    <td className="px-4 py-3">IP adresi, erişim logları, giriş-çıkış bilgileri, şifre (hashlenmiş), cihaz bilgileri.</td>
+                    <td className="px-4 py-3 font-semibold text-slate-700">İşlem Güvenliği Bilgileri</td>
+                    <td className="px-4 py-3">IP adresi, erişim logları, giriş-çıkış bilgileri, şifre (hashlenmiş), cihaz bilgileri (User Agent).</td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-3 font-semibold text-slate-700">Görsel ve İşitsel</td>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Görsel ve İşitsel Kayıtlar</td>
                     <td className="px-4 py-3">Profil fotoğrafı, tariflere eklenen fotoğraflar ve videolar.</td>
                   </tr>
                   <tr>
-                    <td className="px-4 py-3 font-semibold text-slate-700">Kullanıcı İçeriği</td>
-                    <td className="px-4 py-3">Tarifler, blog yorumları, forum paylaşımları (paylaşılan sağlık ve çocuk bilgileri dahil).</td>
+                    <td className="px-4 py-3 font-semibold text-slate-700">Kullanıcı İçeriği ve Yorumlar</td>
+                    <td className="px-4 py-3">Tarifler, blog yorumları, forum paylaşımları (Bu alanda paylaşılan sağlık verileri ve çocuk bilgileri alenileştirme iradeniz kapsamında işlenir).</td>
                   </tr>
                   <tr>
                     <td className="px-4 py-3 font-semibold text-slate-700">Pazarlama Bilgileri</td>
@@ -127,30 +125,33 @@ export default function AydinlatmaMetniPage() {
               </div>
               <h2 className="text-2xl font-bold text-slate-800">2. Kişisel Verilerin İşlenme Amaçları</h2>
             </div>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Kişisel verileriniz aşağıdaki amaçlarla işlenmektedir:
+            </p>
             <ul className="grid md:grid-cols-2 gap-4 text-gray-600">
               <li className="bg-gray-50 p-4 rounded-xl">
                 <strong className="block text-slate-800 mb-1"><i className="fa-solid fa-user-check text-purple-500 mr-2"></i>Üyelik Süreçleri</strong>
-                <span className="text-sm">Kayıt oluşturma, kimlik doğrulama, sosyal medya girişi.</span>
+                <span className="text-sm">Kullanıcı kaydının oluşturulması, kimlik doğrulama ve sosyal medya hesabı ile giriş imkanının sağlanması.</span>
               </li>
               <li className="bg-gray-50 p-4 rounded-xl">
                 <strong className="block text-slate-800 mb-1"><i className="fa-solid fa-utensils text-purple-500 mr-2"></i>Hizmet İfası</strong>
-                <span className="text-sm">Tarif paylaşımı, yorum yapma, içerik üretimi süreçleri.</span>
+                <span className="text-sm">Tarif paylaşımı, yorum yapma ve içerik üretimi süreçlerinin yürütülmesi.</span>
               </li>
               <li className="bg-gray-50 p-4 rounded-xl">
                 <strong className="block text-slate-800 mb-1"><i className="fa-solid fa-scale-balanced text-purple-500 mr-2"></i>Yasal Uyum</strong>
-                <span className="text-sm">5651 sayılı Kanun gereği trafik kayıtlarının tutulması.</span>
+                <span className="text-sm">5651 sayılı Kanun uyarınca trafik kayıtlarının tutulması, yetkili makam taleplerinin karşılanması.</span>
               </li>
               <li className="bg-gray-50 p-4 rounded-xl">
                 <strong className="block text-slate-800 mb-1"><i className="fa-solid fa-bullhorn text-purple-500 mr-2"></i>İletişim ve Pazarlama</strong>
-                <span className="text-sm">Bülten gönderimi, kampanya duyuruları (Açık rıza ile).</span>
+                <span className="text-sm">Bülten (newsletter) gönderimi, kampanya duyuruları (Açık rızanız veya ticari elektronik ileti onayınız olması halinde).</span>
               </li>
               <li className="bg-gray-50 p-4 rounded-xl">
                 <strong className="block text-slate-800 mb-1"><i className="fa-solid fa-shield-halved text-purple-500 mr-2"></i>Güvenlik</strong>
-                <span className="text-sm">Platform güvenliği, siber saldırıların tespiti.</span>
+                <span className="text-sm">Platform güvenliğinin sağlanması, siber saldırıların tespiti ve önlenmesi.</span>
               </li>
               <li className="bg-gray-50 p-4 rounded-xl">
                 <strong className="block text-slate-800 mb-1"><i className="fa-solid fa-child-reaching text-purple-500 mr-2"></i>İçerik Denetimi</strong>
-                <span className="text-sm">Çocukların dijital güvenliği için içerik moderasyonu.</span>
+                <span className="text-sm">Çocukların dijital güvenliğini sağlamak amacıyla paylaşılan içeriklerin moderasyonu.</span>
               </li>
             </ul>
           </div>
@@ -163,36 +164,38 @@ export default function AydinlatmaMetniPage() {
               <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-full text-green-500">
                 <i className="fa-solid fa-database text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">3. Toplanma Yöntemi ve Hukuki Sebebi</h2>
+              <h2 className="text-2xl font-bold text-slate-800">3. Kişisel Verilerin Toplanma Yöntemi ve Hukuki Sebebi</h2>
             </div>
             <p className="text-gray-600 leading-relaxed mb-4">
-              Kişisel verileriniz; formların doldurulması, API&apos;ler, çerezler ve loglama sistemleri aracılığıyla toplanır. 
-              KVKK Madde 5 ve 6&apos;ya dayalı hukuki sebeplerimiz:
+              Kişisel verileriniz; Platform üzerindeki formların doldurulması, API&apos;ler aracılığıyla sosyal medya platformlarından veri çekilmesi, çerezler ve otomatik loglama sistemleri aracılığıyla elektronik ortamda toplanmaktadır.
+            </p>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Bu veriler, Kanun&apos;un 5. ve 6. maddelerinde belirtilen şu hukuki sebeplere dayanmaktadır:
             </p>
             <ul className="space-y-2 text-gray-600 ml-2">
               <li className="flex gap-2 text-sm">
                 <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span><strong>Sözleşmenin İfası (m. 5/2-c):</strong> Üyelik ve hesap yönetimi.</span>
+                <span><strong>Bir sözleşmenin kurulması veya ifası (m. 5/2-c):</strong> Üyelik sözleşmesinin gereği olarak hesap yönetimi.</span>
               </li>
               <li className="flex gap-2 text-sm">
                 <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span><strong>Kanunlarda Öngörülmesi (m. 5/2-a):</strong> Trafik loglarının tutulması.</span>
+                <span><strong>Kanunlarda açıkça öngörülmesi (m. 5/2-a):</strong> Trafik loglarının tutulması.</span>
               </li>
               <li className="flex gap-2 text-sm">
                 <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span><strong>Hukuki Yükümlülük (m. 5/2-ç):</strong> Yasal bildirimler ve veri güvenliği.</span>
+                <span><strong>Veri sorumlusunun hukuki yükümlülüğü (m. 5/2-ç):</strong> Yasal bildirimler ve veri güvenliği tedbirleri.</span>
               </li>
               <li className="flex gap-2 text-sm">
                 <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span><strong>Alenileştirme (m. 6/3):</strong> Yorumlarda paylaştığınız veriler.</span>
+                <span><strong>İlgili kişinin alenileştirmesi (m. 6/3):</strong> Yorumlarda veya içeriklerde kendi rızanızla paylaştığınız sağlık verileri (alerji vb.) ve görseller.</span>
               </li>
               <li className="flex gap-2 text-sm">
                 <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span><strong>Meşru Menfaat (m. 5/2-f):</strong> Platform geliştirme ve güvenliği.</span>
+                <span><strong>Meşru Menfaat (m. 5/2-f):</strong> Temel haklarınıza zarar vermemek kaydıyla Platformun geliştirilmesi ve güvenliği.</span>
               </li>
               <li className="flex gap-2 text-sm">
                 <i className="fa-solid fa-check text-green-500 mt-1"></i>
-                <span><strong>Açık Rıza (m. 5/1):</strong> Pazarlama ve bülten gönderimi.</span>
+                <span><strong>Açık Rıza (m. 5/1):</strong> Ticari elektronik ileti gönderimi ve yurt dışı kaynaklı pazarlama çerezlerinin kullanımı.</span>
               </li>
             </ul>
           </div>
@@ -205,20 +208,22 @@ export default function AydinlatmaMetniPage() {
               <div className="w-12 h-12 flex items-center justify-center bg-indigo-100 rounded-full text-indigo-500">
                 <i className="fa-solid fa-share-nodes text-xl"></i>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800">4. Verilerin Aktarılması ve Yurt Dışı Aktarım</h2>
+              <h2 className="text-2xl font-bold text-slate-800">4. Kişisel Verilerin Aktarılması ve Yurt Dışı Aktarım</h2>
             </div>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              Kişisel verileriniz;
+            </p>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-indigo-50 rounded-xl p-5 border border-indigo-100">
-                <h4 className="font-bold text-indigo-800 mb-2">Yurt İçi Aktarım</h4>
+                <h4 className="font-bold text-indigo-800 mb-2">Yurt İçi</h4>
                 <p className="text-sm text-gray-700">
-                  Hukuki uyuşmazlıklarda adli makamlara ve bilişim altyapı desteği alınan yerli tedarikçilere aktarılabilir.
+                  Hukuki uyuşmazlıklarda adli makamlara, bilişim altyapı desteği alınan yerli tedarikçilere aktarılabilir.
                 </p>
               </div>
               <div className="bg-indigo-50 rounded-xl p-5 border border-indigo-100">
-                <h4 className="font-bold text-indigo-800 mb-2">Yurt Dışı Aktarım</h4>
+                <h4 className="font-bold text-indigo-800 mb-2">Yurt Dışı</h4>
                 <p className="text-sm text-gray-700">
-                  E-posta gönderim servisleri, Google Analytics ve sosyal medya giriş modülleri (Facebook/Google) nedeniyle 
-                  verileriniz yurt dışındaki sunuculara aktarılabilir.
+                  Platformumuzda kullanılan e-posta gönderim servisleri, analitik araçları (Google Analytics) ve sosyal medya giriş modülleri (Facebook/Google) nedeniyle verileriniz yurt dışındaki sunuculara aktarılabilir.
                 </p>
               </div>
             </div>
@@ -236,10 +241,7 @@ export default function AydinlatmaMetniPage() {
             </div>
             <div className="bg-red-50 border border-red-200 rounded-xl p-6">
               <p className="text-red-900 leading-relaxed text-sm">
-                Platformumuza içerik yükleyen ebeveynlerin, çocuklarına ait görselleri veya bilgileri paylaşırken 
-                <strong> &quot;Çocuğun Üstün Yararı&quot;</strong> ilkesini gözetmeleri esastır. 
-                Ebeveyn tarafından paylaşılan ve çocuğun mahremiyetini ihlal ettiği tespit edilen içerikler, 
-                Şirketimiz tarafından derhal kaldırılabilir. Paylaşılan içeriklerin hukuki sorumluluğu paylaşan Kullanıcı&apos;ya aittir.
+                Platformumuza içerik yükleyen ebeveynlerin, çocuklarına ait görselleri veya bilgileri paylaşırken &quot;Çocuğun Üstün Yararı&quot; ilkesini gözetmeleri esastır. Ebeveyn tarafından paylaşılan ve çocuğun mahremiyetini ihlal ettiği tespit edilen içerikler, Şirketimiz tarafından derhal kaldırılabilir. Paylaşılan içeriklerin hukuki sorumluluğu paylaşan Kullanıcı&apos;ya aittir.
               </p>
             </div>
           </div>
@@ -255,14 +257,12 @@ export default function AydinlatmaMetniPage() {
               <h2 className="text-2xl font-bold text-slate-800">6. İlgili Kişi Hakları (Madde 11)</h2>
             </div>
             <p className="text-gray-600 mb-6">
-              Kanun&apos;un 11. maddesi kapsamındaki haklarınıza ilişkin taleplerinizi, &quot;Veri Sorumlusuna Başvuru Usul ve Esasları Hakkında Tebliğ&quot;e uygun olarak iletebilirsiniz.
+              Kanun&apos;un 11. maddesi kapsamındaki haklarınıza (bilgi alma, düzeltme, silme, itiraz etme vb.) ilişkin taleplerinizi, &quot;Veri Sorumlusuna Başvuru Usul ve Esasları Hakkında Tebliğ&quot;e uygun olarak iletisim@kidsgourmet.com.tr adresine iletebilirsiniz.
             </p>
             
             <div className="bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-xl p-6">
-              <h4 className="font-bold text-teal-800 mb-2">Başvuru Yöntemi</h4>
               <p className="text-sm text-gray-700 mb-4">
-                Taleplerinizi aşağıdaki e-posta adresine veya başvuru formu aracılığıyla iletebilirsiniz.
-                <br/><span className="text-xs text-gray-500 mt-1 block">(Kayıtlı olmayan e-posta adreslerinden yapılan başvurularda güvenli elektronik imza veya mobil imza gereklidir.)</span>
+                (Eğer gönderim yaptığınız e-posta adresi Şirket’imizin sisteminde kayıtlı değilse, başvurunuzun güvenli elektronik imza ya da mobil imza ile imzalanması gerekmektedir.)
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
@@ -278,7 +278,7 @@ export default function AydinlatmaMetniPage() {
                   className="inline-flex items-center justify-center gap-2 bg-teal-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-teal-700 transition-colors shadow-sm"
                 >
                   <i className="fa-solid fa-file-pen"></i>
-                  Yazılı Başvuru Formu İçin Tıklayınız
+                  Yazılı Başvuru Formu İçin Tıklayınız!
                 </Link>
               </div>
             </div>
