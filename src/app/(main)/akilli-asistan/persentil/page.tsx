@@ -166,8 +166,12 @@ export default function PercentileCalculatorPage() {
         child_name: regChildName,
         child_birth_date: regChildBirthDate,
         consents: {
+          terms_accepted: true,
+          terms_accepted_at: new Date().toISOString(),
+          marketing_consent: false,
+          marketing_consent_at: null,
           sensitive_data_consent: sensitiveDataConsent,
-          sensitive_data_consent_at: new Date().toISOString(),
+          sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
         }
       });
 

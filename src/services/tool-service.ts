@@ -93,6 +93,7 @@ export const toolService = {
           name: registrationData.name,
           child_name: registrationData.child_name,
           child_birth_date: registrationData.child_birth_date,
+          consents: registrationData.consents,
         }),
       }
     );
@@ -160,6 +161,7 @@ export const toolService = {
           name: registrationData.name,
           child_name: registrationData.child_name,
           child_birth_date: registrationData.child_birth_date,
+          consents: registrationData.consents,
         }),
       }
     );
@@ -273,6 +275,7 @@ export const toolService = {
           name: registrationData.name,
           child_name: registrationData.child_name,
           child_birth_date: registrationData.child_birth_date,
+          consents: registrationData.consents,
         }),
       }
     );
