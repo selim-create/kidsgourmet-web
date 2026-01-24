@@ -47,6 +47,7 @@ export default function PercentileCalculatorPage() {
   const [regChildName, setRegChildName] = useState('');
   const [regChildBirthDate, setRegChildBirthDate] = useState('');
   const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
+  const [guardianDeclaration, setGuardianDeclaration] = useState(false);
 
   // Eğer kayıtlı kullanıcı ve aktif çocuk varsa bilgileri otomatik doldur
   useEffect(() => {
@@ -157,6 +158,11 @@ export default function PercentileCalculatorPage() {
       return;
     }
 
+    if (regChildName.trim() && regChildBirthDate && !guardianDeclaration) {
+      toast.error('Çocuk profili eklemek için veli/vasi beyanını onaylamanız gerekmektedir.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await toolService.savePercentileWithRegistration(result, {
@@ -172,6 +178,8 @@ export default function PercentileCalculatorPage() {
           marketing_consent_at: null,
           sensitive_data_consent: sensitiveDataConsent,
           sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
+          guardian_declaration: guardianDeclaration,
+          guardian_declaration_at: guardianDeclaration ? new Date().toISOString() : null,
         }
       });
 
@@ -667,6 +675,23 @@ export default function PercentileCalculatorPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Guardian Declaration - only when child info is provided */}
+                {regChildName.trim() && regChildBirthDate && (
+                  <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <input
+                      type="checkbox"
+                      id="guardian-declaration"
+                      checked={guardianDeclaration}
+                      onChange={(e) => setGuardianDeclaration(e.target.checked)}
+                      className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                    />
+                    <label htmlFor="guardian-declaration" className="text-sm text-gray-700 cursor-pointer">
+                      <strong>18 yaşından büyük olduğumu</strong> ve bu platformda paylaşacağım çocuk bilgilerini{' '}
+                      <strong>yasal veli/vasi sıfatıyla</strong> paylaştığımı beyan ederim.
+                    </label>
+                  </div>
+                )}
 
                 {/* Sensitive Data Consent */}
                 <div className="flex items-start gap-3 mt-4">

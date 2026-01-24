@@ -347,6 +347,8 @@ export interface RegisterData {
     marketing_consent_at: string | null;
     sensitive_data_consent: boolean;
     sensitive_data_consent_at: string | null;
+    guardian_declaration?: boolean;
+    guardian_declaration_at?: string | null;
   };
 }
 
