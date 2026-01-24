@@ -270,13 +270,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    // Fetch dynamic blog posts
+    // Fetch dynamic blog posts with lightweight endpoint
     let currentPage = 1;
     let hasMorePosts = true;
 
-    while (hasMorePosts && currentPage <= 10) {
+    while (hasMorePosts && currentPage <= 20) {  // 20 sayfaya çıkar (50x20=1000 post)
       try {
-        const blogResponse = await blogService.getAll(currentPage, 100);
+        // Hafif endpoint kullan - sadece id, slug, date çeker
+        const blogResponse = await blogService.getSitemapPosts(currentPage, 50);
 
         if (blogResponse.posts && blogResponse.posts.length > 0) {
           blogResponse.posts.forEach((post) => {

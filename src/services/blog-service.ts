@@ -162,5 +162,21 @@ export const blogService = {
   // Kategorileri getir
   getCategories: async () => {
     return await fetchAPI<any[]>(`${WP_API_NAMESPACE}/categories?per_page=100&hide_empty=true`);
+  },
+
+  // Sitemap için sadece gerekli alanları çeken hafif fonksiyon
+  // _embed kullanmadan, sadece id, slug, date alanlarını çeker
+  // Bu sayede response boyutu ~2.5MB'dan ~50KB'a düşer
+  getSitemapPosts: async (page = 1, perPage = 50): Promise<{
+    posts: Array<{ id: number; slug: string; date: string }>;
+    totalPages: number;
+  }> => {
+    const response = await fetchAPIWithHeaders<Array<{ id: number; slug: string; date: string }>>(
+      `${WP_API_NAMESPACE}/posts?page=${page}&per_page=${perPage}&_fields=id,slug,date`
+    );
+    return {
+      posts: response.data,
+      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1')
+    };
   }
 };
