@@ -4,6 +4,10 @@ import { blogService } from '@/services/blog-service';
 
 const BASE_URL = 'https://kidsgourmet.com.tr';
 
+// Sitemap configuration
+const SITEMAP_POSTS_PER_PAGE = 50;  // Optimized to keep response under 2MB cache limit
+const MAX_SITEMAP_PAGES = 20;       // 50 posts/page * 20 pages = 1000 posts total
+
 // Static routes that don't change
 const staticRoutes: MetadataRoute.Sitemap = [
   // Main pages
@@ -274,10 +278,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let currentPage = 1;
     let hasMorePosts = true;
 
-    while (hasMorePosts && currentPage <= 20) {  // 20 sayfaya çıkar (50x20=1000 post)
+    while (hasMorePosts && currentPage <= MAX_SITEMAP_PAGES) {
       try {
         // Hafif endpoint kullan - sadece id, slug, date çeker
-        const blogResponse = await blogService.getSitemapPosts(currentPage, 50);
+        const blogResponse = await blogService.getSitemapPosts(currentPage, SITEMAP_POSTS_PER_PAGE);
 
         if (blogResponse.posts && blogResponse.posts.length > 0) {
           blogResponse.posts.forEach((post) => {
