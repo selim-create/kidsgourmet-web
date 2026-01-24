@@ -460,9 +460,17 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
                         target="_blank"
                         className="text-blue-600 font-bold hover:underline"
                       >
-                        KVKK kapsamında
-                      </Link>{' '}
-                      rıza gösteriyorum. <span className="text-red-500">*</span>
+                        KVKK Aydınlatma Metni
+                      </Link>
+                      {' '}ve{' '}
+                      <Link
+                        href="/acik-riza-metni"
+                        target="_blank"
+                        className="text-orange-500 font-bold hover:underline"
+                      >
+                        Açık Rıza Metni
+                      </Link>
+                      {' '}kapsamında onay veriyorum. <span className="text-red-500">*</span>
                     </span>
                   </label>
                 </div>

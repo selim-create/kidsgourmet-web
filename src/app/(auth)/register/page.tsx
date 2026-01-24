@@ -25,6 +25,7 @@ export default function RegisterPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
+  const [guardianDeclaration, setGuardianDeclaration] = useState(false);
   
   // UI State
   const [error, setError] = useState("");
@@ -49,6 +50,11 @@ export default function RegisterPage() {
       setError("Devam etmek için Kullanıcı Sözleşmesi'ni kabul etmeniz gerekmektedir.");
       return;
     }
+
+    if (!skipChild && childName.trim() && childBirthDate && !guardianDeclaration) {
+      setError("Çocuk profili eklemek için veli/vasi beyanını onaylamanız gerekmektedir.");
+      return;
+    }
     
     setIsLoading(true);
 
@@ -64,6 +70,8 @@ export default function RegisterPage() {
           marketing_consent_at: marketingConsent ? new Date().toISOString() : null,
           sensitive_data_consent: sensitiveDataConsent,
           sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
+          guardian_declaration: guardianDeclaration,
+          guardian_declaration_at: guardianDeclaration ? new Date().toISOString() : null,
         }
       };
 
@@ -278,6 +286,23 @@ export default function RegisterPage() {
                         )}
                     </div>
 
+                    {/* Guardian Declaration - Required when adding child */}
+                    {!skipChild && (
+                      <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                        <input
+                          type="checkbox"
+                          id="guardian-declaration"
+                          checked={guardianDeclaration}
+                          onChange={(e) => setGuardianDeclaration(e.target.checked)}
+                          className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                        />
+                        <label htmlFor="guardian-declaration" className="text-sm text-gray-700 cursor-pointer">
+                          <strong>18 yaşından büyük olduğumu</strong> ve bu platformda paylaşacağım çocuk bilgilerini{' '}
+                          <strong>yasal veli/vasi sıfatıyla</strong> paylaştığımı beyan ederim.
+                        </label>
+                      </div>
+                    )}
+
                     {/* Consents (Compact) */}
                     <div className="space-y-3 pt-2">
                         {/* Terms Consent - Required */}
@@ -333,7 +358,11 @@ export default function RegisterPage() {
                                   className="mt-0.5 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 accent-orange-500"
                                 />
                                 <span className="text-xs text-gray-500 leading-tight group-hover:text-gray-700 transition-colors">
-                                    Paylaşacağım sağlık verilerinin (varsa) işlenmesine rıza gösteriyorum. (İsteğe bağlı)
+                                    Çocuğuma ait sağlık ve gelişim verilerinin işlenmesine{' '}
+                                    <Link href="/acik-riza-metni" className="text-orange-500 hover:underline font-medium">
+                                        Açık Rıza Metni
+                                    </Link>
+                                    &apos;nde belirtilen şartlarla onay veriyorum. (İsteğe bağlı)
                                 </span>
                             </label>
                         </div>
