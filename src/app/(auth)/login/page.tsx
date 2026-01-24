@@ -64,10 +64,13 @@ export default function LoginPage() {
                 {/* Decorative Illustration */}
                 <div className="mb-8 relative inline-block">
                     <div className="w-64 h-64 bg-white/50 backdrop-blur-sm rounded-full shadow-2xl transform -rotate-3 border-8 border-white flex items-center justify-center">
-                        <div className="text-center">
-                            <i className="fa-solid fa-utensils text-orange-500 text-7xl mb-4"></i>
-                            <i className="fa-solid fa-heart text-red-400 text-4xl"></i>
-                        </div>
+                        <Image 
+                          src="/kidsgourmet-icon.svg" 
+                          alt="KidsGourmet" 
+                          width={120} 
+                          height={120} 
+                          className="w-32 h-32 object-contain"
+                        />
                     </div>
                     <div className="absolute -bottom-6 -right-6 bg-white p-4 rounded-2xl shadow-lg flex items-center gap-3 animate-bounce">
                         <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600">
@@ -80,7 +83,7 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <h2 className="font-display font-bold text-4xl text-slate-800 mb-4">Mutfakta Yalnız Değilsiniz.</h2>
-                <p className="text-gray-600 text-lg">KidsGourmet&apos;e giriş yapın, bebeğinize özel haftalık planlara ve uzman onaylı tariflere ulaşın.</p>
+                <p className="text-gray-600 text-lg">KidsGourmet&apos;ye giriş yapın, bebeğinize özel haftalık planlara, uzman görüşlerine ve tariflere ulaşın.</p>
             </div>
         </div>
 

@@ -51,36 +51,56 @@ export default function KunyePage() {
 
           <hr className="border-gray-200" />
 
-          {/* Sahibi */}
+          {/* Site Sahibi */}
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-4">Site Sahibi</h2>
             <div className="space-y-3 text-gray-600">
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Şirket:</span>
-                <span>Hip Medya</span>
+                <span>HİP Medya (Umut Kaan Özdemir)</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Vergi Kimlik No:</span>
+                <span>6810178450</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Adres:</span>
+                <span>Türkiye-İstanbul</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Web Sitesi:</span>
+                <span>
+                  <a href="https://www.hipmedya.com" target="_blank" rel="noopener noreferrer" className="text-orange-500 hover:underline">
+                    www.hipmedya.com
+                  </a>
+                </span>
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Marka:</span>
-                <span>KidsGourmet bir Hip Medya markasıdır</span>
+                <span>KidsGourmet bir HİP medya markasıdır.</span>
               </div>
             </div>
           </div>
 
           <hr className="border-gray-200" />
 
-          {/* Yayın Kurulu */}
+          {/* Yayın-Yönetim */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Yayın Kurulu</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Yayın-Yönetim</h2>
             <div className="space-y-3 text-gray-600">
               <div className="flex flex-col md:flex-row md:gap-4">
-                <span className="font-semibold text-slate-700 md:w-48">İçerik Sorumlusu:</span>
-                <span>KidsGourmet Editör Ekibi</span>
+                <span className="font-semibold text-slate-700 md:w-48">İmtiyaz Sahibi:</span>
+                <span>Umut Kaan Özdemir</span>
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
-                <span className="font-semibold text-slate-700 md:w-48">Uzmanlarımız:</span>
+                <span className="font-semibold text-slate-700 md:w-48">Genel Yayın Yönetmeni:</span>
+                <span>Uzman Ebe-Hemşire Yeliz Toplar Eken</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Yazarlar:</span>
                 <span>
                   <Link href="/uzmanlar" className="text-orange-500 hover:underline">
-                    Diyetisyen ve Doktorlarımızı Görüntüleyin
+                    Uzmanlarımız
                   </Link>
                 </span>
               </div>
@@ -91,11 +111,15 @@ export default function KunyePage() {
 
           {/* Hosting ve Teknik */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Teknik Altyapı</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Teknik Alt Yapı</h2>
             <div className="space-y-3 text-gray-600">
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Hosting:</span>
-                <span>Türkiye</span>
+                <span>Hostinger - Türkiye</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Domain:</span>
+                <span>İxir Host - Türkiye</span>
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Teknoloji:</span>
@@ -110,6 +134,14 @@ export default function KunyePage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-4">İletişim Bilgileri</h2>
             <div className="space-y-3 text-gray-600">
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Telefon:</span>
+                <span>
+                  <a href="tel:08504501105" className="text-orange-500 hover:underline">
+                    0850 450 11 05
+                  </a>
+                </span>
+              </div>
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">E-posta:</span>
                 <span>
@@ -131,9 +163,9 @@ export default function KunyePage() {
 
           <hr className="border-gray-200" />
 
-          {/* Kardeş Siteler */}
+          {/* Ekosistem */}
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-4">Kardeş Siteler</h2>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Ekosistem</h2>
             <div className="flex flex-wrap gap-4">
               <a 
                 href="https://rejimde.com" 
@@ -153,6 +185,47 @@ export default function KunyePage() {
                 <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                 Tariften.com
               </a>
+            </div>
+          </div>
+
+          <hr className="border-gray-200" />
+
+          {/* Yasal Bildirimler ve Uyarılar */}
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Yasal Bildirimler ve Uyarılar</h2>
+            <div className="space-y-4 text-gray-600">
+              <div>
+                <p className="mb-2">
+                  <strong className="text-slate-700">1. Tıbbi Sorumluluk Reddi:</strong>
+                </p>
+                <p className="leading-relaxed">
+                  KidsGourmet platformunda yer alan tüm içerikler, tarifler ve akıllı hesaplama araçları (Aşı Takvimi, Persentil vb.) yalnızca bilgilendirme amaçlıdır. Sitemizde sunulan bilgiler bir hekimin tıbbi tavsiyesi, teşhisi veya tedavisi yerine geçmez. Herhangi bir uygulamadan önce mutlaka uzman bir doktora danışınız.
+                </p>
+              </div>
+              <div>
+                <p className="mb-2">
+                  <strong className="text-slate-700">2. Fikri Mülkiyet Hakları:</strong>
+                </p>
+                <p className="leading-relaxed">
+                  Sitede yayınlanan tüm metin, fotoğraf, video ve yazılım kodları Fikir ve Sanat Eserleri Kanunu (FSEK) uyarınca korunmaktadır. KidsGourmet&apos;in yazılı izni olmaksızın içeriklerin kısmen veya tamamen kopyalanması, başka platformlarda yayınlanması yasaktır.
+                </p>
+              </div>
+              <div>
+                <p className="mb-2">
+                  <strong className="text-slate-700">3. Yer Sağlayıcı Bildirimi:</strong>
+                </p>
+                <p className="leading-relaxed">
+                  Kids Gourmet, 5651 sayılı &quot;İnternet Ortamında Yapılan Yayınların Düzenlenmesi ve Bu Yayınlar Yoluyla İşlenen Suçlarla Mücadele Edilmesi Hakkında Kanun&quot; kapsamında &quot;İçerik Sağlayıcı&quot; ve kullanıcı yorumları bakımından &quot;Yer Sağlayıcı&quot; olarak faaliyet göstermektedir.
+                </p>
+              </div>
+              <div>
+                <p className="mb-2">
+                  <strong className="text-slate-700">4. Uyar-Kaldır Prensibi:</strong>
+                </p>
+                <p className="leading-relaxed">
+                  Sitemizde telif haklarını veya kişilik haklarını ihlal ettiğini düşündüğünüz bir içerik varsa, lütfen iletisim@kidsgourmet.com.tr adresi üzerinden bizimle iletişime geçiniz. Bildiriminiz en geç 48 saat içerisinde incelenerek yasal gereği yapılacaktır.
+                </p>
+              </div>
             </div>
           </div>
 
