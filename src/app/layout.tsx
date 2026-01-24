@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
+import "@fortawesome/fontawesome-free/css/all.min.css"; 
 import { UserProvider } from "@/hooks/use-user";
 import { FavoritesProvider } from "@/contexts/favorites-context";
 import { ChildProfileProvider } from "@/contexts/ChildProfileContext";
@@ -84,9 +85,6 @@ export default function RootLayout({
 
   return (
     <html lang="tr">
-      <head>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-      </head>
       <body className="bg-gray-50 text-brand-dark font-sans antialiased">
         {/* Google Consent Mode v2 - MUST load before gtag */}
         <Script id="google-consent-mode" strategy="beforeInteractive">

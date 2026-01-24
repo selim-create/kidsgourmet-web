@@ -504,18 +504,6 @@ export default function CommunityPage() {
                     ))}
                 </div>
 
-                {/* Create Post Input (Teaser) */}
-                <Link
-                  href="/topluluk/soru-sor"
-                  className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex gap-4 items-center cursor-pointer hover:border-orange-200 transition-colors"
-                >
-                    <img src="https://placehold.co/100x100/FFCC80/ffffff?text=Siz" className="w-10 h-10 rounded-full bg-gray-100" alt="User" />
-                    <div className="flex-1 bg-gray-50 rounded-full px-4 py-2.5 text-gray-400 text-sm">
-                        Aklına takılanı sor, anneler ve uzmanlar cevaplasın...
-                    </div>
-                    <button className="text-orange-500 text-xl"><i className="fa-regular fa-image"></i></button>
-                </Link>
-
                 {/* Search Box */}
                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
                     <div className="relative">

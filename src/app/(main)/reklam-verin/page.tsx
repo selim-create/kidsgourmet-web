@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image'; // Image eklendi
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -456,12 +457,68 @@ export default function ReklamVerinPage() {
             <p className="text-gray-500">Sektörün önde gelen markalarıyla geçmişten bugüne iş birliği yapıyoruz.</p>
           </div>
           
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale">
-            <div className="w-24 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">Logo 1</div>
-            <div className="w-24 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">Logo 2</div>
-            <div className="w-24 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">Logo 3</div>
-            <div className="w-24 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">Logo 4</div>
-            <div className="w-24 h-12 bg-gray-200 rounded flex items-center justify-center text-gray-400 text-xs">Logo 5</div>
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
+            
+            {/* Dalin */}
+            <div className="relative w-32 h-16 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300">
+              <Image 
+                src="https://api.kidsgourmet.com.tr/wp-content/uploads/2026/01/dalin.png" 
+                alt="Dalin" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+
+            {/* Dyson */}
+            <div className="relative w-32 h-16 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300">
+              <Image 
+                src="https://api.kidsgourmet.com.tr/wp-content/uploads/2026/01/dyson.png" 
+                alt="Dyson" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+
+            {/* Sleepy */}
+            <div className="relative w-32 h-16 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300">
+              <Image 
+                src="https://api.kidsgourmet.com.tr/wp-content/uploads/2026/01/sleepy.png" 
+                alt="Sleepy" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+
+            {/* Evolvia */}
+            <div className="relative w-32 h-16 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300">
+              <Image 
+                src="https://api.kidsgourmet.com.tr/wp-content/uploads/2026/01/evolvia.png" 
+                alt="Evolvia" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+
+            {/* Sebamed */}
+            <div className="relative w-32 h-16 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300">
+              <Image 
+                src="https://api.kidsgourmet.com.tr/wp-content/uploads/2026/01/sebamed.png" 
+                alt="Sebamed" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+
+            {/* Benetton */}
+            <div className="relative w-32 h-16 grayscale hover:grayscale-0 opacity-60 hover:opacity-100 transition-all duration-300">
+              <Image 
+                src="https://api.kidsgourmet.com.tr/wp-content/uploads/2026/01/benetton.png" 
+                alt="Benetton" 
+                fill 
+                className="object-contain" 
+              />
+            </div>
+
           </div>
         </div>
       </div>

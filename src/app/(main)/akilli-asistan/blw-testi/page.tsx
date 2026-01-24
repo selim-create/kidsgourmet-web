@@ -708,10 +708,14 @@ export default function BLWTestPage() {
                   </span>
                 </div>
 
-                {/* Question Icon */}
-                <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
-                  <i className={currentQuestion.icon || 'fa-solid fa-question'}></i>
-                </div>
+              {/* Question Icon - GÜNCELLENMİŞ HALİ 2 (Resilient) */}
+              <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+                <i 
+                  key={currentQuestion.id}
+                  className={`${currentQuestion.icon?.includes('fa-') ? currentQuestion.icon : `fa-solid fa-${currentQuestion.icon}`} ${!currentQuestion.icon?.includes('fa-solid') && !currentQuestion.icon?.includes('fas') ? 'fa-solid' : ''} font-black not-italic`}
+                  style={{ minWidth: '1em' }}
+                ></i>
+              </div>
 
                 {/* Question */}
                 <h2 className="font-display font-bold text-2xl text-slate-800 mb-4 text-center">
