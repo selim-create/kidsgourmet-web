@@ -280,28 +280,39 @@ export default function RegisterPage() {
 
                     {/* Consents (Compact) */}
                     <div className="space-y-3 pt-2">
-                        {/* Info Banner */}
-                        <div className="flex items-start gap-2 p-2.5 bg-blue-50/50 rounded-lg border border-blue-100/50">
-                            <i className="fa-solid fa-circle-info text-blue-400 text-xs mt-0.5"></i>
-                            <Link href="/aydinlatma-metni" target="_blank" className="text-xs text-blue-600/80 hover:text-blue-700 hover:underline leading-tight">
-                                Kişisel Verilerin İşlenmesi Hakkında Aydınlatma Metni&apos;ni okumak için tıklayınız
-                            </Link>
+                        {/* Terms Consent - Required */}
+                        <div className="flex items-start gap-3">
+                            <input
+                              type="checkbox"
+                              id="terms-consent"
+                              checked={termsAccepted}
+                              onChange={(e) => setTermsAccepted(e.target.checked)}
+                              className="w-4 h-4 mt-1 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                              required
+                            />
+                            <label htmlFor="terms-consent" className="text-sm text-gray-600 cursor-pointer">
+                                <Link href="/kullanim-kosullari" className="text-orange-500 hover:underline font-medium">
+                                    Kullanım Koşulları
+                                </Link>
+                                &apos;nı ve{' '}
+                                <Link href="/gizlilik-politikasi" className="text-orange-500 hover:underline font-medium">
+                                    Gizlilik Politikası
+                                </Link>
+                                &apos;nı okudum, kabul ediyorum.
+                            </label>
                         </div>
 
-                        {/* Checkboxes */}
-                        <div className="space-y-2.5">
-                            <label className="flex items-start gap-2 cursor-pointer group select-none">
-                                <input
-                                  type="checkbox"
-                                  checked={termsAccepted}
-                                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                                  className="mt-0.5 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500 accent-orange-500"
-                                />
-                                <span className="text-xs text-gray-600 leading-tight group-hover:text-gray-800 transition-colors">
-                                    <Link href="/kullanim-kosullari" target="_blank" className="font-bold text-orange-600 hover:text-orange-700 hover:underline">Kullanıcı Sözleşmesi</Link>&apos;ni okudum ve kabul ediyorum. <span className="text-red-500">*</span>
-                                </span>
-                            </label>
+                        {/* KVKK Information Text */}
+                        <p className="text-xs text-gray-500 mt-2">
+                            Kişisel verilerinizin işlenmesine ilişkin detaylı bilgiye{' '}
+                            <Link href="/kvkk" className="text-orange-500 hover:underline">
+                                KVKK Aydınlatma Metni
+                            </Link>
+                            &apos;nden ulaşabilirsiniz.
+                        </p>
 
+                        {/* Optional Consents */}
+                        <div className="space-y-2.5 pt-2">
                             <label className="flex items-start gap-2 cursor-pointer group select-none">
                                 <input
                                   type="checkbox"
