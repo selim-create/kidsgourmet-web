@@ -4,6 +4,10 @@ import { blogService } from '@/services/blog-service';
 
 const BASE_URL = 'https://kidsgourmet.com.tr';
 
+// Sitemap configuration
+const SITEMAP_POSTS_PER_PAGE = 50;  // Optimized to keep response under 2MB cache limit
+const MAX_SITEMAP_PAGES = 20;       // 50 posts/page * 20 pages = 1000 posts total
+
 // Static routes that don't change
 const staticRoutes: MetadataRoute.Sitemap = [
   // Main pages
@@ -270,13 +274,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   try {
-    // Fetch dynamic blog posts
+    // Fetch dynamic blog posts with lightweight endpoint
     let currentPage = 1;
     let hasMorePosts = true;
 
-    while (hasMorePosts && currentPage <= 10) {
+    while (hasMorePosts && currentPage <= MAX_SITEMAP_PAGES) {
       try {
-        const blogResponse = await blogService.getAll(currentPage, 100);
+        // Use lightweight endpoint - only fetches id, slug, date
+        const blogResponse = await blogService.getSitemapPosts(currentPage, SITEMAP_POSTS_PER_PAGE);
 
         if (blogResponse.posts && blogResponse.posts.length > 0) {
           blogResponse.posts.forEach((post) => {

@@ -162,5 +162,29 @@ export const blogService = {
   // Kategorileri getir
   getCategories: async () => {
     return await fetchAPI<any[]>(`${WP_API_NAMESPACE}/categories?per_page=100&hide_empty=true`);
+  },
+
+  /**
+   * Sitemap için optimize edilmiş hafif endpoint
+   * 
+   * WordPress API'den sadece sitemap için gerekli olan id, slug ve date alanlarını çeker.
+   * _embed parametresi kullanmadığı için response boyutunu ~2.5MB'dan ~50KB'a düşürür,
+   * böylece Vercel'in 2MB cache limitini aşmaz.
+   * 
+   * @param page - Sayfa numarası (varsayılan: 1)
+   * @param perPage - Sayfa başına post sayısı (varsayılan: 50)
+   * @returns Posts dizisi ve toplam sayfa sayısı
+   */
+  getSitemapPosts: async (page = 1, perPage = 50): Promise<{
+    posts: Array<{ id: number; slug: string; date: string }>;
+    totalPages: number;
+  }> => {
+    const response = await fetchAPIWithHeaders<Array<{ id: number; slug: string; date: string }>>(
+      `${WP_API_NAMESPACE}/posts?page=${page}&per_page=${perPage}&_fields=id,slug,date`
+    );
+    return {
+      posts: response.data,
+      totalPages: parseInt(response.headers['x-wp-totalpages'] || '1')
+    };
   }
 };
