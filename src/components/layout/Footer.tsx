@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image'; // Image import edildi
+import Image from 'next/image';
 import NewsletterForm from '@/components/common/NewsletterForm';
 import { openCookiePreferences } from '@/components/common/CookieConsent'; 
 
@@ -48,12 +48,16 @@ export default function Footer() {
         <div className="bg-gray-50 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-8">
+                {/* GRID UPDATE:
+                   lg:grid-cols-12 yaptık.
+                   Logo alanı: lg:col-span-4 (Geniş)
+                   Diğer alanlar: lg:col-span-2 (Daha dar ve kompakt)
+                */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-8 lg:gap-8">
                     
-                    {/* Brand Column */}
-                    <div className="col-span-2 md:col-span-3 lg:col-span-1 flex flex-col">
+                    {/* Brand Column (Genişletildi - 4/12) */}
+                    <div className="col-span-2 md:col-span-4 lg:col-span-4 flex flex-col pr-0 lg:pr-8">
                         <Link href="/" className="flex items-center mb-5 group" aria-label="KidsGourmet Ana Sayfa">
-                             {/* Logo Update: Using the full SVG logo */}
                              <Image 
                                 src="/kidsgourmet-logo.svg" 
                                 alt="KidsGourmet Logo" 
@@ -66,8 +70,10 @@ export default function Footer() {
                             Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman görüşleri, sağlıklı tarifler ve akıllı araçlarla yanınızdayız.
                         </p>
                         
-                        {/* Social Media - Grid System (Fixed Size & Layout) */}
-                        <div className="grid grid-cols-6 lg:grid-cols-3 gap-2 w-fit mt-auto">
+                        {/* Social Media - Grid System */}
+                        {/* Alan genişlediği için ikonları tek satırda 6'lı gösterebiliriz veya 3'lü bırakabiliriz. 
+                            Geniş alanda tek satır daha şık durabilir, bu yüzden lg:grid-cols-6 yaptım. */}
+                        <div className="grid grid-cols-6 gap-2 w-fit mt-auto">
                             <Link 
                                 href="https://www.instagram.com/kidsgourmet/" 
                                 target="_blank" 
@@ -125,8 +131,8 @@ export default function Footer() {
                         </div>
                     </div>
                     
-                    {/* Tarifler (6 Madde) */}
-                    <div className="col-span-1">
+                    {/* Tarifler (6 Madde) - Daraltıldı (2/12) */}
+                    <div className="col-span-1 md:col-span-1 lg:col-span-2">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-orange-100 flex items-center justify-center">
                                 <i className="fa-solid fa-utensils text-orange-500 text-xs"></i>
@@ -169,8 +175,8 @@ export default function Footer() {
                         </nav>
                     </div>
 
-                    {/* Keşfet (6 Madde) */}
-                    <div className="col-span-1">
+                    {/* Keşfet (6 Madde) - Daraltıldı (2/12) */}
+                    <div className="col-span-1 md:col-span-1 lg:col-span-2">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center">
                                 <i className="fa-solid fa-compass text-purple-500 text-xs"></i>
@@ -213,8 +219,8 @@ export default function Footer() {
                         </nav>
                     </div>
 
-                    {/* Kurumsal (6 Madde) */}
-                    <div className="col-span-1">
+                    {/* Kurumsal (6 Madde) - Daraltıldı (2/12) */}
+                    <div className="col-span-1 md:col-span-1 lg:col-span-2">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-green-100 flex items-center justify-center">
                                 <i className="fa-solid fa-building text-green-500 text-xs"></i>
@@ -257,8 +263,9 @@ export default function Footer() {
                         </nav>
                     </div>
 
-                    {/* Bilgilendirme (6 Madde) */}
-                    <div className="col-span-1">
+                    {/* Bilgilendirme (6 Madde) - Daraltıldı (2/12) */}
+                    {/* Açık Rıza ve Başvuru Formu kaldırıldı, sayı 6'ya düştü. */}
+                    <div className="col-span-1 md:col-span-1 lg:col-span-2">
                         <h4 className="font-display font-bold text-slate-800 mb-5 flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center">
                                 <i className="fa-solid fa-shield-halved text-blue-500 text-xs"></i>
@@ -298,16 +305,6 @@ export default function Footer() {
                                 <li>
                                     <Link href="/aydinlatma-metni" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
                                         Aydınlatma Metni
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/acik-riza-metni" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
-                                        Açık Rıza Metni
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/basvuru-formu" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
-                                        Başvuru Formu
                                     </Link>
                                 </li>
                             </ul>

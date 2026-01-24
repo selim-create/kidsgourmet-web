@@ -26,21 +26,42 @@ export default function CerezPolitikasiPage() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12 space-y-8">
           
-          {/* Veri Sorumlusu Künyesi */}
+{/* Veri Sorumlusu Künyesi - DÜZELTİLMİŞ VERSİYON */}
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-6">
             <h3 className="font-bold text-orange-800 mb-4 flex items-center gap-2">
               <i className="fa-solid fa-building-shield"></i>
               VERİ SORUMLUSU
             </h3>
-            <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
+            
+            {/* Grid yapısını değiştirdik: İç içe divler yerine tek grid container kullandık */}
+            <div className="grid md:grid-cols-2 gap-y-4 gap-x-8 text-sm text-gray-700">
+              
+              {/* 1. Unvan */}
               <div>
-                <p><span className="font-semibold">Unvan:</span> HİP Medya (Umut Kaan Özdemir)</p>
-                <p><span className="font-semibold">Vergi Kimlik No:</span> 6810178450</p>
+                <span className="font-bold text-slate-800 block mb-1">Unvan:</span>
+                <span>HİP Medya (Umut Kaan Özdemir)</span>
               </div>
+
+              {/* 2. VKN */}
               <div>
-                <p><span className="font-semibold">Adres:</span> Fatih Mah. Çapraz Sok. No:11/2 K.Çekmece-İstanbul</p>
-                <p><span className="font-semibold">E-posta:</span> iletisim@kidsgourmet.com.tr</p>
+                <span className="font-bold text-slate-800 block mb-1">Vergi Kimlik No:</span>
+                <span>6810178450</span>
               </div>
+
+              {/* 3. E-posta */}
+              <div>
+                <span className="font-bold text-slate-800 block mb-1">E-posta:</span>
+                <a href="mailto:iletisim@kidsgourmet.com.tr" className="hover:text-orange-600 transition-colors">
+                  iletisim@kidsgourmet.com.tr
+                </a>
+              </div>
+
+              {/* 4. Adres (md:col-span-2 ile tam genişlik yaptık) */}
+              <div className="md:col-span-2 border-t border-orange-200/50 pt-3 mt-1">
+                <span className="font-bold text-slate-800 block mb-1">Adres:</span>
+                <span>Fatih Mah. Çapraz Sok. No:11/2 K.Çekmece-İstanbul</span>
+              </div>
+
             </div>
           </div>
 

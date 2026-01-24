@@ -9,61 +9,18 @@ export const metadata: Metadata = {
 export default function GizlilikPolitikasiPage() {
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section - Modern Design */}
-      <div className="relative bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 overflow-hidden py-16">
-        {/* Decorative Background Blobs */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
-        
-        <div className="max-w-4xl mx-auto px-4 relative z-10">
-          {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-sm text-blue-100 mb-6">
-            <Link href="/" className="hover:text-white transition-colors">Ana Sayfa</Link>
+      
+      {/* HEADER SECTION - STANDARDIZED */}
+      {/* Diğer sayfalarla uyumlu, sade ve beyaz header yapısı */}
+      <div className="bg-white border-b border-gray-100 py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <nav className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+            <Link href="/" className="hover:text-orange-500 transition-colors">Ana Sayfa</Link>
             <span>/</span>
-            <span className="text-white font-medium">Gizlilik Politikası</span>
+            <span className="text-gray-800">Gizlilik Politikası</span>
           </nav>
-          
-          {/* Main Content */}
-          <div className="flex flex-col md:flex-row md:items-center gap-8">
-            {/* Icon Side */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-white/10 backdrop-blur-sm rounded-3xl border-4 border-white/20 flex items-center justify-center shadow-2xl">
-                <i className="fa-solid fa-shield-halved text-white text-5xl md:text-6xl"></i>
-              </div>
-            </div>
-            
-            {/* Text Side */}
-            <div className="flex-1">
-              <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                Gizlilik Politikası
-              </h1>
-              <p className="text-blue-50 text-lg mb-6">
-                Kişisel verilerinizin korunması ve mahremiyetiniz bizim için en öncelikli değerdir.
-              </p>
-              
-              {/* Meta Info Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-                  <div className="flex items-center gap-3 text-white">
-                    <i className="fa-regular fa-calendar text-xl"></i>
-                    <div>
-                      <p className="text-xs text-blue-100 uppercase tracking-wide font-semibold">Son Güncelleme</p>
-                      <p className="font-bold">Ocak 2026</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-4">
-                  <div className="flex items-center gap-3 text-white">
-                    <i className="fa-solid fa-building-user text-xl"></i>
-                    <div>
-                      <p className="text-xs text-blue-100 uppercase tracking-wide font-semibold">Veri Sorumlusu</p>
-                      <p className="font-bold">HİP Medya</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-800">GİZLİLİK POLİTİKASI</h1>
+          <p className="text-gray-600 mt-3">Kişisel verilerinizin işlenmesi, korunması ve mahremiyet haklarınız hakkında aydınlatma metni.</p>
         </div>
       </div>
       
@@ -71,13 +28,45 @@ export default function GizlilikPolitikasiPage() {
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 md:p-12 space-y-10">
           
+          {/* BİLGİ KARTI (Veri Sorumlusu + Platform + Tarih) */}
+          {/* İstenilen Platform bilgisi buraya eklendi */}
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
+            <h3 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
+              <i className="fa-solid fa-circle-info"></i>
+              KÜNYE VE GÜNCELLİK BİLGİSİ
+            </h3>
+            <div className="grid md:grid-cols-3 gap-6 text-sm">
+              
+              {/* Veri Sorumlusu */}
+              <div>
+                <p className="text-xs text-blue-600/80 uppercase font-bold tracking-wider mb-1">Veri Sorumlusu</p>
+                <p className="font-bold text-slate-700">HİP Medya</p>
+                <p className="text-slate-600 text-xs mt-1">Umut Kaan Özdemir</p>
+              </div>
+
+              {/* Platform */}
+              <div>
+                <p className="text-xs text-blue-600/80 uppercase font-bold tracking-wider mb-1">Platform</p>
+                <Link href="https://www.kidsgourmet.com.tr" className="font-bold text-slate-700 hover:text-orange-600 transition-colors">
+                  www.kidsgourmet.com.tr
+                </Link>
+              </div>
+
+              {/* Son Güncelleme */}
+              <div>
+                <p className="text-xs text-blue-600/80 uppercase font-bold tracking-wider mb-1">Son Güncelleme</p>
+                <p className="font-bold text-slate-700">Ocak 2026</p>
+              </div>
+            </div>
+          </div>
+
           {/* 1. Giriş */}
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-4">1. GİRİŞ VE HUKUKİ DAYANAK</h2>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
                 İşbu Gizlilik Politikası ve Aydınlatma Metni (&quot;Politika&quot;), HİP Medya (&quot;Şirket&quot;) tarafından işletilen 
-                www.kidsgourmet.com.tr (&quot;Platform&quot;) web sitesini ziyaret eden, üye olan, içerik paylaşan veya hizmetlerimizden 
+                <span className="font-semibold text-slate-800 mx-1">www.kidsgourmet.com.tr</span> (&quot;Platform&quot;) web sitesini ziyaret eden, üye olan, içerik paylaşan veya hizmetlerimizden 
                 yararlanan tüm gerçek kişilerin (&quot;Kullanıcı&quot;) kişisel verilerinin işlenmesi, saklanması, korunması ve imha edilmesi 
                 süreçlerini düzenlemektedir.
               </p>
