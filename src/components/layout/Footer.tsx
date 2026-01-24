@@ -300,6 +300,16 @@ export default function Footer() {
                                         Aydınlatma Metni
                                     </Link>
                                 </li>
+                                <li>
+                                    <Link href="/acik-riza-metni" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
+                                        Açık Rıza Metni
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/basvuru-formu" className="text-gray-600 hover:text-orange-500 transition-colors text-sm">
+                                        Başvuru Formu
+                                    </Link>
+                                </li>
                             </ul>
                         </nav>
                     </div>
