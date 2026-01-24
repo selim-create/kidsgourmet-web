@@ -26,6 +26,8 @@ const KNOWN_ROUTES = [
   'kullanim-kosullari',
   'gizlilik-politikasi',
   'cerez-politikasi',
+  'acik-riza-metni',
+  'basvuru-formu',
   'kvkk',
   'aydinlatma-metni',
   'reklam-verin',
