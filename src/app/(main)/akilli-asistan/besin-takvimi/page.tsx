@@ -298,7 +298,7 @@ export default function BesinTakvimiPage() {
           </div>
           <div className="bg-white rounded-2xl border border-gray-100 p-5 text-center shadow-sm hover:shadow-md transition-shadow">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-              <i className="fa-solid fa-sparkles text-blue-500 text-xl"></i>
+              <i className="fa-brands fa-nutritionix text-blue-500 text-xl"></i>
             </div>
             <div className="text-3xl font-bold text-slate-800">{stats.newThisWeek}</div>
             <div className="text-sm text-gray-500 mt-1">Yeni Gıda</div>

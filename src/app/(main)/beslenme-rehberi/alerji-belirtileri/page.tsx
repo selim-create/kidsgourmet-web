@@ -185,7 +185,6 @@ export default function AlerjiBelirtileriPage() {
             <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8">
               <div className="mb-6">
                 <h3 className="font-bold text-2xl text-red-900 mb-3 flex items-center gap-2">
-                  <i className="fa-solid fa-siren-on text-red-600 animate-pulse"></i>
                   ACİL DURUM - HEMEN 112'Yİ ARAYIN!
                 </h3>
                 <p className="text-red-800 leading-relaxed font-bold text-lg">

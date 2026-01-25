@@ -182,9 +182,14 @@ export const navigationItems: NavItem[] = [
         icon: 'fa-solid fa-people-roof' 
       },
       { 
-        label: 'Çocuk Gelişimi', 
-        href: '/kesfet/kategori/cocuk-gelisimi', 
-        icon: 'fa-solid fa-seedling' 
+        label: 'Psikoloji', 
+        href: '/kesfet/kategori/psikoloji', 
+        icon: 'fa-solid fa-person-breastfeeding' 
+      },
+      { 
+        label: 'Seyahat', 
+        href: '/kesfet/kategori/seyahat', 
+        icon: 'fa-solid fa-plane' 
       },
       { 
         label: 'Oyun', 
