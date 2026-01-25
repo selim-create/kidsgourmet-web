@@ -22,6 +22,7 @@ interface FavoritesContextType {
   removeFavorite: (itemId: number, itemType?: FavoriteItemType) => Promise<void>;
   toggleFavorite: (itemId: number, itemType?: FavoriteItemType) => Promise<void>;
   createCollection: (data: CollectionInput) => Promise<Collection>;
+  updateCollection: (id: string, data: CollectionInput) => Promise<Collection>;
   deleteCollection: (id: string) => Promise<void>;
   addToCollection: (collectionId: string, itemId: number, itemType: FavoriteItemType) => Promise<void>;
   removeFromCollection: (collectionId: string, itemId: number, itemType: FavoriteItemType) => Promise<void>;
@@ -171,6 +172,12 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     return collection;
   }, []);
 
+  const updateCollection = useCallback(async (id: string, data: CollectionInput) => {
+    const collection = await userService.updateCollection(id, data);
+    setCollections(prev => prev.map(c => c.id === id ? collection : c));
+    return collection;
+  }, []);
+
   const deleteCollection = useCallback(async (id: string) => {
     await userService.deleteCollection(id);
     setCollections(prev => prev.filter(c => c.id !== id));
@@ -202,6 +209,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     removeFavorite,
     toggleFavorite,
     createCollection,
+    updateCollection,
     deleteCollection,
     addToCollection,
     removeFromCollection,
@@ -218,6 +226,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
     removeFavorite,
     toggleFavorite,
     createCollection,
+    updateCollection,
     deleteCollection,
     addToCollection,
     removeFromCollection,
