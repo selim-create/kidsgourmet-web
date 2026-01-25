@@ -161,7 +161,7 @@ const defaultQuestions: BLWTestQuestion[] = [
     category: 'physical_readiness',
     question: 'Bebeğinizin baş kontrolü tam mı?',
     description: 'Başını dik tutabiliyor ve her iki yana rahatça çevirebiliyor olmalı.',
-    icon: 'fa-solid fa-head-side-mask',
+    icon: 'fa-solid fa-child',
     weight: 15,
     options: [
       { id: 'head_yes', text: 'Evet, tam kontrol var', value: 100 },
@@ -250,7 +250,7 @@ const defaultQuestions: BLWTestQuestion[] = [
     options: [
       { id: 'medical_no', text: 'Hayır, bilinen bir sorun yok', value: 100 },
       { id: 'medical_mild', text: 'Küçük bir sorun var, doktora danıştık', value: 70 },
-      { id: 'medical_yes', text: 'Evet var, doktora henüz danışmadık', value: 0, is_red_flag: true, red_flag_message: 'Tıbbi bir durum varsa mutlaka doktorunuze danışın.' },
+      { id: 'medical_yes', text: 'Evet var, doktora henüz danışmadık', value: 0, is_red_flag: true, red_flag_message: 'Tıbbi bir durum varsa mutlaka doktorunuza danışın.' },
       { id: 'medical_uncertain', text: 'Emin değilim', value: 50 }
     ]
   },

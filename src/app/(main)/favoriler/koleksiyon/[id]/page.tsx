@@ -105,7 +105,7 @@ export default function CollectionDetailPage() {
             {error || 'Bu koleksiyon bulunamadı veya erişim izniniz yok.'}
           </p>
           <Link
-            href="/dashboard/favoriler"
+            href="/favoriler"
             className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
           >
             Favorilere Dön
