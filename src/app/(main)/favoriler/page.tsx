@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from "next/link";
 import { useFavorites } from '@/hooks/use-favorites';
 import { useUser } from '@/hooks/use-user';
-import { FavoriteItemType } from '@/lib/types';
+import { FavoriteItemType, CollectionInput } from '@/lib/types';
 import CollectionCard from '@/components/favorites/CollectionCard';
 import CreateCollectionModal from '@/components/favorites/CreateCollectionModal';
 import FavoriteRecipeCard from '@/components/favorites/FavoriteRecipeCard';
@@ -22,12 +22,14 @@ export default function FavoritesPage() {
     error,
     counts,
     createCollection,
+    updateCollection,
     deleteCollection,
   } = useFavorites();
 
   const [activeFilter, setActiveFilter] = useState<FavoriteItemType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingCollection, setEditingCollection] = useState<{ id: string; name: string; icon: string; color: string } | null>(null);
 
   const tabs = [
     { name: "Tümü", key: "all" as const, count: counts.all },
@@ -36,6 +38,34 @@ export default function FavoritesPage() {
     { name: "Blog & Rehber", key: "post" as const, count: counts.posts },
     { name: "Topluluk", key: "discussion" as const, count: counts.discussions }
   ];
+
+  // Koleksiyon düzenleme işlemleri
+  const handleEditCollection = (id: string) => {
+    const collection = collections.find(c => c.id === id);
+    if (collection) {
+      setEditingCollection({
+        id: collection.id,
+        name: collection.name,
+        icon: collection.icon,
+        color: collection.color,
+      });
+      setShowCreateModal(true);
+    }
+  };
+
+  const handleCollectionSubmit = async (data: CollectionInput) => {
+    if (editingCollection) {
+      await updateCollection(editingCollection.id, data);
+      setEditingCollection(null);
+    } else {
+      await createCollection(data);
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowCreateModal(false);
+    setEditingCollection(null);
+  };
 
   // Auth kontrolü
   if (authLoading) {
@@ -142,6 +172,7 @@ export default function FavoritesPage() {
                             key={collection.id}
                             collection={collection}
                             onDelete={deleteCollection}
+                            onEdit={handleEditCollection}
                           />
                         ))}
                         
@@ -294,8 +325,10 @@ export default function FavoritesPage() {
         {/* Create/Edit Collection Modal */}
         <CreateCollectionModal
           isOpen={showCreateModal}
-          onClose={() => setShowCreateModal(false)}
-          onSubmit={createCollection} // Değişiklik: onCreate -> onSubmit
+          onClose={handleModalClose}
+          onSubmit={handleCollectionSubmit}
+          editMode={!!editingCollection}
+          initialData={editingCollection || undefined}
         />
 
     </div>

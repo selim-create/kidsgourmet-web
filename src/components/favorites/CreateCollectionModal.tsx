@@ -66,9 +66,10 @@ export default function CreateCollectionModal({
         const matchedIcon = iconOptions.find(opt => opt.value === cleanIcon);
         setSelectedIcon(matchedIcon ? matchedIcon.value : iconOptions[0].value);
 
-        // Renk eşleştirmesi
-        const matchedColor = colorOptions.find(opt => opt.hex === initialData.color);
-        setSelectedColor(matchedColor ? matchedColor.value : colorOptions[0].value);
+        // Renk eşleştirmesi - Backend renk ismi ('orange') veya HEX döndürebilir
+        const matchedColorByName = colorOptions.find(opt => opt.value === initialData.color);
+        const matchedColorByHex = colorOptions.find(opt => opt.hex === initialData.color);
+        setSelectedColor(matchedColorByName?.value || matchedColorByHex?.value || colorOptions[0].value);
       } else {
         setName('');
         setSelectedIcon(iconOptions[0].value);
@@ -85,13 +86,11 @@ export default function CreateCollectionModal({
 
     setIsLoading(true);
     try {
-      const colorOption = colorOptions.find(opt => opt.value === selectedColor);
-      
-      // API'ye sadece ikon ismini ('mug-hot') ve hex kodunu gönderiyoruz
+      // API'ye ikon ismini ('mug-hot') ve renk ismini ('orange', 'blue' vb.) gönderiyoruz
       await onSubmit({
         name: name.trim(),
         icon: selectedIcon, 
-        color: colorOption?.hex || colorOptions[0].hex, 
+        color: selectedColor, // Renk ismi gönder (HEX yerine)
       });
       
       onClose();
