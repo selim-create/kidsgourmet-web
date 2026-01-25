@@ -6,8 +6,8 @@ import { AdProvider } from "@/contexts/AdContext";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'KidsGourmet - Bebek ve Çocuk Beslenme Rehberi | Uzman Onaylı Tarifler',
-  description: 'Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman onaylı tarifler, beslenme rehberleri ve akıllı araçlarla sağlıklı gelişim. 6 ay+ bebekler için özel tarifler, BLW rehberi ve daha fazlası.',
+  title: 'KidsGourmet - Bebek ve Çocuk Beslenme Rehberi | Bebek ve Çocuk Tarifleri',
+  description: 'Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman görüşleri, sağlıklı tarifler ve akıllı araçlarla yanınızdayız.',
   keywords: [
     'bebek beslenmesi',
     'çocuk tarifleri',
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'KidsGourmet - Bebek ve Çocuk Beslenme Rehberi',
-    description: 'Uzman onaylı bebek ve çocuk tarifleri, beslenme rehberleri ve akıllı araçlarla sağlıklı gelişim. 6 ay+ bebekler için özel içerikler.',
+    description: 'Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman görüşleri, sağlıklı tarifler ve akıllı araçlarla yanınızdayız.',
     url: 'https://kidsgourmet.com.tr',
     siteName: 'KidsGourmet',
     locale: 'tr_TR',
