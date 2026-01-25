@@ -58,6 +58,17 @@ export default function CollectionDetailPage() {
     }
   };
 
+  const handleUpdateCollection = async (data: { name: string; icon: string; color: string }) => {
+    try {
+      await userService.updateCollection(collectionId, data);
+      setIsEditModalOpen(false);
+      loadCollection(); // Refresh data after edit
+    } catch (err) {
+      console.error('Failed to update collection:', err);
+      alert('Koleksiyon güncellenirken hata oluştu');
+    }
+  };
+
   // İkonu doğru formata çevirme (backend 'star' gönderiyorsa 'fa-solid fa-star' yapar)
   const getIconClass = (iconName: string) => {
     if (iconName.startsWith('fa-')) return iconName;
@@ -219,13 +230,10 @@ export default function CollectionDetailPage() {
       {collection && (
         <CreateCollectionModal 
           isOpen={isEditModalOpen} 
-          onClose={() => {
-            setIsEditModalOpen(false);
-            loadCollection(); // Refresh data after edit
-          }}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleUpdateCollection}
           editMode={true}
           initialData={{
-            id: collection.id,
             name: collection.name,
             icon: collection.icon,
             color: collection.color
