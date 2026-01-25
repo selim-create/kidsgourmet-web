@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { FavoriteIngredientCard as FavoriteIngredientCardType } from '@/lib/types';
 import { decodeEntities } from '@/utils/textHelpers';
+import { getIconClass } from '@/utils/iconHelpers';
 import { useFavorites } from '@/hooks/use-favorites';
 import { toast } from 'sonner';
 
@@ -136,7 +137,7 @@ export default function FavoriteIngredientCard({ ingredient, onRemove }: Favorit
                         onClick={(e) => handleAddToCollection(e, collection.id)}
                         className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 transition-colors flex items-center gap-2"
                       >
-                        <i className={`fa-solid fa-${collection.icon} text-gray-400`}></i>
+                        <i className={getIconClass(collection.icon) + ' text-gray-400'}></i>
                         <span className="text-slate-800">{collection.name}</span>
                       </button>
                     ))

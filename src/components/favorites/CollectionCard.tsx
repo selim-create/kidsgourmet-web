@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Collection } from '@/lib/types';
+import { getIconClass } from '@/utils/iconHelpers';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -74,7 +75,7 @@ export default function CollectionCard({ collection, onDelete, onEdit }: Collect
           color: hexColor 
         }}
       >
-        <i className={`fa-solid fa-${collection.icon}`}></i>
+        <i className={getIconClass(collection.icon)}></i>
       </div>
       <h3 className="font-bold text-slate-800 text-sm">{collection.name}</h3>
       <p className="text-xs text-gray-400 mt-1">
