@@ -34,11 +34,12 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
 
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false); // Yeni yükleniyor state'i
   const [error, setError] = useState(false);
+  const [page, setPage] = useState(1); // Sayfa numarası state'i
+  const [totalPages, setTotalPages] = useState(1); // Toplam sayfa sayısı state'i
   
   // Kategori bilgilerini (ID, isim vb.) tutmak için state
-  // Gerçek uygulamada, slug'dan kategori ID'sini bulmak için ayrı bir servis çağrısı gerekebilir
-  // veya tüm kategorileri çekip slug ile eşleştirebiliriz.
   const [categoryInfo, setCategoryInfo] = useState<{ id: number, name: string, description?: string } | null>(null);
   
   // Random tool selection
@@ -72,6 +73,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
         // 2. Bulunan kategori ID'sine göre yazıları çekelim
         const categoryPosts = await blogService.getAll(1, 10, currentCategory.id);
         setPosts(categoryPosts.posts);
+        setTotalPages(categoryPosts.totalPages); // Toplam sayfa sayısını set et
         
         // 3. Uzmanları çek ve rastgele birini seç
         const experts = await userService.getExperts();
@@ -91,17 +93,22 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
     fetchData();
   }, [slug]);
 
-  // Yardımcı fonksiyonlar (Blog listesindeki gibi)
-  const getImageUrl = (post: BlogPost) => {
-    return post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://placehold.co/600x450/E3F2FD/81D4FA?text=Gorsel+Yok';
-  };
+  // Daha fazla göster fonksiyonu
+  const handleLoadMore = async () => {
+    if (!categoryInfo || loadingMore || page >= totalPages) return;
 
-  const getAuthorName = (post: BlogPost) => {
-    return post._embedded?.author?.[0]?.name || 'KidsGourmet Editörü';
-  };
-  
-  const stripHtml = (html: string) => {
-    return html.replace(/<[^>]*>?/gm, '');
+    setLoadingMore(true);
+    const nextPage = page + 1;
+
+    try {
+        const response = await blogService.getAll(nextPage, 10, categoryInfo.id);
+        setPosts(prevPosts => [...prevPosts, ...response.posts]);
+        setPage(nextPage);
+    } catch (error) {
+        console.error("Daha fazla yazı yüklenirken hata:", error);
+    } finally {
+        setLoadingMore(false);
+    }
   };
 
   // Featured Post (Kategorideki ilk yazı)
@@ -216,11 +223,22 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                         </div>
                     )}
 
-                    {/* Load More (Şimdilik statik) */}
-                    {otherPosts.length >= 9 && (
+                    {/* Load More (Dinamik ve Çalışır Halde) */}
+                    {page < totalPages && (
                         <div className="mt-12 text-center">
-                            <button className="bg-white border-2 border-gray-100 text-gray-600 hover:border-green-600 hover:text-green-600 font-bold py-3 px-8 rounded-full transition-all shadow-sm">
-                                Daha Fazla Göster
+                            <button 
+                                onClick={handleLoadMore}
+                                disabled={loadingMore}
+                                className="bg-white border-2 border-gray-100 text-gray-600 hover:border-green-600 hover:text-green-600 font-bold py-3 px-8 rounded-full transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loadingMore ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                                        Yükleniyor...
+                                    </span>
+                                ) : (
+                                    'Daha Fazla Göster'
+                                )}
                             </button>
                         </div>
                     )}
@@ -276,12 +294,13 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                         </div>
                     )}
 
-                    {/* Newsletter Widget */}
+                    {/* Newsletter Widget - DİNAMİK BAŞLIKLI */}
                     <div className="bg-green-50/50 p-6 rounded-3xl border border-green-100 text-center">
                         <div className="w-12 h-12 bg-white text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-xl">
                             <i className="fa-regular fa-envelope"></i>
                         </div>
-                        <h3 className="font-bold text-slate-800 mb-2 font-sans">Çocuk Bülteni</h3>
+                        {/* DÜZELTME: Başlık kategori adına göre dinamik yapıldı */}
+                        <h3 className="font-bold text-slate-800 mb-2 font-sans">{categoryInfo.name} Bülteni</h3>
                         <p className="text-xs text-gray-600 mb-4">Bebeğinizin ayına özel beslenme ipuçları, yeni tarifler ve doktor önerileri güncel olarak mail kutunuzda!</p>
                         <NewsletterForm 
                             source="category"

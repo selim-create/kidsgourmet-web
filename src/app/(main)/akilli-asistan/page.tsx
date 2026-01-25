@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { toolService } from '@/services/tool-service';
 import type { Tool } from '@/lib/types';
 
-// Fallback araç listesi (API'den veri gelmezse)
+// Fallback araç listesi
 const defaultTools: Tool[] = [
   {
     id: 1,
@@ -180,7 +180,7 @@ const slugMapping: Record<string, string> = {
   'diaper-calculator': 'bez-hesaplayici',
   'air-quality': 'hava-kalitesi',
   'stain-encyclopedia': 'leke-rehberi',
-  // Diğer araçlar (eğer backend'den farklı geliyorsa)
+  // Diğer araçlar
   'blw-test': 'blw-testi',
   'percentile': 'persentil',
   'water-calculator': 'su-ihtiyaci',
@@ -193,9 +193,11 @@ const slugMapping: Record<string, string> = {
 
 // Slug'ı frontend klasör adına dönüştür
 const getToolPath = (tool: Tool): string => {
-  if (tool.tool_type === 'vaccine_calendar') {
-    return '/dashboard/saglik/asi-takvimi';
+  // Aşı takvimi için özel yönlendirme (DÜZELTİLDİ: /asilar path'ine gidiyor)
+  if (tool.tool_type === 'vaccine_calendar' || tool.slug === 'asi-takvimi') {
+    return '/dashboard/saglik/asilar';
   }
+  
   // Önce mapping'e bak, yoksa orijinal slug'ı kullan
   const mappedSlug = slugMapping[tool.slug] || tool.slug;
   return `/akilli-asistan/${mappedSlug}`;
@@ -210,10 +212,25 @@ export default function ToolsPage() {
       try {
         const data = await toolService.getTools();
         if (data && data.length > 0) {
-          setTools(data);
+          // API'den gelen listeyi alıyoruz
+          let mergedTools = [...data];
+          
+          // DÜZELTME: API listesinde "Aşı Takvimi" yoksa, defaultTools'dan bulup ekliyoruz.
+          // Böylece backend'de tanımlanmamış olsa bile frontend'de görünür.
+          const hasVaccine = mergedTools.some(t => t.tool_type === 'vaccine_calendar' || t.slug === 'asi-takvimi');
+          
+          if (!hasVaccine) {
+            const vaccineTool = defaultTools.find(t => t.slug === 'asi-takvimi');
+            if (vaccineTool) {
+              mergedTools.push(vaccineTool);
+            }
+          }
+          
+          setTools(mergedTools);
         }
       } catch (error) {
         console.log('Using default tools:', error);
+        // Hata durumunda zaten defaultTools set edilmiş durumda
       } finally {
         setIsLoading(false);
       }

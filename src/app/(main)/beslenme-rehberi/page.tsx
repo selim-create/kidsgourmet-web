@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from "next/link";
 import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 import { InContentAd } from '@/components/ads';
 
-// Kategori icon mapping'i genişlet
-const categoryIcons: Record<string, string> = {
+// --- SABİTLER VE KONFİGÜRASYON ---
+
+const CATEGORY_ICONS: Record<string, string> = {
   'Sebzeler': 'fa-carrot',
   'Meyveler': 'fa-apple-whole',
   'Tahıllar': 'fa-wheat-awn',
@@ -17,455 +18,451 @@ const categoryIcons: Record<string, string> = {
   'Yağlar': 'fa-droplet',
   'Sıvılar': 'fa-glass-water',
   'Baharatlar': 'fa-pepper-hot',
+  'Kuruyemişler': 'fa-bowl-rice',
   'Özel Ürünler': 'fa-star',
 };
 
-// Yaş grubu renkleri (Tarifler sayfasındaki gibi)
-const AGE_GROUP_COLORS: { [key: string]: { bg: string; text: string } } = {
-  '6': { bg: 'bg-[#FFCCBC]', text: 'text-[#BF360C]' },   // 6 ay - Şeftali
-  '8': { bg: 'bg-[#C8E6C9]', text: 'text-[#2E7D32]' },   // 8 ay - Nane Yeşili
-  '9': { bg: 'bg-[#B3E5FC]', text: 'text-[#0277BD]' },   // 9 ay - Gökyüzü Mavisi
-  '12': { bg: 'bg-[#FFF9C4]', text: 'text-[#F57F17]' },  // 12 ay - Limon Sarısı
-  '24': { bg: 'bg-[#E1BEE7]', text: 'text-[#7B1FA2]' },  // 24 ay - Lila
+const AGE_GROUP_COLORS: { [key: string]: { bg: string; text: string; border: string } } = {
+  '6': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200' },
+  '8': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200' },
+  '9': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
+  '12': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' },
+  '24': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
 };
 
-// Mevsim ikonları ve renkleri
-const SEASON_CONFIG: { [key: string]: { icon: string; bg: string; text: string } } = {
-  'Kış': { icon: 'fa-snowflake', bg: 'bg-blue-100/90', text: 'text-blue-600' },
-  'İlkbahar': { icon: 'fa-seedling', bg: 'bg-green-100/90', text: 'text-green-600' },
-  'Yaz': { icon: 'fa-sun', bg: 'bg-yellow-100/90', text: 'text-yellow-600' },
-  'Sonbahar': { icon: 'fa-leaf', bg: 'bg-orange-100/90', text: 'text-orange-600' },
-  'Tüm Yıl': { icon: 'fa-calendar-check', bg: 'bg-purple-100/90', text: 'text-purple-600' },
+const SEASON_CONFIG: { [key: string]: { icon: string; color: string } } = {
+  'Kış': { icon: 'fa-snowflake', color: 'text-blue-500' },
+  'İlkbahar': { icon: 'fa-seedling', color: 'text-green-500' },
+  'Yaz': { icon: 'fa-sun', color: 'text-yellow-500' },
+  'Sonbahar': { icon: 'fa-leaf', color: 'text-orange-500' },
+  'Tüm Yıl': { icon: 'fa-calendar-check', color: 'text-purple-500' },
 };
 
 const ITEMS_PER_PAGE = 12;
 
+// --- YARDIMCI KOMPONENTLER ---
+
+// Yükleniyor iskeleti (Skeleton)
+const IngredientSkeleton = () => (
+  <div className="bg-white rounded-[2rem] p-4 border border-gray-100 shadow-sm animate-pulse">
+    <div className="w-full h-40 bg-gray-200 rounded-2xl mb-4"></div>
+    <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+    <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+    <div className="h-3 bg-gray-200 rounded w-full mb-1"></div>
+    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+  </div>
+);
+
 export default function IngredientsGuidePage() {
+  // --- STATE YÖNETİMİ ---
+  
+  // Filtreler
   const [activeCategory, setActiveCategory] = useState("Tümü");
-  const [activeSeasons, setActiveSeasons] = useState<string[]>(["Tümü"]);
+  const [activeSeasons, setActiveSeasons] = useState<string[]>([]); // Boş array = hepsi
+  const [searchQuery, setSearchQuery] = useState("");
+  
+  // Veri
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [categories, setCategories] = useState<string[]>(["Tümü"]);
+  
+  // UI Durumları
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
   
-  // Arama state'leri
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Ingredient[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  // Favori state
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
+
+  // Favoriler
   const [favorites, setFavorites] = useState<number[]>([]);
-  
-  // Pagination state'leri
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalIngredients, setTotalIngredients] = useState(0);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  // LocalStorage'dan favorileri yükle
+  // --- EFFECT: Initial Load ---
   useEffect(() => {
-    try {
-      const savedFavorites = localStorage.getItem('ingredient-favorites');
-      if (savedFavorites) {
-        setFavorites(JSON.parse(savedFavorites));
-      }
-    } catch (error) {
-      console.error('Favori yükleme hatası:', error);
-      // Hatalı veriyi temizle
-      localStorage.removeItem('ingredient-favorites');
-    }
-  }, []);
-
-  // Kategorileri ve malzemeleri yükle
-  useEffect(() => {
-    async function fetchData() {
+    async function loadCategories() {
       try {
-        setLoading(true);
-        
-        // Kategorileri çek
         const cats = await ingredientService.getCategories();
         setCategories(["Tümü", ...cats]);
-        
-        // İlk sayfa malzemeleri çek (pagination ile)
-        const response = await ingredientService.getAll({ page: 1, perPage: ITEMS_PER_PAGE });
-        
-        // Response'u parse et
-        let ingredientList: Ingredient[] = [];
-        if (Array.isArray(response)) {
-          ingredientList = response;
-        } else {
-          // IngredientsResponse format
-          const paginatedResponse = response as IngredientsResponse;
-          ingredientList = paginatedResponse.ingredients || [];
-          setTotalPages(paginatedResponse.pages || 1);
-          setTotalIngredients(paginatedResponse.total || ingredientList.length);
-        }
-        
-        setIngredients(ingredientList);
-        
-      } catch (error) {
-        console.error("Veri yüklenirken hata:", error);
-        setIngredients([]);
-      } finally {
-        setLoading(false);
+      } catch (err) {
+        console.error("Kategoriler yüklenemedi", err);
       }
     }
-    fetchData();
+    
+    // Favorileri LocalStorage'dan çek
+    const savedFavs = localStorage.getItem('ingredient-favorites');
+    if (savedFavs) setFavorites(JSON.parse(savedFavs));
+
+    loadCategories();
+    setInitialLoaded(true);
   }, []);
 
-  // Debounced search effect
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (searchQuery.trim().length >= 2) {
-        setIsSearching(true);
-        try {
-          const results = await ingredientService.search(searchQuery);
-          setSearchResults(results);
-        } catch (error) {
-          console.error("Arama hatası:", error);
-          setSearchResults([]);
-        } finally {
-          setIsSearching(false);
-        }
+  // --- CORE DATA FETCHING FUNCTION ---
+  const fetchIngredients = useCallback(async (reset = false) => {
+    if (!initialLoaded) return;
+
+    try {
+      const currentPage = reset ? 1 : page;
+      if (reset) {
+        setLoading(true);
+        setIngredients([]);
       } else {
-        setSearchResults([]);
+        setLoadingMore(true);
       }
-    }, 300);
+
+      // API Parametrelerini Hazırla
+      const params: any = {
+        page: currentPage,
+        perPage: ITEMS_PER_PAGE,
+      };
+
+      // Arama varsa
+      if (searchQuery.length >= 2) {
+        const searchResults = await ingredientService.search(searchQuery);
+        setIngredients(searchResults);
+        setHasMore(false);
+        setTotalItems(searchResults.length);
+      } else {
+        // Normal Filtreleme
+        if (activeCategory !== "Tümü") {
+          params.category = activeCategory;
+        }
+        
+        const response = await ingredientService.getAll(params);
+        
+        let newItems: Ingredient[] = [];
+        let total = 0;
+
+        if (Array.isArray(response)) {
+          newItems = response;
+          total = response.length;
+        } else {
+          const paginated = response as IngredientsResponse;
+          newItems = paginated.ingredients || [];
+          total = paginated.total || 0;
+        }
+
+        // Mevsim Filtrelemesi (Client-side)
+        if (activeSeasons.length > 0) {
+           newItems = newItems.filter(ing => 
+             activeSeasons.some(s => ing.season?.includes(s) || ing.season?.includes("Tümü"))
+           );
+        }
+
+        if (reset) {
+          setIngredients(newItems);
+        } else {
+          setIngredients(prev => [...prev, ...newItems]);
+        }
+
+        // Pagination Kontrolü
+        setHasMore(newItems.length >= ITEMS_PER_PAGE); 
+        setTotalItems(total);
+        if (!reset) setPage(prev => prev + 1);
+        else setPage(2);
+      }
+
+    } catch (error) {
+      console.error("Veri çekme hatası:", error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [activeCategory, activeSeasons, searchQuery, page, initialLoaded]);
+
+  // --- EVENT HANDLERS ---
+
+  // Filtre değiştiğinde (Kategori veya Mevsim)
+  useEffect(() => {
+    fetchIngredients(true);
+  }, [activeCategory, activeSeasons]); 
+
+  // Arama için Debounce (Harici kütüphane olmadan)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Sadece arama metni değiştiğinde çalışır
+      if (initialLoaded && (searchQuery.length >= 2 || searchQuery === "")) {
+        fetchIngredients(true);
+      }
+    }, 500); // 500ms bekleme süresi
     
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, initialLoaded]); // fetchIngredients dependency'sini kaldırdık ki sonsuz döngü olmasın
 
-  // Daha fazla malzeme yükle
-  const loadMoreIngredients = async () => {
-    if (isLoadingMore || currentPage >= totalPages) return;
-    
-    setIsLoadingMore(true);
-    try {
-      const nextPage = currentPage + 1;
-      const response = await ingredientService.getAll({ page: nextPage, perPage: ITEMS_PER_PAGE });
-      
-      let newIngredients: Ingredient[] = [];
-      if (Array.isArray(response)) {
-        newIngredients = response;
-      } else {
-        // IngredientsResponse format
-        const paginatedResponse = response as IngredientsResponse;
-        newIngredients = paginatedResponse.ingredients || [];
-      }
-      
-      setIngredients(prev => [...prev, ...newIngredients]);
-      setCurrentPage(nextPage);
-    } catch (error) {
-      console.error("Daha fazla malzeme yüklenirken hata:", error);
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
-  // Toggle favori fonksiyonu
-  const toggleFavorite = (e: React.MouseEvent, ingredientId: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    setFavorites(prev => {
-      const newFavorites = prev.includes(ingredientId)
-        ? prev.filter(id => id !== ingredientId)
-        : [...prev, ingredientId];
-      
-      // localStorage kontrolü
-      try {
-        localStorage.setItem('ingredient-favorites', JSON.stringify(newFavorites));
-      } catch (error) {
-        console.error('Favori kaydetme hatası:', error);
-      }
-      return newFavorites;
+  const handleSeasonToggle = (season: string) => {
+    setActiveSeasons(prev => {
+      if (season === "Tümü") return [];
+      if (prev.includes(season)) return prev.filter(s => s !== season);
+      return [...prev, season];
     });
   };
 
-  // Yaş grubuna göre renk belirle
-  const getAgeGroupColor = (startAge: string | undefined) => {
-    if (!startAge) return AGE_GROUP_COLORS['6']; // Default
-    const ageNum = startAge.toString().match(/\d+/)?.[0];
-    if (!ageNum) return AGE_GROUP_COLORS['6'];
+  const toggleFavorite = (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFavorites(prev => {
+      const newList = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
+      localStorage.setItem('ingredient-favorites', JSON.stringify(newList));
+      return newList;
+    });
+  };
+
+  // Helper: Renk ve ikon getir
+  const getAgeColor = (ageText?: string) => {
+    if (!ageText) return AGE_GROUP_COLORS['6'];
+    const num = ageText.match(/\d+/)?.[0];
+    if (!num) return AGE_GROUP_COLORS['6'];
     
-    const age = parseInt(ageNum);
-    const ageGroupKeys = Object.keys(AGE_GROUP_COLORS).map(Number).sort((a, b) => b - a);
-    
-    // En yakın yaş grubunu bul (büyükten küçüğe sıralı)
-    for (const threshold of ageGroupKeys) {
-      if (age >= threshold) {
-        return AGE_GROUP_COLORS[threshold.toString()];
-      }
-    }
-    
-    // Hiçbiri uymazsa en düşük yaş grubunu döndür
+    if (parseInt(num) >= 24) return AGE_GROUP_COLORS['24'];
+    if (parseInt(num) >= 12) return AGE_GROUP_COLORS['12'];
+    if (parseInt(num) >= 9) return AGE_GROUP_COLORS['9'];
+    if (parseInt(num) >= 8) return AGE_GROUP_COLORS['8'];
     return AGE_GROUP_COLORS['6'];
   };
 
-  // Mevsim badge bilgisi
-  const getSeasonBadge = (season: string | string[] | undefined) => {
-    if (!season) return null;
-    
-    // Eğer season bir array ise, ilk elemanı al
-    let seasonStr = '';
-    if (Array.isArray(season)) {
-      seasonStr = season[0] || '';
-    } else if (typeof season === 'string') {
-      // Birden fazla mevsim varsa ilkini al
-      seasonStr = season.split(',')[0].trim();
-    } else {
-      return null;
-    }
-    
+  const getSeasonInfo = (seasonData?: string | string[]) => {
+    if (!seasonData) return null;
+    const seasonStr = Array.isArray(seasonData) ? seasonData[0] : seasonData.split(',')[0].trim();
     return SEASON_CONFIG[seasonStr] || SEASON_CONFIG['Tüm Yıl'];
   };
 
-  // Mevsim toggle handler for multi-select
-  const toggleSeason = (season: string) => {
-    if (season === "Tümü") {
-      setActiveSeasons(["Tümü"]);
-    } else {
-      setActiveSeasons(prev => {
-        // Remove "Tümü" if selecting a specific season
-        const filtered = prev.filter(s => s !== "Tümü");
-        
-        // Toggle the season
-        if (filtered.includes(season)) {
-          const newSeasons = filtered.filter(s => s !== season);
-          // If no seasons selected, default to "Tümü"
-          return newSeasons.length === 0 ? ["Tümü"] : newSeasons;
-        } else {
-          return [...filtered, season];
-        }
-      });
-    }
-  };
-
-  // Filtreleme logic
-  const displayedIngredients = searchQuery.trim().length >= 2 
-    ? searchResults
-    : ingredients.filter(ing => {
-        const categoryMatch = activeCategory === "Tümü" || ing.category === activeCategory;
-        const seasonMatch = activeSeasons.includes("Tümü") || 
-                          activeSeasons.some(season => ing.season?.includes(season));
-        return categoryMatch && seasonMatch;
-      });
-
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen pb-20">
+      
+      {/* HERO SECTION */}
+      <div className="bg-white border-b border-gray-100 pt-8 pb-12 px-4 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-50 rounded-full blur-3xl opacity-60 pointer-events-none"></div>
+        
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <span className="inline-block py-1 px-3 rounded-full bg-green-100 text-green-700 text-xs font-bold mb-4 uppercase tracking-wider">
+            Akıllı Asistan
+          </span>
+          <h1 className="font-display text-3xl md:text-5xl font-bold text-slate-800 mb-4 font-sans">
+            Beslenme Rehberi
+          </h1>
+          <p className="text-gray-500 text-lg mb-8 max-w-2xl mx-auto">
+            Bebeğinizin ayına uygun besinleri, alerjen risklerini ve mevsimsel önerileri uzman onaylı rehberimizde keşfedin.
+          </p>
 
-      {/* HERO & SEARCH */}
-      {/* DÜZELTME: -mx kaldırıldı, layout zaten full-width */}
-      <div className="bg-green-50/50 relative overflow-hidden pb-16 pt-12">
-          {/* Decor */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-green-100/50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-yellow-100/50 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
-
-          <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-              <h1 className="font-display font-bold text-3xl md:text-5xl text-slate-800 mb-4 font-sans">Beslenme Rehberi</h1>
-              <p className="text-gray-600 text-lg mb-8">
-                  "Bebeğim neyi, ne zaman yiyebilir?" sorusunun cevabını uzman onaylı sözlüğümüzde arayın.
-              </p>
-
-              {/* Search Bar */}
-              <div className="relative max-w-2xl mx-auto">
-                  <input 
-                    type="text" 
-                    placeholder="Merak ettiğiniz besini yazın..." 
-                    className="w-full py-3 md:py-4 pl-12 md:pl-14 pr-4 md:pr-6 rounded-full shadow-lg border-2 border-white focus:border-green-400 outline-none text-gray-700 font-medium transition-colors text-sm md:text-base"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl">
-                      {isSearching ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
-                      ) : (
-                        <i className="fa-solid fa-magnifying-glass"></i>
-                      )}
-                  </div>
-                  {searchQuery && (
-                    <button 
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-2 top-2 bottom-2 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-full font-bold transition-colors"
-                    >
-                      Temizle
-                    </button>
-                  )}
+          {/* Search Bar */}
+          <div className="relative max-w-xl mx-auto group">
+            <div className="absolute inset-0 bg-green-200 rounded-full blur opacity-20 group-hover:opacity-30 transition-opacity"></div>
+            <div className="relative flex items-center bg-white rounded-full shadow-lg border border-gray-100 p-2">
+              <div className="w-10 h-10 flex items-center justify-center bg-gray-50 rounded-full text-gray-400 ml-1">
+                <i className="fa-solid fa-search"></i>
               </div>
+              <input 
+                type="text" 
+                placeholder="Örn: Avokado, Yumurta, Brokoli..." 
+                className="flex-1 bg-transparent border-none outline-none px-4 text-gray-700 placeholder-gray-400 font-medium h-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery("")}
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 mr-1"
+                >
+                  <i className="fa-solid fa-times"></i>
+                </button>
+              )}
+            </div>
           </div>
+        </div>
       </div>
 
-      {/* MAIN CONTENT */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+{/* FILTERS SECTION (Sticky) */}
+      <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-md border-b border-gray-200 py-4 shadow-sm transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
           
-          {/* Category and Season Tabs */}
-          <div className="mb-8 space-y-4">
-              {/* Category Filters */}
-              <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-                  <div className="flex gap-2 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
-                      {categories.map((cat) => (
-                          <button 
-                              key={cat}
-                              onClick={() => setActiveCategory(cat)}
-                              className={`px-3 py-1.5 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 whitespace-nowrap text-sm ${
-                                  activeCategory === cat 
-                                  ? "bg-slate-800 text-white shadow-md transform scale-105" 
-                                  : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
-                              }`}
-                          >
-                              {categoryIcons[cat] && <i className={`fa-solid ${categoryIcons[cat]}`}></i>}
-                              {cat}
-                          </button>
-                      ))}
-                  </div>
-              </div>
-              
-              {/* Season Filter - Multi-Select with Chips */}
-              <div className="-mx-4 px-4 overflow-x-auto scrollbar-hide">
-                  <div className="flex gap-2 justify-start md:justify-center min-w-max md:min-w-0 md:flex-wrap">
-                      {["Tümü", "Kış", "İlkbahar", "Yaz", "Sonbahar", "Tüm Yıl"].map((season) => {
-                          const isActive = activeSeasons.includes(season);
-                          return (
-                            <button 
-                                key={season}
-                                onClick={() => toggleSeason(season)}
-                                className={`px-3 py-1.5 rounded-full font-bold shadow-sm transition-all whitespace-nowrap text-sm flex items-center gap-1.5 ${
-                                    isActive
-                                    ? "bg-green-500 text-white shadow-md transform scale-105" 
-                                    : "bg-white text-gray-600 border border-gray-200 hover:border-green-400 hover:text-green-600 hover:bg-green-50"
-                                }`}
-                            >
-                                {isActive && season !== "Tümü" && (
-                                  <i className="fa-solid fa-check text-xs"></i>
-                                )}
-                                {season}
-                            </button>
-                          );
-                      })}
-                  </div>
-              </div>
-          </div>
-
-          {/* Ingredient Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-
-              {loading ? (
-                <div className="col-span-full flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
-                </div>
-              ) : displayedIngredients.length > 0 ? (
-                displayedIngredients.map((ingredient, index) => {
-                  const ageGroupColor = getAgeGroupColor(ingredient.start_age);
-                  const seasonBadge = getSeasonBadge(ingredient.season);
-                  
-                  return (
-                    <React.Fragment key={ingredient.id}>
-                      <Link href={`/beslenme-rehberi/${ingredient.slug}`} className="bg-white rounded-[2rem] p-5 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col">
-                        <div className="w-full h-40 bg-green-50 rounded-2xl mb-4 overflow-hidden relative">
-                            <img src={ingredient.image || `https://placehold.co/400x300/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt={ingredient.name} />
-                            
-                            {/* Başlangıç Yaşı Badge - Sol Üst (Renkli) */}
-                            <div className={`absolute top-2 left-2 ${ageGroupColor.bg} backdrop-blur px-2 py-1 rounded-lg text-xs font-bold ${ageGroupColor.text} shadow-sm`}>
-                                {ingredient.start_age?.toString().includes('ay') ? ingredient.start_age : ingredient.start_age ? `${ingredient.start_age} ay` : '6 ay'}
-                            </div>
-                            
-                            {/* Mevsim Badge - Sağ Alt (İkonlu) */}
-                            {seasonBadge && (
-                              <div className={`absolute bottom-2 right-2 ${seasonBadge.bg} backdrop-blur px-2 py-1 rounded-lg text-xs font-bold ${seasonBadge.text} shadow-sm flex items-center gap-1`}>
-                                <i className={`fa-solid ${seasonBadge.icon}`}></i>
-                                {(() => {
-                                  const displaySeason = Array.isArray(ingredient.season) 
-                                    ? ingredient.season[0] 
-                                    : typeof ingredient.season === 'string' 
-                                      ? ingredient.season.split(',')[0].trim() 
-                                      : '';
-                                  return displaySeason;
-                                })()}
-                              </div>
-                            )}
-                            
-                            {/* Favori Butonu - Sağ Üst (Konum sabit) */}
-                            <button 
-                              onClick={(e) => toggleFavorite(e, ingredient.id)}
-                              className="absolute top-2 right-2 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform z-10"
-                              aria-label={favorites.includes(ingredient.id) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
-                            >
-                              <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart ${favorites.includes(ingredient.id) ? 'text-red-500' : 'text-gray-400'}`}></i>
-                            </button>
-                        </div>
-                        
-                        {/* Kategori - Card altına taşındı */}
-                        {ingredient.category && (
-                          <span className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-1 block">
-                            {ingredient.category}
-                          </span>
-                        )}
-                        
-                        <h3 className="font-display font-bold text-xl text-slate-800 mb-1 font-sans">{ingredient.name}</h3>
-                        <p className="text-xs text-gray-500 mb-3 line-clamp-2">{ingredient.description}</p>
-                        
-                        {/* Alt badge - Sadece Alerjen */}
-                        <div className="mt-auto">
-                          <span className={`text-[10px] font-bold px-2 py-1 rounded border ${
-                            ingredient.allergy_risk === 'Düşük' ? 'bg-green-100 text-green-700 border-green-200' :
-                            ingredient.allergy_risk === 'Orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
-                            'bg-red-100 text-red-700 border-red-200'
-                          }`}>
-                            {ingredient.allergy_risk === 'Yüksek' && <i className="fa-solid fa-triangle-exclamation mr-1"></i>}
-                            {ingredient.allergy_risk || 'Düşük'} Alerjen
-                          </span>
-                        </div>
-                    </Link>
-                    {/* Insert ad after every 8 ingredients */}
-                    {(index + 1) % 8 === 0 && index < displayedIngredients.length - 1 && (
-                      <div className="col-span-full">
-                        <InContentAd />
-                      </div>
-                    )}
-                  </React.Fragment>
-                  );
-                })
-              ) : (
-                <div className="col-span-full text-center py-12">
-                  <i className="fa-solid fa-search text-4xl text-gray-300 mb-4"></i>
-                  <p className="text-gray-500">
-                    {searchQuery ? 'Arama sonucu bulunamadı.' : 'Bu kategoride malzeme bulunamadı.'}
-                  </p>
-                </div>
-              )}
-
-          </div>
-
-          {/* Load More - Pagination */}
-          {!searchQuery && activeCategory === "Tümü" && currentPage < totalPages && (
-            <div className="mt-12 text-center">
-              <button 
-                onClick={loadMoreIngredients}
-                disabled={isLoadingMore}
-                className="bg-white border-2 border-gray-200 text-gray-600 hover:border-green-500 hover:text-green-500 font-bold py-3 px-8 rounded-full transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          {/* Category Filter */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all border ${
+                  activeCategory === cat
+                    ? 'bg-slate-800 text-white border-slate-800 shadow-md transform scale-105'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-green-300 hover:bg-green-50'
+                }`}
               >
-                {isLoadingMore ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                    Yükleniyor...
-                  </span>
-                ) : (
-                  <span>
-                    Daha Fazla Göster ({ingredients.length} / {totalIngredients})
-                  </span>
-                )}
+                {CATEGORY_ICONS[cat] && <i className={`fa-solid ${CATEGORY_ICONS[cat]}`}></i>}
+                {cat}
               </button>
-            </div>
-          )}
+            ))}
+          </div>
 
-          {/* Tümü yüklendi mesajı */}
-          {!searchQuery && activeCategory === "Tümü" && currentPage >= totalPages && ingredients.length > 0 && (
-            <div className="mt-12 text-center">
-              <p className="text-gray-500 text-sm">
-                <i className="fa-solid fa-check-circle text-green-500 mr-2"></i>
-                Tüm malzemeler gösteriliyor ({totalIngredients} adet)
-              </p>
+          {/* Season Filter - DÜZELTİLDİ: "Tüm Yıl" eklendi */}
+          <div className="flex flex-wrap gap-2 items-center justify-center sm:justify-start">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide mr-2">Mevsim:</span>
+            {["Kış", "İlkbahar", "Yaz", "Sonbahar", "Tüm Yıl"].map((season) => {
+              const isActive = activeSeasons.includes(season);
+              const config = SEASON_CONFIG[season];
+              return (
+                <button
+                  key={season}
+                  onClick={() => handleSeasonToggle(season)}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+                    isActive
+                      ? 'bg-white border-green-500 text-green-600 shadow-sm ring-1 ring-green-500'
+                      : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  <i className={`fa-solid ${config?.icon || 'fa-circle'} ${isActive ? 'text-green-500' : 'text-gray-300'}`}></i>
+                  {season}
+                </button>
+              );
+            })}
+            {activeSeasons.length > 0 && (
+              <button 
+                onClick={() => setActiveSeasons([])}
+                className="text-xs text-red-500 hover:underline font-medium ml-auto sm:ml-2"
+              >
+                Temizle
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* RESULTS GRID */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        {loading && ingredients.length === 0 ? (
+          // Loading State
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => <IngredientSkeleton key={i} />)}
+          </div>
+        ) : ingredients.length > 0 ? (
+          // Results
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {ingredients.map((ingredient, index) => {
+              const ageStyle = getAgeColor(ingredient.start_age);
+              const seasonInfo = getSeasonInfo(ingredient.season);
+              
+              return (
+                <React.Fragment key={ingredient.id}>
+                  <Link 
+                    href={`/beslenme-rehberi/${ingredient.slug}`}
+                    className="group bg-white rounded-[20px] p-4 border border-gray-100 hover:border-green-200 hover:shadow-xl transition-all duration-300 flex flex-col h-full relative"
+                  >
+                    {/* Image Container */}
+                    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-gray-100">
+                      <img 
+                        src={ingredient.image || `https://placehold.co/400x300/F1F8E9/558B2F?text=${encodeURIComponent(ingredient.name.substring(0,2))}`} 
+                        alt={ingredient.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      
+                      {/* Age Badge */}
+                      <div className={`absolute top-2 left-2 ${ageStyle.bg} ${ageStyle.text} ${ageStyle.border} border px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-sm backdrop-blur-sm`}>
+                        {ingredient.start_age}
+                      </div>
+
+                      {/* Favorite Button */}
+                      <button 
+                        onClick={(e) => toggleFavorite(e, ingredient.id)}
+                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur text-gray-400 hover:text-red-500 hover:bg-white flex items-center justify-center transition-all shadow-sm"
+                      >
+                        <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart`}></i>
+                      </button>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex flex-col flex-1">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                          {ingredient.category}
+                        </span>
+                        {seasonInfo && (
+                          <div className={`flex items-center gap-1 text-[10px] font-bold ${seasonInfo.color} bg-gray-50 px-2 py-0.5 rounded-full`}>
+                            <i className={`fa-solid ${seasonInfo.icon}`}></i>
+                            <span>{typeof ingredient.season === 'string' ? ingredient.season.split(',')[0] : ingredient.season?.[0]}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-green-600 transition-colors line-clamp-1">
+                        {ingredient.name}
+                      </h3>
+                      
+                      <p className="text-xs text-gray-500 line-clamp-2 mb-4">
+                        {ingredient.description}
+                      </p>
+
+                      {/* Footer Badge */}
+                      <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
+                        <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
+                          ingredient.allergy_risk === 'Düşük' ? 'bg-green-50 text-green-700 border-green-100' :
+                          ingredient.allergy_risk === 'Orta' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                          'bg-red-50 text-red-700 border-red-100'
+                        }`}>
+                          {ingredient.allergy_risk || 'Belirsiz'} Risk
+                        </div>
+                        <span className="text-gray-300 group-hover:text-green-500 transition-colors">
+                          <i className="fa-solid fa-arrow-right"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Ad Injection */}
+                  {(index + 1) % 8 === 0 && (
+                    <div className="col-span-full py-4">
+                      <InContentAd />
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        ) : (
+          // Empty State
+          <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i className="fa-solid fa-basket-shopping text-3xl text-gray-300"></i>
             </div>
-          )}
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Sonuç Bulunamadı</h3>
+            <p className="text-gray-500 max-w-md mx-auto mb-6">
+              Aradığınız kriterlere uygun besin bulunamadı. Filtreleri değiştirmeyi veya aramayı temizlemeyi deneyin.
+            </p>
+            <button 
+              onClick={() => {
+                setActiveCategory("Tümü");
+                setSearchQuery("");
+                setActiveSeasons([]);
+              }}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-xl transition-colors shadow-lg shadow-green-200"
+            >
+              Filtreleri Temizle
+            </button>
+          </div>
+        )}
+
+        {/* Load More Button */}
+        {hasMore && !loading && ingredients.length > 0 && searchQuery.length < 2 && (
+          <div className="mt-12 text-center">
+            <button
+              onClick={() => fetchIngredients(false)}
+              disabled={loadingMore}
+              className="group relative inline-flex items-center justify-center px-8 py-3 font-bold text-white transition-all duration-200 bg-slate-800 rounded-full hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg"
+            >
+              {loadingMore ? (
+                <>
+                  <div className="w-5 h-5 mr-3 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                  Yükleniyor...
+                </>
+              ) : (
+                <>
+                  Daha Fazla Göster
+                  <i className="fa-solid fa-chevron-down ml-2 group-hover:translate-y-1 transition-transform"></i>
+                </>
+              )}
+            </button>
+          </div>
+        )}
 
       </div>
     </div>

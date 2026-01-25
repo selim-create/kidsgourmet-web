@@ -8,14 +8,21 @@ import { useFavorites } from '@/hooks/use-favorites';
 
 interface FavoriteIngredientCardProps {
   ingredient: FavoriteIngredientCardType;
+  onRemove?: () => void;
 }
 
-export default function FavoriteIngredientCard({ ingredient }: FavoriteIngredientCardProps) {
+export default function FavoriteIngredientCard({ ingredient, onRemove }: FavoriteIngredientCardProps) {
   const { toggleFavorite } = useFavorites();
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (onRemove) {
+      onRemove();
+      return;
+    }
+
     try {
       await toggleFavorite(ingredient.id, 'ingredient');
     } catch (error) {
@@ -31,9 +38,12 @@ export default function FavoriteIngredientCard({ ingredient }: FavoriteIngredien
       <div className="absolute top-3 right-3 z-10">
         <button
           onClick={handleFavoriteClick}
-          className="w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-red-500 shadow-sm hover:scale-110 transition-transform"
+          className={`w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-transform ${
+            onRemove ? 'text-gray-400 hover:text-red-500' : 'text-red-500'
+          }`}
+          title={onRemove ? "Listeden Kaldır" : "Favorilerden Çıkar"}
         >
-          <i className="fa-solid fa-heart"></i>
+          <i className={`fa-solid ${onRemove ? 'fa-trash-can' : 'fa-heart'}`}></i>
         </button>
       </div>
       <div className="w-full h-40 bg-green-50 relative overflow-hidden">
@@ -50,7 +60,7 @@ export default function FavoriteIngredientCard({ ingredient }: FavoriteIngredien
         <h3 className="font-bold text-slate-800 mb-1 group-hover:text-green-500 transition-colors">
           {decodeEntities(ingredient.name)}
         </h3>
-        <p className="text-xs text-gray-500 mb-3">Malzeme Rehberi</p>
+        <p className="text-xs text-gray-500 mb-3">Beslenme Rehberi</p>
         <div className="mt-auto pt-3 border-t border-gray-50">
           <span
             className={`text-[10px] font-bold px-2 py-1 rounded border ${

@@ -500,13 +500,12 @@ export default function Home() {
                   <p className="text-gray-500 mt-2">Çocuğunuzun gelişimi ve güvenliği için veri odaklı çözümler.</p>
               </div>
 
-              {/* Mobil için yatay scroll */}
-              <div className="lg:hidden overflow-x-auto pb-4 -mx-4 px-4">
-                <div className="flex gap-4" style={{ width: 'max-content' }}>
+              {/* Mobil için yatay scroll - DÜZENLENDİ: width:max-content kaldırıldı, flex-none kullanıldı */}
+              <div className="lg:hidden flex overflow-x-auto pb-6 -mx-4 px-4 gap-4 snap-x snap-mandatory scrollbar-hide">
                   {randomTools.map((tool, index) => {
                     const colors = getToolColorClasses(tool.color);
                     return (
-                      <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col min-w-[280px]">
+                      <div key={index} className="flex-none snap-center w-[260px] bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg transition-all flex flex-col">
                         <div className={`w-16 h-16 ${colors.bg} ${colors.text} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
                           <i className={`fa-solid ${tool.icon}`}></i>
                         </div>
@@ -519,7 +518,6 @@ export default function Home() {
                       </div>
                     );
                   })}
-                </div>
               </div>
 
               {/* Desktop için grid */}

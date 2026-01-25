@@ -73,6 +73,7 @@ export default function WeeklyPlanPage() {
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [isChildDropdownOpen, setIsChildDropdownOpen] = useState(false);
   const [isMobileRecipePoolOpen, setIsMobileRecipePoolOpen] = useState(false);
+  const [highlightedDay, setHighlightedDay] = useState<string | null>(null);
 
   // Set default view mode based on screen size after mount
   useEffect(() => {
@@ -330,8 +331,8 @@ export default function WeeklyPlanPage() {
         {/* MAIN CONTENT */}
         <main className="flex-1 w-full min-w-0 flex flex-col h-screen overflow-hidden">
             
-            {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-stone-100 flex-shrink-0">
+            {/* MOBILE HEADER - Just Title */}
+            <div className="lg:hidden bg-white px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-30 border-b border-stone-100 flex-shrink-0">
                 <span className="font-display font-bold text-lg text-slate-800">Haftalık Plan</span>
                 <div className="flex gap-2">
                     <button className="text-stone-500 text-xl"><i className="fa-solid fa-print"></i></button>
@@ -339,18 +340,18 @@ export default function WeeklyPlanPage() {
                 </div>
             </div>
 
-            {/* PLAN HEADER & CONTROLS */}
-            <header className="h-20 bg-white border-b border-stone-100 flex items-center justify-between px-6 flex-shrink-0 z-20">
-                <div className="max-w-full mx-auto w-full flex items-center justify-between">
+            {/* PLAN HEADER & CONTROLS - Responsive */}
+            <header className="bg-white border-b border-stone-100 flex flex-col md:flex-row md:items-center justify-between px-4 md:px-6 py-4 md:py-0 md:h-20 flex-shrink-0 z-20 gap-4 md:gap-0">
+                <div className="max-w-full mx-auto w-full flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-0">
                     
                         {/* Left: Child Switcher & Date Nav */}
-                        <div className="flex items-center gap-6">
+                        <div className="flex items-center justify-between md:justify-start gap-3 md:gap-6 w-full md:w-auto">
                             {/* Child Dropdown */}
                             {userChildren.length > 0 && (
                               <div className="relative">
                                 <button 
                                   onClick={() => setIsChildDropdownOpen(!isChildDropdownOpen)}
-                                  className="flex items-center gap-2 bg-stone-100 hover:bg-stone-200 px-4 py-2 rounded-full text-sm font-bold text-stone-800 transition-colors"
+                                  className="flex items-center gap-2 bg-stone-100 hover:bg-stone-200 px-3 md:px-4 py-2 rounded-full text-sm font-bold text-stone-800 transition-colors whitespace-nowrap"
                                 >
                                   <span>{activeChild.name}</span>
                                   <i className={`fa-solid fa-chevron-down text-sm transition-transform ${isChildDropdownOpen ? 'rotate-180' : ''}`}></i>
@@ -358,7 +359,6 @@ export default function WeeklyPlanPage() {
                                 
                                 {isChildDropdownOpen && userChildren.length > 1 && (
                                   <>
-                                    {/* Backdrop for closing */}
                                     <div 
                                       className="fixed inset-0 z-40" 
                                       onClick={() => setIsChildDropdownOpen(false)} 
@@ -390,8 +390,8 @@ export default function WeeklyPlanPage() {
                               </div>
                             )}
 
-                            {/* Date Navigator - Rounded pill style */}
-                            <div className="flex items-center gap-3 bg-white border border-stone-200 rounded-full px-2 py-1">
+                            {/* Date Navigator */}
+                            <div className="flex items-center gap-2 md:gap-3 bg-white border border-stone-200 rounded-full px-2 py-1 flex-1 md:flex-initial justify-between md:justify-center">
                               <button 
                                 onClick={goToPreviousWeek}
                                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-stone-50 text-stone-400 hover:text-orange-500 transition-colors"
@@ -399,7 +399,7 @@ export default function WeeklyPlanPage() {
                               >
                                 <i className="fa-solid fa-chevron-left"></i>
                               </button>
-                              <div className="flex flex-col items-center px-2 w-40">
+                              <div className="flex flex-col items-center px-2 min-w-[120px]">
                                 <span className="text-sm font-bold text-stone-800">{weekRange}</span>
                                 {isCurrentWeek && (
                                   <span className="text-[9px] text-orange-500 font-medium">Bu Hafta</span>
@@ -416,9 +416,9 @@ export default function WeeklyPlanPage() {
                         </div>
 
                         {/* Right: View Toggle & Actions */}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-end gap-3 w-full md:w-auto">
                             {/* View Mode Toggle */}
-                            <div className="flex bg-stone-100 rounded-lg p-1">
+                            <div className="flex bg-stone-100 rounded-lg p-1 hidden md:flex">
                               <button 
                                 onClick={() => setViewMode('daily')}
                                 className={`w-9 h-9 rounded-md transition-all flex items-center justify-center ${
@@ -437,12 +437,12 @@ export default function WeeklyPlanPage() {
                               </button>
                             </div>
                             
-                            <div className="h-8 w-px bg-stone-200 mx-1"></div>
+                            <div className="h-8 w-px bg-stone-200 mx-1 hidden md:block"></div>
 
                             <button 
                               onClick={handleCreateShoppingList}
                               disabled={!plan || isCreatingShoppingList}
-                              className="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-200 flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-orange-200 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isCreatingShoppingList ? (
                                   <><i className="fa-solid fa-spinner fa-spin text-lg"></i> Oluşturuluyor...</>
@@ -456,8 +456,8 @@ export default function WeeklyPlanPage() {
             </header>
 
             {/* Stats Bar */}
-            <div className="bg-white border-b border-stone-100 p-4 flex-shrink-0">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto">
+            <div className="bg-white border-b border-stone-100 p-4 flex-shrink-0 overflow-x-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-5xl mx-auto min-w-[300px]">
                         <StatCard 
                           icon={<i className="fa-solid fa-carrot"></i>}
                           label="Sebze"
@@ -526,12 +526,20 @@ export default function WeeklyPlanPage() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 min-h-[600px]">
                               {plan.days.map((day) => {
                                 const isToday = new Date(day.date).toDateString() === new Date().toDateString();
+                                const isHighlighted = highlightedDay === day.date;
                                 return (
-                                  <div key={day.date} className={`flex flex-col gap-3 ${isToday ? 'bg-orange-50/30 -m-2 p-2 rounded-2xl border border-orange-100/50' : ''}`}>
-                                    <div className={`text-center p-3 rounded-2xl border-b-4 shadow-sm ${
+                                  <div key={day.date} className={`flex flex-col gap-3 rounded-2xl transition-colors duration-300 p-2 -m-2 
+                                    ${isToday ? 'bg-orange-50/30 border border-orange-100/50' : ''}
+                                    ${isHighlighted && !isToday ? 'bg-orange-50/50' : ''}
+                                  `}>
+                                    <div 
+                                      onClick={() => setHighlightedDay(highlightedDay === day.date ? null : day.date)}
+                                      className={`text-center p-3 rounded-2xl border-b-4 shadow-sm cursor-pointer transition-all hover:-translate-y-1 hover:shadow-md ${
                                       isToday 
                                         ? 'bg-orange-500 text-white border-orange-600' 
-                                        : 'bg-white text-stone-800 border-stone-200'
+                                        : isHighlighted 
+                                          ? 'bg-orange-100 text-orange-800 border-orange-300' 
+                                          : 'bg-white text-stone-800 border-stone-200 hover:border-orange-200'
                                     }`}>
                                       <span className={`text-[10px] font-bold uppercase tracking-wider block mb-1 ${
                                         isToday ? 'text-orange-100' : 'text-stone-400'
@@ -550,6 +558,7 @@ export default function WeeklyPlanPage() {
                                           onClick={() => setSelectedSlotId(slot.id)}
                                           onRefresh={() => refreshSlot(slot.id)}
                                           onSkip={(reason) => skipSlot(slot.id, reason)}
+                                          onSelectFromList={() => setSelectedSlotId(slot.id)}
                                           isCompact={true}
                                         />
                                       ))}
@@ -624,14 +633,24 @@ export default function WeeklyPlanPage() {
                   
                   {selectedSlotId ? (
                     <div className="bg-orange-50 border border-orange-100 p-4 rounded-xl mb-4">
-                      <p className="text-sm text-orange-800 font-bold flex items-center gap-2 mb-1">
-                        <i className="fa-solid fa-wand-magic-sparkles"></i> Öğün Seçildi
-                      </p>
-                      <p className="text-xs text-orange-600">Aşağıdaki listeden bir tarif seçerek plana ekle.</p>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-sm text-orange-800 font-bold flex items-center gap-2 mb-1">
+                            <i className="fa-solid fa-wand-magic-sparkles"></i> Öğün Seçildi
+                          </p>
+                          <p className="text-xs text-orange-600">Aşağıdaki listeden bir tarif seçerek plana ekle.</p>
+                        </div>
+                        <button 
+                          onClick={() => setSelectedSlotId(null)}
+                          className="text-orange-400 hover:text-orange-600"
+                        >
+                          <i className="fa-solid fa-xmark"></i>
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <p className="text-xs text-stone-400 text-center italic bg-stone-50 p-2 rounded-lg border border-stone-100">
-                      Önce takvimden bir öğün seçin, ardından buradan tarif ekleyin.
+                      Önce takvimden bir öğün seçin veya kart menüsünden "Listeden Seç"e tıklayın.
                     </p>
                   )}
                   

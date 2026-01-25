@@ -68,7 +68,6 @@ export default function ShoppingListPage() {
       setNewItem('');
     } catch (error) {
       console.error('Add item error:', error);
-      // Error handling is already done in useShoppingList hook
     }
   };
 
@@ -105,7 +104,7 @@ export default function ShoppingListPage() {
   }
 
   return (
-    <div className="flex min-h-screen relative">
+    <div className="flex min-h-screen relative bg-[#FDFBF7]">
 
         {/* DESKTOP SIDEBAR */}
         <DashboardSidebar activePage="alisveris-listesi" />
@@ -114,15 +113,15 @@ export default function ShoppingListPage() {
         <main className="flex-1 w-full min-w-0">
             
             {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
+            <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30 border-b border-gray-100">
                 <span className="font-display font-bold text-lg text-slate-800">Alışveriş Listesi</span>
-                <button onClick={shareWhatsapp} className="text-orange-500 text-xl">
+                <button onClick={shareWhatsapp} className="text-orange-500 text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-orange-50">
                   <i className="fa-solid fa-share-nodes"></i>
                 </button>
             </div>
 
             {/* SHOPPING LIST CONTENT */}
-            <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8 pb-24">
+            <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-8 pb-32 lg:pb-8">
 
                 {/* Header & Actions */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
@@ -133,18 +132,23 @@ export default function ShoppingListPage() {
                             <span className="font-bold text-slate-800"> {remainingCount}</span> kaldı
                         </p>
                     </div>
-                    <div className="flex gap-3 w-full md:w-auto">
+                    {/* DÜZENLEME 1: Mobilde sadece ikonlar */}
+                    <div className="flex gap-2 w-full md:w-auto">
                         <button 
                           onClick={shareWhatsapp}
-                          className="flex-1 md:flex-none bg-green-50 text-green-600 hover:bg-green-100 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 md:flex-none bg-green-50 text-green-600 hover:bg-green-100 px-4 py-3 md:px-5 md:py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          title="Whatsapp ile Paylaş"
                         >
-                            <i className="fa-brands fa-whatsapp text-lg"></i> Paylaş
+                            <i className="fa-brands fa-whatsapp text-xl md:text-lg"></i> 
+                            <span className="hidden md:inline">Paylaş</span>
                         </button>
                         <button 
                           onClick={() => window.print()}
-                          className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-4 py-3 md:px-5 md:py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          title="Yazdır"
                         >
-                            <i className="fa-solid fa-print"></i> Yazdır
+                            <i className="fa-solid fa-print text-xl md:text-lg"></i>
+                            <span className="hidden md:inline">Yazdır</span>
                         </button>
                         <button 
                           onClick={() => {
@@ -156,9 +160,11 @@ export default function ShoppingListPage() {
                               toast.error('Kopyalama başarısız oldu');
                             }
                           }}
-                          className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 md:flex-none bg-white border border-gray-200 text-gray-600 hover:border-gray-300 px-4 py-3 md:px-5 md:py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                          title="Kopyala"
                         >
-                            <i className="fa-solid fa-copy"></i> Kopyala
+                            <i className="fa-solid fa-copy text-xl md:text-lg"></i>
+                            <span className="hidden md:inline">Kopyala</span>
                         </button>
                     </div>
                 </div>
@@ -175,7 +181,7 @@ export default function ShoppingListPage() {
                     />
                     <button 
                       onClick={handleAddItem}
-                      className="absolute right-2 top-2 bottom-2 bg-orange-500 hover:bg-orange-600 text-white w-12 rounded-xl font-bold transition-colors text-xl"
+                      className="absolute right-2 top-2 bottom-2 bg-orange-500 hover:bg-orange-600 text-white w-12 rounded-xl font-bold transition-colors text-xl flex items-center justify-center"
                     >
                         <i className="fa-solid fa-plus"></i>
                     </button>
@@ -211,7 +217,7 @@ export default function ShoppingListPage() {
                         const config = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.other;
                         
                         return (
-                          <div key={category} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                          <div key={category} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden h-fit">
                               <div className={`${config.colorClasses.bg} p-4 ${config.colorClasses.border} border-b flex justify-between items-center`}>
                                   <h3 className="font-bold text-slate-800 flex items-center gap-2">
                                       <i className={`fa-solid ${config.icon} ${config.colorClasses.text}`}></i> {config.name}
@@ -226,12 +232,16 @@ export default function ShoppingListPage() {
                                         key={String(item.id)} 
                                         className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer group transition-colors select-none"
                                       >
-                                          <input 
-                                              type="checkbox" 
-                                              checked={item.checked}
-                                              onChange={() => toggleItem(item.id)}
-                                              className="w-5 h-5 rounded border-gray-300 text-orange-500 focus:ring-orange-500 accent-orange-500 cursor-pointer" 
-                                          />
+                                          <div className="relative flex items-center justify-center">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={item.checked}
+                                                onChange={() => toggleItem(item.id)}
+                                                className="peer w-5 h-5 rounded border-2 border-gray-300 text-orange-500 focus:ring-orange-500 appearance-none checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" 
+                                            />
+                                            <i className="fa-solid fa-check text-white text-xs absolute opacity-0 peer-checked:opacity-100 pointer-events-none"></i>
+                                          </div>
+                                          
                                           <div className={`flex-1 flex justify-between items-center transition-all ${item.checked ? 'line-through text-gray-400 opacity-60' : ''}`}>
                                               <span className="font-medium text-slate-700">{item.ingredient}</span>
                                               {item.amount && (
@@ -245,7 +255,7 @@ export default function ShoppingListPage() {
                                               e.preventDefault();
                                               removeItem(item.id);
                                             }}
-                                            className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all px-2"
+                                            className="text-gray-300 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all px-2"
                                           >
                                               <i className="fa-solid fa-trash-can"></i>
                                           </button>
@@ -262,26 +272,35 @@ export default function ShoppingListPage() {
             </div>
         </main>
 
-        {/* MOBILE BOTTOM NAVIGATION */}
-        <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around py-3 pb-safe z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            <Link href="/dashboard" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors">
+        {/* MOBILE BOTTOM NAVIGATION - DÜZENLENDİ */}
+        {/* z-index 50 yapıldı ve items-end ile buton hizalaması düzeltildi */}
+        <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-between items-end px-6 py-2 pb-safe z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-20">
+            <Link href="/dashboard" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors mb-2 w-1/5">
                 <i className="fa-solid fa-house text-xl mb-1"></i>
                 <span className="text-[10px] font-medium">Panelim</span>
             </Link>
-            <Link href="/dashboard/haftalik-plan" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors">
+            <Link href="/dashboard/haftalik-plan" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors mb-2 w-1/5">
                 <i className="fa-solid fa-calendar-days text-xl mb-1"></i>
                 <span className="text-[10px] font-medium">Plan</span>
             </Link>
-            <div className="relative -top-8">
-                <Link href="/alisveris-listesi" className="flex items-center justify-center w-14 h-14 bg-orange-500 rounded-full text-white shadow-lg shadow-orange-200 hover:scale-105 transition-transform">
-                    <i className="fa-solid fa-basket-shopping text-2xl"></i>
+            
+            {/* Ortadaki Yüzen Buton - Pointer events ayarı ve z-index */}
+            <div className="relative w-1/5 flex justify-center h-full">
+                <Link 
+                  href="/alisveris-listesi" 
+                  className="absolute -top-6 flex items-center justify-center w-14 h-14 bg-orange-500 rounded-full text-white shadow-lg shadow-orange-200 hover:scale-105 transition-transform"
+                >
+                    <i className="fa-solid fa-basket-shopping text-xl"></i>
                 </Link>
+                {/* Buton altındaki metin */}
+                <span className="text-[10px] font-bold text-orange-500 absolute bottom-2">Liste</span>
             </div>
-            <Link href="/favoriler" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors">
+
+            <Link href="/favoriler" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors mb-2 w-1/5">
                 <i className="fa-solid fa-heart text-xl mb-1"></i>
                 <span className="text-[10px] font-medium">Favoriler</span>
             </Link>
-            <Link href="/profil" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors">
+            <Link href="/profil" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors mb-2 w-1/5">
                 <i className="fa-solid fa-user text-xl mb-1"></i>
                 <span className="text-[10px] font-medium">Profil</span>
             </Link>

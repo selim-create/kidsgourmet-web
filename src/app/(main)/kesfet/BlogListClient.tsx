@@ -14,7 +14,8 @@ export default function BlogListClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
-  const POSTS_PER_PAGE = 10;
+  // DÜZELTME: İlk sayfa için 10 (1 hero + 9 grid), diğer sayfalar için 9 limit belirledik.
+  const getPostsPerPage = (page: number) => (page === 1 ? 10 : 9);
 
   // Verileri çek
   useEffect(() => {
@@ -28,10 +29,10 @@ export default function BlogListClient() {
           setCategories(cats);
         }
 
-        // Yazıları çek
+        // Yazıları çek - Dinamik limit ile
         const response = await blogService.getAll(
           currentPage, 
-          POSTS_PER_PAGE, 
+          getPostsPerPage(currentPage), 
           activeCategory !== "Tümü" ? activeCategory : undefined
         );
         
@@ -140,9 +141,13 @@ export default function BlogListClient() {
 
             {/* BLOG GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post, index) => (
+              {posts.map((post, index) => {
                 // Featured post'u listede tekrar gösterme (sadece "Tümü" sekmesinde ve ilk sayfada)
-                (activeCategory !== "Tümü" || currentPage !== 1 || post.id !== featuredPost?.id) && (
+                const shouldSkip = activeCategory === "Tümü" && currentPage === 1 && post.id === featuredPost?.id;
+                
+                if (shouldSkip) return null;
+
+                return (
                   <React.Fragment key={post.id}>
                     <BlogCard 
                       post={post}
@@ -153,8 +158,8 @@ export default function BlogListClient() {
                       <InContentAd className="col-span-full" />
                     )}
                   </React.Fragment>
-                )
-              ))}
+                );
+              })}
             </div>
 
             {posts.length === 0 && (

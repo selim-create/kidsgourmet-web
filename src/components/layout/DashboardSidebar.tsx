@@ -46,7 +46,7 @@ export default function DashboardSidebar({ activePage }: DashboardSidebarProps) 
 
         <Link href="/favoriler" className={linkClasses('favoriler')}>
           <i className={`fa-solid fa-heart ${iconClasses('favoriler')}`}></i>
-          <span className="text-sm font-semibold">Favori Tarifler</span>
+          <span className="text-sm font-semibold">Favoriler</span>
         </Link>
 
         {/* Gelişim & Sağlık */}

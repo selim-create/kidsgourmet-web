@@ -176,7 +176,6 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const [activePortion, setActivePortion] = useState("1 Öğün");
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
-  const { ageGroups } = useAgeGroups();
   const { isAuthenticated } = useUser();
   const { activeChild } = useActiveChild();
 
@@ -361,7 +360,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
           url={window.location.href}
         />
         
-        {/* BREADCRUMB - Header altında kalmayacak şekilde padding ekle */}
+        {/* BREADCRUMB */}
         <div className="bg-white border-b border-gray-100 pt-5">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
                 <nav className="flex text-sm text-gray-500" aria-label="Breadcrumb">
@@ -388,7 +387,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
         {/* MAIN CONTENT */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             
-            {/* Safety Alert Banner - replaces Age Warning Banner */}
+            {/* Safety Alert Banner */}
             {activeChild && (
               <SafetyAlertBanner 
                 recipeId={recipe.id}
@@ -421,7 +420,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         )}
                     </div>
 
-                    {/* Edit Button - Hover'da görünür, sadece yetkili kullanıcılara */}
+                    {/* Edit Button */}
                     <EditButton 
                       contentType="recipe" 
                       contentId={recipe.id}
@@ -444,7 +443,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 {/* Right: Meta Info */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center">
                     <div className="flex items-center gap-2 mb-3 flex-wrap">
-                        {/* Age Groups - Tıklanabilir */}
+                        {/* Age Groups */}
                         {recipe.age_groups?.map((age, index) => (
                           <Link 
                             key={index}
@@ -455,7 +454,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                           </Link>
                         ))}
                         
-                        {/* Diet Types - Tıklanabilir */}
+                        {/* Diet Types */}
                         {recipe.diet_types?.map((diet, index) => (
                           <Link 
                             key={index}
@@ -468,7 +467,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                           </Link>
                         ))}
                         
-                        {/* Meal Type - Tıklanabilir */}
+                        {/* Meal Type */}
                         {recipe.meal_type && (
                           <Link 
                             href={`/tarifler?meal-type=${getMealTypeSlug(recipe.meal_type)}`}
@@ -549,32 +548,35 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                       )}
                     </div>
 
-                    {/* Action Buttons - Yeniden Tasarlanmış */}
-                    <div className="flex flex-wrap gap-3">
+                    {/* Action Buttons - Yeniden Tasarlanmış (Mobil Uyumlu) */}
+                    <div className="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0 md:flex-wrap md:overflow-visible no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
                       {/* Favorilere Kaydet */}
                       <button 
                         onClick={handleSaveToFavorites}
-                        className={`flex-1 min-w-[120px] font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 ${
+                        className={`flex-shrink-0 md:flex-1 md:min-w-[120px] font-bold py-3.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2 ${
                           isFavorite 
                             ? 'bg-red-500 text-white hover:bg-red-600' 
                             : 'bg-white border-2 border-gray-200 hover:border-red-400 hover:text-red-500 text-gray-600'
                         }`}
                       >
-                        <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart`}></i>
+                        <i className={`${isFavorite ? 'fa-solid' : 'fa-regular'} fa-heart text-xl md:text-base`}></i>
                         <span className="hidden md:inline">{isFavorite ? 'Kaydedildi' : 'Kaydet'}</span>
                       </button>
                       
                       {/* Haftalık Plana Ekle */}
                       <button 
                         onClick={handleAddToMealPlan}
-                        className="flex-1 min-w-[120px] bg-purple-500 hover:bg-purple-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
+                        className="flex-shrink-0 md:flex-1 md:min-w-[120px] bg-purple-500 hover:bg-purple-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2"
                       >
-                        <i className="fa-solid fa-calendar-plus"></i>
+                        <i className="fa-solid fa-calendar-plus text-xl md:text-base"></i>
                         <span className="hidden md:inline">Plana Ekle</span>
                       </button>
                       
-                      {/* Sosyal Paylaşım */}
-                      <div className="flex flex-wrap gap-2">
+                      {/* Ayracı Çizgi */}
+                      <div className="w-px h-10 bg-gray-200 hidden md:block"></div>
+
+                      {/* Sosyal Paylaşım - Mobilde hepsi tek satırda */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
                         <button 
                           onClick={shareWhatsapp} 
                           className="bg-green-500 hover:bg-green-600 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-colors"
@@ -726,7 +728,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                             ))}
                         </ul>
 
-                        {/* Alternatif Tarif Önerisi */}
+                        {/* DÜZENLENDİ: Alternatif Tarif Linki - encodeURIComponent kullanıldı */}
                         {recipe.substitutes && recipe.substitutes.length > 0 && (
                           <div className="mt-6 pt-4 border-t border-dashed border-gray-200 text-center">
                             <p className="text-sm text-gray-500">
@@ -1087,14 +1089,17 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
               </div>
             )}
 
-            {/* RELATED RECIPES - 4 Cards with RecipeCard Component */}
+            {/* DÜZENLENDİ: Benzer Tarifler - Filtreleme ve Sonra Dilimleme */}
             {recipe.related_recipes && recipe.related_recipes.length > 0 && (
               <div className="mt-10">
                 <h3 className="font-bold text-slate-800 mb-6 text-xl flex items-center">
                   <i className="fa-solid fa-utensils text-orange-500 mr-2"></i> Benzer Tarifler
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {recipe.related_recipes.slice(0, 4).map((related) => (
+                  {recipe.related_recipes
+                    .filter(r => r.id !== recipe.id) // Önce mevcut tarifi çıkar
+                    .slice(0, 4) // Sonra ilk 4 taneyi al
+                    .map((related) => (
                     <RecipeCard 
                       key={related.id}
                       recipe={related}

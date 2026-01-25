@@ -1,12 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CollectionInput, Collection } from '@/lib/types';
 
 interface CreateCollectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreate: (data: CollectionInput) => Promise<void | Collection>;
+  onSubmit: (data: CollectionInput) => Promise<void | Collection>;
+  editMode?: boolean;
+  initialData?: {
+    name: string;
+    icon: string;
+    color: string;
+  };
 }
 
 const iconOptions = [
@@ -38,11 +44,38 @@ const colorOptions = [
   { value: 'teal', hex: '#4DB6AC', label: 'Turkuaz' },
 ];
 
-export default function CreateCollectionModal({ isOpen, onClose, onCreate }: CreateCollectionModalProps) {
+export default function CreateCollectionModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  editMode = false, 
+  initialData 
+}: CreateCollectionModalProps) {
   const [name, setName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(iconOptions[0].value);
   const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Edit modu verilerini yükle veya formu sıfırla
+  useEffect(() => {
+    if (isOpen) {
+      if (editMode && initialData) {
+        setName(initialData.name);
+        // İkon ismini temizle (örn: 'fa-solid fa-star' -> 'star')
+        const cleanIcon = initialData.icon.replace('fa-solid fa-', '').replace('fa-', '');
+        const matchedIcon = iconOptions.find(opt => opt.value === cleanIcon);
+        setSelectedIcon(matchedIcon ? matchedIcon.value : iconOptions[0].value);
+
+        // Renk eşleştirmesi
+        const matchedColor = colorOptions.find(opt => opt.hex === initialData.color);
+        setSelectedColor(matchedColor ? matchedColor.value : colorOptions[0].value);
+      } else {
+        setName('');
+        setSelectedIcon(iconOptions[0].value);
+        setSelectedColor(colorOptions[0].value);
+      }
+    }
+  }, [isOpen, editMode, initialData]);
 
   if (!isOpen) return null;
 
@@ -52,32 +85,31 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
 
     setIsLoading(true);
     try {
-      // Find the selected icon and color details
-      const iconOption = iconOptions.find(opt => opt.value === selectedIcon);
       const colorOption = colorOptions.find(opt => opt.value === selectedColor);
       
-      await onCreate({
+      // API'ye sadece ikon ismini ('mug-hot') ve hex kodunu gönderiyoruz
+      await onSubmit({
         name: name.trim(),
-        icon: iconOption?.class || iconOptions[0].class, // Use full class name
-        color: colorOption?.hex || colorOptions[0].hex, // Use hex value
+        icon: selectedIcon, 
+        color: colorOption?.hex || colorOptions[0].hex, 
       });
-      setName('');
-      setSelectedIcon(iconOptions[0].value);
-      setSelectedColor(colorOptions[0].value);
+      
       onClose();
     } catch (error) {
-      console.error('Failed to create collection:', error);
-      alert('Koleksiyon oluşturulurken bir hata oluştu');
+      console.error('Failed to save collection:', error);
+      alert('Koleksiyon kaydedilirken bir hata oluştu');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display font-bold text-xl text-slate-800">Yeni Koleksiyon</h2>
+          <h2 className="font-display font-bold text-xl text-slate-800">
+            {editMode ? 'Koleksiyonu Düzenle' : 'Yeni Koleksiyon'}
+          </h2>
           <button
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
@@ -106,7 +138,7 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
             <label className="block text-sm font-bold text-slate-800 mb-2">
               İkon Seç
             </label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-5 gap-2 max-h-40 overflow-y-auto p-1">
               {iconOptions.map((icon) => (
                 <button
                   key={icon.value}
@@ -160,9 +192,13 @@ export default function CreateCollectionModal({ isOpen, onClose, onCreate }: Cre
             <button
               type="submit"
               disabled={isLoading || !name.trim()}
-              className="flex-1 px-6 py-3 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-6 py-3 rounded-xl bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Oluşturuluyor...' : 'Oluştur'}
+              {isLoading ? (
+                <><i className="fa-solid fa-spinner fa-spin"></i> İşleniyor</>
+              ) : (
+                editMode ? 'Güncelle' : 'Oluştur'
+              )}
             </button>
           </div>
         </form>

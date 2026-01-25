@@ -10,6 +10,7 @@ import FavoriteRecipeCard from '@/components/favorites/FavoriteRecipeCard';
 import FavoriteIngredientCard from '@/components/favorites/FavoriteIngredientCard';
 import FavoriteBlogCard from '@/components/favorites/FavoriteBlogCard';
 import FavoriteDiscussionCard from '@/components/favorites/FavoriteDiscussionCard';
+import CreateCollectionModal from '@/components/favorites/CreateCollectionModal';
 
 export default function CollectionDetailPage() {
   const params = useParams();
@@ -18,6 +19,9 @@ export default function CollectionDetailPage() {
   const [collection, setCollection] = useState<Collection | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Edit Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const collectionId = params.id as string;
 
@@ -41,27 +45,23 @@ export default function CollectionDetailPage() {
     }
   }, [isAuthenticated, collectionId, loadCollection]);
 
-  const handleRemoveItem = async (itemId: number, itemType: string) => {
-    try {
-      await userService.removeCollectionItem(collectionId, itemId, itemType as any);
-      await loadCollection();
-    } catch (err) {
-      console.error('Failed to remove item:', err);
-      alert('İçerik kaldırılırken hata oluştu');
-    }
-  };
-
   const handleDeleteCollection = async () => {
     if (!confirm(`"${collection?.name}" koleksiyonunu silmek istediğinize emin misiniz?`)) {
       return;
     }
     try {
       await userService.deleteCollection(collectionId);
-      router.push('/favoriler');
+      router.push('/dashboard/favoriler'); // Yönlendirme güncellendi
     } catch (err) {
       console.error('Failed to delete collection:', err);
       alert('Koleksiyon silinirken hata oluştu');
     }
+  };
+
+  // İkonu doğru formata çevirme (backend 'star' gönderiyorsa 'fa-solid fa-star' yapar)
+  const getIconClass = (iconName: string) => {
+    if (iconName.startsWith('fa-')) return iconName;
+    return `fa-solid fa-${iconName}`;
   };
 
   if (authLoading || isLoading) {
@@ -94,7 +94,7 @@ export default function CollectionDetailPage() {
             {error || 'Bu koleksiyon bulunamadı veya erişim izniniz yok.'}
           </p>
           <Link
-            href="/favoriler"
+            href="/dashboard/favoriler"
             className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
           >
             Favorilere Dön
@@ -105,28 +105,28 @@ export default function CollectionDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#FDFBF7]">
       <div className="max-w-6xl mx-auto p-4 md:p-8">
         {/* Header */}
         <div className="mb-8">
           <Link
-            href="/favoriler"
+            href="/dashboard/favoriler"
             className="inline-flex items-center text-gray-500 hover:text-slate-800 mb-4 transition-colors"
           >
             <i className="fa-solid fa-arrow-left mr-2"></i>
             Favorilere Dön
           </Link>
 
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div className="flex items-center gap-4">
               <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl"
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl shadow-sm"
                 style={{
-                  backgroundColor: `${collection.color}20`,
-                  color: collection.color
+                  backgroundColor: collection.color ? `${collection.color}20` : '#FFF3E0',
+                  color: collection.color || '#F97316'
                 }}
               >
-                <i className={collection.icon}></i>
+                <i className={getIconClass(collection.icon)}></i>
               </div>
               <div>
                 <h1 className="font-display font-bold text-3xl text-slate-800 mb-1">
@@ -138,13 +138,22 @@ export default function CollectionDetailPage() {
               </div>
             </div>
 
-            <button
-              onClick={handleDeleteCollection}
-              className="px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors font-bold"
-            >
-              <i className="fa-solid fa-trash mr-2"></i>
-              Sil
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-white hover:border-gray-300 transition-colors font-bold bg-white/50"
+              >
+                <i className="fa-solid fa-pen mr-2"></i>
+                Düzenle
+              </button>
+              <button
+                onClick={handleDeleteCollection}
+                className="px-4 py-2 rounded-xl border border-red-200 text-red-500 hover:bg-red-50 transition-colors font-bold bg-white/50"
+              >
+                <i className="fa-solid fa-trash mr-2"></i>
+                Sil
+              </button>
+            </div>
           </div>
         </div>
 
@@ -188,23 +197,41 @@ export default function CollectionDetailPage() {
             })}
           </div>
         ) : (
-          <div className="text-center py-12">
-            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i className="fa-solid fa-folder-open text-gray-400 text-3xl"></i>
+          <div className="text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <div className="w-20 h-20 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i className="fa-solid fa-folder-open text-orange-300 text-3xl"></i>
             </div>
-            <h3 className="font-bold text-slate-800 mb-2">Koleksiyon Boş</h3>
-            <p className="text-gray-500 mb-6">
+            <h3 className="font-bold text-slate-800 mb-2 text-lg">Koleksiyon Boş</h3>
+            <p className="text-gray-500 mb-6 max-w-sm mx-auto">
               Bu koleksiyonda henüz içerik yok. Favorilerinizden koleksiyonlara içerik ekleyebilirsiniz.
             </p>
             <Link
-              href="/favoriler"
-              className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
+              href="/dashboard/favoriler"
+              className="inline-block bg-orange-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors shadow-lg shadow-orange-200"
             >
               Favorilere Git
             </Link>
           </div>
         )}
       </div>
+
+      {/* Edit Modal */}
+      {collection && (
+        <CreateCollectionModal 
+          isOpen={isEditModalOpen} 
+          onClose={() => {
+            setIsEditModalOpen(false);
+            loadCollection(); // Refresh data after edit
+          }}
+          editMode={true}
+          initialData={{
+            id: collection.id,
+            name: collection.name,
+            icon: collection.icon,
+            color: collection.color
+          }}
+        />
+      )}
     </div>
   );
 }

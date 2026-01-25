@@ -102,7 +102,7 @@ export default function FavoritesPage() {
                      filtered.posts.length + filtered.discussions.length > 0;
 
   return (
-    <div className="flex min-h-screen relative">
+    <div className="flex min-h-screen relative bg-[#FDFBF7]">
 
         {/* DESKTOP SIDEBAR */}
         <DashboardSidebar activePage="favoriler" />
@@ -111,7 +111,7 @@ export default function FavoritesPage() {
         <main className="flex-1 w-full min-w-0">
             
             {/* MOBILE HEADER */}
-            <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-20 z-30 border-b border-gray-100">
+            <div className="lg:hidden bg-white px-4 py-3 pt-[25px] flex items-center justify-between shadow-sm sticky top-0 z-30 border-b border-gray-100">
                 <span className="font-display font-bold text-lg text-slate-800">Favoriler</span>
                 <button 
                   onClick={() => setShowCreateModal(true)}
@@ -122,7 +122,7 @@ export default function FavoritesPage() {
             </div>
 
             {/* FAVORITES CONTENT */}
-            <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8 pb-24">
+            <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8 pb-32 lg:pb-12">
 
                 {/* 1. COLLECTIONS (Folders) */}
                 <section>
@@ -148,7 +148,7 @@ export default function FavoritesPage() {
                         {/* Add New (Placeholder Visual) */}
                         <button
                           onClick={() => setShowCreateModal(true)}
-                          className="border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 transition-colors cursor-pointer h-full"
+                          className="border-2 border-dashed border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center text-gray-400 hover:border-orange-500 hover:text-orange-500 transition-colors cursor-pointer h-full min-h-[140px]"
                         >
                             <i className="fa-solid fa-plus text-xl mb-2"></i>
                             <span className="text-xs font-bold">Yeni Liste</span>
@@ -268,7 +268,6 @@ export default function FavoritesPage() {
 
         {/* MOBILE BOTTOM NAVIGATION */}
         <div className="lg:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around py-3 pb-safe z-40 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-            {/* Localde Link kullanın */}
             <Link href="/dashboard" className="flex flex-col items-center text-gray-400 hover:text-orange-500 transition-colors">
                 <i className="fa-solid fa-house text-xl mb-1"></i>
                 <span className="text-[10px] font-medium">Panelim</span>
@@ -292,11 +291,11 @@ export default function FavoritesPage() {
             </Link>
         </div>
 
-        {/* Create Collection Modal */}
+        {/* Create/Edit Collection Modal */}
         <CreateCollectionModal
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
-          onCreate={createCollection}
+          onSubmit={createCollection} // Değişiklik: onCreate -> onSubmit
         />
 
     </div>

@@ -202,7 +202,7 @@ const defaultQuestions: BLWTestQuestion[] = [
     id: 'q5_grasp',
     category: 'physical_readiness',
     question: 'Bebeğiniz nesneleri kavrayıp ağzına götürebiliyor mu?',
-    description: 'El-Göz-Ağız koordinasyonunu sağlayabiliyor mu?',
+    description: 'El-Göz-Ağız koordinasyonunu sağlayabiliyor mu?', // Updated
     icon: 'fa-solid fa-hand',
     weight: 10,
     options: [
@@ -243,8 +243,8 @@ const defaultQuestions: BLWTestQuestion[] = [
   {
     id: 'q8_medical',
     category: 'safety',
-    question: 'Bebeğinizin beslenme konusunda tıbbi bir sorunu var mı?',
-    description: 'Reflü, yutma güçlüğü, prematüre doğum gibi konuları düşünerek cevaplayınız.',
+    question: 'Bebeğinizin beslenme konusunda tıbbi bir sorunu var mı?', // Updated
+    description: 'Reflü, yutma güçlüğü, prematüre doğum gibi konuları düşünerek cevaplayınız.', // Updated
     icon: 'fa-solid fa-notes-medical',
     weight: 10,
     options: [
@@ -257,7 +257,7 @@ const defaultQuestions: BLWTestQuestion[] = [
   {
     id: 'q9_first_aid',
     category: 'safety',
-    question: 'Boğulma durumunda Heimlich Manevrası yapabilir misiniz?',
+    question: 'Boğulma durumunda Heimlich Manevrası yapabilir misiniz?', // Updated
     description: 'Boğulma durumunda ne yapmanız gerektiğini biliyor musunuz?',
     icon: 'fa-solid fa-kit-medical',
     weight: 5,
@@ -269,10 +269,10 @@ const defaultQuestions: BLWTestQuestion[] = [
     ]
   },
   {
-    id: 'q10_supervision',
+    id: 'q10_supervision', // User's Q9
     category: 'environment',
     question: 'Bebek yemek yerken yanında olabilir misiniz?',
-    description: 'Besleme sırasında yanından ayrılmadan gözetim sağlamanız gerekir.',
+    description: 'Besleme sırasında yanından ayrılmadan gözetim sağlamanız gerekir.', // Updated
     icon: 'fa-solid fa-eye',
     weight: 0,
     options: [

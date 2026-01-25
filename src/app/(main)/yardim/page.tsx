@@ -49,7 +49,7 @@ const faqData: FAQItem[] = [
   {
     category: 'technical',
     question: 'Mobil uygulama var mı?',
-    answer: 'Şu anda mobil uygulamamız bulunmamaktadır ancak web sitemiz tüm mobil cihazlarda sorunsuz çalışacak şekilde optimize edilmiştir. Mobil tarayıcınızdan siteye erişebilirsiniz.'
+    answer: 'Şu anda mobil uygulamamız bulunmamaktadır. Ancak web sitemiz tüm mobil cihazlarda sorunsuz çalışacak şekilde optimize edilmiştir. Mobil tarayıcınızdan siteye erişebilirsiniz.'
   },
   {
     category: 'technical',
