@@ -73,7 +73,7 @@ export function useFeaturedRecipes(limit: number = 5) {
   );
 }
 
-export function useRelatedRecipes(recipeId: number, limit: number = 4) {
+export function useRelatedRecipes(recipeId: number, limit: number = 5) {
   return useSWR(
     recipeId ? ['recipes', 'related', recipeId, limit] : null,
     () => recipeService.getRelated(recipeId, limit),
