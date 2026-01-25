@@ -15,6 +15,15 @@ export default function UserDropdown() {
   const dashboardLink = getDashboardUrl(user);
   const publicProfileUrl = getPublicProfileUrl(user);
 
+  // Yetki kontrolü (Uzman/Admin ise true)
+  const isExpertOrAdmin = user && (
+    user.is_admin || 
+    user.is_editor || 
+    user.is_author || 
+    user.has_editor_access ||
+    user.is_expert
+  );
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -66,14 +75,28 @@ export default function UserDropdown() {
 
           {/* Menu Items */}
           <div className="py-1">
+            
+            {/* 1. ANA PANEL LİNKİ (Uzmanlar için "Uzman Paneli", Diğerleri için "Ebeveyn Paneli") */}
             <Link
               href={dashboardLink}
               onClick={() => setIsOpen(false)}
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
             >
-              <i className="fa-solid fa-gauge-high w-4 text-center"></i>
-              <span>Ebeveyn Paneli</span>
+              <i className={`fa-solid ${isExpertOrAdmin ? 'fa-user-doctor' : 'fa-gauge-high'} w-4 text-center`}></i>
+              <span>{isExpertOrAdmin ? 'Uzman Paneli' : 'Ebeveyn Paneli'}</span>
             </Link>
+
+            {/* 2. EBEVEYN PANELİ (Sadece Uzmanlar için 2. Link Olarak Görünür) */}
+            {isExpertOrAdmin && (
+              <Link
+                href="/dashboard" 
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-600 transition-colors"
+              >
+                <i className="fa-solid fa-gauge-high w-4 text-center"></i>
+                <span>Ebeveyn Paneli</span>
+              </Link>
+            )}
 
             <Link
               href="/profil"
@@ -103,7 +126,7 @@ export default function UserDropdown() {
             </Link>
           </div>
 
-          {/* Admin Quick Menu - Yetkili kullanıcılar için */}
+          {/* Admin Quick Menu - (Studio Linki ve Admin Linkleri Burada) */}
           <AdminQuickMenu />
 
           {/* Logout */}

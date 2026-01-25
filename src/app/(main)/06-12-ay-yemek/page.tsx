@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export default async function Recipes6To12MonthsPage() {
   // Fetch recipes for 6-12 months age group
   const recipesData = await recipeService.getAll({
-    ageGroup: '6-12-ay',
+    ageGroup: '6-8-ay-baslangic,9-11-ay-kesif', // Burayı güncelledik
     perPage: 24,
     orderBy: 'date',
     order: 'desc',

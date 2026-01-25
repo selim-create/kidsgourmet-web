@@ -25,10 +25,23 @@ export const metadata: Metadata = {
 };
 
 export default async function MainMeals12PlusPage() {
-  // Fetch main meal recipes for 12+ months
+  // 1. Yaş Grupları (Mevcut + Yeni Eklenen)
+  const ageGroups = [
+    '12-24-ay-gecis',
+    '2-yas-ve-uzeri'
+  ];
+
+  // 2. Yemek Türleri (Listenizdeki başlıkların slug karşılıkları)
+  const mealTypes = [
+    'aksam-yemegi',
+    'ogle-yemegi'
+  ];
+
+  // 3. Servise virgülle birleştirerek gönderiyoruz
+  // Not: Eğer servisiniz array kabul ediyorsa .join(',') kısmını kaldırabilirsiniz.
   const recipesData = await recipeService.getAll({
-    ageGroup: '12-ay-ustu',
-    mealType: 'ana-ogun',
+    ageGroup: ageGroups.join(','), 
+    mealType: mealTypes.join(','),
     perPage: 24,
     orderBy: 'date',
     order: 'desc',

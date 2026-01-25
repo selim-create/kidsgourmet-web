@@ -167,14 +167,14 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         </span>
         
         {/* Content */}
-        <div className="absolute bottom-0 left-0 p-8 md:p-12 max-w-4xl">
+        {/* PADDING DÜZENLENDİ: p-8 yerine p-6 */}
+        <div className="absolute bottom-0 left-0 p-6 md:p-12 max-w-4xl">
           <h2 
-            className="font-display font-bold text-3xl md:text-5xl text-white mb-4 leading-tight group-hover:underline decoration-green-500 decoration-4 underline-offset-4"
+            className="font-display font-bold text-2xl md:text-5xl text-white mb-4 leading-tight group-hover:underline decoration-green-500 decoration-4 underline-offset-4"
             dangerouslySetInnerHTML={{ __html: title }}
           />
-          <p className="text-gray-200 text-lg mb-6 line-clamp-2 hidden md:block">
-            {excerpt}
-          </p>
+          
+          {/* DESCRIPTION/EXCERPT KALDIRILDI */}
           
           {/* Meta - Sponsorlu değilse yazar ve tarih göster */}
           {!isSponsored && (
@@ -237,7 +237,9 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
     );
 
     return (
-      <article className="group relative block rounded-[2.5rem] overflow-hidden shadow-xl aspect-[16/9] md:aspect-[21/9]">
+      // ASPECT RATIO DÜZENLENDİ: aspect-[16/9] yerine aspect-[4/3] (mobil için)
+      // ROUNDED DÜZENLENDİ: rounded-3xl md:rounded-[2.5rem]
+      <article className="group relative block rounded-3xl md:rounded-[2.5rem] overflow-hidden shadow-xl aspect-[4/3] md:aspect-[21/9]">
         {renderImpressionPixel()}
         {hasGamTracking ? (
           <a 

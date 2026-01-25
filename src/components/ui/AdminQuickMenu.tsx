@@ -17,12 +17,27 @@ const defaultEditUrls = {
 export function AdminQuickMenu({ className = '' }: AdminQuickMenuProps) {
   const { hasEditorAccess, adminUrl, editUrls } = useUser();
   
+  // Yetkisi olmayanlar göremez
   if (!hasEditorAccess) return null;
   
   const urls = editUrls || defaultEditUrls;
   
   return (
     <div className={`border-t border-gray-100 pt-2 mt-2 ${className}`}>
+      
+      {/* 1. STUDIO LINK (EN ÜSTE EKLENDİ) */}
+      <a
+        href="https://studio.kidsgourmet.com.tr"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-3 px-4 py-2.5 text-gray-800 bg-slate-50 hover:bg-slate-100 transition-colors font-bold mb-2"
+      >
+        <span className="w-8 h-8 rounded-lg bg-slate-200 text-slate-700 flex items-center justify-center">
+          <i className="fa-solid fa-pen-nib"></i>
+        </span>
+        <span>İçerik Stüdyosu</span>
+      </a>
+
       {/* Yeni İçerik Başlığı */}
       <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
         Yeni Ekle

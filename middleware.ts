@@ -36,6 +36,8 @@ const KNOWN_ROUTES = [
   'api',
   '_next',
   'favicon.ico',
+  '1-yas-ustu-yemek',
+  '06-12-ay-yemek',
 ];
 
 // Bilinen statik dosya uzantıları

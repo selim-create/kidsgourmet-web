@@ -24,15 +24,42 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Snacks12PlusPage() {
-  // Fetch snack recipes for 12+ months
+export default async function Recipes12PlusMonthsPage() {
+  // 1. Yaş Grupları: 12-24 Ay ve 2 Yaş Üzeri kapsayacak şekilde
+  const ageGroups = [
+    '12-24-ay-gecis',
+    '2-yas-ve-uzeri'
+  ];
+
+  // 2. Yemek Türleri: Listelediğiniz tüm yiyecek/içecek kategorileri
+  // (Temizlik kategorisi hariç tutulmuştur)
+  const mealTypes = [
+    'aksam-yemegi',
+    'ara-ogun',
+    'atistirmalik',
+    'beslenme-cantasi',
+    'corba',
+    'icecek',
+    'ikindi',
+    'kahvalti',
+    'kusluk',
+    'meze',
+    'ogle-yemegi',
+    'salata',
+    'salata-sosu',
+    'sos',
+    'tatli'
+  ];
+
+  // Servise çoklu parametre gönderimi
   const recipesData = await recipeService.getAll({
-    ageGroup: '12-ay-ustu',
-    mealType: 'ara-ogun',
+    ageGroup: ageGroups.join(','),
+    mealType: mealTypes.join(','),
     perPage: 24,
     orderBy: 'date',
     order: 'desc',
   });
+
 
   const recipes = recipesData.recipes || [];
 

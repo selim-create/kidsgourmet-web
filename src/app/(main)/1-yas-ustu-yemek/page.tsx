@@ -34,10 +34,10 @@ export const metadata: Metadata = {
 };
 
 export default async function Recipes12PlusMonthsPage() {
-  // Fetch recipes for 12+ months
+  // 12-24 Ay ve 2 Yaş Üzeri gruplarını virgülle birleştirerek gönderiyoruz
   const recipesData = await recipeService.getAll({
-    ageGroup: '12-ay-ustu',
-    perPage: 12,
+    ageGroup: '12-24-ay-gecis,2-yas-ve-uzeri', // Burayı güncelledik
+    perPage: 24,
     orderBy: 'date',
     order: 'desc',
   });

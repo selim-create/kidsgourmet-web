@@ -222,8 +222,9 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
             </div>
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex gap-2 self-end">
+          {/* Navigation Buttons - DÜZENLEME BURADA YAPILDI */}
+          {/* 'flex' yerine 'hidden md:flex' eklendi. Böylece mobilde gizlenir. */}
+          <div className="hidden md:flex gap-2 self-end">
             <button
               onClick={() => scrollSlider('left')}
               className="w-10 h-10 rounded-full bg-white shadow-md text-gray-600 hover:text-orange-500 transition-colors flex items-center justify-center"

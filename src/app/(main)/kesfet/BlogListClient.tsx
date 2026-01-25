@@ -148,11 +148,9 @@ export default function BlogListClient() {
                       post={post}
                       categories={categories}
                     />
-                    {/* Insert ad after every 6 posts */}
+                    {/* Insert ad after every 6 posts - Wrapper DIV kaldırıldı */}
                     {(index + 1) % 6 === 0 && index < posts.length - 1 && (
-                      <div className="col-span-full">
-                        <InContentAd />
-                      </div>
+                      <InContentAd className="col-span-full" />
                     )}
                   </React.Fragment>
                 )
