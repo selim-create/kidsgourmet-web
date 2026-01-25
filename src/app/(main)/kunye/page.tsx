@@ -94,7 +94,11 @@ export default function KunyePage() {
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Genel Yayın Yönetmeni:</span>
-                <span>Uzman Ebe-Hemşire Yeliz Toplar Eken</span>
+                <span>Uzm. Ebe Hem. Yeliz Toplar Eken</span>
+              </div>
+              <div className="flex flex-col md:flex-row md:gap-4">
+                <span className="font-semibold text-slate-700 md:w-48">Konsept Danışmanı:</span>
+                <span>Serap Torun</span>
               </div>
               <div className="flex flex-col md:flex-row md:gap-4">
                 <span className="font-semibold text-slate-700 md:w-48">Yazarlar:</span>
