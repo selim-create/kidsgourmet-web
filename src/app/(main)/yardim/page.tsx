@@ -261,7 +261,7 @@ export default function YardimPage() {
         {/* Hala Yardıma mı İhtiyacınız Var? */}
         <div className="bg-gradient-to-r from-orange-50 to-white rounded-2xl shadow-sm border border-orange-100 p-8 md:p-12 mt-8 text-center">
           <i className="fa-solid fa-headset text-orange-500 text-5xl mb-4"></i>
-          <h3 className="text-2xl font-bold text-slate-800 mb-3">Hala Yardıma mı İhtiyacınız Var?</h3>
+          <h3 className="text-2xl font-bold text-slate-800 mb-3">Yardıma ihtiyacınız mı var?</h3>
           <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
             Aradığınız cevabı bulamadıysanız, bizimle iletişime geçmekten çekinmeyin. 
             Destek ekibimiz size yardımcı olmaktan mutluluk duyacaktır.

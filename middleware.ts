@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { LEGACY_RECIPE_SLUGS } from '@/lib/legacy-recipes'; // 1. Adımda oluşturduğumuz listeyi import edin
 
 // Bilinen Next.js route'ları (redirect edilmemeli)
 const KNOWN_ROUTES = [
@@ -76,24 +77,26 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // Nested kategori yapısını kontrol et (örn: /cocuk/cocuk-sagligi/cocuk-beslenmesi/)
-  // Bu durumda son segment'i al ve /kesfet/kategori/[son-segment]'e yönlendir
+  // Nested kategori yapısını kontrol et
   if (segments.length >= 2) {
-    // Muhtemelen nested kategori veya eski yapı
     const lastSegment = segments[segments.length - 1];
-    
-    // Kategori olup olmadığını kontrol etmek için API'ye sorgu yapılabilir
-    // Şimdilik son segment'i kullanarak kesfet'e yönlendir
     const url = request.nextUrl.clone();
     url.pathname = `/kesfet/kategori/${lastSegment}`;
     return NextResponse.redirect(url, 301);
   }
   
-  // Tek segment var - bu ya eski blog yazısı ya da eski kategori
-  // Önce kesfet altında blog yazısı olarak dene
+  // Tek segment var. Burası KRİTİK NOKTA.
   const slug = firstSegment;
+
+  // ÖNCE TARİF KONTROLÜ YAPALIM
+  // Eğer gelen slug bizim eski tarif listemizde varsa, onu /tarifler/ altına yönlendir.
+  if (LEGACY_RECIPE_SLUGS.includes(slug)) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/tarifler/${slug}`;
+    return NextResponse.redirect(url, 301);
+  }
   
-  // 301 redirect to /kesfet/[slug]
+  // Tarif değilse, varsayılan olarak blog yazısıdır -> /kesfet/
   const url = request.nextUrl.clone();
   url.pathname = `/kesfet/${slug}`;
   return NextResponse.redirect(url, 301);
@@ -101,13 +104,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
     '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
 };
