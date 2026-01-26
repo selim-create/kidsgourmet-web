@@ -75,7 +75,8 @@ export default function ConsentManagementPage() {
       // Array yanıtını object'e dönüştür
       const transformedConsents: ConsentStatus = { ...DEFAULT_CONSENTS };
       
-      if (Array.isArray(data)) {
+      // API'den array geldiğinde dönüştür (defensive check)
+      if (data && Array.isArray(data)) {
         data.forEach(consent => {
           switch (consent.consent_type) {
             case 'terms':
@@ -130,7 +131,7 @@ export default function ConsentManagementPage() {
     if (!consentToRevoke) return;
 
     // Consent tipini API formatına dönüştür
-    const consentTypeMap: Record<typeof consentToRevoke, string> = {
+    const consentTypeMap: Record<'marketing_consent' | 'sensitive_data_consent', string> = {
       'marketing_consent': 'marketing',
       'sensitive_data_consent': 'sensitive_data',
     };
