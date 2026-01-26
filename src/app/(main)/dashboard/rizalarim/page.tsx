@@ -7,6 +7,18 @@ import Link from 'next/link';
 import { fetchAuthAPI } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
 
+// API'den gelen consent record tipi
+interface ConsentRecord {
+  id: number;
+  consent_type: 'terms' | 'marketing' | 'sensitive_data' | 'guardian_declaration';
+  consented: boolean;
+  consented_at: string | null;
+  revoked_at: string | null;
+  version: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface ConsentStatus {
   terms_accepted: boolean;
   terms_accepted_at: string | null;
@@ -46,14 +58,61 @@ export default function ConsentManagementPage() {
   const fetchConsents = async () => {
     setIsLoading(true);
     try {
-      const data = await fetchAuthAPI<ConsentStatus>(API_ENDPOINTS.USER_CONSENTS, {}, [404]);
-      setConsents(data);
+      const data = await fetchAuthAPI<ConsentRecord[]>(API_ENDPOINTS.USER_CONSENTS, {}, [404]);
+      
+      // Array yanıtını object'e dönüştür
+      const transformedConsents: ConsentStatus = {
+        terms_accepted: false,
+        terms_accepted_at: null,
+        marketing_consent: false,
+        marketing_consent_at: null,
+        sensitive_data_consent: false,
+        sensitive_data_consent_at: null,
+        guardian_declaration: false,
+        guardian_declaration_at: null,
+      };
+      
+      if (Array.isArray(data)) {
+        data.forEach(consent => {
+          switch (consent.consent_type) {
+            case 'terms':
+              transformedConsents.terms_accepted = consent.consented;
+              transformedConsents.terms_accepted_at = consent.consented_at;
+              break;
+            case 'marketing':
+              transformedConsents.marketing_consent = consent.consented;
+              transformedConsents.marketing_consent_at = consent.consented_at;
+              break;
+            case 'sensitive_data':
+              transformedConsents.sensitive_data_consent = consent.consented;
+              transformedConsents.sensitive_data_consent_at = consent.consented_at;
+              break;
+            case 'guardian_declaration':
+              transformedConsents.guardian_declaration = consent.consented;
+              transformedConsents.guardian_declaration_at = consent.consented_at;
+              break;
+          }
+        });
+      }
+      
+      setConsents(transformedConsents);
     } catch (error) {
       // 404 hatası sessizce ele alınacak - yeni kullanıcılarda normal
       if ((error as any)?.errorInfo?.statusCode !== 404) {
         console.error('Error fetching consents:', error);
         toast.error('Rıza bilgileri yüklenirken hata oluştu');
       }
+      // Hata durumunda boş consent state'i set et
+      setConsents({
+        terms_accepted: false,
+        terms_accepted_at: null,
+        marketing_consent: false,
+        marketing_consent_at: null,
+        sensitive_data_consent: false,
+        sensitive_data_consent_at: null,
+        guardian_declaration: false,
+        guardian_declaration_at: null,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -76,8 +135,13 @@ export default function ConsentManagementPage() {
   const handleRevokeConsent = async () => {
     if (!consentToRevoke) return;
 
+    // Consent tipini API formatına dönüştür
+    const apiConsentType = consentToRevoke === 'marketing_consent' 
+      ? 'marketing' 
+      : 'sensitive_data';
+
     try {
-      await fetchAuthAPI(API_ENDPOINTS.USER_CONSENT_UPDATE(consentToRevoke), {
+      await fetchAuthAPI(API_ENDPOINTS.USER_CONSENT_UPDATE(apiConsentType), {
         method: 'PUT',
         body: JSON.stringify({ consented: false }),
       });
@@ -340,27 +404,19 @@ export default function ConsentManagementPage() {
                 </div>
               </div>
               <div className="ml-4">
-                {!consents?.guardian_declaration && (
-                  <button
-                    onClick={() => handleGrantConsent('guardian_declaration')}
-                    className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors"
-                  >
-                    <i className="fa-solid fa-check mr-2"></i>
-                    Onayla
-                  </button>
-                )}
-                {consents?.guardian_declaration && (
-                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                    <i className="fa-solid fa-lock"></i>
-                    Geri Çekilemez
-                  </span>
-                )}
+                {/* Veli/Vasi beyanı manuel olarak onaylanamaz - sadece bilgilendirici */}
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  <i className="fa-solid fa-info-circle"></i>
+                  {consents?.guardian_declaration ? 'Geri Çekilemez' : 'Çocuk Ekleyince Otomatik'}
+                </span>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 <i className="fa-solid fa-info-circle mr-1"></i>
-                Bu beyan çocuk profili eklediğinizde otomatik olarak alınır ve geri çekilemez.
+                {consents?.guardian_declaration 
+                  ? 'Bu beyan çocuk profili eklediğinizde otomatik olarak alınmıştır ve geri çekilemez.'
+                  : 'Bu beyan, çocuk profili eklediğinizde otomatik olarak alınacaktır.'}
               </p>
             </div>
           </div>
