@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { fetchAuthAPI } from '@/lib/api';
 
 interface ConsentStatus {
   terms_accepted: boolean;
@@ -29,24 +30,29 @@ export default function ConsentManagementPage() {
     }
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    const handleCookieConsentUpdate = () => {
+      // Cookie consent güncellendiğinde sayfayı yenile
+      if (isAuthenticated) {
+        fetchConsents();
+      }
+    };
+
+    window.addEventListener('cookieConsentUpdate', handleCookieConsentUpdate);
+    return () => window.removeEventListener('cookieConsentUpdate', handleCookieConsentUpdate);
+  }, [isAuthenticated]);
+
   const fetchConsents = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/wp-json/kg/v1/user/consents', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Rıza bilgileri alınamadı');
-      }
-
-      const data = await response.json();
+      const data = await fetchAuthAPI<ConsentStatus>('/user/consents', {}, [404]);
       setConsents(data);
     } catch (error) {
-      console.error('Error fetching consents:', error);
-      toast.error('Rıza bilgileri yüklenirken hata oluştu');
+      // 404 hatası sessizce ele alınacak - yeni kullanıcılarda normal
+      if (!((error as any)?.errorInfo?.statusCode === 404)) {
+        console.error('Error fetching consents:', error);
+        toast.error('Rıza bilgileri yüklenirken hata oluştu');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -56,18 +62,10 @@ export default function ConsentManagementPage() {
     if (!consentToRevoke) return;
 
     try {
-      const response = await fetch(`/wp-json/kg/v1/user/consents/${consentToRevoke}`, {
+      await fetchAuthAPI(`/user/consents/${consentToRevoke}`, {
         method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ value: false }),
+        body: JSON.stringify({ consented: false }),
       });
-
-      if (!response.ok) {
-        throw new Error('Rıza geri çekilemedi');
-      }
 
       toast.success('Rızanız başarıyla geri çekildi');
       await fetchConsents();
@@ -131,10 +129,12 @@ export default function ConsentManagementPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
+          {/* Geri dön linki */}
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-orange-500 hover:text-orange-600 mb-4 transition-colors">
+            <i className="fa-solid fa-arrow-left"></i>
+            Ebeveyn Paneline Dön
+          </Link>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Rıza Yönetimi</h1>
-          <p className="text-slate-600">
-            Verdiğiniz rızaları görüntüleyin ve yönetin. KVKK kapsamında haklarınızı kullanabilirsiniz.
-          </p>
         </div>
 
         {/* Consents List */}
@@ -176,11 +176,7 @@ export default function ConsentManagementPage() {
             <div className="mt-4 pt-4 border-t border-gray-100">
               <p className="text-xs text-gray-500">
                 <i className="fa-solid fa-info-circle mr-1"></i>
-                Bu rıza platformu kullanabilmek için zorunludur. Hesabınızı silmek isterseniz{' '}
-                <Link href="/profil" className="text-orange-500 hover:underline">
-                  profil ayarları
-                </Link>
-                ndan hesap silme işlemi yapabilirsiniz.
+                Bu rıza platformu kullanabilmek için zorunludur. Hesabınızı silmek isterseniz Profil Ayarları bölümünden hesap silme işlemi yapabilirsiniz.
               </p>
             </div>
           </div>
@@ -332,7 +328,7 @@ export default function ConsentManagementPage() {
             <p>
               Verilerinizin silinmesi, düzeltilmesi veya diğer haklarınızı kullanmak için{' '}
               <Link href="/iletisim" className="font-bold hover:underline">
-                iletişim
+                İletişim
               </Link>
               {' '}sayfasından bizimle iletişime geçebilirsiniz.
             </p>

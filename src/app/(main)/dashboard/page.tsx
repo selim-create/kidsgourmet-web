@@ -300,7 +300,13 @@ export default function DashboardPage() {
                                         }}
                                       />
                                       <div className="absolute bottom-0 right-0 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                                          {activeChild.birth_date ? formatAge(activeChild.birth_date) : activeChild.age_months ? `${activeChild.age_months} Aylık` : 'Bebek'}
+                                          {activeChild.birth_date 
+                                            ? formatAge(activeChild.birth_date) 
+                                            : activeChild.age_months !== undefined && activeChild.age_months !== null
+                                              ? activeChild.age_months < 24 
+                                                ? 'Bebek' 
+                                                : 'Çocuk'
+                                              : 'Bebek'}
                                       </div>
                                   </div>
 
