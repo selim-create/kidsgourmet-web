@@ -32,7 +32,7 @@ export default function ConsentManagementPage() {
 
   useEffect(() => {
     const handleCookieConsentUpdate = () => {
-      // Cookie consent güncellendiğinde sayfayı yenile
+      // Cookie consent güncellendiğinde sayfa yenilenir
       if (isAuthenticated) {
         fetchConsents();
       }
@@ -49,7 +49,7 @@ export default function ConsentManagementPage() {
       setConsents(data);
     } catch (error) {
       // 404 hatası sessizce ele alınacak - yeni kullanıcılarda normal
-      if (!((error as any)?.errorInfo?.statusCode === 404)) {
+      if ((error as any)?.errorInfo?.statusCode !== 404) {
         console.error('Error fetching consents:', error);
         toast.error('Rıza bilgileri yüklenirken hata oluştu');
       }
