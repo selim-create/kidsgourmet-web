@@ -49,6 +49,10 @@ export const API_ENDPOINTS = {
   USER_AVATAR: `${KG_API_NAMESPACE}/user/avatar`,
   CHILD_PROFILE_AVATAR: (childId: string) => `${KG_API_NAMESPACE}/child-profiles/${childId}/avatar`,
   
+  // Consent Management
+  USER_CONSENTS: `${KG_API_NAMESPACE}/user/consents`,
+  USER_CONSENT_UPDATE: (type: string) => `${KG_API_NAMESPACE}/user/consents/${type}`,
+  
   // Search
   SEARCH: `${KG_API_NAMESPACE}/search`,
   

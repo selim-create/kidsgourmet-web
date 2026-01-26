@@ -134,6 +134,47 @@ export default function ProfileSettingsPage() {
     }
   };
 
+  // Helper function to get child age label
+  const getChildAgeLabel = (child: Child): string => {
+    // First check age_months
+    if (child.age_months !== undefined && child.age_months !== null) {
+      if (child.age_months < 0) {
+        return 'Yaş bilgisi yok';
+      }
+      if (child.age_months < 24) {
+        return `${child.age_months} Aylık Bebek`;
+      }
+      return `${Math.floor(child.age_months / 12)} Yaşında Çocuk`;
+    }
+    
+    // If age_months is not available, calculate from birth_date
+    if (child.birth_date) {
+      const birthDate = new Date(child.birth_date);
+      const today = new Date();
+      
+      // Calculate age in months more accurately
+      let ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12;
+      ageInMonths += today.getMonth() - birthDate.getMonth();
+      
+      // Adjust if birth day hasn't occurred yet this month
+      if (today.getDate() < birthDate.getDate()) {
+        ageInMonths--;
+      }
+      
+      // Handle negative ages (future birth dates or data errors)
+      if (ageInMonths < 0) {
+        return 'Yaş bilgisi yok';
+      }
+      
+      if (ageInMonths < 24) {
+        return `${ageInMonths} Aylık Bebek`;
+      }
+      return `${Math.floor(ageInMonths / 12)} Yaşında Çocuk`;
+    }
+    
+    return 'Yaş bilgisi yok';
+  };
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -304,11 +345,7 @@ export default function ProfileSettingsPage() {
                                 <div>
                                     <h3 className="font-bold text-lg text-slate-800">{child.name}</h3>
                                     <p className={`text-sm font-medium ${index === 0 ? 'text-orange-500' : 'text-gray-500'}`}>
-                                      {child.age_months !== undefined && child.age_months !== null
-                                        ? child.age_months < 24 
-                                          ? `${child.age_months} Aylık Bebek` 
-                                          : `${Math.floor(child.age_months / 12)} Yaşında Çocuk`
-                                        : 'Bebek'}
+                                      {getChildAgeLabel(child)}
                                     </p>
                                 </div>
                             </div>
@@ -481,7 +518,7 @@ export default function ProfileSettingsPage() {
                                   type="password" 
                                   value={password}
                                   onChange={(e) => setPassword(e.target.value)}
-                                  placeholder="Yeni şifreniz (değiştirmek istemiyorsanız boş bırakın)" 
+                                  placeholder="Yeni şifreniz (Değiştirmeyecekseniz boş bırakın)" 
                                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" 
                                 />
                             </div>
