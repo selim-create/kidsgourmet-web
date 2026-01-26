@@ -138,6 +138,9 @@ export default function ProfileSettingsPage() {
   const getChildAgeLabel = (child: Child): string => {
     // First check age_months
     if (child.age_months !== undefined && child.age_months !== null) {
+      if (child.age_months < 0) {
+        return 'Yaş bilgisi yok';
+      }
       if (child.age_months < 24) {
         return `${child.age_months} Aylık Bebek`;
       }
@@ -156,6 +159,11 @@ export default function ProfileSettingsPage() {
       // Adjust if birth day hasn't occurred yet this month
       if (today.getDate() < birthDate.getDate()) {
         ageInMonths--;
+      }
+      
+      // Handle negative ages (future birth dates or data errors)
+      if (ageInMonths < 0) {
+        return 'Yaş bilgisi yok';
       }
       
       if (ageInMonths < 24) {
