@@ -306,8 +306,8 @@ export default function ProfileSettingsPage() {
                                     <p className={`text-sm font-medium ${index === 0 ? 'text-orange-500' : 'text-gray-500'}`}>
                                       {child.age_months !== undefined && child.age_months !== null
                                         ? child.age_months < 24 
-                                          ? 'Bebek' 
-                                          : 'Çocuk'
+                                          ? `${child.age_months} Aylık Bebek` 
+                                          : `${Math.floor(child.age_months / 12)} Yaşında Çocuk`
                                         : 'Bebek'}
                                     </p>
                                 </div>
@@ -481,7 +481,7 @@ export default function ProfileSettingsPage() {
                                   type="password" 
                                   value={password}
                                   onChange={(e) => setPassword(e.target.value)}
-                                  placeholder="Yeni şifreniz (Değiştirmek istemiyorsanız boş bırakın)" 
+                                  placeholder="Yeni şifreniz (değiştirmek istemiyorsanız boş bırakın)" 
                                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors" 
                                 />
                             </div>
