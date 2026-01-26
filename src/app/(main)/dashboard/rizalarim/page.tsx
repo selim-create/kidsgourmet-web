@@ -45,7 +45,7 @@ export default function ConsentManagementPage() {
   const fetchConsents = async () => {
     setIsLoading(true);
     try {
-      const data = await fetchAuthAPI<ConsentStatus>('/user/consents', {}, [404]);
+      const data = await fetchAuthAPI<ConsentStatus>('/kg/v1/user/consents', {}, [404]);
       setConsents(data);
     } catch (error) {
       // 404 hatası sessizce ele alınacak - yeni kullanıcılarda normal
@@ -58,11 +58,25 @@ export default function ConsentManagementPage() {
     }
   };
 
+  const handleGrantConsent = async (type: 'terms' | 'marketing' | 'sensitive_data' | 'guardian_declaration') => {
+    try {
+      await fetchAuthAPI(`/kg/v1/user/consents/${type}`, {
+        method: 'PUT',
+        body: JSON.stringify({ consented: true }),
+      });
+      toast.success('Rızanız başarıyla onaylandı');
+      await fetchConsents();
+    } catch (error) {
+      console.error('Error granting consent:', error);
+      toast.error('Rıza onaylanırken hata oluştu');
+    }
+  };
+
   const handleRevokeConsent = async () => {
     if (!consentToRevoke) return;
 
     try {
-      await fetchAuthAPI(`/user/consents/${consentToRevoke}`, {
+      await fetchAuthAPI(`/kg/v1/user/consents/${consentToRevoke}`, {
         method: 'PUT',
         body: JSON.stringify({ consented: false }),
       });
@@ -167,10 +181,21 @@ export default function ConsentManagementPage() {
                 </div>
               </div>
               <div className="ml-4">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                  <i className="fa-solid fa-lock"></i>
-                  Geri Çekilemez
-                </span>
+                {!consents?.terms_accepted && (
+                  <button
+                    onClick={() => handleGrantConsent('terms')}
+                    className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors"
+                  >
+                    <i className="fa-solid fa-check mr-2"></i>
+                    Onayla
+                  </button>
+                )}
+                {consents?.terms_accepted && (
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    <i className="fa-solid fa-lock"></i>
+                    Geri Çekilemez
+                  </span>
+                )}
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100">
@@ -208,8 +233,17 @@ export default function ConsentManagementPage() {
                   )}
                 </div>
               </div>
-              {consents?.marketing_consent && (
-                <div className="ml-4">
+              <div className="ml-4">
+                {!consents?.marketing_consent && (
+                  <button
+                    onClick={() => handleGrantConsent('marketing')}
+                    className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors"
+                  >
+                    <i className="fa-solid fa-check mr-2"></i>
+                    Onayla
+                  </button>
+                )}
+                {consents?.marketing_consent && (
                   <button
                     onClick={() => openRevokeModal('marketing_consent')}
                     className="px-4 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-colors"
@@ -217,8 +251,8 @@ export default function ConsentManagementPage() {
                     <i className="fa-solid fa-ban mr-2"></i>
                     Geri Çek
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
@@ -254,8 +288,17 @@ export default function ConsentManagementPage() {
                   )}
                 </div>
               </div>
-              {consents?.sensitive_data_consent && (
-                <div className="ml-4">
+              <div className="ml-4">
+                {!consents?.sensitive_data_consent && (
+                  <button
+                    onClick={() => handleGrantConsent('sensitive_data')}
+                    className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors"
+                  >
+                    <i className="fa-solid fa-check mr-2"></i>
+                    Onayla
+                  </button>
+                )}
+                {consents?.sensitive_data_consent && (
                   <button
                     onClick={() => openRevokeModal('sensitive_data_consent')}
                     className="px-4 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-colors"
@@ -263,8 +306,8 @@ export default function ConsentManagementPage() {
                     <i className="fa-solid fa-ban mr-2"></i>
                     Geri Çek
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
@@ -296,10 +339,21 @@ export default function ConsentManagementPage() {
                 </div>
               </div>
               <div className="ml-4">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                  <i className="fa-solid fa-lock"></i>
-                  Geri Çekilemez
-                </span>
+                {!consents?.guardian_declaration && (
+                  <button
+                    onClick={() => handleGrantConsent('guardian_declaration')}
+                    className="px-4 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-colors"
+                  >
+                    <i className="fa-solid fa-check mr-2"></i>
+                    Onayla
+                  </button>
+                )}
+                {consents?.guardian_declaration && (
+                  <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                    <i className="fa-solid fa-lock"></i>
+                    Geri Çekilemez
+                  </span>
+                )}
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-gray-100">
