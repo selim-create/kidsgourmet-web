@@ -18,17 +18,17 @@ interface ConsentStatus {
 }
 
 export default function ConsentManagementPage() {
-  const { isAuthenticated } = useUser();
+  const { isAuthenticated, isLoading: userLoading } = useUser();
   const [consents, setConsents] = useState<ConsentStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [consentToRevoke, setConsentToRevoke] = useState<'marketing_consent' | 'sensitive_data_consent' | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !userLoading) {
       fetchConsents();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, userLoading]);
 
   useEffect(() => {
     const handleCookieConsentUpdate = () => {
