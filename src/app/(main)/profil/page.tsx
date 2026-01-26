@@ -148,9 +148,16 @@ export default function ProfileSettingsPage() {
     if (child.birth_date) {
       const birthDate = new Date(child.birth_date);
       const today = new Date();
-      const ageInMonths = Math.floor(
-        (today.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
-      );
+      
+      // Calculate age in months more accurately
+      let ageInMonths = (today.getFullYear() - birthDate.getFullYear()) * 12;
+      ageInMonths += today.getMonth() - birthDate.getMonth();
+      
+      // Adjust if birth day hasn't occurred yet this month
+      if (today.getDate() < birthDate.getDate()) {
+        ageInMonths--;
+      }
+      
       if (ageInMonths < 24) {
         return `${ageInMonths} Aylık Bebek`;
       }
