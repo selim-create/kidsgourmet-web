@@ -30,6 +30,18 @@ interface ConsentStatus {
   guardian_declaration_at: string | null;
 }
 
+// Default empty consent state
+const DEFAULT_CONSENTS: ConsentStatus = {
+  terms_accepted: false,
+  terms_accepted_at: null,
+  marketing_consent: false,
+  marketing_consent_at: null,
+  sensitive_data_consent: false,
+  sensitive_data_consent_at: null,
+  guardian_declaration: false,
+  guardian_declaration_at: null,
+};
+
 export default function ConsentManagementPage() {
   const { isAuthenticated, isLoading: userLoading } = useUser();
   const [consents, setConsents] = useState<ConsentStatus | null>(null);
@@ -61,16 +73,7 @@ export default function ConsentManagementPage() {
       const data = await fetchAuthAPI<ConsentRecord[]>(API_ENDPOINTS.USER_CONSENTS, {}, [404]);
       
       // Array yanıtını object'e dönüştür
-      const transformedConsents: ConsentStatus = {
-        terms_accepted: false,
-        terms_accepted_at: null,
-        marketing_consent: false,
-        marketing_consent_at: null,
-        sensitive_data_consent: false,
-        sensitive_data_consent_at: null,
-        guardian_declaration: false,
-        guardian_declaration_at: null,
-      };
+      const transformedConsents: ConsentStatus = { ...DEFAULT_CONSENTS };
       
       if (Array.isArray(data)) {
         data.forEach(consent => {
@@ -103,16 +106,7 @@ export default function ConsentManagementPage() {
         toast.error('Rıza bilgileri yüklenirken hata oluştu');
       }
       // Hata durumunda boş consent state'i set et
-      setConsents({
-        terms_accepted: false,
-        terms_accepted_at: null,
-        marketing_consent: false,
-        marketing_consent_at: null,
-        sensitive_data_consent: false,
-        sensitive_data_consent_at: null,
-        guardian_declaration: false,
-        guardian_declaration_at: null,
-      });
+      setConsents({ ...DEFAULT_CONSENTS });
     } finally {
       setIsLoading(false);
     }
@@ -136,11 +130,12 @@ export default function ConsentManagementPage() {
     if (!consentToRevoke) return;
 
     // Consent tipini API formatına dönüştür
-    const apiConsentType = consentToRevoke === 'marketing_consent' 
-      ? 'marketing' 
-      : consentToRevoke === 'sensitive_data_consent'
-      ? 'sensitive_data'
-      : '';
+    const consentTypeMap: Record<typeof consentToRevoke, string> = {
+      'marketing_consent': 'marketing',
+      'sensitive_data_consent': 'sensitive_data',
+    };
+
+    const apiConsentType = consentTypeMap[consentToRevoke];
 
     if (!apiConsentType) {
       console.error('Invalid consent type:', consentToRevoke);
