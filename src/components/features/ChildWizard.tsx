@@ -93,7 +93,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
   };
 
   const handleSubmit = async () => {
-    // Yeni çocuk eklerken guardian_declaration zorunlu
+    // Guardian declaration is required when adding new children
     if (!child && !guardianDeclaration) {
       alert('Veli/Vasi beyanını onaylamadan çocuk ekleyemezsiniz.');
       return;
@@ -116,7 +116,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
             gender,
             allergies,
             feeding_style: feedingStyle,
-            // Consent bilgilerini ekle
+            // Add consent information
             consents: {
               guardian_declaration: true,
               guardian_declaration_at: new Date().toISOString(),
@@ -138,7 +138,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
 
   const isStep1Valid = name.trim() !== '' && birthDate !== '';
   const isStep2Valid = true; // feedingStyle always has a value
-  const isStep3Valid = child ? true : guardianDeclaration; // Yeni çocuk için guardian_declaration zorunlu
+  const isStep3Valid = child ? true : guardianDeclaration; // Guardian declaration required for new children
 
   // Get max date (today) for birth date input
   const getMaxDate = () => {

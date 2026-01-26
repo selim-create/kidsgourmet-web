@@ -317,7 +317,7 @@ export interface Child {
   // Backward compatibility
   allergens?: string[];
   blw_test_results?: BLWTestResult[];
-  // Yeni consent alanları
+  // New consent fields
   consents?: {
     guardian_declaration?: boolean;
     guardian_declaration_at?: string | null;
