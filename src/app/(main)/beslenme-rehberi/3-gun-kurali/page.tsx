@@ -19,7 +19,7 @@ export default function ThreeDayRulePage() {
           </div>
           <div className="flex items-center gap-4 mb-4">
             <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <i className="fa-solid fa-calendar-check text-4xl"></i>
+              <i className="fa-solid fa-clock-rotate-left text-4xl"></i>
             </div>
             <div>
               <h1 className="font-display font-bold text-4xl md:text-5xl mb-2">
