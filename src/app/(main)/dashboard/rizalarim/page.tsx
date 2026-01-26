@@ -138,7 +138,14 @@ export default function ConsentManagementPage() {
     // Consent tipini API formatına dönüştür
     const apiConsentType = consentToRevoke === 'marketing_consent' 
       ? 'marketing' 
-      : 'sensitive_data';
+      : consentToRevoke === 'sensitive_data_consent'
+      ? 'sensitive_data'
+      : '';
+
+    if (!apiConsentType) {
+      console.error('Invalid consent type:', consentToRevoke);
+      return;
+    }
 
     try {
       await fetchAuthAPI(API_ENDPOINTS.USER_CONSENT_UPDATE(apiConsentType), {
