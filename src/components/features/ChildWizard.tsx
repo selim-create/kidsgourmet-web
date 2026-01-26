@@ -37,7 +37,8 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
   const [feedingStyle, setFeedingStyle] = useState<'blw' | 'puree' | 'mixed'>('mixed');
   const [allergies, setAllergies] = useState<string[]>([]);
   const [customAllergy, setCustomAllergy] = useState('');
-  const [kvkkConsent, setKvkkConsent] = useState(false);
+  const [guardianDeclaration, setGuardianDeclaration] = useState(false);
+  const [sensitiveDataConsent, setSensitiveDataConsent] = useState(false);
 
   // Initialize form with child data if editing
   useEffect(() => {
@@ -60,7 +61,8 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
     setFeedingStyle('mixed');
     setAllergies([]);
     setCustomAllergy('');
-    setKvkkConsent(false);
+    setGuardianDeclaration(false);
+    setSensitiveDataConsent(false);
   };
 
   const handleNext = () => {
@@ -91,8 +93,9 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
   };
 
   const handleSubmit = async () => {
-    if (!kvkkConsent && !child) {
-      alert('KVKK onayı vermeden çocuk ekleyemezsiniz.');
+    // Yeni çocuk eklerken guardian_declaration zorunlu
+    if (!child && !guardianDeclaration) {
+      alert('Veli/Vasi beyanını onaylamadan çocuk ekleyemezsiniz.');
       return;
     }
 
@@ -113,7 +116,13 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
             gender,
             allergies,
             feeding_style: feedingStyle,
-            kvkk_consent: true,
+            // Consent bilgilerini ekle
+            consents: {
+              guardian_declaration: true,
+              guardian_declaration_at: new Date().toISOString(),
+              sensitive_data_consent: sensitiveDataConsent,
+              sensitive_data_consent_at: sensitiveDataConsent ? new Date().toISOString() : null,
+            },
           };
 
       await onSave(childData);
@@ -129,7 +138,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
 
   const isStep1Valid = name.trim() !== '' && birthDate !== '';
   const isStep2Valid = true; // feedingStyle always has a value
-  const isStep3Valid = child ? true : kvkkConsent; // Skip KVKK for edit mode
+  const isStep3Valid = child ? true : guardianDeclaration; // Yeni çocuk için guardian_declaration zorunlu
 
   // Get max date (today) for birth date input
   const getMaxDate = () => {
@@ -442,19 +451,60 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
                 )}
               </div>
 
-              {/* KVKK Consent (only for new children) */}
+              {/* KVKK & Consent Section (only for new children) */}
               {!child && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={kvkkConsent}
-                      onChange={(e) => setKvkkConsent(e.target.checked)}
-                      className="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
-                      required
-                    />
-                    <span className="text-sm text-gray-700">
-                      Çocuğuma ait verilerin işlenmesine{' '}
+                <div className="space-y-4">
+                  {/* Veli/Vasi Beyanı - Zorunlu */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={guardianDeclaration}
+                        onChange={(e) => setGuardianDeclaration(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
+                        required
+                      />
+                      <span className="text-sm text-gray-700">
+                        18 yaşından büyük olduğumu ve eklediğim çocuğun yasal velisi/vasisi olduğumu beyan ederim.
+                        <span className="text-red-500 ml-1">*</span>
+                        <span className="block text-xs text-gray-500 mt-1">
+                          Bu beyan zorunludur ve geri çekilemez.
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Açık Rıza Metni - Opsiyonel */}
+                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={sensitiveDataConsent}
+                        onChange={(e) => setSensitiveDataConsent(e.target.checked)}
+                        className="mt-1 w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+                      />
+                      <span className="text-sm text-gray-700">
+                        Çocuğuma ait sağlık ve gelişim verilerinin işlenmesine{' '}
+                        <Link
+                          href="/acik-riza-metni"
+                          target="_blank"
+                          className="text-orange-500 font-bold hover:underline"
+                        >
+                          Açık Rıza Metni
+                        </Link>
+                        'nde belirtilen şartlarla onay veriyorum.
+                        <span className="block text-xs text-gray-500 mt-1">
+                          Bu onay opsiyoneldir ve istediğiniz zaman geri çekebilirsiniz.
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Mevcut KVKK Aydınlatma Metni bilgilendirmesi */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <p className="text-sm text-gray-600">
+                      <i className="fa-solid fa-info-circle text-gray-400 mr-2"></i>
+                      Kişisel verilerinizin işlenmesine ilişkin detaylı bilgi için{' '}
                       <Link
                         href="/kvkk"
                         target="_blank"
@@ -462,17 +512,9 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
                       >
                         KVKK Aydınlatma Metni
                       </Link>
-                      {' '}ve{' '}
-                      <Link
-                        href="/acik-riza-metni"
-                        target="_blank"
-                        className="text-orange-500 font-bold hover:underline"
-                      >
-                        Açık Rıza Metni
-                      </Link>
-                      {' '}kapsamında onay veriyorum. <span className="text-red-500">*</span>
-                    </span>
-                  </label>
+                      'ni inceleyebilirsiniz.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>

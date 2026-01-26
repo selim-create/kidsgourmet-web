@@ -317,6 +317,13 @@ export interface Child {
   // Backward compatibility
   allergens?: string[];
   blw_test_results?: BLWTestResult[];
+  // Yeni consent alanları
+  consents?: {
+    guardian_declaration?: boolean;
+    guardian_declaration_at?: string | null;
+    sensitive_data_consent?: boolean;
+    sensitive_data_consent_at?: string | null;
+  };
 }
 
 export interface AuthResponse {
