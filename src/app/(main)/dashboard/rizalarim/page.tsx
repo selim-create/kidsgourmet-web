@@ -5,6 +5,7 @@ import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { fetchAuthAPI } from '@/lib/api';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 interface ConsentStatus {
   terms_accepted: boolean;
@@ -45,7 +46,7 @@ export default function ConsentManagementPage() {
   const fetchConsents = async () => {
     setIsLoading(true);
     try {
-      const data = await fetchAuthAPI<ConsentStatus>('/kg/v1/user/consents', {}, [404]);
+      const data = await fetchAuthAPI<ConsentStatus>(API_ENDPOINTS.USER_CONSENTS, {}, [404]);
       setConsents(data);
     } catch (error) {
       // 404 hatası sessizce ele alınacak - yeni kullanıcılarda normal
@@ -60,7 +61,7 @@ export default function ConsentManagementPage() {
 
   const handleGrantConsent = async (type: 'terms' | 'marketing' | 'sensitive_data' | 'guardian_declaration') => {
     try {
-      await fetchAuthAPI(`/kg/v1/user/consents/${type}`, {
+      await fetchAuthAPI(API_ENDPOINTS.USER_CONSENT_UPDATE(type), {
         method: 'PUT',
         body: JSON.stringify({ consented: true }),
       });
@@ -76,7 +77,7 @@ export default function ConsentManagementPage() {
     if (!consentToRevoke) return;
 
     try {
-      await fetchAuthAPI(`/kg/v1/user/consents/${consentToRevoke}`, {
+      await fetchAuthAPI(API_ENDPOINTS.USER_CONSENT_UPDATE(consentToRevoke), {
         method: 'PUT',
         body: JSON.stringify({ consented: false }),
       });
