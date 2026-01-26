@@ -3,29 +3,29 @@
 import React from 'react';
 import Link from 'next/link';
 import { FeaturedItem } from '@/services/featured-service';
-import { decodeEntities } from '@/utils/textHelpers';
 
 interface ToolCardProps {
   item: FeaturedItem;
 }
 
 // Smart Assistant Tools
+// İkonlar kullanıcı isteğine göre güncellendi (tam sınıf adları ile)
 const SMART_TOOLS = [
-  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-plate-utensils' },
-  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-book-sparkles' },
-  { name: 'Ek Gıdaya Başlama Kontrolü', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-list-check' },
-  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-circle-question' },
-  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-calendar-days' },
-  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-clipboard-check' },
-  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-chart-line' },
-  { name: 'Su İhtiyacı Hesaplayıcı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-droplet' },
-  { name: 'Alerjen Deneme Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-shield-virus' },
-  { name: 'Banyo Rutini Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-bath' },
-  { name: 'Günlük Hijyen Hesaplayıcı', path: '/akilli-asistan/gunluk-hijyen', icon: 'fa-hand-sparkles' },
-  { name: 'Akıllı Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby' },
-  { name: 'Hava Kalitesi Rehberi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-wind' },
-  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-spray-can-sparkles' },
-  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-clock-rotate-left' },
+  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-solid fa-plate-wheat' },
+  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-solid fa-carrot' },
+  { name: 'Ek Gıdaya Başlama Kontrolü', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-solid fa-utensils' },
+  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-solid fa-magnifying-glass' },
+  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-solid fa-seedling' },
+  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-solid fa-baby' },
+  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-solid fa-chart-line' },
+  { name: 'Su İhtiyacı Hesaplayıcı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-solid fa-glass-water' },
+  { name: 'Alerjen Deneme Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-solid fa-shield-heart' },
+  { name: 'Banyo Rutini Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-solid fa-bath' },
+  { name: 'Günlük Hijyen Hesaplayıcı', path: '/akilli-asistan/gunluk-hijyen', icon: 'fa-solid fa-hand-sparkles' },
+  { name: 'Akıllı Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-solid fa-baby-carriage' },
+  { name: 'Hava Kalitesi Rehberi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-solid fa-wind' },
+  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-solid fa-tshirt' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-solid fa-clock-rotate-left' },
 ];
 
 export default function ToolCard({ item }: ToolCardProps) {
@@ -52,13 +52,14 @@ export default function ToolCard({ item }: ToolCardProps) {
         {/* Tool Info */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-2xl border border-white/30">
-            <i className={`fa-solid ${randomTool.icon}`}></i>
+            {/* fa-solid prefixi kaldırıldı çünkü datada artık mevcut */}
+            <i className={randomTool.icon}></i>
           </div>
           <div>
             <h3 className="font-display font-bold text-xl leading-tight">
               {randomTool.name}
             </h3>
-            <p className="text-white/80 text-xs mt-1">Yapay zeka destekli araç</p>
+            <p className="text-white/80 text-xs mt-1">Interaktif faydalı araç</p>
           </div>
         </div>
 

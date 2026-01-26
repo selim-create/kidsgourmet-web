@@ -251,7 +251,7 @@ export default function BesinTakvimiPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl">
-                <i className="fa-solid fa-calendar-check"></i>
+                <i className="fa-solid fa-seedling"></i>
               </div>
               <div>
                 <h1 className="font-display font-bold text-3xl">Besin Deneme Takvimi</h1>

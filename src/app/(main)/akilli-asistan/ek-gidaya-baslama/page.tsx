@@ -545,7 +545,7 @@ export default function EkGidayaBaslamaPage() {
             <div className="bg-white rounded-[2rem] border border-gray-100 shadow-lg p-8 md:p-12 text-center">
               {/* Icon */}
               <div className="w-20 h-20 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-                <i className="fa-solid fa-baby-carriage"></i>
+                <i className="fa-solid fa-utensils"></i>
               </div>
 
               {/* Title */}

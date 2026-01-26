@@ -68,7 +68,7 @@ export const navigationItems: NavItem[] = [
       { 
         label: 'Ek Gıdaya Başlama Kontrolü', 
         href: '/akilli-asistan/ek-gidaya-baslama', 
-        icon: 'fa-solid fa-clipboard-check' 
+        icon: 'fa-solid fa-utensils' 
       },
       { 
         label: '3 Gün Kuralı', 
@@ -83,12 +83,12 @@ export const navigationItems: NavItem[] = [
       { 
         label: 'Bu Gıda Verilir mi?', 
         href: '/akilli-asistan/bu-gida-verilir-mi', 
-        icon: 'fa-solid fa-circle-question' 
+        icon: 'fa-solid fa-magnifying-glass' 
       },
       { 
         label: 'Besin Deneme Takvimi', 
         href: '/akilli-asistan/besin-takvimi', 
-        icon: 'fa-solid fa-calendar-check' 
+        icon: 'fa-solid fa-seedling' 
       },
     ],
   },
@@ -141,7 +141,7 @@ export const navigationItems: NavItem[] = [
       { 
         label: 'Leke Ansiklopedisi', 
         href: '/akilli-asistan/leke-rehberi', 
-        icon: 'fa-solid fa-shirt' 
+        icon: 'fa-solid fa-tshirt' 
       },
     ],
   },

@@ -42,15 +42,12 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
 
   const getAuthorAvatar = (post: BlogPost) => {
     const avatarUrls = post._embedded?.author?.[0]?.avatar_urls;
-    // Try different sizes
     const avatar = avatarUrls?.['96'] || avatarUrls?.['48'] || avatarUrls?.['24'];
     
-    // Fix protocol if missing
     if (avatar && avatar.startsWith('//')) {
       return `https:${avatar}`;
     }
     
-    // Return null for invalid avatars (will show initials instead)
     if (!avatar || avatar.includes('blank.gif') || avatar.includes('mystery-man')) {
       return null;
     }
@@ -58,8 +55,17 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
     return avatar;
   };
 
+  // DÜZELTME BURADA YAPILDI:
+  // Harici categories listesi olmasa bile, post verisinden ismi almaya çalışır.
   const getCategoryName = (post: BlogPost) => {
-    const catId = post._embedded?.['wp:term']?.[0]?.[0]?.id;
+    // 1. Önce post'un kendi içindeki gömülü veriden ismi almayı dene
+    const embeddedCategory = post._embedded?.['wp:term']?.[0]?.[0];
+    if (embeddedCategory && embeddedCategory.name) {
+      return embeddedCategory.name;
+    }
+
+    // 2. Bulunamazsa categories prop'una bak (Fallback)
+    const catId = embeddedCategory?.id;
     const cat = categories?.find(c => c.id === catId);
     return cat ? cat.name : 'Genel';
   };
@@ -142,7 +148,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         
-        {/* Edit Button - Hover'da görünür */}
+        {/* Edit Button */}
         <EditButton 
           contentType="post" 
           contentId={post.id}
@@ -167,16 +173,13 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
         </span>
         
         {/* Content */}
-        {/* PADDING DÜZENLENDİ: p-8 yerine p-6 */}
         <div className="absolute bottom-0 left-0 p-6 md:p-12 max-w-4xl">
           <h2 
             className="font-display font-bold text-2xl md:text-5xl text-white mb-4 leading-tight group-hover:underline decoration-green-500 decoration-4 underline-offset-4"
             dangerouslySetInnerHTML={{ __html: title }}
           />
           
-          {/* DESCRIPTION/EXCERPT KALDIRILDI */}
-          
-          {/* Meta - Sponsorlu değilse yazar ve tarih göster */}
+          {/* Meta */}
           {!isSponsored && (
             <div className="flex items-center text-white/80 text-sm gap-6 flex-wrap">
               <div className="flex items-center gap-2">
@@ -200,7 +203,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             </div>
           )}
           
-          {/* Sponsor Logo - Sponsorlu ise */}
+          {/* Sponsor Logo */}
           {isSponsored && sponsorData && (() => {
             const logoUrl = typeof sponsorData.sponsor_light_logo === 'string' 
               ? sponsorData.sponsor_light_logo 
@@ -208,12 +211,10 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
                   ? sponsorData.sponsor_logo 
                   : null);
             
-            // Validate logo URL
             if (!logoUrl || logoUrl === '' || logoUrl === 'null' || logoUrl === 'undefined') {
               return null;
             }
             
-            // Fix relative URLs
             const finalLogoUrl = logoUrl.startsWith('/') 
               ? `${process.env.NEXT_PUBLIC_API_URL || ''}${logoUrl}`
               : logoUrl;
@@ -237,8 +238,6 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
     );
 
     return (
-      // ASPECT RATIO DÜZENLENDİ: aspect-[16/9] yerine aspect-[4/3] (mobil için)
-      // ROUNDED DÜZENLENDİ: rounded-3xl md:rounded-[2.5rem]
       <article className="group relative block rounded-3xl md:rounded-[2.5rem] overflow-hidden shadow-xl aspect-[4/3] md:aspect-[21/9]">
         {renderImpressionPixel()}
         {hasGamTracking ? (
@@ -285,7 +284,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           </Link>
         )}
         
-        {/* Edit Button - Hover'da görünür */}
+        {/* Edit Button */}
         <EditButton 
           contentType="post" 
           contentId={post.id}
@@ -294,7 +293,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           className={EDIT_BUTTON_OFFSET}
         />
         
-        {/* Category Badge - Top Left (for non-sponsored) OR Sponsored Badge - Top Left (for sponsored) */}
+        {/* Category Badge */}
         {isSponsored ? (
           <span className="absolute top-4 left-4 bg-amber-500 text-white px-3 py-1 rounded-lg text-xs font-bold shadow-md z-10">
             Sponsorlu
@@ -305,7 +304,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           </span>
         )}
         
-        {/* Favorite Button - Top Right */}
+        {/* Favorite Button */}
         <button 
           onClick={handleFavoriteClick}
           aria-label={isFav ? "Favorilerden kaldır" : "Favorilere ekle"}
@@ -315,7 +314,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           <i className={isFav ? "fa-solid fa-heart text-red-500" : "fa-regular fa-heart"}></i>
         </button>
         
-        {/* Sponsor Logo - Bottom Left (for sponsored posts) */}
+        {/* Sponsor Logo */}
         {isSponsored && sponsorData && (() => {
           const logoUrl = typeof sponsorData.sponsor_logo === 'string' 
             ? sponsorData.sponsor_logo 
@@ -323,12 +322,10 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
                 ? sponsorData.sponsor_light_logo 
                 : null);
           
-          // Validate logo URL
           if (!logoUrl || logoUrl === '' || logoUrl === 'null' || logoUrl === 'undefined') {
             return null;
           }
           
-          // Fix relative URLs
           const finalLogoUrl = logoUrl.startsWith('/') 
             ? `${process.env.NEXT_PUBLIC_API_URL || ''}${logoUrl}`
             : logoUrl;
@@ -350,7 +347,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
       
       {/* Content Section */}
       <div className="p-5 flex-1 flex flex-col">
-        {/* Meta Info - Different for sponsored */}
+        {/* Meta Info */}
         {isSponsored ? (
           <div className="flex items-center gap-2 mb-3">
             <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold">
@@ -368,7 +365,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
           </div>
         )}
         
-        {/* Discount Badge - Only for sponsored with discount */}
+        {/* Discount Badge */}
         {isSponsored && sponsorData?.discount_text && (
           <div className="bg-green-50 border border-green-100 rounded-lg p-2 mb-3">
             <span className="text-green-600 text-xs font-bold">

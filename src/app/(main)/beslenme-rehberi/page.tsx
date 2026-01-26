@@ -13,7 +13,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   'Meyveler': 'fa-apple-whole',
   'Tahıllar': 'fa-wheat-awn',
   'Proteinler': 'fa-drumstick-bite',
-  'Süt Ürünleri': 'fa-cheese',
+  'Süt Ürünleri': 'fa-cow',
   'Baklagiller': 'fa-seedling',
   'Yağlar': 'fa-droplet',
   'Sıvılar': 'fa-glass-water',
@@ -236,13 +236,12 @@ export default function IngredientsGuidePage() {
         
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <span className="inline-block py-1 px-3 rounded-full bg-green-100 text-green-700 text-xs font-bold mb-4 uppercase tracking-wider">
-            Akıllı Asistan
-          </span>
+            Gıdalar</span>
           <h1 className="font-display text-3xl md:text-5xl font-bold text-slate-800 mb-4 font-sans">
             Beslenme Rehberi
           </h1>
           <p className="text-gray-500 text-lg mb-8 max-w-2xl mx-auto">
-            Bebeğinizin ayına uygun besinleri, alerjen risklerini ve mevsimsel önerileri uzman onaylı rehberimizde keşfedin.
+           "Bebeğim neyi, ne zaman yiyebilir?" sorusunun cevabını uzman görüşleri eşliğinde sözlüğümüzde arayın. Bebeğinizin ayına uygun besinleri, alerjen risklerini ve mevsimsel önerileri rehberimizde keşfedin.
           </p>
 
           {/* Search Bar */}
@@ -296,8 +295,7 @@ export default function IngredientsGuidePage() {
 
           {/* Season Filter - DÜZELTİLDİ: "Tüm Yıl" eklendi */}
           <div className="flex flex-wrap gap-2 items-center justify-center sm:justify-start">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide mr-2">Mevsim:</span>
-            {["Kış", "İlkbahar", "Yaz", "Sonbahar", "Tüm Yıl"].map((season) => {
+            {["Tüm Yıl", "Kış", "İlkbahar", "Yaz", "Sonbahar"].map((season) => {
               const isActive = activeSeasons.includes(season);
               const config = SEASON_CONFIG[season];
               return (

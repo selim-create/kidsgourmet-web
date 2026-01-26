@@ -6,6 +6,26 @@ import Link from 'next/link';
 import { searchService, SearchResponse } from '@/services/search-service';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 
+// Tüm 16 araçlık havuz - Standart İkonlar ve Renkler
+const ALL_TOOLS = [
+  { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-solid fa-shield-heart', color: 'from-red-400 to-red-600' },
+  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-solid fa-magnifying-glass', color: 'from-amber-400 to-amber-600' },
+  { name: 'Ek Gıdaya Başlama', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-solid fa-utensils', color: 'from-orange-400 to-orange-600' },
+  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-solid fa-carrot', color: 'from-green-400 to-green-600' },
+  { name: 'Su İhtiyacı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-solid fa-glass-water', color: 'from-cyan-400 to-cyan-600' },
+  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-solid fa-chart-line', color: 'from-blue-400 to-blue-600' },
+  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-solid fa-baby', color: 'from-pink-400 to-pink-600' },
+  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-solid fa-tshirt', color: 'from-indigo-400 to-indigo-600' },
+  { name: 'Hava Kalitesi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-solid fa-wind', color: 'from-sky-400 to-sky-600' },
+  { name: 'Akıllı Bez', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-solid fa-baby-carriage', color: 'from-rose-400 to-rose-600' },
+  { name: 'Günlük Hijyen', path: '/akilli-asistan/hijyen-hesaplayici', icon: 'fa-solid fa-hand-sparkles', color: 'from-teal-400 to-teal-600' },
+  { name: 'Banyo Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-solid fa-bath', color: 'from-blue-400 to-indigo-500' },
+  { name: 'Aşı Takvimi', path: '/dashboard/saglik/asilar', icon: 'fa-solid fa-syringe', color: 'from-emerald-400 to-emerald-600' },
+  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-solid fa-plate-wheat', color: 'from-yellow-500 to-orange-500' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-solid fa-clock-rotate-left', color: 'from-purple-400 to-purple-600' },
+  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-solid fa-calendar-check', color: 'from-lime-400 to-lime-600' },
+];
+
 function SearchContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -18,6 +38,9 @@ function SearchContent() {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
   
+  // Sidebar Tools State
+  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+  
   const { ageGroups } = useAgeGroups();
 
   // Initialize age groups from URL parameter
@@ -26,6 +49,12 @@ function SearchContent() {
       setSelectedAgeGroups([ageParam]);
     }
   }, [ageParam]);
+
+  // Initialize Random Tools (3 adet)
+  useEffect(() => {
+    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
+    setSidebarTools(shuffled.slice(0, 3));
+  }, []);
 
   // Perform search
   const performSearch = useCallback(async (searchQuery: string, ageGroup?: string) => {
@@ -441,42 +470,40 @@ function SearchContent() {
                     {/* Faydalı Araçlar (Random Tool Cards) */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-slate-800 px-1">Faydalı Araçlar</h3>
-                        {(() => {
-                          // Smart Assistant Tools list
-                          const SMART_TOOLS = [
-                            { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-plate-utensils', color: 'from-purple-500 to-pink-500' },
-                            { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-book-sparkles', color: 'from-blue-500 to-indigo-500' },
-                            { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'from-green-500 to-teal-500' },
-                            { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-clipboard-check', color: 'from-orange-500 to-red-500' },
-                            { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-chart-line', color: 'from-indigo-500 to-purple-500' },
-                            { name: 'Su İhtiyacı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-droplet', color: 'from-cyan-500 to-blue-500' },
-                            { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-shield-virus', color: 'from-red-500 to-pink-500' },
-                            { name: 'Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby', color: 'from-pink-500 to-rose-500' },
-                          ];
-                          
-                          // Shuffle and pick 3 random tools
-                          const shuffled = [...SMART_TOOLS].sort(() => Math.random() - 0.5);
-                          const randomTools = shuffled.slice(0, 3);
-                          
-                          return randomTools.map((tool, index) => (
-                            <Link 
-                              key={index}
-                              href={tool.path}
-                              className={`block bg-gradient-to-br ${tool.color} p-4 rounded-2xl text-white hover:shadow-lg transition-all group`}
-                            >
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
-                                  <i className={`fa-solid ${tool.icon} text-lg`}></i>
-                                </div>
-                                <h4 className="font-bold text-sm">{tool.name}</h4>
-                              </div>
-                              <p className="text-xs text-white/80 mb-2">Yapay zeka destekli araç</p>
-                              <div className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
-                                Hemen Dene <i className="fa-solid fa-arrow-right"></i>
-                              </div>
-                            </Link>
-                          ));
-                        })()}
+                        {/* Rastgele seçilen 3 araç gösterilir.
+                          Hydration Error'ı önlemek için useEffect içinde seçim yapılır.
+                          Loading state sırasında placeholder gösterilir.
+                        */}
+                        {sidebarTools.length === 0 ? (
+                            // Loading Skeleton
+                            [1, 2, 3].map((i) => (
+                                <div key={i} className="bg-gray-100 p-4 rounded-2xl h-24 animate-pulse"></div>
+                            ))
+                        ) : (
+                            sidebarTools.map((tool, index) => (
+                                <Link 
+                                  key={index}
+                                  href={tool.path}
+                                  className={`block bg-gradient-to-br ${tool.color} p-4 rounded-2xl text-white hover:shadow-lg transition-all group relative overflow-hidden`}
+                                >
+                                  {/* Background Pattern */}
+                                  <i className={`fa-solid ${tool.icon} absolute -right-2 -bottom-4 text-6xl text-white/10 group-hover:rotate-12 transition-transform duration-500`}></i>
+                                  
+                                  <div className="relative z-10">
+                                      <div className="flex items-center gap-3 mb-2">
+                                        <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center border border-white/20 shadow-sm">
+                                          <i className={`${tool.icon} text-lg text-white`}></i>
+                                        </div>
+                                        <h4 className="font-bold text-sm leading-tight text-white">{tool.name}</h4>
+                                      </div>
+                                      <p className="text-xs text-white/80 mb-3 font-medium">Yapay zeka destekli araç</p>
+                                      <div className="text-xs font-bold bg-white/20 hover:bg-white/30 backdrop-blur inline-flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all border border-white/20">
+                                        Hemen Dene <i className="fa-solid fa-arrow-right"></i>
+                                      </div>
+                                  </div>
+                                </Link>
+                            ))
+                        )}
                     </div>
 
                 </aside>

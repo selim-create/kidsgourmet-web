@@ -6,13 +6,14 @@ import { toolService } from '@/services/tool-service';
 import type { Tool } from '@/lib/types';
 
 // Fallback araç listesi
+// İkonlar standartlaştırıldı
 const defaultTools: Tool[] = [
   {
     id: 1,
     title: 'BLW Hazırlık Testi',
     slug: 'blw-testi',
     description: 'WHO standartlarında 8 soruda bebeğinizin BLW\'ye hazır olup olmadığını öğrenin.',
-    icon: 'fa-solid fa-baby',
+    icon: 'fa-solid fa-baby', // Güncellendi
     tool_type: 'blw_test',
     is_active: true,
     requires_auth: false,
@@ -42,7 +43,7 @@ const defaultTools: Tool[] = [
     title: 'Ek Gıda Rehberi',
     slug: 'ek-gida-rehberi',
     description: 'Bu besin bebeğime uygun mu? Malzemeleri arayın ve yaşa göre uygunluğunu öğrenin.',
-    icon: 'fa-solid fa-carrot',
+    icon: 'fa-solid fa-carrot', // Güncellendi
     tool_type: 'food_guide',
     is_active: true,
     requires_auth: false,
@@ -52,7 +53,7 @@ const defaultTools: Tool[] = [
     title: 'Ek Gıdaya Başlama Kontrolü',
     slug: 'ek-gidaya-baslama',
     description: 'Bebeğiniz katı gıdaya hazır mı? Hazırlık testini yapın ve öneriler alın.',
-    icon: 'fa-solid fa-utensils',
+    icon: 'fa-solid fa-utensils', // Güncellendi
     tool_type: 'solid_food_readiness',
     is_active: true,
     requires_auth: false,
@@ -62,7 +63,7 @@ const defaultTools: Tool[] = [
     title: 'Bu Gıda Verilir mi?',
     slug: 'bu-gida-verilir-mi',
     description: 'Tek bir besin için hızlı karar verin. Hangi yaşta, nasıl verilebilir?',
-    icon: 'fa-solid fa-circle-check',
+    icon: 'fa-solid fa-magnifying-glass', // Güncellendi
     tool_type: 'food_checker',
     is_active: true,
     requires_auth: false,
@@ -82,7 +83,7 @@ const defaultTools: Tool[] = [
     title: 'Besin Deneme Takvimi',
     slug: 'besin-takvimi',
     description: 'Hangi gıdaların ne zaman denendiğini takip edin ve kayıt altına alın.',
-    icon: 'fa-solid fa-calendar-check',
+    icon: 'fa-solid fa-calendar-check', // Güncellendi
     tool_type: 'food_trial_calendar',
     is_active: true,
     requires_auth: true,
@@ -136,7 +137,7 @@ const defaultTools: Tool[] = [
     title: 'Leke Ansiklopedisi',
     slug: 'leke-rehberi',
     description: 'Bebek kıyafetlerindeki lekeler için çözüm rehberi.',
-    icon: 'fa-solid fa-shirt',
+    icon: 'fa-solid fa-tshirt', // Güncellendi
     tool_type: 'stain_encyclopedia',
     is_active: true,
     requires_auth: false,
@@ -295,6 +296,7 @@ export default function ToolsPage() {
 
                   {/* Icon */}
                   <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 text-2xl transition-transform group-hover:scale-110 ${toolIconColors[tool.tool_type] || 'bg-gray-50 text-gray-500'}`}>
+                    {/* Tool'dan gelen ikon kullanılıyor, standartlara uygun olmalı */}
                     <i className={tool.icon}></i>
                   </div>
 

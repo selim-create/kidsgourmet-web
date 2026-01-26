@@ -63,7 +63,7 @@ export default function DashboardSidebar({ activePage }: DashboardSidebarProps) 
         </Link>
 
         <Link href="/akilli-asistan/blw-testi" className={linkClasses('blw-testi')}>
-          <i className={`fa-solid fa-utensils ${iconClasses('blw-testi')}`}></i>
+          <i className={`fa-solid fa-baby ${iconClasses('blw-testi')}`}></i>
           <span className="text-sm font-semibold">Ek Gıda & BLW</span>
         </Link>
 

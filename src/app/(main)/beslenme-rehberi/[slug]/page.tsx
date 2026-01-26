@@ -15,8 +15,37 @@ import { useActiveChild } from '@/contexts/ActiveChildContext';
 import IngredientSafetyAlert from '@/components/features/safety/IngredientSafetyAlert';
 import RecipeCard from '@/components/ui/RecipeCard';
 
+const ALL_TOOLS = [
+  { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-solid fa-shield-heart', color: 'text-red-500', bg: 'bg-red-50' },
+  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-solid fa-magnifying-glass', color: 'text-amber-500', bg: 'bg-amber-50' },
+  { name: 'Ek Gıdaya Başlama', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-solid fa-utensils', color: 'text-orange-500', bg: 'bg-orange-50' },
+  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-solid fa-carrot', color: 'text-green-500', bg: 'bg-green-50' },
+  { name: 'Su İhtiyacı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-solid fa-glass-water', color: 'text-cyan-500', bg: 'bg-cyan-50' },
+  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-solid fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
+  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-solid fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
+  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-solid fa-tshirt', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+  { name: 'Hava Kalitesi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-solid fa-wind', color: 'text-sky-500', bg: 'bg-sky-50' },
+  { name: 'Akıllı Bez', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-solid fa-baby-carriage', color: 'text-rose-500', bg: 'bg-rose-50' },
+  { name: 'Günlük Hijyen', path: '/akilli-asistan/hijyen-hesaplayici', icon: 'fa-solid fa-hand-sparkles', color: 'text-teal-500', bg: 'bg-teal-50' },
+  { name: 'Banyo Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-solid fa-bath', color: 'text-blue-400', bg: 'bg-blue-50' },
+  { name: 'Aşı Takvimi', path: '/dashboard/saglik/asilar', icon: 'fa-solid fa-syringe', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-solid fa-plate-wheat', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-solid fa-clock-rotate-left', color: 'text-purple-500', bg: 'bg-purple-50' },
+  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-solid fa-calendar-check', color: 'text-lime-500', bg: 'bg-lime-50' },
+];
+
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
+
+  // 2. ADIM: Hooks (useState, useEffect) BURADA, fonksiyonun EN BAŞINDA olmalı
+  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+
+  useEffect(() => {
+    // Sayfa yüklendiğinde 16 araçtan rastgele 4 tanesini seç
+    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
+    setSidebarTools(shuffled.slice(0, 4));
+  }, []);
+
   const [ingredient, setIngredient] = useState<Ingredient | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -691,35 +720,39 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                           </div>
                         )}
 
-                        {/* SIDEBAR ARAÇLAR - Rastgele Faydalı Araçlar */}
+                        {/* SIDEBAR ARAÇLAR - Rastgele 4 Faydalı Araç */}
                         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
                           <h3 className="font-bold text-slate-800 mb-4 flex items-center">
                             <i className="fa-solid fa-wand-magic-sparkles text-green-500 mr-2"></i> 
                             Faydalı Araçlar
                           </h3>
                           <div className="space-y-2">
-                            {[
-                              { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: 'fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
-                              { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: 'fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
-                              { name: 'Su İhtiyacı Hesaplayıcı', slug: 'su-ihtiyaci', icon: 'fa-droplet', color: 'text-cyan-500', bg: 'bg-cyan-50' },
-                              { name: 'Alerjen Planlayıcı', slug: 'alerjen-planlayici', icon: 'fa-shield-halved', color: 'text-red-500', bg: 'bg-red-50' },
-                              { name: 'Ek Gıda Rehberi', slug: 'ek-gida-rehberi', icon: 'fa-book-open', color: 'text-green-500', bg: 'bg-green-50' },
-                              { name: 'Bu Gıda Verilir mi?', slug: 'bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'text-amber-500', bg: 'bg-amber-50' },
-                            ].sort(() => Math.random() - 0.5).slice(0, 4).map((tool) => (
-                              <Link
-                                key={tool.slug}
-                                href={`/akilli-asistan/${tool.slug}`}
-                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
-                              >
-                                <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center`}>
-                                  <i className={`fa-solid ${tool.icon} ${tool.color}`}></i>
+                            {/* Loading State veya Araç Listesi */}
+                            {sidebarTools.length === 0 ? (
+                              // Yüklenirken gösterilecek skeleton (titreme efekti)
+                              [1, 2, 3, 4].map((i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 animate-pulse">
+                                  <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
+                                  <div className="h-4 bg-gray-200 rounded w-24"></div>
                                 </div>
-                                <span className="font-medium text-slate-700 group-hover:text-green-500 transition-colors text-sm">
-                                  {tool.name}
-                                </span>
-                                <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
-                              </Link>
-                            ))}
+                              ))
+                            ) : (
+                              sidebarTools.map((tool) => (
+                                <Link
+                                  key={tool.path}
+                                  href={tool.path}
+                                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                                >
+                                  <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                                    <i className={`${tool.icon} ${tool.color}`}></i>
+                                  </div>
+                                  <span className="font-medium text-slate-700 group-hover:text-green-500 transition-colors text-sm">
+                                    {tool.name}
+                                  </span>
+                                  <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                                </Link>
+                              ))
+                            )}
                           </div>
                         </div>
 

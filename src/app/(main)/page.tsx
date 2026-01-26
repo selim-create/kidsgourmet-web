@@ -17,6 +17,26 @@ import BlogSection from '@/components/features/BlogSection';
 import RecipeCardComponent from '@/components/ui/RecipeCard';
 import { InContentAd } from '@/components/ads';
 
+// Tüm 16 araçlık havuz - Standart İkonlar, Renkler ve Açıklamalar
+const ALL_TOOLS = [
+  { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-solid fa-shield-heart', color: 'text-red-500', bg: 'bg-red-50', description: 'Potansiyel alerjenleri güvenli şekilde tanıtma planı oluşturun.' },
+  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-solid fa-magnifying-glass', color: 'text-amber-500', bg: 'bg-amber-50', description: 'Hangi besin, hangi ayda, nasıl verilir? Hızlıca öğrenin.' },
+  { name: 'Ek Gıdaya Başlama', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-solid fa-utensils', color: 'text-orange-500', bg: 'bg-orange-50', description: 'Bebeğiniz katı gıdaya hazır mı? Hazırlık testini çözün.' },
+  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-solid fa-carrot', color: 'text-green-500', bg: 'bg-green-50', description: 'Aydan aya beslenme rehberi ve porsiyon bilgileri.' },
+  { name: 'Su İhtiyacı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-solid fa-glass-water', color: 'text-cyan-500', bg: 'bg-cyan-50', description: 'Bebeğinizin günlük sıvı ihtiyacını kolayca hesaplayın.' },
+  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-solid fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50', description: 'Bebeğinizin gelişimini WHO standartlarına göre takip edin.' },
+  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-solid fa-baby', color: 'text-pink-500', bg: 'bg-pink-50', description: 'Bebeğiniz kendi kendine beslenmeye hazır mı?' },
+  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-solid fa-tshirt', color: 'text-indigo-500', bg: 'bg-indigo-50', description: 'Zorlu bebek lekeleriyle başa çıkmanın püf noktaları.' },
+  { name: 'Hava Kalitesi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-solid fa-wind', color: 'text-sky-500', bg: 'bg-sky-50', description: 'Bulunduğunuz yerin hava kalitesi bebek için uygun mu?' },
+  { name: 'Akıllı Bez', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-solid fa-baby-carriage', color: 'text-rose-500', bg: 'bg-rose-50', description: 'Bebeğiniz için doğru bez numarasını ve miktarını bulun.' },
+  { name: 'Günlük Hijyen', path: '/akilli-asistan/hijyen-hesaplayici', icon: 'fa-solid fa-hand-sparkles', color: 'text-teal-500', bg: 'bg-teal-50', description: 'Günlük bakım ve hijyen ürünleri ihtiyacını planlayın.' },
+  { name: 'Banyo Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-solid fa-bath', color: 'text-blue-400', bg: 'bg-blue-50', description: 'Bebeğiniz için ideal banyo sıklığı ve süresini öğrenin.' },
+  { name: 'Aşı Takvimi', path: '/dashboard/saglik/asilar', icon: 'fa-solid fa-syringe', color: 'text-emerald-500', bg: 'bg-emerald-50', description: 'Aşı zamanlarını takip edin, hatırlatmalar alın.' },
+  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-solid fa-plate-wheat', color: 'text-yellow-600', bg: 'bg-yellow-50', description: 'İştahsız bebekler için eğlenceli tabak sunumları.' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-solid fa-clock-rotate-left', color: 'text-purple-500', bg: 'bg-purple-50', description: 'Yeni gıdaları güvenle tanıtmak için altın kural.' },
+  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-solid fa-seedling', color: 'text-lime-500', bg: 'bg-lime-50', description: 'Denediğiniz besinleri ve tepkileri kayıt altına alın.' },
+];
+
 // --- HOME PAGE ---
 export default function Home() {
   const router = useRouter();
@@ -30,8 +50,8 @@ export default function Home() {
   const [tariftenRecipe, setTariftenRecipe] = useState<TariftenRecipe | null>(null);
   const [rejimdeContent, setRejimdeContent] = useState<RejimdeContent | null>(null);
   
-  // Random tools state
-  const [randomTools, setRandomTools] = useState<Array<{name: string; path: string; icon: string; color: string; description: string}>>([]);
+  // Random tools state - Hydration safe
+  const [randomTools, setRandomTools] = useState<typeof ALL_TOOLS>([]);
   
   // Age dropdown state
   const [isAgeDropdownOpen, setIsAgeDropdownOpen] = useState(false);
@@ -139,26 +159,10 @@ export default function Home() {
     fetchData();
   }, []);
   
-  // Random tools selection
+  // Random tools selection - Client Side Only to prevent hydration error
   useEffect(() => {
-    const allTools = [
-      { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-baby', color: 'blue', description: 'WHO standartlarında 8 soruda bebeğinizin BLW\'ye hazır olup olmadığını öğrenin.' },
-      { name: 'Persentil Hesaplama', path: '/akilli-asistan/persentil-hesaplama', icon: 'fa-chart-line', color: 'purple', description: 'Bebeğinizin boy ve kilosunu WHO büyüme eğrileriyle karşılaştırın.' },
-      { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-magnifying-glass', color: 'orange', description: 'Bu besin bebeğime uygun mu? Malzemeleri arayın ve yaşa göre uygunluğunu öğrenin.' },
-      { name: 'Çocuğum Profili', path: '/profil', icon: 'fa-id-card', color: 'green', description: 'Bebeğinizin gelişimini takip edin ve kişiselleştirilmiş öneriler alın.' },
-      { name: 'Aşı Takvimi', path: '/dashboard/saglik/asilar', icon: 'fa-syringe', color: 'red', description: 'Bebeğinizin aşı takvimini takip edin ve hatırlatıcılar alın.' },
-      { name: 'Su İhtiyacı Hesaplama', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-droplet', color: 'cyan', description: 'Bebeğinizin günlük sıvı ihtiyacını yaşına göre hesaplayın.' },
-      { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-triangle-exclamation', color: 'amber', description: 'Potansiyel alerjenleri güvenli şekilde tanıtma planı oluşturun.' },
-      { name: 'Besin Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-calendar-days', color: 'lime', description: 'Hangi gıdaların ne zaman denendiğini takip edin ve kayıt altına alın.' },
-      { name: 'Haftalık Plan', path: '/dashboard/haftalik-plan', icon: 'fa-calendar-week', color: 'teal', description: 'Bebeğiniz için haftalık beslenme planı oluşturun ve takip edin.' },
-      { name: 'Alışveriş Listesi', path: '/alisveris-listesi', icon: 'fa-basket-shopping', color: 'pink', description: 'Tariflerden otomatik alışveriş listesi oluşturun ve düzenleyin.' },
-      { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-deneme-takvimi', icon: 'fa-clipboard-check', color: 'indigo', description: 'Yeni gıdaları 3 gün kuralıyla tanıtın ve alerjik reaksiyonları takip edin.' },
-      { name: 'Banyo Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-bath', color: 'sky', description: 'Bebeğiniz için mevsime ve cilt tipine uygun banyo rutini oluşturun.' },
-      { name: 'Bez Hesaplayıcı', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-baby-carriage', color: 'rose', description: 'Doğru bez numarası ve aylık ihtiyacınızı öğrenin.' },
-    ];
-    
     // Fisher-Yates shuffle algorithm for proper randomization
-    const shuffled = [...allTools];
+    const shuffled = [...ALL_TOOLS];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -189,26 +193,6 @@ export default function Home() {
   const filteredRecipes = latestRecipes.filter(recipe => !featuredIds.includes(recipe.id));
   const filteredPosts = blogPosts.filter(post => !featuredIds.includes(post.id)).slice(0, 6);
   
-  // Helper function to get color classes for tool cards
-  const getToolColorClasses = (color: string) => {
-    const colorMap: Record<string, { bg: string; text: string }> = {
-      blue: { bg: 'bg-blue-50', text: 'text-blue-500' },
-      purple: { bg: 'bg-purple-50', text: 'text-purple-500' },
-      orange: { bg: 'bg-orange-100', text: 'text-orange-500' },
-      green: { bg: 'bg-green-50', text: 'text-green-500' },
-      red: { bg: 'bg-red-50', text: 'text-red-500' },
-      cyan: { bg: 'bg-cyan-50', text: 'text-cyan-500' },
-      amber: { bg: 'bg-amber-50', text: 'text-amber-600' },
-      lime: { bg: 'bg-lime-50', text: 'text-lime-600' },
-      teal: { bg: 'bg-teal-50', text: 'text-teal-600' },
-      pink: { bg: 'bg-pink-50', text: 'text-pink-500' },
-      indigo: { bg: 'bg-indigo-50', text: 'text-indigo-500' },
-      sky: { bg: 'bg-sky-50', text: 'text-sky-500' },
-      rose: { bg: 'bg-rose-50', text: 'text-rose-500' },
-    };
-    return colorMap[color] || { bg: 'bg-gray-50', text: 'text-gray-500' };
-  };
-  
   // Age groups for dropdown
   const ageGroupsOrdered = [
     { value: '', label: 'Tüm Aylar' },
@@ -220,7 +204,7 @@ export default function Home() {
   ];
 
   // Dalgalı arka plan görseli (SVG)
-  const waveBgImage = "data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.184 20c.357-.13.72-.264 1.088-.402l1.768-.661C33.64 15.347 39.647 14 50 14c10.271 0 15.362 1.222 24.629 4.928.955.383 1.869.74 2.75 1.072h6.225c-2.51-.73-5.139-1.691-8.233-2.928C65.888 12.878 58.749 10 50 10c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h6.225zM0 20c2.51-.73 5.139-1.691 8.233-2.928C18.749 12.878 24.889 10 35 10c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928H0zM50 0c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928C74.638 6.253 68.647 5 50 5c-10.271 0-15.362 1.222-24.629 4.928C14.112 14.122 6.973 17 0 17v3h100v-3s-2.51-.73-5.139-1.691C84.362 10.928 77.223 8 68.474 8c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928C24.362 14.072 17.223 11 11.526 11c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h11.474z' fill='%23FFF8E1' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E";
+  const waveBgImage = "data:image/svg+xml,%3Csvg width='100' height='20' viewBox='0 0 100 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M21.184 20c.357-.13.72-.264 1.088-.402l1.768-.661C33.64 15.347 39.647 14 50 14c10.271 0 15.362 1.222 24.629 4.928.955.383 1.869.74 2.75 1.072h6.225c-2.51-.73-5.139-1.691-8.233-2.928C65.888 12.878 58.749 10 50 10c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h6.225zM0 20c2.51-.73 5.139-1.691 8.233-2.928C18.749 12.878 24.889 10 35 10c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928H0zM50 0c8.749 0 14.889 2.878 25.371 7.072 3.094 1.237 5.723 2.198 8.233 2.928C74.638 6.253 68.647 5 50 5c-10.271 0-15.362 1.222-24.629 4.928C14.112 14.122 6.973 17 0 17v3h100v-3s-2.51-.73-5.139-1.691C84.362 10.928 77.223 8 68.474 8c-8.749 0-14.889 2.878-25.371 7.072-3.094 1.237-5.723 2.198-8.233 2.928h11.474z' fill='%23FFF8E1' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E";
 
   // JSON-LD Structured Data
   const structuredData = {
@@ -500,44 +484,38 @@ export default function Home() {
                   <p className="text-gray-500 mt-2">Çocuğunuzun gelişimi ve güvenliği için veri odaklı çözümler.</p>
               </div>
 
-              {/* Mobil için yatay scroll - DÜZENLENDİ: width:max-content kaldırıldı, flex-none kullanıldı */}
+              {/* Mobil için yatay scroll */}
               <div className="lg:hidden flex overflow-x-auto pb-6 -mx-4 px-4 gap-4 snap-x snap-mandatory scrollbar-hide">
-                  {randomTools.map((tool, index) => {
-                    const colors = getToolColorClasses(tool.color);
-                    return (
+                  {randomTools.map((tool, index) => (
                       <div key={index} className="flex-none snap-center w-[260px] bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg transition-all flex flex-col">
-                        <div className={`w-16 h-16 ${colors.bg} ${colors.text} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
-                          <i className={`fa-solid ${tool.icon}`}></i>
+                        <div className={`w-16 h-16 ${tool.bg} ${tool.color} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
+                          <i className={`${tool.icon}`}></i>
                         </div>
                         <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">{tool.name}</h3>
                         <p className="text-gray-500 text-sm leading-relaxed mb-3">{tool.description}</p>
                         <div className="flex-grow"></div>
-                        <Link href={tool.path} className={`${colors.text} font-bold flex items-center hover:underline mt-4`}>
+                        <Link href={tool.path} className={`${tool.color} font-bold flex items-center hover:underline mt-4`}>
                           Keşfet <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                         </Link>
                       </div>
-                    );
-                  })}
+                  ))}
               </div>
 
               {/* Desktop için grid */}
               <div className="hidden lg:grid grid-cols-4 gap-6">
-                {randomTools.map((tool, index) => {
-                  const colors = getToolColorClasses(tool.color);
-                  return (
+                {randomTools.map((tool, index) => (
                     <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col">
-                      <div className={`w-16 h-16 ${colors.bg} ${colors.text} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
-                        <i className={`fa-solid ${tool.icon}`}></i>
+                      <div className={`w-16 h-16 ${tool.bg} ${tool.color} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
+                        <i className={`${tool.icon}`}></i>
                       </div>
                       <h3 className="font-sans font-bold text-xl text-slate-800 mb-2">{tool.name}</h3>
                       <p className="text-gray-500 text-sm leading-relaxed mb-3">{tool.description}</p>
                       <div className="flex-grow"></div>
-                      <Link href={tool.path} className={`${colors.text} font-bold flex items-center hover:underline mt-4`}>
+                      <Link href={tool.path} className={`${tool.color} font-bold flex items-center hover:underline mt-4`}>
                         Keşfet <i className="fa-solid fa-chevron-right ml-2 text-xs"></i>
                       </Link>
                     </div>
-                  );
-                })}
+                ))}
               </div>
           </div>
       </div>

@@ -21,6 +21,26 @@ import { SidebarAds, InContentAd } from '@/components/ads';
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
 
+// Tüm 16 araçlık havuz - Standart İkonlar ve Renkler
+const ALL_TOOLS = [
+  { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-solid fa-shield-heart', color: 'text-red-500', bg: 'bg-red-50' },
+  { name: 'Bu Gıda Verilir mi?', path: '/akilli-asistan/bu-gida-verilir-mi', icon: 'fa-solid fa-magnifying-glass', color: 'text-amber-500', bg: 'bg-amber-50' },
+  { name: 'Ek Gıdaya Başlama', path: '/akilli-asistan/ek-gidaya-baslama', icon: 'fa-solid fa-utensils', color: 'text-orange-500', bg: 'bg-orange-50' },
+  { name: 'Ek Gıda Rehberi', path: '/akilli-asistan/ek-gida-rehberi', icon: 'fa-solid fa-carrot', color: 'text-green-500', bg: 'bg-green-50' },
+  { name: 'Su İhtiyacı', path: '/akilli-asistan/su-ihtiyaci', icon: 'fa-solid fa-glass-water', color: 'text-cyan-500', bg: 'bg-cyan-50' },
+  { name: 'Persentil Hesaplayıcı', path: '/akilli-asistan/persentil', icon: 'fa-solid fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
+  { name: 'BLW Hazırlık Testi', path: '/akilli-asistan/blw-testi', icon: 'fa-solid fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
+  { name: 'Leke Ansiklopedisi', path: '/akilli-asistan/leke-rehberi', icon: 'fa-solid fa-tshirt', color: 'text-indigo-500', bg: 'bg-indigo-50' },
+  { name: 'Hava Kalitesi', path: '/akilli-asistan/hava-kalitesi', icon: 'fa-solid fa-wind', color: 'text-sky-500', bg: 'bg-sky-50' },
+  { name: 'Akıllı Bez', path: '/akilli-asistan/bez-hesaplayici', icon: 'fa-solid fa-baby-carriage', color: 'text-rose-500', bg: 'bg-rose-50' },
+  { name: 'Günlük Hijyen', path: '/akilli-asistan/hijyen-hesaplayici', icon: 'fa-solid fa-hand-sparkles', color: 'text-teal-500', bg: 'bg-teal-50' },
+  { name: 'Banyo Planlayıcı', path: '/akilli-asistan/banyo-planlayici', icon: 'fa-solid fa-bath', color: 'text-blue-400', bg: 'bg-blue-50' },
+  { name: 'Aşı Takvimi', path: '/dashboard/saglik/asilar', icon: 'fa-solid fa-syringe', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { name: 'Sunum Önerileri', path: '/beslenme-rehberi/sunum-onerileri', icon: 'fa-solid fa-plate-wheat', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+  { name: '3 Gün Kuralı', path: '/beslenme-rehberi/3-gun-kurali', icon: 'fa-solid fa-clock-rotate-left', color: 'text-purple-500', bg: 'bg-purple-50' },
+  { name: 'Besin Deneme Takvimi', path: '/akilli-asistan/besin-takvimi', icon: 'fa-solid fa-seedling', color: 'text-lime-500', bg: 'bg-lime-50' },
+];
+
 // params tipini Promise olarak güncelliyoruz
 export default function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   // params Promise'ini çözüyoruz
@@ -41,6 +61,15 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }>>([]);
   const [headings, setHeadings] = useState<{ level: number; id: string; text: string }[]>([]);
   const [activeHeading, setActiveHeading] = useState<string>('');
+  
+  // Sidebar Tools State - Hydration safe random selection
+  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+
+  useEffect(() => {
+    // Sayfa yüklendiğinde 16 araçtan rastgele 4 tanesini seç
+    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
+    setSidebarTools(shuffled.slice(0, 4));
+  }, []);
 
   // Favorites hook
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -169,7 +198,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }, [headings]);
 
   // Intersection Observer for active heading
-  // Configuration constants for TOC visibility tracking
   const OBSERVER_ROOT_MARGIN = '-100px 0px -80% 0px'; // Top and bottom margins for visibility
   const OBSERVER_THRESHOLDS = [0, 0.25, 0.5, 0.75, 1]; // Track visibility at these percentages
   
@@ -238,23 +266,17 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       // Escape special regex characters in heading text
       const escapedText = heading.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       
-      // More flexible regex that handles various HTML patterns
-      // Matches h2 or h3 tags with any attributes, followed by the heading text (with possible whitespace and inline elements)
       const patterns = [
-        // Pattern 1: Exact text match with flexible whitespace
         new RegExp(`(<h[2-3]\\b[^>]*?)(>)([^<]*${escapedText}[^<]*)(</h[2-3]>)`, 'i'),
-        // Pattern 2: Text with inline elements (like <strong>, <em>, etc.)
         new RegExp(`(<h[2-3]\\b[^>]*?)(>)((?:(?!<h[2-3]).)*?${escapedText}(?:(?!<h[2-3]).)*?)(</h[2-3]>)`, 'is'),
       ];
       
       for (const regex of patterns) {
         const newResult = result.replace(regex, (match, openTag, closeBracket, content, closeTag) => {
-          // Only add ID if not already present
           if (openTag.includes('id=')) return match;
           return `${openTag} id="${heading.id}"${closeBracket}${content}${closeTag}`;
         });
         
-        // If replacement was successful, use it and break
         if (newResult !== result) {
           result = newResult;
           break;
@@ -277,15 +299,12 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   
   const getAuthorImage = (post: BlogPost) => {
     const avatarUrls = post._embedded?.author?.[0]?.avatar_urls;
-    // Try different sizes
     const avatar = avatarUrls?.['96'] || avatarUrls?.['48'] || avatarUrls?.['24'];
     
-    // Fix protocol if missing
     if (avatar && avatar.startsWith('//')) {
       return `https:${avatar}`;
     }
     
-    // Return null for invalid avatars (will show initials instead)
     if (!avatar || avatar.includes('blank.gif') || avatar.includes('mystery-man')) {
       return null;
     }
@@ -296,7 +315,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const getAuthorSlug = (post: BlogPost) => {
     const author = post._embedded?.author?.[0];
     const slug = author?.slug || author?.id?.toString();
-    // Return fallback to avoid broken links
     return slug || 'unknown';
   };
 
@@ -315,29 +333,22 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       return `${minutes} dk okuma`;
   };
   
-  // Get sponsor logo with validation
   const getSponsorLogo = (sponsorData: typeof post.sponsor_data): string | null => {
     if (!sponsorData) return null;
     
-    // sponsor_logo veya sponsor_light_logo'yu al
     let logo = sponsorData.sponsor_logo || sponsorData.sponsor_light_logo;
     
-    // Logo yoksa null döndür
     if (!logo) return null;
     
-    // Logo bir object ise (WordPress media object olabilir)
     if (typeof logo === 'object') {
-      // url, source_url veya src property'lerini dene
       const mediaObject = logo as { url?: string; source_url?: string; src?: string };
       logo = mediaObject.url || mediaObject.source_url || mediaObject.src || null;
     }
     
-    // Hala geçerli bir string değilse null döndür
     if (typeof logo !== 'string' || !logo || logo === 'null' || logo === 'undefined' || logo.trim() === '') {
       return null;
     }
     
-    // Relative URL'i absolute yap
     if (logo.startsWith('/')) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_WP_URL || '';
       return `${apiUrl}${logo}`;
@@ -346,7 +357,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     return logo;
   };
 
-  // Social sharing functions
   const shareUrl = typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/kesfet/${slug}`;
   const shareTitle = post ? stripHtml(post.title.rendered) : '';
 
@@ -391,12 +401,10 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     }
   };
 
-  // Check if post is sponsored
   const isSponsored = post?.sponsor_data?.is_sponsored ?? false;
   const sponsorData = post?.sponsor_data;
   const isFav = post ? isFavorite(post.id, 'post') : false;
   
-  // Create final processed content with sponsor CTA if needed
   let processedContent = baseProcessedContent;
   if (isSponsored && sponsorData?.sponsor_url && processedContent) {
     const sponsorLogo = getSponsorLogo(sponsorData);
@@ -421,8 +429,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       </div>
     `;
     
-    // Find the 2nd closing </p> tag and inject after it
-    // If there are fewer than 2 paragraphs, inject after the 1st
     let pCount = 0;
     let injected = false;
     processedContent = processedContent.replace(/<\/p>/g, (match) => {
@@ -434,7 +440,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       return match;
     });
     
-    // Fallback: if we didn't inject (less than 2 paragraphs), inject after first paragraph
     if (!injected && pCount > 0) {
       pCount = 0;
       processedContent = processedContent.replace(/<\/p>/, (match) => {
@@ -524,7 +529,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         <span className="text-gray-500">{sponsorData.sponsor_name} katkılarıyla</span>
                       ) : null;
                     })()}
-                    {/* Reading Time - Show in sponsored posts too */}
+                    {/* Reading Time */}
                     <div className="flex items-center gap-2 text-gray-500">
                       <i className="fa-regular fa-clock"></i> {calculateReadTime(post.content.rendered)}
                     </div>
@@ -598,7 +603,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         <img src={getImageUrl(post)} className="w-full h-auto object-cover" alt={post.title.rendered} />
                     </div>
 
-                    {/* Content Body - WordPress Content Render */}
+                    {/* Content Body */}
                     <div 
                         className="prose prose-lg prose-slate max-w-none text-gray-700 leading-relaxed font-sans
                         prose-headings:font-sans prose-headings:text-slate-800 prose-headings:font-bold
@@ -637,10 +642,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                       />
                     </div>
 
-                    {/* In-Content Ad after main content */}
                     <InContentAd className="my-8" />
 
-                    {/* Expert Approval - Uzman Notu */}
+                    {/* Expert Approval */}
                     {post.expert && post.expert.approved && (
                       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 rounded-2xl p-4 md:p-5 mt-8">
                         <div className="flex items-start gap-3 md:gap-4">
@@ -677,9 +681,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                       </div>
                     )}
 
-                    {/* Tags & Share (Mobile) */}
+                    {/* Tags & Share */}
                     <div className="mt-12 pt-8 border-t border-gray-100">
-                        {/* Etiketler (Tags) varsa göster */}
                         {post._embedded?.['wp:term']?.[1] && post._embedded['wp:term'][1].length > 0 && (
                             <div className="mt-10 pt-8 border-t border-gray-100">
                               <h4 className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">
@@ -699,7 +702,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             </div>
                         )}
                         
-                        {/* Author Box - Only for non-sponsored posts */}
                         {!isSponsored && (
                           <div className="bg-orange-50/50 p-6 rounded-3xl flex flex-col sm:flex-row items-center gap-6 text-center sm:text-left border border-orange-100 mt-8">
                               {(() => {
@@ -731,7 +733,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                           </div>
                         )}
                         
-                        {/* Sponsor Info Box - Only for sponsored posts */}
                         {isSponsored && sponsorData && (
                           <div className="bg-amber-50 p-6 rounded-3xl border border-amber-100 mt-8">
                             <div className="flex items-center gap-4">
@@ -771,15 +772,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         )}
                     </div>
                     
-                    {/* YORUM BÖLÜMÜ */}
                     <div className="mt-8">
                       <CommentSection postId={post.id} postType="post" initialCommentCount={post.comment_count || 0} />
                     </div>
                     
-                    {/* ============ RELATED CONTENT SECTIONS ============ */}
+                    {/* RELATED CONTENT SECTIONS */}
                     <div className="mt-12 space-y-10">
                       
-                      {/* İlginizi Çekebilir */}
                       {relatedPosts.length > 0 && (
                         <div>
                           <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
@@ -815,7 +814,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         </div>
                       )}
 
-                      {/* Önerilen Tarifler */}
                       {randomRecipes.length > 0 && (
                         <div>
                           <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
@@ -835,7 +833,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         </div>
                       )}
 
-                      {/* Önerilen Malzemeler */}
                       {randomIngredients.length > 0 && (
                         <div>
                           <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
@@ -881,10 +878,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 <aside className="hidden lg:block w-80 flex-shrink-0">
                     <div className="sticky top-24 space-y-8">
                         
-                        {/* Sidebar Ads */}
                         <SidebarAds />
                         
-                        {/* Table of Contents (Dynamic) */}
+                        {/* Table of Contents */}
                         {headings.length > 0 && (
                           <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                             <h3 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider flex items-center">
@@ -900,7 +896,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                       const element = document.getElementById(heading.id);
                                       if (element) {
                                         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                        // Update URL without scrolling
                                         window.history.pushState(null, '', `#${heading.id}`);
                                       }
                                     }}
@@ -918,33 +913,39 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                           </div>
                         )}
 
-                        {/* Faydalı Araçlar Widget */}
+                        {/* Faydalı Araçlar Widget - GÜNCELLENDİ */}
                         <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                           <h3 className="font-bold text-slate-800 mb-4 flex items-center text-sm uppercase tracking-wider">
                             <i className="fa-solid fa-wand-magic-sparkles text-orange-500 mr-2"></i> 
                             Faydalı Araçlar
                           </h3>
                           <div className="space-y-2">
-                            {[
-                              { name: 'BLW Hazırlık Testi', slug: 'blw-testi', icon: 'fa-baby', color: 'text-pink-500', bg: 'bg-pink-50' },
-                              { name: 'Persentil Hesaplayıcı', slug: 'persentil', icon: 'fa-chart-line', color: 'text-blue-500', bg: 'bg-blue-50' },
-                              { name: 'Su İhtiyacı', slug: 'su-ihtiyaci', icon: 'fa-droplet', color: 'text-cyan-500', bg: 'bg-cyan-50' },
-                              { name: 'Bu Gıda Verilir mi?', slug: 'bu-gida-verilir-mi', icon: 'fa-circle-question', color: 'text-amber-500', bg: 'bg-amber-50' },
-                            ].map((tool) => (
-                              <Link
-                                key={tool.slug}
-                                href={`/akilli-asistan/${tool.slug}`}
-                                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
-                              >
-                                <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center`}>
-                                  <i className={`fa-solid ${tool.icon} ${tool.color}`}></i>
+                            {/* Loading State veya Araç Listesi */}
+                            {sidebarTools.length === 0 ? (
+                              // Skeleton Loading
+                              [1, 2, 3, 4].map((i) => (
+                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 animate-pulse">
+                                  <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
+                                  <div className="h-4 bg-gray-200 rounded w-24"></div>
                                 </div>
-                                <span className="font-medium text-slate-700 group-hover:text-orange-500 transition-colors text-sm">
-                                  {tool.name}
-                                </span>
-                                <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
-                              </Link>
-                            ))}
+                              ))
+                            ) : (
+                              sidebarTools.map((tool) => (
+                                <Link
+                                  key={tool.path}
+                                  href={tool.path}
+                                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
+                                >
+                                  <div className={`w-10 h-10 ${tool.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                                    <i className={`${tool.icon} ${tool.color}`}></i>
+                                  </div>
+                                  <span className="font-medium text-slate-700 group-hover:text-orange-500 transition-colors text-sm">
+                                    {tool.name}
+                                  </span>
+                                  <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
+                                </Link>
+                              ))
+                            )}
                           </div>
                         </div>
 
