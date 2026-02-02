@@ -70,7 +70,7 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
   const slots = allSlots.filter((slot) => {
     // Check devices array
     if (Array.isArray(slot.devices) && slot.devices.length > 0) {
-      return slot.devices.includes(deviceType);
+      return slot.devices.includes(deviceType) || slot.devices.includes('all');
     }
     // Check device string
     if (slot.device) {
