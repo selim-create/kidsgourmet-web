@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from "next/link";
 import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
-import { InContentAd } from '@/components/ads';
+import { AdZone } from '@/components/ads';
+import { useAds } from '@/contexts/AdContext';
 
 // --- SABİTLER VE KONFİGÜRASYON ---
 
@@ -52,7 +53,17 @@ const IngredientSkeleton = () => (
     <div className="h-3 bg-gray-200 rounded w-2/3"></div>
   </div>
 );
-
+// Reklam gösterilecek pozisyonları hesapla
+// İlk reklam: 4. pozisyon (index 3'ten sonra)
+// Sonraki reklamlar: her 8 kartta bir (index 11, 19, 27, ...)
+const shouldShowAd = (index: number, hasAd: boolean): boolean => {
+  if (!hasAd) return false;
+  // İlk reklam index 3'ten sonra (4. kart)
+  if (index === 3) return true;
+  // Sonraki reklamlar: 4 + 8n pozisyonlarında (index 11, 19, 27...)
+  if (index > 3 && (index - 3) % 8 === 0) return true;
+  return false;
+};
 export default function IngredientsGuidePage() {
   // --- STATE YÖNETİMİ ---
   
@@ -226,6 +237,22 @@ export default function IngredientsGuidePage() {
     return SEASON_CONFIG[seasonStr] || SEASON_CONFIG['Tüm Yıl'];
   };
 
+  const { hasSlotForPlacement } = useAds();
+  const hasInFeedAd = hasSlotForPlacement('content-in-feed');
+
+  // Reklam pozisyonlarını hesapla - her 8 kartta bir, 4. karttan başlayarak
+  // Pozisyonlar: 4, 12, 20, 28, ... (index: 3, 11, 19, 27, ...)
+  const getAdPositions = (totalItems: number): number[] => {
+    if (!hasInFeedAd) return [];
+    const positions: number[] = [];
+    let pos = 3; // İlk reklam index 3'te (4. kart sonrası)
+    while (pos < totalItems) {
+      positions.push(pos);
+      pos += 8; // Her 8 kartta bir
+    }
+    return positions;
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen pb-20">
       
@@ -333,90 +360,111 @@ export default function IngredientsGuidePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => <IngredientSkeleton key={i} />)}
           </div>
-        ) : ingredients.length > 0 ? (
-          // Results
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {ingredients.map((ingredient, index) => {
-              const ageStyle = getAgeColor(ingredient.start_age);
-              const seasonInfo = getSeasonInfo(ingredient.season);
-              
-              return (
-                <React.Fragment key={ingredient.id}>
-                  <Link 
-                    href={`/beslenme-rehberi/${ingredient.slug}`}
-                    className="group bg-white rounded-[20px] p-4 border border-gray-100 hover:border-green-200 hover:shadow-xl transition-all duration-300 flex flex-col h-full relative"
-                  >
-                    {/* Image Container */}
-                    <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-gray-100">
-                      <img 
-                        src={ingredient.image || `https://placehold.co/400x300/F1F8E9/558B2F?text=${encodeURIComponent(ingredient.name.substring(0,2))}`} 
-                        alt={ingredient.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      
-                      {/* Age Badge */}
-                      <div className={`absolute top-2 left-2 ${ageStyle.bg} ${ageStyle.text} ${ageStyle.border} border px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-sm backdrop-blur-sm`}>
-                        {ingredient.start_age}
-                      </div>
-
-                      {/* Favorite Button */}
-                      <button 
-                        onClick={(e) => toggleFavorite(e, ingredient.id)}
-                        className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur text-gray-400 hover:text-red-500 hover:bg-white flex items-center justify-center transition-all shadow-sm"
-                      >
-                        <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart`}></i>
-                      </button>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex flex-col flex-1">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                          {ingredient.category}
-                        </span>
-                        {seasonInfo && (
-                          <div className={`flex items-center gap-1 text-[10px] font-bold ${seasonInfo.color} bg-gray-50 px-2 py-0.5 rounded-full`}>
-                            <i className={`fa-solid ${seasonInfo.icon}`}></i>
-                            <span>{typeof ingredient.season === 'string' ? ingredient.season.split(',')[0] : ingredient.season?.[0]}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-green-600 transition-colors line-clamp-1">
-                        {ingredient.name}
-                      </h3>
-                      
-                      <p className="text-xs text-gray-500 line-clamp-2 mb-4">
-                        {ingredient.description}
-                      </p>
-
-                      {/* Footer Badge */}
-                      <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
-                        <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
-                          ingredient.allergy_risk === 'Düşük' ? 'bg-green-50 text-green-700 border-green-100' :
-                          ingredient.allergy_risk === 'Orta' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
-                          'bg-red-50 text-red-700 border-red-100'
-                        }`}>
-                          {ingredient.allergy_risk || 'Belirsiz'} Risk
+        ) : ingredients.length > 0 ? (() => {
+          // Reklam pozisyonlarını hesapla
+          const adPositions = getAdPositions(ingredients.length);
+          let adCounter = 0; // Her reklam için benzersiz sayaç
+          
+          return (
+            // Results
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {ingredients.map((ingredient, index) => {
+                const ageStyle = getAgeColor(ingredient.start_age);
+                const seasonInfo = getSeasonInfo(ingredient.season);
+                const showAd = adPositions.includes(index);
+                const currentAdIndex = showAd ? adCounter++ : -1;
+                
+                return (
+                  <React.Fragment key={ingredient.id}>
+                    {/* Ingredient Card */}
+                    <Link 
+                      href={`/beslenme-rehberi/${ingredient.slug}`}
+                      className="group bg-white rounded-[20px] p-4 border border-gray-100 hover:border-green-200 hover:shadow-xl transition-all duration-300 flex flex-col h-full relative"
+                    >
+                      {/* Image Container */}
+                      <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-gray-100">
+                        <img 
+                          src={ingredient.image || `https://placehold.co/400x300/F1F8E9/558B2F?text=${encodeURIComponent(ingredient.name.substring(0,2))}`} 
+                          alt={ingredient.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        
+                        {/* Age Badge */}
+                        <div className={`absolute top-2 left-2 ${ageStyle.bg} ${ageStyle.text} ${ageStyle.border} border px-2.5 py-1 rounded-lg text-xs font-extrabold shadow-sm backdrop-blur-sm`}>
+                          {ingredient.start_age}
                         </div>
-                        <span className="text-gray-300 group-hover:text-green-500 transition-colors">
-                          <i className="fa-solid fa-arrow-right"></i>
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
 
-                  {/* Ad Injection */}
-                  {(index + 1) % 8 === 0 && (
-                    <div className="col-span-full py-4">
-                      <InContentAd />
+                        {/* Favorite Button */}
+                        <button 
+                          onClick={(e) => toggleFavorite(e, ingredient.id)}
+                          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 backdrop-blur text-gray-400 hover:text-red-500 hover:bg-white flex items-center justify-center transition-all shadow-sm"
+                        >
+                          <i className={`fa-${favorites.includes(ingredient.id) ? 'solid' : 'regular'} fa-heart`}></i>
+                        </button>
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex flex-col flex-1">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            {ingredient.category}
+                          </span>
+                          {seasonInfo && (
+                            <div className={`flex items-center gap-1 text-[10px] font-bold ${seasonInfo.color} bg-gray-50 px-2 py-0.5 rounded-full`}>
+                              <i className={`fa-solid ${seasonInfo.icon}`}></i>
+                              <span>{typeof ingredient.season === 'string' ? ingredient.season.split(',')[0] : ingredient.season?.[0]}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-green-600 transition-colors line-clamp-1">
+                          {ingredient.name}
+                        </h3>
+                        
+                        <p className="text-xs text-gray-500 line-clamp-2 mb-4">
+                          {ingredient.description}
+                        </p>
+
+                        {/* Footer Badge */}
+                        <div className="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
+                          <div className={`text-xs font-bold px-2 py-1 rounded-md border ${
+                            ingredient.allergy_risk === 'Düşük' ? 'bg-green-50 text-green-700 border-green-100' :
+                            ingredient.allergy_risk === 'Orta' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                            'bg-red-50 text-red-700 border-red-100'
+                          }`}>
+                            {ingredient.allergy_risk || 'Belirsiz'} Risk
+                          </div>
+                          <span className="text-gray-300 group-hover:text-green-500 transition-colors">
+                            <i className="fa-solid fa-arrow-right"></i>
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+
+                  {/* Ad Card - Malzeme kartı tarzında */}
+                  {showAd && (
+                    <div 
+                      key={`ad-${currentAdIndex}`}
+                      className="bg-white rounded-[20px] border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full"
+                    >
+                      <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                        <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                          <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                        </span>
+                        {/* instanceId ile benzersiz reklam alanı */}
+                        <AdZone 
+                          placement="content-in-feed" 
+                          instanceId={currentAdIndex}
+                        />
+                      </div>
                     </div>
                   )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-        ) : (
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          );
+        })() : (
           // Empty State
           <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">

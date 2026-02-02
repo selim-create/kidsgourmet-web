@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { blogService, BlogPost } from '@/services/blog-service';
 import BlogCard from '@/components/features/BlogCard';
-import { InContentAd } from '@/components/ads';
+import { AdZone } from '@/components/ads';
+import { useAds } from '@/contexts/AdContext';
+import { useDeviceType } from '@/hooks/useDeviceType';
 
 export default function BlogListClient() {
   const [activeCategory, setActiveCategory] = useState<number | "Tümü">("Tümü");
@@ -14,8 +16,23 @@ export default function BlogListClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   
-  // DÜZELTME: İlk sayfa için 10 (1 hero + 9 grid), diğer sayfalar için 9 limit belirledik.
-  const getPostsPerPage = (page: number) => (page === 1 ? 10 : 9);
+  const { hasSlotForPlacement } = useAds();
+  const deviceType = useDeviceType();
+  
+  // Reklam kontrolü - desktop için sidebar-middle, mobile için content-in-feed
+  const hasDesktopAd = hasSlotForPlacement('sidebar-middle');
+  const hasMobileAd = hasSlotForPlacement('content-in-feed');
+  const hasAnyAd = deviceType === 'mobile' ? hasMobileAd : hasDesktopAd;
+  
+  // Reklam varsa grid'de 8, yoksa 9 gösterilecek
+  const getPostsPerPage = (page: number) => {
+    if (page === 1) {
+      // Hero (1) + Grid (8 veya 9) = 9 veya 10
+      return hasAnyAd ? 9 : 10;
+    }
+    // Diğer sayfalar: 8 veya 9
+    return hasAnyAd ? 8 : 9;
+  };
 
   // Verileri çek
   useEffect(() => {
@@ -54,7 +71,7 @@ export default function BlogListClient() {
     }
 
     fetchData();
-  }, [activeCategory, currentPage]);
+  }, [activeCategory, currentPage, hasAnyAd]);
 
   // Kategori değiştiğinde sayfayı sıfırla ve scroll to top
   const handleCategoryChange = (category: number | "Tümü") => {
@@ -141,25 +158,51 @@ export default function BlogListClient() {
 
             {/* BLOG GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post, index) => {
-                // Featured post'u listede tekrar gösterme (sadece "Tümü" sekmesinde ve ilk sayfada)
-                const shouldSkip = activeCategory === "Tümü" && currentPage === 1 && post.id === featuredPost?.id;
+              {(() => {
+                // Featured post'u filtrele (sadece "Tümü" sekmesinde ve ilk sayfada)
+                const filteredPosts = posts.filter(post => {
+                  const shouldSkip = activeCategory === "Tümü" && currentPage === 1 && post.id === featuredPost?.id;
+                  return !shouldSkip;
+                });
                 
-                if (shouldSkip) return null;
-
-                return (
-                  <React.Fragment key={post.id}>
-                    <BlogCard 
-                      post={post}
-                      categories={categories}
-                    />
-                    {/* Insert ad after every 6 posts - Wrapper DIV kaldırıldı */}
-                    {(index + 1) % 6 === 0 && index < posts.length - 1 && (
-                      <InContentAd className="col-span-full" />
-                    )}
-                  </React.Fragment>
-                );
-              })}
+                // Reklam pozisyonu: 6. kart yerine (index 5)
+                const adPosition = 5;
+                let displayIndex = 0;
+                
+                return filteredPosts.map((post, index) => {
+                  const currentDisplayIndex = displayIndex;
+                  displayIndex++;
+                  
+                  // Reklam 6. pozisyonda (index 5) gösterilecek
+                  const showAdBefore = hasAnyAd && currentDisplayIndex === adPosition;
+                  
+                  return (
+                    <React.Fragment key={post.id}>
+                      {/* Reklam kartı - 6. pozisyonda - Minik Gurmeler tarzı */}
+                      {showAdBefore && (
+                        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full">
+                          {/* Ad Area */}
+                          <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center flex-1 min-h-[280px]">
+                            {/* Desktop: sidebar-middle (300x600) */}
+                            <div className="hidden lg:block">
+                              <AdZone placement="sidebar-middle" instanceId={`kesfet-grid-${currentPage}`} />
+                            </div>
+                            {/* Mobile/Tablet: content-in-feed (300x250) */}
+                            <div className="lg:hidden">
+                              <AdZone placement="content-in-feed" instanceId={`kesfet-grid-${currentPage}`} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <BlogCard 
+                        post={post}
+                        categories={categories}
+                      />
+                    </React.Fragment>
+                  );
+                });
+              })()}
             </div>
 
             {posts.length === 0 && (

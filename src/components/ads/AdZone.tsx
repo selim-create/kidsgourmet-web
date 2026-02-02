@@ -2,6 +2,7 @@
 
 /**
  * Ad Zone Component - Easy placement-based ad rendering
+ * Updated: Added instanceId support for multiple instances of same placement
  */
 
 import React from 'react';
@@ -16,9 +17,10 @@ interface AdZoneProps {
   style?: React.CSSProperties;
   debug?: boolean;
   limit?: number;
+  instanceId?: string | number; // NEW: Unique identifier for multiple instances
 }
 
-export function AdZone({ placement, className = '', style, debug = false, limit }: AdZoneProps) {
+export function AdZone({ placement, className = '', style, debug = false, limit, instanceId }: AdZoneProps) {
   const { getSlotsByPlacement, loading, initialized, isDebugMode, adsEnabled, config } = useAds();
   const deviceType = useDeviceType();
 
@@ -27,7 +29,7 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
 
   // Debug logging
   if (showDebug) {
-    console.log(`🔧 [AdZone:${placement}] adsEnabled=${adsEnabled}, initialized=${initialized}, loading=${loading}`);
+    console.log(`🔧 [AdZone:${placement}${instanceId ? `-${instanceId}` : ''}] adsEnabled=${adsEnabled}, initialized=${initialized}, loading=${loading}`);
   }
 
   // Don't render anything if ads are disabled (but show debug if debug mode)
@@ -51,7 +53,7 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
           ...style,
         }}
       >
-        <div>🔄 Loading ads... (placement: {placement})</div>
+        <div>🔄 Loading ads... (placement: {placement}{instanceId ? ` #${instanceId}` : ''})</div>
         <div>adsEnabled: {String(adsEnabled)}</div>
         <div>initialized: {String(initialized)}</div>
       </div>
@@ -88,6 +90,11 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
   // Apply limit if specified
   const displaySlots = limit ? slots.slice(0, limit) : slots;
 
+  // Generate unique container ID suffix if instanceId is provided
+  const getContainerId = (baseId: string) => {
+    return instanceId ? `${baseId}-instance-${instanceId}` : baseId;
+  };
+
   // Footer sticky mobile special handling
   if (placement === 'footer-sticky-mobile') {
     // Only show on mobile
@@ -100,13 +107,17 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
         className={`ad-zone ad-zone-footer-sticky-mobile fixed bottom-0 left-0 right-0 z-40 bg-white shadow-lg ${className}`.trim()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)', ...style }}
       >
-        {displaySlots.map((slot) => (
-          <AdSlot
-            key={slot.slot_id || slot.slotId || slot.id}
-            slotId={slot.slot_id || slot.slotId || slot.id}
-            debug={showDebug}
-          />
-        ))}
+        {displaySlots.map((slot) => {
+          const baseSlotId = slot.slot_id || slot.slotId || slot.id;
+          return (
+            <AdSlot
+              key={getContainerId(baseSlotId)}
+              slotId={baseSlotId}
+              containerId={getContainerId(baseSlotId)}
+              debug={showDebug}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -120,13 +131,17 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
     
     return (
       <div className={`ad-zone ad-zone-sidebar-sticky sticky top-24 ${className}`.trim()} style={style}>
-        {displaySlots.map((slot) => (
-          <AdSlot
-            key={slot.slot_id || slot.slotId || slot.id}
-            slotId={slot.slot_id || slot.slotId || slot.id}
-            debug={showDebug}
-          />
-        ))}
+        {displaySlots.map((slot) => {
+          const baseSlotId = slot.slot_id || slot.slotId || slot.id;
+          return (
+            <AdSlot
+              key={getContainerId(baseSlotId)}
+              slotId={baseSlotId}
+              containerId={getContainerId(baseSlotId)}
+              debug={showDebug}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -134,13 +149,17 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
   // Default rendering
   return (
     <div className={`ad-zone ad-zone-${placement} ${className}`.trim()} style={style}>
-      {displaySlots.map((slot) => (
-        <AdSlot
-          key={slot.slot_id || slot.slotId || slot.id}
-          slotId={slot.slot_id || slot.slotId || slot.id}
-          debug={showDebug}
-        />
-      ))}
+      {displaySlots.map((slot) => {
+        const baseSlotId = slot.slot_id || slot.slotId || slot.id;
+        return (
+          <AdSlot
+            key={getContainerId(baseSlotId)}
+            slotId={baseSlotId}
+            containerId={getContainerId(baseSlotId)}
+            debug={showDebug}
+          />
+        );
+      })}
     </div>
   );
 }

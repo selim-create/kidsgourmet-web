@@ -448,11 +448,17 @@ export default function Home() {
                           <React.Fragment key={recipe.id}>
                             <RecipeCardComponent recipe={enhancedRecipe} />
                             {/* Insert ad at position 8 (after 7th card, index 6) if ad exists */}
-                            {hasInFeedAd && index === 6 && (
-                              <div className="flex items-center justify-center">
+                          {hasInFeedAd && index === 6 && (
+                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                              {/* Sponsored Badge */}
+                              <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                                <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                  <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                                </span>
                                 <AdZone placement="content-in-feed" />
                               </div>
-                            )}
+                            </div>
+                          )}
                           </React.Fragment>
                         );
                       })}

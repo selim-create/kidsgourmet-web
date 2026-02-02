@@ -14,6 +14,7 @@ import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import RecipeCard from '@/components/ui/RecipeCard';
+import { useAds } from '@/contexts/AdContext';
 import { InContentAd, InFeedAdWrapper, FooterBannerAd, AdZone } from '@/components/ads';
 
 // Yaş Grubu Sıralaması
@@ -79,6 +80,11 @@ function RecipesPageContent() {
   const { mealTypes } = useMealTypes();
   const { dietTypes } = useDietTypes();
   const { activeChild } = useActiveChild();
+  const { hasSlotForPlacement } = useAds(); // Bu satırı ekleyin
+
+  // Reklam kontrolü için
+  const hasFirstAd = hasSlotForPlacement('sidebar-top');
+  const hasSecondAd = hasSlotForPlacement('content-in-feed');
   
   // Filtre state
   const [filters, setFilters] = useState<FilterState>({
@@ -458,87 +464,148 @@ function RecipesPageContent() {
               </div>
             ) : (
               <>
-                {/* Suitable Recipes Section */}
-                {profile.birthDate && suitableRecipes.length > 0 && (
-                  <section className="mb-12">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <span className="text-green-500">✓</span> Çocuğunuz için Önerilen Tarifler
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {suitableRecipes.map((recipe, index) => (
-                        <React.Fragment key={recipe.id}>
-                          <RecipeCard 
-                            recipe={recipe}
-                          />
-                          {/* Insert ad after every 6 recipes */}
-                          {(index + 1) % 6 === 0 && index < suitableRecipes.length - 1 && (
-                            <div className="col-span-full">
-                              <InContentAd />
-                            </div>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Other Recipes Section */}
-                {profile.birthDate && otherRecipes.length > 0 && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Diğer Tarifler</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {otherRecipes.map((recipe, index) => (
-                        <React.Fragment key={recipe.id}>
-                          {/* 3rd position (index 2): sidebar-top */}
-                          {index === 2 && (
-                            <div className="col-span-1">
+            {/* Suitable Recipes Section */}
+            {profile.birthDate && suitableRecipes.length > 0 && (
+              <section className="mb-12">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <span className="text-green-500">✓</span> Çocuğunuz için Önerilen Tarifler
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {suitableRecipes.map((recipe, index) => {
+                    const showFirstAd = hasFirstAd && index === 2;
+                    const showSecondAd = hasSecondAd && index === 10;
+                    
+                    return (
+                      <React.Fragment key={recipe.id}>
+                        {/* First ad at position 3 */}
+                        {showFirstAd && (
+                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                              <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                              </span>
                               <AdZone placement="sidebar-top" />
                             </div>
-                          )}
-                          
-                          <RecipeCard 
-                            recipe={recipe}
-                          />
-                          
-                          {/* 12th position (index 11): content-in-feed */}
-                          {index === 11 && (
-                            <div className="col-span-full flex justify-center">
-                              <AdZone placement="content-in-feed" />
-                            </div>
-                          )}
-                        </React.Fragment>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* All Recipes (when no profile) */}
-                {!profile.birthDate && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recipes.map((recipe, index) => (
-                      <React.Fragment key={recipe.id}>
-                        {/* 3rd position (index 2): sidebar-top */}
-                        {index === 2 && (
-                          <div className="col-span-1">
-                            <AdZone placement="sidebar-top" />
                           </div>
                         )}
                         
-                        <RecipeCard 
-                          recipe={recipe}
-                        />
+                        <RecipeCard recipe={recipe} />
                         
-                        {/* 12th position (index 11): content-in-feed */}
-                        {index === 11 && (
-                          <div className="col-span-full flex justify-center">
-                            <AdZone placement="content-in-feed" />
+                        {/* Second ad at position 11 */}
+                        {showSecondAd && (
+                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                              <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                              </span>
+                              <AdZone placement="content-in-feed" />
+                            </div>
                           </div>
                         )}
                       </React.Fragment>
-                    ))}
-                  </div>
-                )}
-              </>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Other Recipes Section */}
+            {profile.birthDate && otherRecipes.length > 0 && (
+              <section>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Diğer Tarifler</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {otherRecipes.map((recipe, index) => {
+                    const showFirstAd = hasFirstAd && index === 2;
+                    const showSecondAd = hasSecondAd && index === 10;
+                    
+                    return (
+                      <React.Fragment key={recipe.id}>
+                        {/* First ad at position 3 */}
+                        {showFirstAd && (
+                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                              <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                              </span>
+                              <AdZone placement="sidebar-top" />
+                            </div>
+                          </div>
+                        )}
+                        
+                        <RecipeCard recipe={recipe} />
+                        
+                        {/* Second ad at position 11 */}
+                        {showSecondAd && (
+                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                              <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                              </span>
+                              <AdZone placement="content-in-feed" />
+                            </div>
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* All Recipes (when no profile) */}
+            {!profile.birthDate && (() => {
+              // Kaç reklam gösterileceğini hesapla
+              const adCount = (hasFirstAd ? 1 : 0) + (hasSecondAd ? 1 : 0);
+              // Gösterilecek tarif sayısı = 12 - reklam sayısı
+              const recipesToShow = 12 - adCount;
+              // Tarifleri kes
+              const displayRecipes = recipes.slice(0, recipesToShow);
+              
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {displayRecipes.map((recipe, index) => {
+                    // İlk reklam 3. pozisyonda (index 2'den sonra)
+                    const showFirstAd = hasFirstAd && index === 2;
+                    // İkinci reklam 11. pozisyonda - ama tarif sayısına göre ayarlanmalı
+                    // Eğer ilk reklam varsa, index 9'da (çünkü 2 tarif + 1 reklam + 7 tarif = 10, sonra 11. pozisyon)
+                    // Eğer ilk reklam yoksa, index 10'da
+                    const secondAdIndex = hasFirstAd ? 9 : 10;
+                    const showSecondAd = hasSecondAd && index === secondAdIndex;
+                    
+                    return (
+                      <React.Fragment key={recipe.id}>
+                        {/* First ad at position 3 */}
+                        {showFirstAd && (
+                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                              <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                              </span>
+                              <AdZone placement="sidebar-top" />
+                            </div>
+                          </div>
+                        )}
+                        
+                        <RecipeCard recipe={recipe} />
+                        
+                        {/* Second ad at position 11 */}
+                        {showSecondAd && (
+                          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
+                            <div className="relative bg-gradient-to-br from-slate-50 to-gray-100 p-4 flex items-center justify-center min-h-[200px]">
+                              <span className="absolute top-3 left-3 px-2 py-1 bg-gray-200/80 text-gray-500 text-xs font-medium rounded-full backdrop-blur-sm">
+                                <i className="fa-solid fa-bullhorn mr-1"></i>Reklam
+                              </span>
+                              <AdZone placement="content-in-feed" />
+                            </div>
+                          </div>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+            </>
             )}
 
             {/* Empty State */}

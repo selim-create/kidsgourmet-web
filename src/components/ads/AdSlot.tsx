@@ -8,32 +8,33 @@ import type { SlotRenderEndedEvent } from '@/lib/ads/types';
 
 interface AdSlotProps {
   slotId: string;
+  containerId?: string; // NEW: Optional custom container ID for multiple instances
   className?: string;
   debug?: boolean;
 }
 
-export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
+export function AdSlot({ slotId, containerId, className = '', debug = false }: AdSlotProps) {
   const { getSlotById, config, initialized, adsEnabled, isDebugMode } = useAds();
   const deviceType = useDeviceType();
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const slotDefinedRef = useRef(false);  // NEW
+  const slotDefinedRef = useRef(false);
 
   const slot = getSlotById(slotId);
+  
+  // Use containerId if provided, otherwise fall back to slotId
+  const actualContainerId = containerId || `ad-slot-${slotId}`;
 
   // Use debug prop OR global debug mode
   const showDebug = debug || isDebugMode;
 
-  // Reset rendered state when slot changes
+  // Reset rendered state when containerId changes
   useEffect(() => {
-    if (slotDefinedRef.current && slotId) {
-      // Slot ID changed, need to re-render
-      setRendered(false);
-      setError(null);
-      slotDefinedRef.current = false;
-    }
-  }, [slotId]);
+    setRendered(false);
+    setError(null);
+    slotDefinedRef.current = false;
+  }, [actualContainerId]);
 
   // Add event listener for empty slot handling
   useEffect(() => {
@@ -41,12 +42,10 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
       return;
     }
     
-    const containerId = `ad-slot-${slotId}`;
-    
     const handleSlotRenderEnded = (event: SlotRenderEndedEvent) => {
       const slotElementId = event.slot.getSlotElementId();
-      if (slotElementId === containerId) {
-        const container = document.getElementById(containerId);
+      if (slotElementId === actualContainerId) {
+        const container = document.getElementById(actualContainerId);
         if (container && event.isEmpty) {
           container.style.minHeight = '0';
           container.style.height = '0';
@@ -66,9 +65,9 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
         });
       }
     };
-  }, [slotId, initialized]);
+  }, [actualContainerId, initialized]);
 
-  // Slot render effect - simplified dependencies
+  // Slot render effect
   useEffect(() => {
     if (!adsEnabled || !initialized || !slot || !containerRef.current || rendered || showDebug) {
       return;
@@ -79,13 +78,13 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
     }
 
     try {
-      const containerId = `ad-slot-${slotId}`;
       const networkCode = config?.network_code || config?.networkCode;
       
       // Only render if ad manager is ready and we have valid config
       if (networkCode && networkCode !== '0' && networkCode !== '') {
-        adManager.defineSlot(slot, containerId);
-        adManager.display(containerId);
+        // Pass the actual container ID to ad manager
+        adManager.defineSlot(slot, actualContainerId);
+        adManager.display(actualContainerId);
         setRendered(true);
         slotDefinedRef.current = true;
       }
@@ -93,19 +92,18 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
       console.error('Error rendering ad slot:', err);
       setError('Failed to render ad');
     }
-  }, [adsEnabled, initialized, slotId, rendered, showDebug]);  // Removed slot, config from deps
+  }, [adsEnabled, initialized, actualContainerId, rendered, showDebug, slot, config]);
 
   // Cleanup ONLY on unmount
   useEffect(() => {
     return () => {
-      // This runs only on unmount
       try {
-        adManager.destroySlot(`ad-slot-${slotId}`);
+        adManager.destroySlot(actualContainerId);
       } catch {
         // Ignore cleanup errors
       }
     };
-  }, [slotId]);  // Include slotId to destroy correct slot if it changes
+  }, [actualContainerId]);
 
   // Don't render if ads disabled and not in debug mode
   if (!adsEnabled && !showDebug) {
@@ -156,6 +154,7 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
         </div>
         <div style={{ textAlign: 'center', lineHeight: 1.4 }}>
           <div><strong>Slot:</strong> {slot.slot_id || slot.slotId}</div>
+          <div><strong>Container:</strong> {actualContainerId}</div>
           <div><strong>Name:</strong> {slot.name || 'N/A'}</div>
           <div><strong>Placement:</strong> {slot.placement}</div>
           <div><strong>Sizes:</strong> {sizesLabel}</div>
@@ -175,10 +174,11 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
   return (
     <div
       ref={containerRef}
-      id={`ad-slot-${slotId}`}
+      id={actualContainerId}
       className={`ad-slot ${className}`.trim()}
       style={{ minHeight: minHeight > 0 ? minHeight : undefined }}
       data-slot-id={slotId}
+      data-container-id={actualContainerId}
       data-placement={slot.placement}
     />
   );
