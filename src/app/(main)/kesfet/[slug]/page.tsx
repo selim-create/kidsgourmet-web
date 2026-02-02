@@ -984,6 +984,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
             </div>
         </div>
 
+        {/* Content - After Hero (Footer üstü, ortalı) */}
+        <div className="w-full flex justify-center py-8 bg-gray-50">
+          <AdZone placement="content-after-hero" />
+        </div>
+
     </div>
   );
 }

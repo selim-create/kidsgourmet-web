@@ -5,6 +5,7 @@ import Link from "next/link";
 import { use } from 'react'; // Next.js 15+ için gerekli
 import { blogService, BlogPost } from '@/services/blog-service';
 import BlogCard from '@/components/features/BlogCard';
+import { AdZone } from '@/components/ads';
 import NewsletterForm from '@/components/common/NewsletterForm';
 import { userService } from '@/services/user-service';
 import { ExpertPublicProfile } from '@/lib/types';
@@ -269,6 +270,9 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                 {/* RIGHT: SIDEBAR (Category Specific) */}
                 <aside className="hidden lg:block space-y-8 sticky top-24 w-[300px]">
                     
+                    {/* Sidebar - Top */}
+                    <AdZone placement="sidebar-top" />
+
                     {/* Expert Widget */}
                     {randomExpert ? (
                         <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm text-center">
@@ -316,6 +320,9 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                         </div>
                     )}
 
+                    {/* Sidebar - Middle (Yazar bloğunun altında) */}
+                    <AdZone placement="sidebar-middle" />
+
                     {/* Newsletter Widget */}
                     <div className="bg-green-50/50 p-6 rounded-3xl border border-green-100 text-center">
                         <div className="w-12 h-12 bg-white text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-xl">
@@ -331,6 +338,9 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                             className=""
                         />
                     </div>
+
+                    {/* Sidebar - Bottom (Newsletter altında) */}
+                    <AdZone placement="sidebar-bottom" />
 
                 </aside>
 
