@@ -489,13 +489,21 @@ function RecipesPageContent() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {otherRecipes.map((recipe, index) => (
                         <React.Fragment key={recipe.id}>
+                          {/* 3rd position (index 2): sidebar-top */}
+                          {index === 2 && (
+                            <div className="col-span-1">
+                              <AdZone placement="sidebar-top" />
+                            </div>
+                          )}
+                          
                           <RecipeCard 
                             recipe={recipe}
                           />
-                          {/* Insert ad after every 6 recipes */}
-                          {(index + 1) % 6 === 0 && index < otherRecipes.length - 1 && (
-                            <div className="col-span-full">
-                              <InContentAd />
+                          
+                          {/* 12th position (index 11): content-in-feed */}
+                          {index === 11 && (
+                            <div className="col-span-full flex justify-center">
+                              <AdZone placement="content-in-feed" />
                             </div>
                           )}
                         </React.Fragment>
@@ -507,17 +515,27 @@ function RecipesPageContent() {
                 {/* All Recipes (when no profile) */}
                 {!profile.birthDate && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <InFeedAdWrapper 
-                      adPositions={[2, 10]} // 3rd and 11th items in grid (0-indexed positions 2 and 10)
-                      totalItems={12} // Show total 12 items (10 recipes + 2 ads)
-                    >
-                      {recipes.map((recipe) => (
+                    {recipes.map((recipe, index) => (
+                      <React.Fragment key={recipe.id}>
+                        {/* 3rd position (index 2): sidebar-top */}
+                        {index === 2 && (
+                          <div className="col-span-1">
+                            <AdZone placement="sidebar-top" />
+                          </div>
+                        )}
+                        
                         <RecipeCard 
-                          key={recipe.id}
                           recipe={recipe}
                         />
-                      ))}
-                    </InFeedAdWrapper>
+                        
+                        {/* 12th position (index 11): content-in-feed */}
+                        {index === 11 && (
+                          <div className="col-span-full flex justify-center">
+                            <AdZone placement="content-in-feed" />
+                          </div>
+                        )}
+                      </React.Fragment>
+                    ))}
                   </div>
                 )}
               </>

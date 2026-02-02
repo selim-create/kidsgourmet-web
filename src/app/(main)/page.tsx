@@ -430,7 +430,7 @@ export default function Home() {
                 (() => {
                   // Check if content-in-feed ad exists
                   const hasInFeedAd = hasSlotForPlacement('content-in-feed');
-                  // Show 7 recipes if ad exists, 8 if not
+                  // Show 7 recipes if ad exists (ad appears after 7th card in 8th position), 8 if not
                   const recipesToShow = hasInFeedAd ? 7 : 8;
                   const recipesSlice = filteredRecipes.slice(0, recipesToShow);
                   
@@ -446,13 +446,13 @@ export default function Home() {
                         
                         return (
                           <React.Fragment key={recipe.id}>
-                            {/* Insert ad at position 3 (index 2) if ad exists */}
-                            {hasInFeedAd && index === 2 && (
+                            <RecipeCardComponent recipe={enhancedRecipe} />
+                            {/* Insert ad at position 8 (after 7th card, index 6) if ad exists */}
+                            {hasInFeedAd && index === 6 && (
                               <div className="flex items-center justify-center">
                                 <AdZone placement="content-in-feed" />
                               </div>
                             )}
-                            <RecipeCardComponent recipe={enhancedRecipe} />
                           </React.Fragment>
                         );
                       })}
