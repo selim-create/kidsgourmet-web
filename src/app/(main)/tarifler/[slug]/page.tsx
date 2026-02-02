@@ -20,7 +20,7 @@ import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
 import Image from 'next/image';
 import RecipeCard from '@/components/ui/RecipeCard';
-import { SidebarAds, InContentAd } from '@/components/ads';
+import { SidebarAds, InContentAd, AdZone } from '@/components/ads';
 
 // Tüm 16 araçlık havuz - Standart İkonlar ve Renkler
 const ALL_TOOLS = [
@@ -775,6 +775,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         )}
                     </div>
 
+                    {/* Content - Top Ad (between Malzemeler and Hazırlanış) */}
+                    <div className="flex justify-center">
+                        <AdZone placement="content-top" />
+                    </div>
+
                     {/* INSTRUCTIONS */}
                     <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-6 md:p-8">
                         <h2 className="font-display font-bold text-2xl text-slate-800 mb-6 font-sans">
@@ -1073,6 +1078,11 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
 
                     </div>
                 </div>
+            </div>
+
+            {/* Content - After Hero Ad */}
+            <div className="mt-10 flex justify-center">
+                <AdZone placement="content-after-hero" />
             </div>
 
             {/* INGREDIENT CARDS - Malzemeler Bölümü */}
