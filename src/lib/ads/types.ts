@@ -87,17 +87,35 @@ declare const googletag: GoogleTagInstance;
  */
 
 export type AdPlacement = 
+  // Header
   | 'header'
+  | 'header-leaderboard'
+  | 'header-masthead'
+  | 'header-mobile'
+  // Sidebar
   | 'sidebar'
+  | 'sidebar-top'
+  | 'sidebar-middle'
+  | 'sidebar-bottom'
   | 'sidebar-sticky'
+  // Content
+  | 'in-content'
   | 'content-top'
+  | 'content-after-hero'
+  | 'content-in-feed'
+  | 'content-after-section'
   | 'content-middle'
   | 'content-bottom'
-  | 'in-content'
+  // Footer
   | 'footer'
+  | 'footer-banner'
+  | 'footer-sticky-mobile'
+  | 'mobile-sticky'
   | 'sticky-bottom'
   | 'sticky-top'
-  | 'mobile-sticky';
+  // Special
+  | 'interstitial'
+  | 'native';
 
 export type DeviceType = 'mobile' | 'tablet' | 'desktop';
 export type DeviceTargeting = DeviceType | 'all';
@@ -141,6 +159,9 @@ export interface AdSlot {
   enabled?: boolean;
   status?: string;
   priority?: number;
+  zone?: string;
+  position?: number;
+  page_types?: string[];
 }
 
 export interface AdConfig {
