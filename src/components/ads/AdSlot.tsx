@@ -29,6 +29,40 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
     setError(null);
   }, [slotId]);
 
+  // Add event listener for empty slot handling
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.googletag || !initialized) {
+      return;
+    }
+    
+    const containerId = `ad-slot-${slotId}`;
+    
+    const handleSlotRenderEnded = (event: { slot: { getSlotElementId: () => string }; isEmpty: boolean }) => {
+      const slotElementId = event.slot.getSlotElementId();
+      if (slotElementId === containerId) {
+        const isEmpty = event.isEmpty;
+        const container = document.getElementById(containerId);
+        if (container && isEmpty) {
+          container.style.minHeight = '0';
+          container.style.height = '0';
+          container.style.overflow = 'hidden';
+        }
+      }
+    };
+    
+    window.googletag.cmd.push(() => {
+      window.googletag.pubads().addEventListener('slotRenderEnded', handleSlotRenderEnded);
+    });
+    
+    return () => {
+      if (window.googletag) {
+        window.googletag.cmd.push(() => {
+          window.googletag.pubads().removeEventListener('slotRenderEnded', handleSlotRenderEnded);
+        });
+      }
+    };
+  }, [slotId, initialized]);
+
   useEffect(() => {
     if (!adsEnabled || !initialized || !slot || !containerRef.current || rendered || showDebug) {
       return;

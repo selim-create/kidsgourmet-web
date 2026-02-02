@@ -26,6 +26,22 @@ export interface PubAdsService {
   enableLazyLoad(config?: LazyLoadConfig): void;
   setTargeting(key: string, value: string | string[]): PubAdsService;
   refresh(slots?: Slot[] | null, options?: RefreshOptions): void;
+  addEventListener(eventType: string, callback: (event: SlotRenderEndedEvent) => void): void;
+  removeEventListener(eventType: string, callback: (event: SlotRenderEndedEvent) => void): void;
+}
+
+export interface SlotRenderEndedEvent {
+  slot: Slot;
+  isEmpty: boolean;
+  size?: [number, number];
+  sourceAgnosticCreativeId?: number;
+  sourceAgnosticLineItemId?: number;
+  isBackfill?: boolean;
+  companyIds?: number[];
+  campaignId?: number;
+  creativeId?: number;
+  lineItemId?: number;
+  advertiserId?: number;
 }
 
 export interface Slot {
@@ -93,7 +109,7 @@ export interface AdSize {
 
 export interface SizeMapping {
   viewport: [number, number];
-  sizes: AdSize[] | 'fluid';
+  sizes: AdSize[] | 'fluid' | number[][];
 }
 
 export interface AdSlot {
