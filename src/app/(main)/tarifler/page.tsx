@@ -525,7 +525,6 @@ function RecipesPageContent() {
                         )}
                         
                         <RecipeCard 
-                          key={recipe.id}
                           recipe={recipe}
                         />
                         
