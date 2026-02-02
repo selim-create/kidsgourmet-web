@@ -82,18 +82,19 @@ export function useAdSlot({ slotId, lazyLoad = false, refreshInterval, enabled =
       }
     }
 
-    // Cleanup - only destroy on unmount, not on dependency changes
+    // Cleanup function - runs on dependency changes AND unmount
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
       adManager.stopAutoRefresh(slotId);
-      // Only destroy if this is actual unmount
+      // Reset tracking refs to allow re-initialization if slotId changes
       slotDefinedRef.current = false;
       currentSlotIdRef.current = '';
-      // Note: Don't destroy slot here - let it persist
+      // Note: Slot is not destroyed here to prevent premature removal during re-renders
+      // Actual slot cleanup should be handled by parent component on unmount
     };
-  }, [slotId, enabled]);  // Remove slotConfig from deps, use only slotId
+  }, [slotId, enabled]);  // Note: lazyLoad and refreshInterval intentionally omitted - these are set at initialization and should not trigger re-renders
 
   return {
     slotRef,

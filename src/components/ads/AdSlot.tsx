@@ -97,16 +97,15 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
 
   // Cleanup ONLY on unmount
   useEffect(() => {
-    const currentSlotId = slotId;
     return () => {
       // This runs only on unmount
       try {
-        adManager.destroySlot(`ad-slot-${currentSlotId}`);
+        adManager.destroySlot(`ad-slot-${slotId}`);
       } catch {
         // Ignore cleanup errors
       }
     };
-  }, []);  // Empty deps = only on unmount
+  }, [slotId]);  // Include slotId to destroy correct slot if it changes
 
   // Don't render if ads disabled and not in debug mode
   if (!adsEnabled && !showDebug) {

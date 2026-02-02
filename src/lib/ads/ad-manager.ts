@@ -135,7 +135,9 @@ class AdManager {
       
       // Skip if already defined
       if (this.slots.has(slotId)) {
-        console.log(`Slot already defined: ${slotId}`);
+        if (typeof console !== 'undefined' && console.debug) {
+          console.debug(`Slot already defined: ${slotId}`);
+        }
         return;
       }
 
