@@ -16,7 +16,7 @@ import NewsletterForm from '@/components/common/NewsletterForm';
 import RecipeCard from '@/components/ui/RecipeCard';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
 import ContentWithEmbeds from '@/components/embeds/ContentWithEmbeds';
-import { SidebarAds, InContentAd } from '@/components/ads';
+import { InContentAd, AdZone } from '@/components/ads';
 
 // React.use'u import ediyoruz (Next.js 15+ için gerekli)
 import { use } from 'react';
@@ -878,9 +878,10 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 <aside className="hidden lg:block w-80 flex-shrink-0">
                     <div className="sticky top-24 space-y-8">
                         
-                        <SidebarAds />
+                        {/* 1. Sidebar - Top (300x250) */}
+                        <AdZone placement="sidebar-top" />
                         
-                        {/* Table of Contents */}
+                        {/* 2. Table of Contents */}
                         {headings.length > 0 && (
                           <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
                             <h3 className="font-bold text-slate-800 mb-4 text-sm uppercase tracking-wider flex items-center">
@@ -912,6 +913,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             </ul>
                           </div>
                         )}
+                        
+                        {/* 3. Sidebar - Middle (300x600) */}
+                        <AdZone placement="sidebar-middle" />
 
                         {/* Faydalı Araçlar Widget - GÜNCELLENDİ */}
                         <div className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm">
@@ -948,6 +952,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             )}
                           </div>
                         </div>
+                        
+                        {/* 4. Sidebar - Bottom */}
+                        <AdZone placement="sidebar-bottom" />
 
                         {/* Newsletter Widget */}
                         <div className="bg-green-50/50 p-6 rounded-[2rem] border border-green-100 text-center">

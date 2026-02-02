@@ -75,7 +75,7 @@ export function InFeedAdWrapper({
       const slotId = slot.slot_id || slot.slotId || '';
       items.push(
         <div key={`ad-${i}`} className={`ad-wrapper flex justify-center items-center ${className}`}>
-          <AdSlot slotId={slotId} className="mx-auto" />
+          <AdSlot slotId={slotId} className="mx-auto max-h-[250px] overflow-hidden" />
         </div>
       );
       adIndex++;

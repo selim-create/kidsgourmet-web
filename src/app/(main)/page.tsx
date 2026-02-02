@@ -16,6 +16,7 @@ import FeaturedSlider from '@/components/features/FeaturedSlider';
 import BlogSection from '@/components/features/BlogSection';
 import RecipeCardComponent from '@/components/ui/RecipeCard';
 import { InContentAd, AdZone } from '@/components/ads';
+import { useAds } from '@/contexts/AdContext';
 
 // Tüm 16 araçlık havuz - Standart İkonlar, Renkler ve Açıklamalar
 const ALL_TOOLS = [
@@ -42,6 +43,7 @@ export default function Home() {
   const router = useRouter();
   const { ageGroups } = useAgeGroups();
   const { isAuthenticated } = useUser();
+  const { hasSlotForPlacement } = useAds();
   const [latestRecipes, setLatestRecipes] = useState<RecipeCard[]>([]);
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -404,6 +406,11 @@ export default function Home() {
         </div>
       )}
 
+      {/* Content - After Hero Ad - MOVED ABOVE "Minik Gurmelere Özel" */}
+      <div className="w-full flex justify-center py-4 bg-gray-50/50">
+        <AdZone placement="content-after-hero" />
+      </div>
+
       {/* RECIPES SECTION */}
       <div className="py-12 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -420,30 +427,44 @@ export default function Home() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
                 </div>
               ) : latestRecipes.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {filteredRecipes.map((recipe) => {
-                      // Enhance recipe with age group color from ageGroups
-                      const ageGroup = ageGroups.find(ag => ag.name === recipe.age_group);
-                      const enhancedRecipe = {
-                        ...recipe,
-                        age_group_color: ageGroup?.age_group_meta?.color_code
-                      };
-                      return (
-                        <RecipeCardComponent key={recipe.id} recipe={enhancedRecipe} />
-                      );
-                    })}
-                </div>
+                (() => {
+                  // Check if content-in-feed ad exists
+                  const hasInFeedAd = hasSlotForPlacement('content-in-feed');
+                  // Show 7 recipes if ad exists, 8 if not
+                  const recipesToShow = hasInFeedAd ? 7 : 8;
+                  const recipesSlice = filteredRecipes.slice(0, recipesToShow);
+                  
+                  return (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {recipesSlice.map((recipe, index) => {
+                        // Enhance recipe with age group color from ageGroups
+                        const ageGroup = ageGroups.find(ag => ag.name === recipe.age_group);
+                        const enhancedRecipe = {
+                          ...recipe,
+                          age_group_color: ageGroup?.age_group_meta?.color_code
+                        };
+                        
+                        return (
+                          <React.Fragment key={recipe.id}>
+                            {/* Insert ad at position 3 (index 2) if ad exists */}
+                            {hasInFeedAd && index === 2 && (
+                              <div className="flex items-center justify-center">
+                                <AdZone placement="content-in-feed" />
+                              </div>
+                            )}
+                            <RecipeCardComponent recipe={enhancedRecipe} />
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="text-center py-12">
                   <p className="text-gray-500">Henüz tarif yüklenmedi. Lütfen daha sonra tekrar kontrol edin.</p>
                 </div>
               )}
           </div>
-      </div>
-
-      {/* Content - After Hero Ad */}
-      <div className="w-full flex justify-center py-4 bg-gray-50/50">
-        <AdZone placement="content-after-hero" />
       </div>
 
       {/* CROSS-SELL SECTION: Bizimkiler Ne Yiyecek? - Tariften.com */}
@@ -523,6 +544,11 @@ export default function Home() {
                 ))}
               </div>
           </div>
+      </div>
+
+      {/* Content - Top Ad - MOVED BELOW "Akıllı Asistan ile Yanınızdayız!" */}
+      <div className="w-full flex justify-center py-4 bg-gray-50/50">
+        <AdZone placement="content-top" />
       </div>
 
       {/* In-Content Ad before BlogSection */}

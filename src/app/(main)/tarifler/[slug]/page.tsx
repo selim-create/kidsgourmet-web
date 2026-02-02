@@ -20,7 +20,7 @@ import CommentSection from '@/components/features/CommentSection';
 import { EditButton } from '@/components/ui/EditButton';
 import Image from 'next/image';
 import RecipeCard from '@/components/ui/RecipeCard';
-import { SidebarAds, InContentAd, AdZone } from '@/components/ads';
+import { InContentAd, AdZone } from '@/components/ads';
 
 // Tüm 16 araçlık havuz - Standart İkonlar ve Renkler
 const ALL_TOOLS = [
@@ -1015,17 +1015,10 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                 <div className="lg:col-span-1">
                     <div className="sticky top-24 space-y-6">
                     
-                    {/* Sidebar Ads */}
-                    <SidebarAds />
+                    {/* 1. Sidebar - Top (300x250) */}
+                    <AdZone placement="sidebar-top" />
                     
-                    {/* ECOSYSTEM CROSS-SELL */}
-                    <CrossSellWidget 
-                      crossSell={recipe.cross_sell}
-                      ingredients={recipe.ingredients}
-                      recipeTitle={recipe.title}
-                    />
-
-                    {/* SIDEBAR ARAÇLAR - Rastgele 4 Faydalı Araç */}
+                    {/* 2. Faydalı Araçlar Bölümü */}
                     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                       <h3 className="font-bold text-slate-800 mb-4 flex items-center">
                         <i className="fa-solid fa-wand-magic-sparkles text-orange-500 mr-2"></i> 
@@ -1060,8 +1053,21 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         )}
                       </div>
                     </div>
-
-                    {/* ASK AN EXPERT - Topluluk'a Yönlendir */}
+                    
+                    {/* 3. Sidebar - Middle (300x600) */}
+                    <AdZone placement="sidebar-middle" />
+                    
+                    {/* 4. Ebeveynlere Özel / Cross-Sell Widget */}
+                    <CrossSellWidget 
+                      crossSell={recipe.cross_sell}
+                      ingredients={recipe.ingredients}
+                      recipeTitle={recipe.title}
+                    />
+                    
+                    {/* 5. Sidebar - Bottom */}
+                    <AdZone placement="sidebar-bottom" />
+                    
+                    {/* 6. Ask Expert / Soru Sor */}
                     <div className="bg-orange-50/50 border border-yellow-100 rounded-2xl p-6 text-center">
                         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm text-yellow-500 text-xl">
                             <i className="fa-solid fa-question"></i>
