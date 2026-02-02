@@ -121,7 +121,13 @@ class AdManager {
     }
 
     window.googletag.cmd.push(() => {
-      const sizes = slotConfig.sizes.map((size) => [size.width, size.height] as [number, number]);
+      // Handle sizes - support both array [width, height] and object {width, height} formats
+      const sizes = slotConfig.sizes.map((size) => {
+        if (Array.isArray(size)) {
+          return [size[0], size[1]] as [number, number];
+        }
+        return [size.width, size.height] as [number, number];
+      });
       
       // Support both ad_unit_path and adUnitPath
       const adUnitPath = slotConfig.ad_unit_path || slotConfig.adUnitPath || '';
@@ -145,10 +151,15 @@ class AdManager {
         const mapping = window.googletag.sizeMapping();
         
         sizeMapping.forEach((map) => {
-          const sizes = map.sizes === 'fluid' 
+          const mappedSizes = map.sizes === 'fluid' 
             ? 'fluid' 
-            : map.sizes.map((s) => [s.width, s.height] as [number, number]);
-          mapping.addSize(map.viewport, sizes);
+            : map.sizes.map((s) => {
+                if (Array.isArray(s)) {
+                  return [s[0], s[1]] as [number, number];
+                }
+                return [s.width, s.height] as [number, number];
+              });
+          mapping.addSize(map.viewport, mappedSizes);
         });
 
         slot.defineSizeMapping(mapping.build());

@@ -3,14 +3,65 @@
  */
 
 import { API_URL } from '../constants';
-import type { AdConfig, AdSlot, AdPlacement, DeviceType } from './types';
+import type { AdConfig, AdSlot, AdPlacement, DeviceType, AdSize } from './types';
 
 const HIP_ADS_API_NAMESPACE = '/hip-ads/v1';
+
+/**
+ * Normalize ad sizes to AdSize[] format
+ */
+function normalizeAdSizes(rawSizes: unknown): AdSize[] {
+  if (!Array.isArray(rawSizes)) return [];
+  return rawSizes.map(size => {
+    // Handle array format [width, height]
+    if (Array.isArray(size) && size.length >= 2) {
+      return { width: Number(size[0]), height: Number(size[1]) };
+    }
+    // Handle object format {width, height}
+    if (typeof size === 'object' && size !== null && 'width' in size && 'height' in size) {
+      return { width: Number((size as { width: unknown }).width), height: Number((size as { height: unknown }).height) };
+    }
+    return { width: 0, height: 0 };
+  }).filter(s => s.width > 0 && s.height > 0);
+}
+
+/**
+ * Normalize size mapping to SizeMapping[] format
+ */
+function normalizeSizeMapping(rawMapping: unknown): AdSlot['size_mapping'] {
+  if (!Array.isArray(rawMapping)) return undefined;
+  const mappings = rawMapping.map(mapping => {
+    if (typeof mapping !== 'object' || mapping === null) {
+      return null;
+    }
+    
+    const viewport = Array.isArray((mapping as { viewport?: unknown }).viewport) 
+      ? [Number((mapping as { viewport: unknown[] }).viewport[0]), Number((mapping as { viewport: unknown[] }).viewport[1])] as [number, number]
+      : [0, 0] as [number, number];
+    
+    const rawSizes = (mapping as { sizes?: unknown }).sizes;
+    const sizes = rawSizes === 'fluid' 
+      ? 'fluid' as const
+      : normalizeAdSizes(rawSizes);
+    
+    return { viewport, sizes };
+  }).filter((m): m is { viewport: [number, number]; sizes: AdSize[] | 'fluid' } => m !== null);
+  
+  return mappings.length > 0 ? mappings : undefined;
+}
 
 /**
  * Normalize slot data to ensure consistent property access
  */
 function normalizeSlot(slot: Record<string, unknown>): AdSlot {
+  // Normalize sizes
+  const rawSizes = slot.sizes || [];
+  const sizes = normalizeAdSizes(rawSizes);
+  
+  // Normalize size_mapping
+  const rawSizeMapping = slot.size_mapping || slot.sizeMappings;
+  const sizeMapping = normalizeSizeMapping(rawSizeMapping);
+  
   return {
     id: String(slot.id || slot.slot_id || slot.slotId || ''),
     slot_id: String(slot.slot_id || slot.slotId || slot.id || ''),
@@ -18,10 +69,9 @@ function normalizeSlot(slot: Record<string, unknown>): AdSlot {
     name: String(slot.name || ''),
     ad_unit_path: String(slot.ad_unit_path || slot.adUnitPath || ''),
     adUnitPath: String(slot.adUnitPath || slot.ad_unit_path || ''),
-    sizes: Array.isArray(slot.sizes) ? slot.sizes : [],
-    size_mapping: Array.isArray(slot.size_mapping || slot.sizeMappings) 
-      ? (slot.size_mapping || slot.sizeMappings) as AdSlot['size_mapping']
-      : undefined,
+    sizes,
+    size_mapping: sizeMapping,
+    sizeMappings: sizeMapping,
     placement: (slot.placement as AdPlacement) || 'in-content',
     devices: Array.isArray(slot.devices) 
       ? slot.devices as DeviceType[]
