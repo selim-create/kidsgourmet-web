@@ -18,7 +18,7 @@ function normalizeAdSizes(rawSizes: unknown): AdSize[] {
       return { width: Number(size[0]), height: Number(size[1]) };
     }
     // Handle object format {width, height}
-    if (typeof size === 'object' && size !== null && 'width' in size) {
+    if (typeof size === 'object' && size !== null && 'width' in size && 'height' in size) {
       return { width: Number((size as { width: unknown }).width), height: Number((size as { height: unknown }).height) };
     }
     return { width: 0, height: 0 };

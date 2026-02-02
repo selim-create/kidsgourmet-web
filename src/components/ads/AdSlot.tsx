@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAds } from '@/contexts/AdContext';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import adManager from '@/lib/ads/ad-manager';
+import type { SlotRenderEndedEvent } from '@/lib/ads/types';
 
 interface AdSlotProps {
   slotId: string;
@@ -37,12 +38,11 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
     
     const containerId = `ad-slot-${slotId}`;
     
-    const handleSlotRenderEnded = (event: { slot: { getSlotElementId: () => string }; isEmpty: boolean }) => {
+    const handleSlotRenderEnded = (event: SlotRenderEndedEvent) => {
       const slotElementId = event.slot.getSlotElementId();
       if (slotElementId === containerId) {
-        const isEmpty = event.isEmpty;
         const container = document.getElementById(containerId);
-        if (container && isEmpty) {
+        if (container && event.isEmpty) {
           container.style.minHeight = '0';
           container.style.height = '0';
           container.style.overflow = 'hidden';
