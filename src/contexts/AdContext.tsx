@@ -91,7 +91,7 @@ export function AdProvider({ children }: AdProviderProps) {
     return config.slots.filter((slot) => {
       if (!slot || slot.enabled === false) return false;
       if (Array.isArray(slot.devices)) {
-        return slot.devices.includes(device);
+        return slot.devices.includes(device) || slot.devices.includes('all');
       }
       if (slot.device) {
         return slot.device === device || slot.device === 'all';
