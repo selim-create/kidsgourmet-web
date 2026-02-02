@@ -508,7 +508,7 @@ function RecipesPageContent() {
                 {!profile.birthDate && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <InFeedAdWrapper 
-                      adPositions={[2, 10]} // 3rd and 11th positions (0-indexed = 2, 10)
+                      adPositions={[2, 10]} // 3rd and 11th items in grid (0-indexed positions 2 and 10)
                       totalItems={12} // Show total 12 items (10 recipes + 2 ads)
                     >
                       {recipes.map((recipe) => (

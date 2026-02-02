@@ -36,7 +36,7 @@ export default function BlogSection({ posts }: BlogSectionProps) {
         {/* Blog Posts Grid with InFeed Ad */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <InFeedAdWrapper 
-            adPositions={[2]} // 3rd position (0-indexed = 2)
+            adPositions={[2]} // 3rd item in grid (0-indexed position 2)
             totalItems={6} // Show total 6 items (5 posts + 1 ad)
           >
             {posts.map((post) => (

@@ -27,7 +27,7 @@ interface InFeedAdWrapperProps {
  */
 export function InFeedAdWrapper({ 
   children, 
-  adPositions = [2], // Default to position 3 (0-indexed = 2)
+  adPositions = [2], // Default to 3rd item in grid (0-indexed position 2)
   totalItems,
   className = ''
 }: InFeedAdWrapperProps) {
@@ -47,12 +47,17 @@ export function InFeedAdWrapper({
 
   const hasAds = adsEnabled && initialized && compatibleSlots.length > 0;
 
-  // If no ads, just render all children
+  // If no ads, just render all children (or limited by totalItems if provided)
   if (!hasAds) {
+    if (totalItems && totalItems < children.length) {
+      return <>{children.slice(0, totalItems)}</>;
+    }
     return <>{children}</>;
   }
 
-  // Calculate how many content items to show
+  // When ads are active:
+  // - If totalItems is provided: show (totalItems - number of ads) content items + ads
+  // - If totalItems is not provided: show all children + ads at specified positions
   const contentCount = totalItems ? totalItems - adPositions.length : children.length;
   const displayChildren = children.slice(0, contentCount);
 
@@ -61,7 +66,9 @@ export function InFeedAdWrapper({
   let contentIndex = 0;
   let adIndex = 0;
 
-  for (let i = 0; i < (totalItems || displayChildren.length + adPositions.length); i++) {
+  // Loop through total positions (content + ads)
+  const maxItems = totalItems || (children.length + adPositions.length);
+  for (let i = 0; i < maxItems; i++) {
     if (adPositions.includes(i) && adIndex < compatibleSlots.length) {
       // Insert ad at this position
       const slot = compatibleSlots[adIndex];
