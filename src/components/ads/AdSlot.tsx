@@ -18,16 +18,21 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rendered, setRendered] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const slotDefinedRef = useRef(false);  // NEW
 
   const slot = getSlotById(slotId);
 
   // Use debug prop OR global debug mode
   const showDebug = debug || isDebugMode;
 
+  // Reset rendered state when slot changes
   useEffect(() => {
-    // Reset rendered state when slot changes
-    setRendered(false);
-    setError(null);
+    if (slotDefinedRef.current && slotId) {
+      // Slot ID changed, need to re-render
+      setRendered(false);
+      setError(null);
+      slotDefinedRef.current = false;
+    }
   }, [slotId]);
 
   // Add event listener for empty slot handling
@@ -63,9 +68,14 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
     };
   }, [slotId, initialized]);
 
+  // Slot render effect - simplified dependencies
   useEffect(() => {
     if (!adsEnabled || !initialized || !slot || !containerRef.current || rendered || showDebug) {
       return;
+    }
+
+    if (slotDefinedRef.current) {
+      return; // Already defined
     }
 
     try {
@@ -77,21 +87,26 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
         adManager.defineSlot(slot, containerId);
         adManager.display(containerId);
         setRendered(true);
+        slotDefinedRef.current = true;
       }
     } catch (err) {
       console.error('Error rendering ad slot:', err);
       setError('Failed to render ad');
     }
+  }, [adsEnabled, initialized, slotId, rendered, showDebug]);  // Removed slot, config from deps
 
+  // Cleanup ONLY on unmount
+  useEffect(() => {
+    const currentSlotId = slotId;
     return () => {
-      // Cleanup on unmount
+      // This runs only on unmount
       try {
-        adManager.destroySlot(`ad-slot-${slotId}`);
+        adManager.destroySlot(`ad-slot-${currentSlotId}`);
       } catch {
         // Ignore cleanup errors
       }
     };
-  }, [adsEnabled, initialized, slot, slotId, rendered, config, showDebug]);
+  }, []);  // Empty deps = only on unmount
 
   // Don't render if ads disabled and not in debug mode
   if (!adsEnabled && !showDebug) {

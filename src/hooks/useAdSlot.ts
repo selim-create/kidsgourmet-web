@@ -12,20 +12,32 @@ interface UseAdSlotOptions {
   slotId: string;
   lazyLoad?: boolean;
   refreshInterval?: number;
+  enabled?: boolean;  // NEW: Allow disabling the hook
 }
 
-export function useAdSlot({ slotId, lazyLoad = false, refreshInterval }: UseAdSlotOptions) {
+export function useAdSlot({ slotId, lazyLoad = false, refreshInterval, enabled = true }: UseAdSlotOptions) {
   const { getSlotById, isDebugMode } = useAds();
   const slotRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const displayedRef = useRef(false);
+  const slotDefinedRef = useRef(false);  // NEW: Track if slot is defined
+  const currentSlotIdRef = useRef<string>('');  // NEW: Track current slot ID
 
-  const slotConfig = getSlotById(slotId);
+  const slotConfig = slotId ? getSlotById(slotId) : undefined;
 
   useEffect(() => {
-    if (!slotConfig || !slotRef.current) {
+    // Skip if disabled or no valid slotId
+    if (!enabled || !slotId || !slotConfig || !slotRef.current) {
       return;
     }
+
+    // Skip if already defined for this slot
+    if (slotDefinedRef.current && currentSlotIdRef.current === slotId) {
+      return;
+    }
+
+    currentSlotIdRef.current = slotId;
+    slotDefinedRef.current = true;
 
     // Define the slot
     adManager.defineSlot(slotConfig);
@@ -70,15 +82,18 @@ export function useAdSlot({ slotId, lazyLoad = false, refreshInterval }: UseAdSl
       }
     }
 
-    // Cleanup
+    // Cleanup - only destroy on unmount, not on dependency changes
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
       adManager.stopAutoRefresh(slotId);
-      adManager.destroySlots([slotId]);
+      // Only destroy if this is actual unmount
+      slotDefinedRef.current = false;
+      currentSlotIdRef.current = '';
+      // Note: Don't destroy slot here - let it persist
     };
-  }, [slotId, slotConfig, lazyLoad, refreshInterval]);
+  }, [slotId, enabled]);  // Remove slotConfig from deps, use only slotId
 
   return {
     slotRef,
