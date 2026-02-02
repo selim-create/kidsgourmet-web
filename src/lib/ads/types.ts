@@ -83,7 +83,8 @@ export type AdPlacement =
   | 'sticky-top'
   | 'mobile-sticky';
 
-export type DeviceType = 'mobile' | 'tablet' | 'desktop' | 'all';
+export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+export type DeviceTargeting = DeviceType | 'all';
 
 export interface AdSize {
   width: number;
@@ -107,7 +108,7 @@ export interface AdSlot {
   size_mapping?: SizeMapping[];
   sizeMappings?: SizeMapping[];
   placement: AdPlacement;
-  devices?: DeviceType[];
+  devices?: DeviceTargeting[];
   device?: string;
   targeting?: Record<string, string | string[]>;
   lazy_load?: boolean;

@@ -71,7 +71,7 @@ export function AdSlot({ slotId, className = '', debug = false }: AdSlotProps) {
 
   // Get responsive min height
   const getMinHeight = (): number => {
-    if (slot.responsive_min_height && deviceType !== 'all') {
+    if (slot.responsive_min_height) {
       return slot.responsive_min_height[deviceType] || slot.min_height || slot.minHeight || 90;
     }
     return slot.min_height || slot.minHeight || 90;
