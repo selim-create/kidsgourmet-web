@@ -14,6 +14,7 @@ import { EditButton } from '@/components/ui/EditButton';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
 import IngredientSafetyAlert from '@/components/features/safety/IngredientSafetyAlert';
 import RecipeCard from '@/components/ui/RecipeCard';
+import { AdZone } from '@/components/ads';
 
 const ALL_TOOLS = [
   { name: 'Alerjen Planlayıcı', path: '/akilli-asistan/alerjen-planlayici', icon: 'fa-solid fa-shield-heart', color: 'text-red-500', bg: 'bg-red-50' },
@@ -572,7 +573,10 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                 <div className="lg:col-span-1 hidden lg:block">
                     <div className="sticky top-24 space-y-6">
                         
-                        {/* IMAGE CARD - Desktop only */}
+                        {/* 1. Sidebar - Top (300x250) */}
+                        <AdZone placement="sidebar-top" />
+                        
+                        {/* 2. IMAGE CARD - Desktop only */}
                         <div className="rounded-3xl overflow-hidden shadow-lg relative group">
                             <img 
                               src={ingredient.image || `https://placehold.co/400x400/AED581/ffffff?text=${encodeURIComponent(ingredient.name)}`} 
@@ -720,7 +724,10 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                           </div>
                         )}
 
-                        {/* SIDEBAR ARAÇLAR - Rastgele 4 Faydalı Araç */}
+                        {/* 3. Sidebar - Middle (300x600) */}
+                        <AdZone placement="sidebar-middle" />
+
+                        {/* 4. SIDEBAR ARAÇLAR - Rastgele 4 Faydalı Araç */}
                         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
                           <h3 className="font-bold text-slate-800 mb-4 flex items-center">
                             <i className="fa-solid fa-wand-magic-sparkles text-green-500 mr-2"></i> 
@@ -755,6 +762,9 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                             )}
                           </div>
                         </div>
+                        
+                        {/* 5. Sidebar - Bottom */}
+                        <AdZone placement="sidebar-bottom" />
 
                     </div>
                 </div>

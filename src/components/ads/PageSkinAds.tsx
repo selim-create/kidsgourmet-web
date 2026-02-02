@@ -38,15 +38,15 @@ export function PageSkinAds() {
 
   return (
     <>
-      {/* Left Page Skin - Only visible on extra wide screens (2xl+) */}
-      <div className="hidden 2xl:block fixed left-4 top-24 z-10">
+      {/* Left Page Skin - Only visible on ultra-wide screens (1920px+) */}
+      <div className="hidden min-[1920px]:block fixed left-4 top-24 z-10">
         <div className="sticky top-24">
           <AdSlot slotId={leftSlotId} className="w-40" />
         </div>
       </div>
 
-      {/* Right Page Skin - Only visible on extra wide screens (2xl+) */}
-      <div className="hidden 2xl:block fixed right-4 top-24 z-10">
+      {/* Right Page Skin - Only visible on ultra-wide screens (1920px+) */}
+      <div className="hidden min-[1920px]:block fixed right-4 top-24 z-10">
         <div className="sticky top-24">
           <AdSlot slotId={rightSlotId} className="w-40" />
         </div>
