@@ -11,6 +11,7 @@ class AdManager {
   private scriptLoaded = false;
   private scriptLoading = false;
   private refreshIntervals: Map<string, ReturnType<typeof setInterval>> = new Map();
+  private servicesEnabled = false;
 
   private constructor() {}
 
@@ -56,10 +57,9 @@ class AdManager {
           });
         }
 
-        const enableServices = this.config?.enable_services ?? this.config?.enableServices;
-        if (enableServices) {
-          window.googletag.enableServices();
-        }
+        // NOTE: enableServices() is NOT called here
+        // It will be called in defineSlot() after the first slot is defined
+        // This ensures proper GPT.js call sequencing: defineSlot → addService → enableServices → display
       });
     }
   }
@@ -176,6 +176,16 @@ class AdManager {
 
       // Store slot reference using the actual slot ID used
       this.slots.set(slotId, slot);
+
+      // Enable services after first slot is defined (only once)
+      // This ensures proper GPT.js call sequencing
+      if (!this.servicesEnabled) {
+        const enableServices = this.config?.enable_services ?? this.config?.enableServices ?? true;
+        if (enableServices) {
+          window.googletag.enableServices();
+          this.servicesEnabled = true;
+        }
+      }
     });
   }
 
@@ -274,6 +284,11 @@ class AdManager {
         this.slots.clear();
         this.refreshIntervals.forEach((interval) => clearInterval(interval));
         this.refreshIntervals.clear();
+      }
+
+      // Reset servicesEnabled flag if all slots are destroyed
+      if (this.slots.size === 0) {
+        this.servicesEnabled = false;
       }
     });
   }
