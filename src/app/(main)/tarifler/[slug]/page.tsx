@@ -776,7 +776,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                     </div>
 
                     {/* Content - Top Ad (between Malzemeler and Hazırlanış) */}
-                    <div className="flex justify-center">
+                    <div className="flex justify-center min-h-[275px] lg:min-h-[100px]">
                         <AdZone placement="content-top" />
                     </div>
 

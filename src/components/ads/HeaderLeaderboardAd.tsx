@@ -36,7 +36,7 @@ export function HeaderLeaderboardAd({ className = '' }: HeaderLeaderboardAdProps
   const slotId = compatibleSlot.slot_id || compatibleSlot.slotId || '';
 
   return (
-    <div className={`ad-zone ad-zone-header-leaderboard w-full flex justify-center pt-[30px] pb-[10px] bg-gray-50/50 ${className}`}>
+    <div className={`ad-zone ad-zone-header-leaderboard w-full flex justify-center pt-[50px] pb-[20px] bg-gray-50/50 ${className}`}>
       <AdSlot slotId={slotId} className="mx-auto" />
     </div>
   );
