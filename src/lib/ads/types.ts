@@ -88,31 +88,24 @@ declare const googletag: GoogleTagInstance;
 
 export type AdPlacement = 
   // Header
-  | 'header'
-  | 'header-leaderboard'
-  | 'header-masthead'
-  | 'header-mobile'
-  // Sidebar
-  | 'sidebar'
-  | 'sidebar-top'
-  | 'sidebar-middle'
-  | 'sidebar-bottom'
-  | 'sidebar-sticky'
+  | 'header-leaderboard'      // 728x90 - Desktop only
+  | 'header-masthead'         // 970x250 - Custom pages
+  | 'header-mobile'           // 320x100 - Mobile only
+  // Footer
+  | 'footer-sticky-mobile'    // 320x50 - Mobile sticky
+  | 'footer-banner'           // 728x90 - Desktop
   // Content
-  | 'in-content'
   | 'content-top'
   | 'content-after-hero'
   | 'content-in-feed'
   | 'content-after-section'
   | 'content-middle'
   | 'content-bottom'
-  // Footer
-  | 'footer'
-  | 'footer-banner'
-  | 'footer-sticky-mobile'
-  | 'mobile-sticky'
-  | 'sticky-bottom'
-  | 'sticky-top'
+  // Sidebar
+  | 'sidebar-top'             // 300x250
+  | 'sidebar-middle'          // 300x600
+  | 'sidebar-bottom'
+  | 'sidebar-sticky'          // 160x600 - Page skin
   // Special
   | 'interstitial'
   | 'native';
