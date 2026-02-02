@@ -180,8 +180,8 @@ class AdManager {
       // Enable services after first slot is defined (only once)
       // This ensures proper GPT.js call sequencing
       if (!this.servicesEnabled) {
-        const enableServices = this.config?.enable_services ?? this.config?.enableServices ?? true;
-        if (enableServices) {
+        const enableServices = this.config?.enable_services ?? this.config?.enableServices;
+        if (enableServices !== false) {
           window.googletag.enableServices();
           this.servicesEnabled = true;
         }
