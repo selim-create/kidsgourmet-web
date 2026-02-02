@@ -83,7 +83,7 @@ export type AdPlacement =
   | 'sticky-top'
   | 'mobile-sticky';
 
-export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+export type DeviceType = 'mobile' | 'tablet' | 'desktop' | 'all';
 
 export interface AdSize {
   width: number;
