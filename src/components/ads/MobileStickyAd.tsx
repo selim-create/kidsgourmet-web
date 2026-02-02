@@ -12,12 +12,7 @@ export function MobileStickyAd() {
   // Only show on mobile
   if (deviceType !== 'mobile' || !adsEnabled || !initialized) return null;
 
-  // footer-sticky-mobile or legacy mobile-sticky
-  let slots = getSlotsByPlacement('footer-sticky-mobile');
-  if (slots.length === 0) {
-    slots = getSlotsByPlacement('mobile-sticky');
-  }
-
+  const slots = getSlotsByPlacement('footer-sticky-mobile');
   const slot = slots[0];
   if (!slot) return null;
 

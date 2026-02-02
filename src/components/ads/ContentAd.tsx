@@ -11,8 +11,7 @@ type ContentPlacement =
   | 'content-in-feed'
   | 'content-after-section'
   | 'content-middle'
-  | 'content-bottom'
-  | 'in-content'; // legacy
+  | 'content-bottom';
 
 interface ContentAdProps {
   placement: ContentPlacement;
@@ -20,7 +19,7 @@ interface ContentAdProps {
   fallbackPlacement?: string;
 }
 
-export function ContentAd({ placement, className = '', fallbackPlacement = 'in-content' }: ContentAdProps) {
+export function ContentAd({ placement, className = '', fallbackPlacement = 'content-middle' }: ContentAdProps) {
   const deviceType = useDeviceType();
   const { getSlotsByPlacement, adsEnabled, initialized } = useAds();
 

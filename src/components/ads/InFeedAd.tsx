@@ -15,10 +15,10 @@ export function InFeedAd({ className = '' }: InFeedAdProps) {
 
   if (!adsEnabled || !initialized) return null;
 
-  // content-in-feed or MediumRectangle placement
+  // content-in-feed or content-middle fallback
   let slots = getSlotsByPlacement('content-in-feed');
   if (slots.length === 0) {
-    slots = getSlotsByPlacement('in-content');
+    slots = getSlotsByPlacement('content-middle');
   }
 
   // Filter for 300x250 size and device compatibility

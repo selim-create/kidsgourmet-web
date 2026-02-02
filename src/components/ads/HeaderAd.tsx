@@ -16,14 +16,10 @@ export function HeaderAd({ className = '' }: HeaderAdProps) {
   if (!adsEnabled || !initialized) return null;
 
   // Desktop: header-leaderboard (728x90)
-  // Mobile: header-mobile or header-leaderboard with mobile sizes (320x100)
+  // Mobile: header-mobile (320x100)
   const placement = deviceType === 'mobile' ? 'header-mobile' : 'header-leaderboard';
   
-  // Fallback to legacy 'header' placement
   let slots = getSlotsByPlacement(placement);
-  if (slots.length === 0) {
-    slots = getSlotsByPlacement('header');
-  }
 
   // Filter by device
   const compatibleSlot = slots.find((slot) => {
