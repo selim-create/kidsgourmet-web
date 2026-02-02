@@ -642,6 +642,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                       />
                     </div>
 
+                    <AdZone placement="content-top" className="my-8" />
+
                     <InContentAd className="my-8" />
 
                     {/* Expert Approval */}
@@ -814,6 +816,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         </div>
                       )}
 
+                      <AdZone placement="footer-banner" className="my-8" />
+
                       {randomRecipes.length > 0 && (
                         <div>
                           <h3 className="font-bold text-slate-800 text-xl mb-6 flex items-center">
@@ -869,6 +873,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                           </div>
                         </div>
                       )}
+
+                      <AdZone placement="content-after-section" className="my-8" />
 
                     </div>
 
