@@ -615,6 +615,21 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         hover:prose-a:text-orange-600 hover:prose-a:underline
                         prose-img:rounded-2xl prose-img:shadow-lg prose-img:my-8
                         prose-blockquote:border-l-4 prose-blockquote:border-orange-500 prose-blockquote:bg-orange-50 prose-blockquote:rounded-r-xl prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:text-gray-700
+                        /* ===== YENİ LİSTE STİLLERİ ===== */
+                        prose-ul:list-disc prose-ul:pl-6 prose-ul:my-6 prose-ul:space-y-3
+                        prose-ol:list-decimal prose-ol:pl-6 prose-ol:my-6 prose-ol:space-y-3
+                        prose-li:text-gray-600 prose-li:pl-2
+                        [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:my-6 [&_ul]:space-y-3
+                        [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:my-6 [&_ol]:space-y-3
+                        [&_li]:pl-2 [&_li]:text-gray-600 [&_li]:leading-relaxed
+                        [&_li::marker]:text-orange-500 [&_li::marker]:font-semibold
+                        [&_ul_ul]:list-circle [&_ul_ul]:mt-2 [&_ul_ul]:ml-4
+                        [&_ul_ul_ul]:list-square [&_ul_ul_ul]:mt-2
+                        [&_ol_ol]:list-[lower-alpha] [&_ol_ol]:mt-2 [&_ol_ol]:ml-4
+                        [&_.wp-block-list]:pl-6 [&_.wp-block-list]:my-6 [&_.wp-block-list]:space-y-3
+                        [&_ul.wp-block-list]:list-disc
+                        [&_ol.wp-block-list]:list-decimal
+                        /* ===== YENİ LİSTE STİLLERİ SONU ===== */
                         prose-ul:my-6 prose-ul:space-y-2 prose-li:text-gray-600
                         prose-ol:my-6 prose-ol:space-y-2
                         prose-strong:text-slate-800 prose-strong:font-bold
