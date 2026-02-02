@@ -28,10 +28,10 @@ export function InContentAd({
   lazyLoad = true,
 }: InContentAdProps) {
   const detectedDevice = useDeviceType();
-  const { getSlotsByPlacement } = useAds();
+  const { getSlotsByPlacement, adsEnabled, initialized } = useAds();
   
-  // If no slotId provided, find an in-content slot automatically
-  let actualSlotId = slotId;
+  // Calculate actualSlotId (no hooks here, just computation)
+  let actualSlotId = slotId || '';
   if (!actualSlotId) {
     const inContentSlots = getSlotsByPlacement('in-content');
     const compatibleSlots = inContentSlots.filter((slot) => {
@@ -45,19 +45,17 @@ export function InContentAd({
     }
   }
 
-  // If still no slot found, return null
-  if (!actualSlotId) {
-    return null;
-  }
-  
+  // ALL HOOKS MUST BE CALLED BEFORE ANY RETURN
   const { slotRef, slotConfig, isDebugMode } = useAdSlot({
     slotId: actualSlotId,
     lazyLoad,
+    enabled: !!actualSlotId && adsEnabled && initialized,  // Pass enabled flag
   });
 
   const showDebug = debug || isDebugMode;
 
-  if (!slotConfig || !slotConfig.enabled) {
+  // NOW we can do early returns
+  if (!actualSlotId || !slotConfig || !slotConfig.enabled) {
     return null;
   }
 

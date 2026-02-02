@@ -12,20 +12,32 @@ interface UseAdSlotOptions {
   slotId: string;
   lazyLoad?: boolean;
   refreshInterval?: number;
+  enabled?: boolean;  // NEW: Allow disabling the hook
 }
 
-export function useAdSlot({ slotId, lazyLoad = false, refreshInterval }: UseAdSlotOptions) {
+export function useAdSlot({ slotId, lazyLoad = false, refreshInterval, enabled = true }: UseAdSlotOptions) {
   const { getSlotById, isDebugMode } = useAds();
   const slotRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const displayedRef = useRef(false);
+  const slotDefinedRef = useRef(false);  // NEW: Track if slot is defined
+  const currentSlotIdRef = useRef<string>('');  // NEW: Track current slot ID
 
-  const slotConfig = getSlotById(slotId);
+  const slotConfig = slotId ? getSlotById(slotId) : undefined;
 
   useEffect(() => {
-    if (!slotConfig || !slotRef.current) {
+    // Skip if disabled or no valid slotId
+    if (!enabled || !slotId || !slotConfig || !slotRef.current) {
       return;
     }
+
+    // Skip if already defined for this slot
+    if (slotDefinedRef.current && currentSlotIdRef.current === slotId) {
+      return;
+    }
+
+    currentSlotIdRef.current = slotId;
+    slotDefinedRef.current = true;
 
     // Define the slot
     adManager.defineSlot(slotConfig);
@@ -70,15 +82,19 @@ export function useAdSlot({ slotId, lazyLoad = false, refreshInterval }: UseAdSl
       }
     }
 
-    // Cleanup
+    // Cleanup function - runs on dependency changes AND unmount
     return () => {
       if (observerRef.current) {
         observerRef.current.disconnect();
       }
       adManager.stopAutoRefresh(slotId);
-      adManager.destroySlots([slotId]);
+      // Reset tracking refs to allow re-initialization if slotId changes
+      slotDefinedRef.current = false;
+      currentSlotIdRef.current = '';
+      // Note: Slot is not destroyed here to prevent premature removal during re-renders
+      // Actual slot cleanup should be handled by parent component on unmount
     };
-  }, [slotId, slotConfig, lazyLoad, refreshInterval]);
+  }, [slotId, enabled]);  // Note: lazyLoad and refreshInterval intentionally omitted - these are set at initialization and should not trigger re-renders
 
   return {
     slotRef,

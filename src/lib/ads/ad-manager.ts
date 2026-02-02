@@ -113,7 +113,14 @@ class AdManager {
   }
 
   /**
-   * Define an ad slot
+   * Check if a slot is already defined
+   */
+  isSlotDefined(slotId: string): boolean {
+    return this.slots.has(slotId);
+  }
+
+  /**
+   * Define an ad slot - with duplicate check
    */
   defineSlot(slotConfig: AdSlot, containerId?: string): void {
     if (typeof window === 'undefined' || !window.googletag) {
@@ -121,6 +128,19 @@ class AdManager {
     }
 
     window.googletag.cmd.push(() => {
+      // Support both ad_unit_path and adUnitPath
+      const adUnitPath = slotConfig.ad_unit_path || slotConfig.adUnitPath || '';
+      // Support both slot_id, slotId and custom containerId
+      const slotId = containerId || slotConfig.slot_id || slotConfig.slotId || '';
+      
+      // Skip if already defined
+      if (this.slots.has(slotId)) {
+        if (typeof console !== 'undefined' && console.debug) {
+          console.debug(`Slot already defined: ${slotId}`);
+        }
+        return;
+      }
+
       // Handle sizes - support both array [width, height] and object {width, height} formats
       const sizes = slotConfig.sizes.map((size) => {
         if (Array.isArray(size)) {
@@ -128,11 +148,6 @@ class AdManager {
         }
         return [size.width, size.height] as [number, number];
       });
-      
-      // Support both ad_unit_path and adUnitPath
-      const adUnitPath = slotConfig.ad_unit_path || slotConfig.adUnitPath || '';
-      // Support both slot_id, slotId and custom containerId
-      const slotId = containerId || slotConfig.slot_id || slotConfig.slotId || '';
 
       const slot = window.googletag.defineSlot(
         adUnitPath,
