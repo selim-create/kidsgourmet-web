@@ -84,3 +84,82 @@ select:-webkit-autofill:active {
     -webkit-text-fill-color: #f9fafb !important;
   }
 }
+
+/* ========================================
+   AD SLOT STYLES
+   Ad layout and centering styles
+   ======================================== */
+
+/* Ad Slot Base Styles */
+.ad-slot,
+.ad-zone,
+[class*="ad-slot-"],
+[id^="ad-slot-"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Ad Zone Styles */
+.ad-zone {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.ad-zone-header {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background-color: #f9fafb;
+  padding: 0.5rem 0;
+}
+
+.ad-zone-content {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem auto;
+}
+
+.ad-zone-in-feed {
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  min-height: 250px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ad-zone-footer-sticky {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: white;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ad-zone-content {
+    margin: 1rem auto;
+  }
+}
+
+/* Hide ads on print */
+@media print {
+  .ad-zone,
+  .ad-slot,
+  [class*="ad-slot-"],
+  [id^="ad-slot-"] {
+    display: none !important;
+  }
+}

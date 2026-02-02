@@ -19,6 +19,8 @@ interface AdContextValue {
   getSlotsByPlacement: (placement: AdPlacement) => AdSlot[];
   getSlotsByDevice: (device: DeviceType) => AdSlot[];
   getSlotById: (slotId: string) => AdSlot | undefined;
+  getSlotsByPlacementGroup: (group: string) => AdSlot[];
+  hasSlotForPlacement: (placement: string) => boolean;
   isDebugMode: boolean;
 }
 
@@ -106,6 +108,19 @@ export function AdProvider({ children }: AdProviderProps) {
     return config.slots.find((slot) => slot?.slot_id === slotId || slot?.slotId === slotId);
   };
 
+  // Get slots by placement group (prefix matching)
+  const getSlotsByPlacementGroup = (group: string): AdSlot[] => {
+    if (!adsEnabled || !config?.slots || !Array.isArray(config.slots)) return [];
+    return config.slots.filter(
+      (slot) => slot?.placement?.startsWith(group + '-') || slot?.placement === group
+    );
+  };
+
+  // Check if slot exists for placement
+  const hasSlotForPlacement = (placement: string): boolean => {
+    return getSlotsByPlacement(placement as AdPlacement).length > 0;
+  };
+
   const value: AdContextValue = {
     config,
     slots: (adsEnabled && config?.slots && Array.isArray(config.slots)) ? config.slots : [],
@@ -116,6 +131,8 @@ export function AdProvider({ children }: AdProviderProps) {
     getSlotsByPlacement,
     getSlotsByDevice,
     getSlotById,
+    getSlotsByPlacementGroup,
+    hasSlotForPlacement,
     isDebugMode: config?.debug_mode || config?.debugMode || false,
   };
 
