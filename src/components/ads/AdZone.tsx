@@ -149,7 +149,7 @@ export function AdZone({ placement, className = '', style, debug = false, limit,
   // Default rendering
   return (
     <div 
-      className={`ad-zone ad-zone-${placement} empty:hidden ${className}`.trim()} 
+      className={`ad-zone ad-zone-${placement} ${className}`.trim()} 
       style={{ minHeight: 0, ...style }}
     >
       {displaySlots.map((slot) => {
