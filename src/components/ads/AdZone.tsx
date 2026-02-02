@@ -88,8 +88,8 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
   // Apply limit if specified
   const displaySlots = limit ? slots.slice(0, limit) : slots;
 
-  // Mobile sticky special handling
-  if (placement === 'mobile-sticky') {
+  // Footer sticky mobile special handling
+  if (placement === 'footer-sticky-mobile') {
     // Only show on mobile
     if (deviceType !== 'mobile') {
       return null;
@@ -97,7 +97,7 @@ export function AdZone({ placement, className = '', style, debug = false, limit 
     
     return (
       <div 
-        className={`ad-zone ad-zone-mobile-sticky fixed bottom-0 left-0 right-0 z-40 bg-white shadow-lg ${className}`.trim()}
+        className={`ad-zone ad-zone-footer-sticky-mobile fixed bottom-0 left-0 right-0 z-40 bg-white shadow-lg ${className}`.trim()}
         style={{ paddingBottom: 'env(safe-area-inset-bottom)', ...style }}
       >
         {displaySlots.map((slot) => (

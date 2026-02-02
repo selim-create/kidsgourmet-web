@@ -33,7 +33,7 @@ export function InContentAd({
   // Calculate actualSlotId (no hooks here, just computation)
   let actualSlotId = slotId || '';
   if (!actualSlotId) {
-    const inContentSlots = getSlotsByPlacement('in-content');
+    const inContentSlots = getSlotsByPlacement('content-middle');
     const compatibleSlots = inContentSlots.filter((slot) => {
       if (Array.isArray(slot.devices)) {
         return slot.devices.includes(detectedDevice);

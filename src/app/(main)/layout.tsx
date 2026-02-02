@@ -1,7 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
-import { AdZone } from "@/components/ads";
+import { HeaderLeaderboardAd, HeaderMobileAd, FooterStickyMobileAd, PageSkinAds } from "@/components/ads";
 import { AdProvider } from "@/contexts/AdContext";
 import type { Metadata } from 'next';
 
@@ -87,28 +87,23 @@ export default function MainLayout({
       <div className="flex flex-col min-h-screen">
         <Header />
         
-        {/* Masthead Banner - Header altı, proper spacing */}
-        <div className="w-full flex justify-center py-3 bg-gray-50/50 mt-[72px] lg:mt-[80px]">
-          <div className="container mx-auto px-4">
-            <AdZone placement="header" />
-          </div>
+        {/* Header Ads - Desktop leaderboard, Mobile banner */}
+        <div className="w-full mt-[72px] lg:mt-[80px]">
+          <HeaderLeaderboardAd />
+          <HeaderMobileAd />
         </div>
         
         <main className="flex-grow w-full">
           {children}
         </main>
         
-        {/* Footer Banner - Footer üstü */}
-        <div className="w-full flex justify-center py-4 bg-gray-50/50">
-          <div className="container mx-auto px-4">
-            <AdZone placement="footer" />
-          </div>
-        </div>
-        
         <Footer />
         
-        {/* Mobile Sticky Bottom - Sadece mobilde, AdZone içinde handle ediliyor */}
-        <AdZone placement="mobile-sticky" />
+        {/* Mobile Sticky Footer Ad */}
+        <FooterStickyMobileAd />
+        
+        {/* Page Skin Ads - Left and right for very wide screens */}
+        <PageSkinAds />
       </div>
     </AdProvider>
   );

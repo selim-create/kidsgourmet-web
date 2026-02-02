@@ -15,7 +15,7 @@ import { useUser } from '@/hooks/use-user';
 import FeaturedSlider from '@/components/features/FeaturedSlider';
 import BlogSection from '@/components/features/BlogSection';
 import RecipeCardComponent from '@/components/ui/RecipeCard';
-import { InContentAd } from '@/components/ads';
+import { InContentAd, AdZone } from '@/components/ads';
 
 // Tüm 16 araçlık havuz - Standart İkonlar, Renkler ve Açıklamalar
 const ALL_TOOLS = [
@@ -439,6 +439,11 @@ export default function Home() {
                 </div>
               )}
           </div>
+      </div>
+
+      {/* Content - After Hero Ad */}
+      <div className="w-full flex justify-center py-4 bg-gray-50/50">
+        <AdZone placement="content-after-hero" />
       </div>
 
       {/* CROSS-SELL SECTION: Bizimkiler Ne Yiyecek? - Tariften.com */}

@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import BlogCard from '@/components/features/BlogCard';
+import { InFeedAdWrapper } from '@/components/ads';
 
 interface BlogSectionProps {
   posts: BlogPost[];
@@ -32,11 +33,16 @@ export default function BlogSection({ posts }: BlogSectionProps) {
           </Link>
         </div>
 
-        {/* Blog Posts Grid */}
+        {/* Blog Posts Grid with InFeed Ad */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map((post) => (
-            <BlogCard key={post.id} post={post} />
-          ))}
+          <InFeedAdWrapper 
+            adPositions={[2]} // 3rd item in grid (0-indexed position 2)
+            totalItems={6} // Show total 6 items (5 posts + 1 ad)
+          >
+            {posts.map((post) => (
+              <BlogCard key={post.id} post={post} />
+            ))}
+          </InFeedAdWrapper>
         </div>
       </div>
     </div>

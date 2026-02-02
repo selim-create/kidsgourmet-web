@@ -1,37 +1,28 @@
 'use client';
 
+/**
+ * Header Leaderboard Ad - 728x90
+ * Desktop only, centered below header
+ */
+
 import React from 'react';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAds } from '@/contexts/AdContext';
 import { AdSlot } from './AdSlot';
 
-type ContentPlacement = 
-  | 'content-top'
-  | 'content-after-hero'
-  | 'content-in-feed'
-  | 'content-after-section'
-  | 'content-middle'
-  | 'content-bottom';
-
-interface ContentAdProps {
-  placement: ContentPlacement;
+interface HeaderLeaderboardAdProps {
   className?: string;
-  fallbackPlacement?: string;
 }
 
-export function ContentAd({ placement, className = '', fallbackPlacement = 'content-middle' }: ContentAdProps) {
+export function HeaderLeaderboardAd({ className = '' }: HeaderLeaderboardAdProps) {
   const deviceType = useDeviceType();
   const { getSlotsByPlacement, adsEnabled, initialized } = useAds();
 
-  if (!adsEnabled || !initialized) return null;
+  // Only show on desktop/tablet
+  if (deviceType === 'mobile' || !adsEnabled || !initialized) return null;
 
-  let slots = getSlotsByPlacement(placement);
+  const slots = getSlotsByPlacement('header-leaderboard');
   
-  // Fallback to legacy placement
-  if (slots.length === 0 && fallbackPlacement) {
-    slots = getSlotsByPlacement(fallbackPlacement as any);
-  }
-
   // Filter by device
   const compatibleSlot = slots.find((slot) => {
     if (Array.isArray(slot.devices)) {
@@ -45,7 +36,7 @@ export function ContentAd({ placement, className = '', fallbackPlacement = 'cont
   const slotId = compatibleSlot.slot_id || compatibleSlot.slotId || '';
 
   return (
-    <div className={`ad-zone ad-zone-content w-full flex justify-center my-6 ${className}`}>
+    <div className={`ad-zone ad-zone-header-leaderboard w-full flex justify-center pt-4 bg-gray-50/50 ${className}`}>
       <AdSlot slotId={slotId} className="mx-auto" />
     </div>
   );
