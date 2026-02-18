@@ -277,9 +277,20 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   // Top-level regular comments (parent_id === 0 and not expert): Show in main section
   const topLevelRegularComments = comments.filter(c => !c.is_expert_comment && c.parent_id === 0);
   
-  // Helper function to get replies for a comment (both expert and regular)
-  const getRepliesForComment = (commentId: number) => {
-    return comments.filter(c => c.parent_id === commentId);
+  // Build a map of parent_id to replies for O(1) lookup performance
+  const repliesMap = comments.reduce((map, comment) => {
+    if (comment.parent_id > 0) {
+      if (!map[comment.parent_id]) {
+        map[comment.parent_id] = [];
+      }
+      map[comment.parent_id].push(comment);
+    }
+    return map;
+  }, {} as Record<number, DiscussionComment[]>);
+  
+  // Helper function to get replies for a comment using the pre-built map
+  const getRepliesForComment = (commentId: number): DiscussionComment[] => {
+    return repliesMap[commentId] || [];
   };
 
   if (loading) {
