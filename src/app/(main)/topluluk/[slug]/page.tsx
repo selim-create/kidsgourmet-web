@@ -16,6 +16,60 @@ import RichContent from '@/components/community/RichContent';
 const ReportModal = dynamic(() => import('@/components/ui/ReportModal'), { ssr: false });
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
 
+// Inline reply form component
+interface InlineReplyFormProps {
+  comment: DiscussionComment;
+  replyText: string;
+  submittingReply: boolean;
+  onReplyTextChange: (text: string) => void;
+  onCancel: () => void;
+  onSubmit: (commentId: number) => void;
+}
+
+const InlineReplyForm = ({ comment, replyText, submittingReply, onReplyTextChange, onCancel, onSubmit }: InlineReplyFormProps) => (
+  <div className="mt-3 ml-8 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-xs text-gray-500">
+        <i className="fa-solid fa-reply text-orange-400 mr-1"></i>
+        <span className="font-medium text-slate-700">{comment.author.name}</span> kullanıcısına yanıt
+      </span>
+      <button onClick={onCancel} className="ml-auto text-xs text-gray-400 hover:text-red-500">
+        <i className="fa-solid fa-times"></i>
+      </button>
+    </div>
+    <textarea
+      value={replyText}
+      onChange={(e) => onReplyTextChange(e.target.value)}
+      placeholder="Yanıtınızı yazın..."
+      rows={3}
+      disabled={submittingReply}
+      className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50"
+      autoFocus
+    />
+    <div className="flex justify-end gap-2 mt-2">
+      <button
+        onClick={onCancel}
+        className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        İptal
+      </button>
+      <button
+        onClick={() => onSubmit(comment.id)}
+        disabled={submittingReply || !replyText.trim()}
+        className="px-4 py-1.5 text-xs bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+      >
+        {submittingReply ? (
+          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+        ) : (
+          <>
+            <i className="fa-solid fa-paper-plane"></i> Yanıtla
+          </>
+        )}
+      </button>
+    </div>
+  </div>
+);
+
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
   
@@ -298,50 +352,15 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
     setShowReportModal(true);
   }
 
-  // Inline reply form component
-  const InlineReplyForm = ({ comment }: { comment: DiscussionComment }) => (
-    <div className="mt-3 ml-8 bg-gray-50 p-4 rounded-2xl border border-gray-200">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-xs text-gray-500">
-          <i className="fa-solid fa-reply text-orange-400 mr-1"></i>
-          <span className="font-medium text-slate-700">{comment.author.name}</span> kullanıcısına yanıt
-        </span>
-        <button onClick={() => { setReplyingTo(null); setReplyText(''); }} className="ml-auto text-xs text-gray-400 hover:text-red-500">
-          <i className="fa-solid fa-times"></i>
-        </button>
-      </div>
-      <textarea
-        value={replyText}
-        onChange={(e) => setReplyText(e.target.value)}
-        placeholder="Yanıtınızı yazın..."
-        rows={3}
-        disabled={submittingReply}
-        className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50"
-        autoFocus
-      />
-      <div className="flex justify-end gap-2 mt-2">
-        <button
-          onClick={() => { setReplyingTo(null); setReplyText(''); }}
-          className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
-        >
-          İptal
-        </button>
-        <button
-          onClick={() => handleSubmitReply(comment.id)}
-          disabled={submittingReply || !replyText.trim()}
-          className="px-4 py-1.5 text-xs bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
-        >
-          {submittingReply ? (
-            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
-          ) : (
-            <>
-              <i className="fa-solid fa-paper-plane"></i> Yanıtla
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-  );
+  function handleCancelReply() {
+    setReplyingTo(null);
+    setReplyText('');
+  }
+
+  function handleStartReply(commentId: number) {
+    setReplyingTo(commentId);
+    setReplyText('');
+  }
 
   // Separate comments by type and hierarchy
   // Top-level expert comments (parent_id === 0): Show at top as "Uzman Cevabı"
@@ -584,10 +603,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                               {/* Reply Button for Expert Comment */}
                               <div className="mt-4 pt-3 border-t border-green-100">
                                 <button 
-                                  onClick={() => {
-                                    setReplyingTo(comment.id);
-                                    setReplyText('');
-                                  }}
+                                  onClick={() => handleStartReply(comment.id)}
                                   className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
                                 >
                                   <i className="fa-solid fa-reply mr-1"></i> Yanıtla
@@ -596,7 +612,16 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                           </div>
                           
                           {/* Inline Reply Form for Expert Comment */}
-                          {replyingTo === comment.id && <InlineReplyForm comment={comment} />}
+                          {replyingTo === comment.id && (
+                            <InlineReplyForm 
+                              comment={comment}
+                              replyText={replyText}
+                              submittingReply={submittingReply}
+                              onReplyTextChange={setReplyText}
+                              onCancel={handleCancelReply}
+                              onSubmit={handleSubmitReply}
+                            />
+                          )}
                           
                           {/* Replies to Expert Comment */}
                           {expertReplies.length > 0 && (
@@ -678,10 +703,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                       
                                       {/* Reply Button */}
                                       <button 
-                                        onClick={() => {
-                                          setReplyingTo(reply.id);
-                                          setReplyText('');
-                                        }}
+                                        onClick={() => handleStartReply(reply.id)}
                                         className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
                                       >
                                         <i className="fa-solid fa-reply mr-1"></i> Yanıtla
@@ -690,7 +712,16 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                   </div>
                                   
                                   {/* Inline Reply Form for Expert Reply */}
-                                  {replyingTo === reply.id && <InlineReplyForm comment={reply} />}
+                                  {replyingTo === reply.id && (
+                                    <InlineReplyForm 
+                                      comment={reply}
+                                      replyText={replyText}
+                                      submittingReply={submittingReply}
+                                      onReplyTextChange={setReplyText}
+                                      onCancel={handleCancelReply}
+                                      onSubmit={handleSubmitReply}
+                                    />
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -770,10 +801,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                       
                                       {/* Reply Button */}
                                       <button 
-                                        onClick={() => {
-                                          setReplyingTo(comment.id);
-                                          setReplyText('');
-                                        }}
+                                        onClick={() => handleStartReply(comment.id)}
                                         className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
                                       >
                                         <i className="fa-solid fa-reply mr-1"></i> Yanıtla
@@ -782,7 +810,16 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                 </div>
                                 
                                 {/* Inline Reply Form for Top-Level Comment */}
-                                {replyingTo === comment.id && <InlineReplyForm comment={comment} />}
+                                {replyingTo === comment.id && (
+                                  <InlineReplyForm 
+                                    comment={comment}
+                                    replyText={replyText}
+                                    submittingReply={submittingReply}
+                                    onReplyTextChange={setReplyText}
+                                    onCancel={handleCancelReply}
+                                    onSubmit={handleSubmitReply}
+                                  />
+                                )}
 
                                 {/* Replies to this comment */}
                                 {replies.length > 0 && (
@@ -864,10 +901,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                           
                                           {/* Reply Button */}
                                           <button 
-                                            onClick={() => {
-                                              setReplyingTo(reply.id);
-                                              setReplyText('');
-                                            }}
+                                            onClick={() => handleStartReply(reply.id)}
                                             className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
                                           >
                                             <i className="fa-solid fa-reply mr-1"></i> Yanıtla
@@ -876,7 +910,16 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                       </div>
                                       
                                       {/* Inline Reply Form for Nested Reply */}
-                                      {replyingTo === reply.id && <InlineReplyForm comment={reply} />}
+                                      {replyingTo === reply.id && (
+                                        <InlineReplyForm 
+                                          comment={reply}
+                                          replyText={replyText}
+                                          submittingReply={submittingReply}
+                                          onReplyTextChange={setReplyText}
+                                          onCancel={handleCancelReply}
+                                          onSubmit={handleSubmitReply}
+                                        />
+                                      )}
                                     </div>
                                     ))}
                                   </div>
