@@ -60,6 +60,10 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
       try {
         setLoading(true);
         setError(null);
+        // IMPORTANT: Clear previous data to prevent stale state when slug changes
+        setDiscussion(null);
+        setComments([]);
+        setRelatedDiscussions([]);
         
         // First fetch discussion to get its ID
         const discussionData = await getDiscussionBySlug(slug);
@@ -266,9 +270,28 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
     setShowReportModal(true);
   }
 
-  // Separate expert and non-expert comments
-  const expertComments = comments.filter(c => c.is_expert_comment);
-  const regularComments = comments.filter(c => !c.is_expert_comment);
+  // Separate comments by type and hierarchy
+  // Top-level expert comments (parent_id === 0): Show at top as "Uzman Cevabı"
+  const topLevelExpertComments = comments.filter(c => c.is_expert_comment && c.parent_id === 0);
+  
+  // Top-level regular comments (parent_id === 0 and not expert): Show in main section
+  const topLevelRegularComments = comments.filter(c => !c.is_expert_comment && c.parent_id === 0);
+  
+  // Build a map of parent_id to replies for O(1) lookup performance
+  const repliesMap = comments.reduce((map, comment) => {
+    if (comment.parent_id > 0) {
+      if (!map[comment.parent_id]) {
+        map[comment.parent_id] = [];
+      }
+      map[comment.parent_id].push(comment);
+    }
+    return map;
+  }, {} as Record<number, DiscussionComment[]>);
+  
+  // Helper function to get replies for a comment using the pre-built map
+  const getRepliesForComment = (commentId: number): DiscussionComment[] => {
+    return repliesMap[commentId] || [];
+  };
 
   if (loading) {
     return (
@@ -456,7 +479,7 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                     </div>
 
                     {/* EXPERT ANSWERS (Pinned) */}
-                    {expertComments.map((comment) => (
+                    {topLevelExpertComments.map((comment) => (
                       <div key={comment.id} className="bg-green-50/50 p-6 md:p-8 rounded-[2rem] border-2 border-green-100 shadow-sm relative overflow-hidden">
                           <div className="absolute top-0 left-0 bg-green-100 text-green-700 text-xs font-bold px-4 py-1.5 rounded-br-2xl border-r border-b border-green-200">
                               <i className="fa-solid fa-check-circle mr-1"></i> Uzman Cevabı
@@ -484,71 +507,160 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                     ))}
 
                     {/* COMMUNITY REPLIES */}
-                    {regularComments.length > 0 && (
+                    {topLevelRegularComments.length > 0 && (
                       <div className="space-y-6 pt-4">
                           <h3 className="font-bold text-slate-800 text-lg px-2">
-                            Diğer Cevaplar ({regularComments.length})
+                            Diğer Cevaplar ({topLevelRegularComments.length})
                           </h3>
 
-                          {regularComments.map((comment) => (
-                            <div key={comment.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                                <div className="flex justify-between mb-3">
-                                    <div className="flex gap-3">
-                                        <img 
-                                          src={comment.author.avatar || `https://placehold.co/100x100/FFAB91/ffffff?text=${comment.author.name.charAt(0)}`}
-                                          className="w-10 h-10 rounded-full bg-gray-100" 
-                                          alt={comment.author.name} 
-                                        />
-                                        <div>
-                                            <Link 
-                                              href={getProfileUrl(comment.author)}
-                                              className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
-                                            >
-                                              {comment.author.name}
-                                            </Link>
-                                            <p className="text-xs text-gray-400">{formatRelativeTime(comment.created_at)}</p>
+                          {topLevelRegularComments.map((comment) => {
+                            const replies = getRepliesForComment(comment.id);
+                            
+                            return (
+                              <div key={comment.id}>
+                                {/* Main Comment */}
+                                <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                                  <div className="flex justify-between mb-3">
+                                      <div className="flex gap-3">
+                                          <img 
+                                            src={comment.author.avatar || `https://placehold.co/100x100/FFAB91/ffffff?text=${comment.author.name.charAt(0)}`}
+                                            className="w-10 h-10 rounded-full bg-gray-100" 
+                                            alt={comment.author.name} 
+                                          />
+                                          <div>
+                                              <Link 
+                                                href={getProfileUrl(comment.author)}
+                                                className="font-bold text-slate-800 text-sm hover:text-orange-500 transition-colors"
+                                              >
+                                                {comment.author.name}
+                                              </Link>
+                                              <p className="text-xs text-gray-400">{formatRelativeTime(comment.created_at)}</p>
+                                          </div>
+                                      </div>
+                                      <button 
+                                        onClick={() => handleReport('comment', comment.id)}
+                                        className="text-gray-400 hover:text-slate-800 text-sm"
+                                      >
+                                        <i className="fa-solid fa-flag"></i>
+                                      </button>
+                                  </div>
+                                  <RichContent 
+                                    html={comment.content} 
+                                    className="text-sm text-gray-600 mb-3"
+                                  />
+                                  <div className="flex gap-4">
+                                      {/* Like Button */}
+                                      <button 
+                                        onClick={() => handleVoteComment(comment.id, 'like')}
+                                        className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
+                                          comment.user_vote === 'like' 
+                                            ? 'text-green-600 bg-green-50 font-medium' 
+                                            : 'text-gray-500 hover:text-green-500 hover:bg-green-50'
+                                        }`}
+                                      >
+                                        <i className={`${comment.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+                                        <span>{comment.like_count || 0}</span>
+                                      </button>
+                                      
+                                      {/* Dislike Button */}
+                                      <button 
+                                        onClick={() => handleVoteComment(comment.id, 'dislike')}
+                                        className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
+                                          comment.user_vote === 'dislike' 
+                                            ? 'text-red-600 bg-red-50 font-medium' 
+                                            : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
+                                        }`}
+                                      >
+                                        <i className={`${comment.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+                                        <span>{comment.dislike_count || 0}</span>
+                                      </button>
+                                  </div>
+                                </div>
+
+                                {/* Replies to this comment */}
+                                {replies.length > 0 && (
+                                  <div className="ml-8 mt-3 space-y-3">
+                                    {replies.map((reply) => (
+                                      <div key={reply.id} className={`p-4 rounded-2xl border ${
+                                        reply.is_expert_comment 
+                                          ? 'bg-green-50/50 border-green-100' 
+                                          : 'bg-gray-50 border-gray-100'
+                                      }`}>
+                                        {/* Expert Reply Badge */}
+                                        {reply.is_expert_comment && (
+                                          <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-2">
+                                            <i className="fa-solid fa-check-circle"></i>
+                                            Uzman Yanıtı
+                                          </div>
+                                        )}
+                                        
+                                        <div className="flex justify-between mb-2">
+                                          <div className="flex gap-2">
+                                            <img 
+                                              src={reply.author.avatar || `https://placehold.co/100x100/${reply.is_expert_comment ? 'AED581' : 'FFAB91'}/ffffff?text=${reply.author.name.charAt(0)}`}
+                                              className="w-8 h-8 rounded-full bg-gray-100" 
+                                              alt={reply.author.name} 
+                                            />
+                                            <div>
+                                              <Link 
+                                                href={getProfileUrl(reply.author)}
+                                                className="font-bold text-slate-800 text-xs hover:text-orange-500 transition-colors"
+                                              >
+                                                {reply.author.name}
+                                                {reply.is_expert_comment && (
+                                                  <i className="fa-solid fa-circle-check text-green-500 ml-1"></i>
+                                                )}
+                                              </Link>
+                                              <p className="text-xs text-gray-400">{formatRelativeTime(reply.created_at)}</p>
+                                            </div>
+                                          </div>
+                                          <button 
+                                            onClick={() => handleReport('comment', reply.id)}
+                                            className="text-gray-400 hover:text-slate-800 text-xs"
+                                          >
+                                            <i className="fa-solid fa-flag"></i>
+                                          </button>
                                         </div>
-                                    </div>
-                                    <button 
-                                      onClick={() => handleReport('comment', comment.id)}
-                                      className="text-gray-400 hover:text-slate-800 text-sm"
-                                    >
-                                      <i className="fa-solid fa-flag"></i>
-                                    </button>
-                                </div>
-                                <RichContent 
-                                  html={comment.content} 
-                                  className="text-sm text-gray-600 mb-3"
-                                />
-                                <div className="flex gap-4">
-                                    {/* Like Button */}
-                                    <button 
-                                      onClick={() => handleVoteComment(comment.id, 'like')}
-                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
-                                        comment.user_vote === 'like' 
-                                          ? 'text-green-600 bg-green-50 font-medium' 
-                                          : 'text-gray-500 hover:text-green-500 hover:bg-green-50'
-                                      }`}
-                                    >
-                                      <i className={`${comment.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
-                                      <span>{comment.like_count || 0}</span>
-                                    </button>
-                                    
-                                    {/* Dislike Button */}
-                                    <button 
-                                      onClick={() => handleVoteComment(comment.id, 'dislike')}
-                                      className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
-                                        comment.user_vote === 'dislike' 
-                                          ? 'text-red-600 bg-red-50 font-medium' 
-                                          : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
-                                      }`}
-                                    >
-                                      <i className={`${comment.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
-                                      <span>{comment.dislike_count || 0}</span>
-                                    </button>
-                                </div>
-                            </div>
-                          ))}
+                                        
+                                        <RichContent 
+                                          html={reply.content} 
+                                          className="text-xs text-gray-600 mb-2"
+                                        />
+                                        
+                                        <div className="flex gap-3">
+                                          {/* Like Button */}
+                                          <button 
+                                            onClick={() => handleVoteComment(reply.id, 'like')}
+                                            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
+                                              reply.user_vote === 'like' 
+                                                ? 'text-green-600 bg-green-50 font-medium' 
+                                                : 'text-gray-500 hover:text-green-500 hover:bg-green-50'
+                                            }`}
+                                          >
+                                            <i className={`${reply.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+                                            <span>{reply.like_count || 0}</span>
+                                          </button>
+                                          
+                                          {/* Dislike Button */}
+                                          <button 
+                                            onClick={() => handleVoteComment(reply.id, 'dislike')}
+                                            className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
+                                              reply.user_vote === 'dislike' 
+                                                ? 'text-red-600 bg-red-50 font-medium' 
+                                                : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
+                                            }`}
+                                          >
+                                            <i className={`${reply.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+                                            <span>{reply.dislike_count || 0}</span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                       </div>
                     )}
 

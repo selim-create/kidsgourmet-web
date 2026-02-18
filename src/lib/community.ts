@@ -90,7 +90,10 @@ export async function getDiscussionById(id: number): Promise<Discussion> {
  * Tek bir tartışmayı slug ile getir
  */
 export async function getDiscussionBySlug(slug: string): Promise<Discussion> {
-  const response = await fetchAPI<DiscussionsResponse>(API_ENDPOINTS.DISCUSSION_BY_SLUG(slug));
+  const response = await fetchAPI<DiscussionsResponse>(
+    API_ENDPOINTS.DISCUSSION_BY_SLUG(slug),
+    { cache: 'no-store' }
+  );
   if (response.discussions.length === 0) {
     throw new Error('Tartışma bulunamadı');
   }
