@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
@@ -15,6 +15,62 @@ import RichContent from '@/components/community/RichContent';
 
 const ReportModal = dynamic(() => import('@/components/ui/ReportModal'), { ssr: false });
 const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false });
+
+// Inline reply form component
+interface InlineReplyFormProps {
+  comment: DiscussionComment;
+  replyText: string;
+  submittingReply: boolean;
+  onReplyTextChange: (text: string) => void;
+  onCancel: () => void;
+  onSubmit: (commentId: number) => void;
+}
+
+const InlineReplyForm = memo(({ comment, replyText, submittingReply, onReplyTextChange, onCancel, onSubmit }: InlineReplyFormProps) => (
+  <div className="mt-3 ml-8 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+    <div className="flex items-center gap-2 mb-2">
+      <span className="text-xs text-gray-500">
+        <i className="fa-solid fa-reply text-orange-400 mr-1"></i>
+        <span className="font-medium text-slate-700">{comment.author.name}</span> kullanıcısına yanıt
+      </span>
+      <button onClick={onCancel} className="ml-auto text-xs text-gray-400 hover:text-red-500">
+        <i className="fa-solid fa-times"></i>
+      </button>
+    </div>
+    <textarea
+      value={replyText}
+      onChange={(e) => onReplyTextChange(e.target.value)}
+      placeholder="Yanıtınızı yazın..."
+      rows={3}
+      disabled={submittingReply}
+      className="w-full bg-white border border-gray-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-orange-500 transition-colors resize-none disabled:opacity-50"
+      autoFocus
+    />
+    <div className="flex justify-end gap-2 mt-2">
+      <button
+        onClick={onCancel}
+        className="px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        İptal
+      </button>
+      <button
+        onClick={() => onSubmit(comment.id)}
+        disabled={submittingReply || !replyText.trim()}
+        className="px-4 py-1.5 text-xs bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+      >
+        {submittingReply ? (
+          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white"></div>
+        ) : (
+          <>
+            <i className="fa-solid fa-paper-plane"></i> Yanıtla
+          </>
+        )}
+      </button>
+    </div>
+  </div>
+));
+
+InlineReplyForm.displayName = 'InlineReplyForm';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -32,6 +88,11 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
   const [reportTarget, setReportTarget] = useState<{type: 'discussion' | 'comment', id: number} | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  
+  // Reply states
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [submittingReply, setSubmittingReply] = useState(false);
   
   const { toggleFavorite, isFavorite } = useFavorites();
 
@@ -265,9 +326,42 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
     }
   }
 
+  async function handleSubmitReply(parentCommentId: number) {
+    if (!replyText.trim() || !discussion) return;
+    
+    try {
+      setSubmittingReply(true);
+      await addComment(discussion.id, replyText.trim(), parentCommentId);
+      
+      // Refresh comments
+      const updatedComments = await getDiscussionComments(discussion.id);
+      const commentsWithDefaults = updatedComments.map(ensureCommentDefaults);
+      setComments(commentsWithDefaults);
+      
+      setReplyText('');
+      setReplyingTo(null);
+      toast.success('Yanıtınız eklendi');
+    } catch (err) {
+      console.error('Error submitting reply:', err);
+      toast.error('Yanıt eklenirken bir hata oluştu. Lütfen giriş yaptığınızdan emin olun.');
+    } finally {
+      setSubmittingReply(false);
+    }
+  }
+
   function handleReport(type: 'discussion' | 'comment', id: number) {
     setReportTarget({ type, id });
     setShowReportModal(true);
+  }
+
+  function handleCancelReply() {
+    setReplyingTo(null);
+    setReplyText('');
+  }
+
+  function handleStartReply(commentId: number) {
+    setReplyingTo(commentId);
+    setReplyText('');
   }
 
   // Separate comments by type and hierarchy
@@ -479,32 +573,164 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                     </div>
 
                     {/* EXPERT ANSWERS (Pinned) */}
-                    {topLevelExpertComments.map((comment) => (
-                      <div key={comment.id} className="bg-green-50/50 p-6 md:p-8 rounded-[2rem] border-2 border-green-100 shadow-sm relative overflow-hidden">
-                          <div className="absolute top-0 left-0 bg-green-100 text-green-700 text-xs font-bold px-4 py-1.5 rounded-br-2xl border-r border-b border-green-200">
-                              <i className="fa-solid fa-check-circle mr-1"></i> Uzman Cevabı
-                          </div>
+                    {topLevelExpertComments.map((comment) => {
+                      const expertReplies = getRepliesForComment(comment.id);
+                      
+                      return (
+                        <div key={comment.id}>
+                          <div className="bg-green-50/50 p-6 md:p-8 rounded-[2rem] border-2 border-green-100 shadow-sm relative overflow-hidden">
+                              <div className="absolute top-0 left-0 bg-green-100 text-green-700 text-xs font-bold px-4 py-1.5 rounded-br-2xl border-r border-b border-green-200">
+                                  <i className="fa-solid fa-check-circle mr-1"></i> Uzman Cevabı
+                              </div>
 
-                          <div className="flex gap-4 mb-4 mt-4">
-                              <img 
-                                src={comment.author.avatar || `https://placehold.co/100x100/AED581/ffffff?text=${comment.author.name.charAt(0)}`}
-                                className="w-12 h-12 rounded-full border-2 border-white shadow-sm" 
-                                alt={comment.author.name} 
+                              <div className="flex gap-4 mb-4 mt-4">
+                                  <img 
+                                    src={comment.author.avatar || `https://placehold.co/100x100/AED581/ffffff?text=${comment.author.name.charAt(0)}`}
+                                    className="w-12 h-12 rounded-full border-2 border-white shadow-sm" 
+                                    alt={comment.author.name} 
+                                  />
+                                  <div>
+                                      <h3 className="font-bold text-slate-800 text-sm">
+                                        {comment.author.name} <i className="fa-solid fa-circle-check text-green-500 ml-1"></i>
+                                      </h3>
+                                      <p className="text-xs text-green-600 font-medium">{formatRelativeTime(comment.created_at)}</p>
+                                  </div>
+                              </div>
+
+                              <RichContent 
+                                html={comment.content} 
+                                className="text-slate-700"
                               />
-                              <div>
-                                  <h3 className="font-bold text-slate-800 text-sm">
-                                    {comment.author.name} <i className="fa-solid fa-circle-check text-green-500 ml-1"></i>
-                                  </h3>
-                                  <p className="text-xs text-green-600 font-medium">{formatRelativeTime(comment.created_at)}</p>
+                              
+                              {/* Reply Button for Expert Comment */}
+                              <div className="mt-4 pt-3 border-t border-green-100">
+                                <button 
+                                  onClick={() => handleStartReply(comment.id)}
+                                  className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
+                                >
+                                  <i className="fa-solid fa-reply mr-1"></i> Yanıtla
+                                </button>
                               </div>
                           </div>
-
-                          <RichContent 
-                            html={comment.content} 
-                            className="text-slate-700"
-                          />
-                      </div>
-                    ))}
+                          
+                          {/* Inline Reply Form for Expert Comment */}
+                          {replyingTo === comment.id && (
+                            <InlineReplyForm 
+                              comment={comment}
+                              replyText={replyText}
+                              submittingReply={submittingReply}
+                              onReplyTextChange={setReplyText}
+                              onCancel={handleCancelReply}
+                              onSubmit={handleSubmitReply}
+                            />
+                          )}
+                          
+                          {/* Replies to Expert Comment */}
+                          {expertReplies.length > 0 && (
+                            <div className="ml-8 mt-3 space-y-3">
+                              {expertReplies.map((reply) => (
+                                <div key={reply.id}>
+                                  <div className={`p-4 rounded-2xl border ${
+                                    reply.is_expert_comment 
+                                      ? 'bg-green-50/50 border-green-100' 
+                                      : 'bg-gray-50 border-gray-100'
+                                  }`}>
+                                    {/* Expert Reply Badge */}
+                                    {reply.is_expert_comment && (
+                                      <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-2">
+                                        <i className="fa-solid fa-check-circle"></i>
+                                        Uzman Yanıtı
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex justify-between mb-2">
+                                      <div className="flex gap-2">
+                                        <img 
+                                          src={reply.author.avatar || `https://placehold.co/100x100/${reply.is_expert_comment ? 'AED581' : 'FFAB91'}/ffffff?text=${reply.author.name.charAt(0)}`}
+                                          className="w-8 h-8 rounded-full bg-gray-100" 
+                                          alt={reply.author.name} 
+                                        />
+                                        <div>
+                                          <Link 
+                                            href={getProfileUrl(reply.author)}
+                                            className="font-bold text-slate-800 text-xs hover:text-orange-500 transition-colors"
+                                          >
+                                            {reply.author.name}
+                                            {reply.is_expert_comment && (
+                                              <i className="fa-solid fa-circle-check text-green-500 ml-1"></i>
+                                            )}
+                                          </Link>
+                                          <p className="text-xs text-gray-400">{formatRelativeTime(reply.created_at)}</p>
+                                        </div>
+                                      </div>
+                                      <button 
+                                        onClick={() => handleReport('comment', reply.id)}
+                                        className="text-gray-400 hover:text-slate-800 text-xs"
+                                      >
+                                        <i className="fa-solid fa-flag"></i>
+                                      </button>
+                                    </div>
+                                    
+                                    <RichContent 
+                                      html={reply.content} 
+                                      className="text-xs text-gray-600 mb-2"
+                                    />
+                                    
+                                    <div className="flex gap-3">
+                                      {/* Like Button */}
+                                      <button 
+                                        onClick={() => handleVoteComment(reply.id, 'like')}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
+                                          reply.user_vote === 'like' 
+                                            ? 'text-green-600 bg-green-50 font-medium' 
+                                            : 'text-gray-500 hover:text-green-500 hover:bg-green-50'
+                                        }`}
+                                      >
+                                        <i className={`${reply.user_vote === 'like' ? 'fa-solid' : 'fa-regular'} fa-thumbs-up`}></i>
+                                        <span>{reply.like_count || 0}</span>
+                                      </button>
+                                      
+                                      {/* Dislike Button */}
+                                      <button 
+                                        onClick={() => handleVoteComment(reply.id, 'dislike')}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs transition-all duration-200 ${
+                                          reply.user_vote === 'dislike' 
+                                            ? 'text-red-600 bg-red-50 font-medium' 
+                                            : 'text-gray-500 hover:text-red-500 hover:bg-red-50'
+                                        }`}
+                                      >
+                                        <i className={`${reply.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
+                                        <span>{reply.dislike_count || 0}</span>
+                                      </button>
+                                      
+                                      {/* Reply Button */}
+                                      <button 
+                                        onClick={() => handleStartReply(reply.id)}
+                                        className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
+                                      >
+                                        <i className="fa-solid fa-reply mr-1"></i> Yanıtla
+                                      </button>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Inline Reply Form for Expert Reply */}
+                                  {replyingTo === reply.id && (
+                                    <InlineReplyForm 
+                                      comment={reply}
+                                      replyText={replyText}
+                                      submittingReply={submittingReply}
+                                      onReplyTextChange={setReplyText}
+                                      onCancel={handleCancelReply}
+                                      onSubmit={handleSubmitReply}
+                                    />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
 
                     {/* COMMUNITY REPLIES */}
                     {topLevelRegularComments.length > 0 && (
@@ -574,18 +800,39 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                         <i className={`${comment.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
                                         <span>{comment.dislike_count || 0}</span>
                                       </button>
+                                      
+                                      {/* Reply Button */}
+                                      <button 
+                                        onClick={() => handleStartReply(comment.id)}
+                                        className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
+                                      >
+                                        <i className="fa-solid fa-reply mr-1"></i> Yanıtla
+                                      </button>
                                   </div>
                                 </div>
+                                
+                                {/* Inline Reply Form for Top-Level Comment */}
+                                {replyingTo === comment.id && (
+                                  <InlineReplyForm 
+                                    comment={comment}
+                                    replyText={replyText}
+                                    submittingReply={submittingReply}
+                                    onReplyTextChange={setReplyText}
+                                    onCancel={handleCancelReply}
+                                    onSubmit={handleSubmitReply}
+                                  />
+                                )}
 
                                 {/* Replies to this comment */}
                                 {replies.length > 0 && (
                                   <div className="ml-8 mt-3 space-y-3">
                                     {replies.map((reply) => (
-                                      <div key={reply.id} className={`p-4 rounded-2xl border ${
-                                        reply.is_expert_comment 
-                                          ? 'bg-green-50/50 border-green-100' 
-                                          : 'bg-gray-50 border-gray-100'
-                                      }`}>
+                                      <div key={reply.id}>
+                                        <div className={`p-4 rounded-2xl border ${
+                                          reply.is_expert_comment 
+                                            ? 'bg-green-50/50 border-green-100' 
+                                            : 'bg-gray-50 border-gray-100'
+                                        }`}>
                                         {/* Expert Reply Badge */}
                                         {reply.is_expert_comment && (
                                           <div className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-xs font-bold px-3 py-1 rounded-full mb-2">
@@ -653,8 +900,29 @@ export default function CommunityDetailPage({ params }: { params: Promise<{ slug
                                             <i className={`${reply.user_vote === 'dislike' ? 'fa-solid' : 'fa-regular'} fa-thumbs-down`}></i>
                                             <span>{reply.dislike_count || 0}</span>
                                           </button>
+                                          
+                                          {/* Reply Button */}
+                                          <button 
+                                            onClick={() => handleStartReply(reply.id)}
+                                            className="text-gray-500 hover:text-orange-500 text-xs transition-colors"
+                                          >
+                                            <i className="fa-solid fa-reply mr-1"></i> Yanıtla
+                                          </button>
                                         </div>
                                       </div>
+                                      
+                                      {/* Inline Reply Form for Nested Reply */}
+                                      {replyingTo === reply.id && (
+                                        <InlineReplyForm 
+                                          comment={reply}
+                                          replyText={replyText}
+                                          submittingReply={submittingReply}
+                                          onReplyTextChange={setReplyText}
+                                          onCancel={handleCancelReply}
+                                          onSubmit={handleSubmitReply}
+                                        />
+                                      )}
+                                    </div>
                                     ))}
                                   </div>
                                 )}
