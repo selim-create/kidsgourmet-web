@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import Link from "next/link";
 import { use } from 'react';
 import { toast } from 'sonner';
@@ -26,7 +26,7 @@ interface InlineReplyFormProps {
   onSubmit: (commentId: number) => void;
 }
 
-const InlineReplyForm = ({ comment, replyText, submittingReply, onReplyTextChange, onCancel, onSubmit }: InlineReplyFormProps) => (
+const InlineReplyForm = memo(({ comment, replyText, submittingReply, onReplyTextChange, onCancel, onSubmit }: InlineReplyFormProps) => (
   <div className="mt-3 ml-8 bg-gray-50 p-4 rounded-2xl border border-gray-200">
     <div className="flex items-center gap-2 mb-2">
       <span className="text-xs text-gray-500">
@@ -68,7 +68,9 @@ const InlineReplyForm = ({ comment, replyText, submittingReply, onReplyTextChang
       </button>
     </div>
   </div>
-);
+));
+
+InlineReplyForm.displayName = 'InlineReplyForm';
 
 export default function CommunityDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
