@@ -122,6 +122,12 @@ export function AdZone({ placement, className = '', style, debug = false, limit,
     );
   }
 
+  // Interstitial ads are handled by InterstitialAd component
+  // They use defineOutOfPageSlot and don't need a DOM container
+  if (placement === 'interstitial') {
+    return null;
+  }
+
   // Sidebar sticky special handling
   if (placement === 'sidebar-sticky') {
     // Only show on desktop

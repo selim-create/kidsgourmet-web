@@ -142,7 +142,8 @@ class AdManager {
       }
 
       // Handle sizes - support both array [width, height] and object {width, height} formats
-      const sizes = slotConfig.sizes.map((size) => {
+      // Guard against undefined/empty sizes (e.g., when this method is mistakenly called for interstitial slots)
+      const sizes = (slotConfig.sizes || []).map((size) => {
         if (Array.isArray(size)) {
           return [size[0], size[1]] as [number, number];
         }
@@ -194,6 +195,54 @@ class AdManager {
 
       // Enable services after first slot is defined (only once)
       // This ensures proper GPT.js call sequencing
+      if (!this.servicesEnabled) {
+        const enableServices = this.config?.enable_services ?? this.config?.enableServices;
+        if (enableServices !== false) {
+          window.googletag.enableServices();
+          this.servicesEnabled = true;
+        }
+      }
+    });
+  }
+
+  /**
+   * Define an interstitial (out-of-page) ad slot
+   */
+  defineInterstitialSlot(slotConfig: AdSlot): void {
+    if (typeof window === 'undefined' || !window.googletag) {
+      return;
+    }
+
+    window.googletag.cmd.push(() => {
+      const adUnitPath = slotConfig.ad_unit_path || slotConfig.adUnitPath || '';
+      const slotKey = `interstitial-${adUnitPath}`;
+
+      // Skip if already defined
+      if (this.slots.has(slotKey)) {
+        return;
+      }
+
+      const slot = window.googletag.defineOutOfPageSlot(
+        adUnitPath,
+        window.googletag.enums.OutOfPageFormat.INTERSTITIAL
+      );
+
+      if (!slot) {
+        console.warn('Interstitial slot not available (frequency cap or unsupported)');
+        return;
+      }
+
+      // Set targeting if configured
+      if (slotConfig.targeting) {
+        Object.entries(slotConfig.targeting).forEach(([key, value]) => {
+          slot.setTargeting(key, value);
+        });
+      }
+
+      slot.addService(window.googletag.pubads());
+      this.slots.set(slotKey, slot);
+
+      // Enable services if not already done
       if (!this.servicesEnabled) {
         const enableServices = this.config?.enable_services ?? this.config?.enableServices;
         if (enableServices !== false) {
