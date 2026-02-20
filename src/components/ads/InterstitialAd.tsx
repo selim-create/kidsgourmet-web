@@ -15,16 +15,21 @@ export function InterstitialAd() {
 
     const slots = getSlotsByPlacement('interstitial');
 
-    const compatibleSlot = slots.find((slot) => {
+    // Filter ALL compatible slots for current device (not just the first one)
+    const compatibleSlots = slots.filter((slot) => {
       if (Array.isArray(slot.devices)) {
         return slot.devices.includes(deviceType) || slot.devices.includes('all');
       }
       return slot.device === deviceType || slot.device === 'all';
     });
 
-    if (!compatibleSlot) return;
+    if (compatibleSlots.length === 0) return;
 
-    adManager.defineInterstitialSlot(compatibleSlot);
+    // Define ALL compatible interstitial slots
+    compatibleSlots.forEach((slot) => {
+      adManager.defineInterstitialSlot(slot);
+    });
+
     definedRef.current = true;
   }, [adsEnabled, initialized, deviceType, getSlotsByPlacement]);
 
