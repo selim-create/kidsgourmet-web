@@ -207,12 +207,10 @@ class AdManager {
 
   /**
    * Define an interstitial (out-of-page) ad slot
-   * Uses defineOutOfPageSlot WITHOUT format parameter for custom creative compatibility.
-   * Google's native INTERSTITIAL format is incompatible with custom HTML creatives.
-   *
-   * IMPORTANT: When SRA (Single Request Architecture) is enabled, out-of-page slots
-   * defined after enableServices() need an explicit refresh() call because they
-   * weren't included in the initial SRA batch request.
+   * Uses googletag.enums.OutOfPageFormat.INTERSTITIAL which tells GPT to:
+   * 1. Create its own full-screen overlay container
+   * 2. Handle display/close lifecycle automatically
+   * 3. Render the creative (including custom HTML) inside the overlay iframe
    */
   defineInterstitialSlot(slotConfig: AdSlot): void {
     if (typeof window === 'undefined' || !window.googletag) {
@@ -228,16 +226,22 @@ class AdManager {
         return;
       }
 
-      // Use defineOutOfPageSlot WITHOUT format parameter
-      // This renders GAM custom creative HTML in an iframe overlay
-      const slot = window.googletag.defineOutOfPageSlot(adUnitPath);
+      // Use OutOfPageFormat.INTERSTITIAL - GPT automatically creates the overlay DOM
+      // This returns null if:
+      // - The interstitial has already been shown (frequency cap)
+      // - The browser/device doesn't support it
+      // - It's the first page view in SPA navigation
+      const slot = window.googletag.defineOutOfPageSlot(
+        adUnitPath,
+        window.googletag.enums.OutOfPageFormat.INTERSTITIAL
+      );
 
       if (!slot) {
-        console.warn(`Interstitial slot could not be defined: ${adUnitPath}`);
+        console.warn(`Interstitial slot could not be defined (may be frequency capped): ${adUnitPath}`);
         return;
       }
 
-      // Set targeting if configured
+      // Set targeting if configured (guard against array from API)
       if (slotConfig.targeting && typeof slotConfig.targeting === 'object' && !Array.isArray(slotConfig.targeting)) {
         Object.entries(slotConfig.targeting).forEach(([key, value]) => {
           slot.setTargeting(key, value);
@@ -256,17 +260,16 @@ class AdManager {
         }
       }
 
-      // Display the out-of-page slot
-      // For out-of-page slots, GPT auto-generates a div element
+      // For OutOfPageFormat.INTERSTITIAL, GPT manages the DOM element itself.
+      // We just need to call display() with the slot's element ID.
+      // GPT has already created the overlay container in the DOM.
       const slotElementId = slot.getSlotElementId();
       if (slotElementId) {
         window.googletag.display(slotElementId);
       }
 
-      // CRITICAL: When SRA (Single Request Architecture) is enabled,
-      // slots defined after enableServices() was already called are NOT
-      // included in the initial batch request. We must explicitly refresh
-      // the slot to trigger a separate ad request for this late-defined slot.
+      // When SRA is enabled, explicitly refresh to trigger ad request
+      // since this slot was defined after the initial SRA batch
       if (this.servicesEnabled) {
         window.googletag.pubads().refresh([slot]);
       }

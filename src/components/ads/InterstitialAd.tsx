@@ -36,7 +36,7 @@ export function InterstitialAd() {
       });
 
       definedRef.current = true;
-    }, 1500);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [adsEnabled, initialized, deviceType, getSlotsByPlacement]);
