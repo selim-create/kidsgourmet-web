@@ -14,9 +14,18 @@ export interface GoogleTag {
   cmd: Array<() => void>;
   pubads(): PubAdsService;
   defineSlot(adUnitPath: string, size: GeneralSize, divId: string): Slot | null;
+  defineOutOfPageSlot(adUnitPath: string, format: number): Slot | null;
   display(divId: string): void;
   enableServices(): void;
   destroySlots(slots?: Slot[]): boolean;
+  enums: {
+    OutOfPageFormat: {
+      INTERSTITIAL: number;
+      REWARDED: number;
+      TOP_ANCHOR: number;
+      BOTTOM_ANCHOR: number;
+    };
+  };
 }
 
 export interface PubAdsService {

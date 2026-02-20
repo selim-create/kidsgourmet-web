@@ -22,4 +22,5 @@ export { FooterStickyMobileAd } from './FooterStickyMobileAd';
 export { FooterBannerAd } from './FooterBannerAd';
 export { PageSkinAds } from './PageSkinAds';
 export { InFeedAdWrapper } from './InFeedAdWrapper';
+export { InterstitialAd } from './InterstitialAd';
 export { useDeviceType } from '@/hooks/useDeviceType';

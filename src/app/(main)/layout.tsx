@@ -1,7 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
-import { HeaderLeaderboardAd, HeaderMobileAd, FooterStickyMobileAd, PageSkinAds } from "@/components/ads";
+import { HeaderLeaderboardAd, HeaderMobileAd, FooterStickyMobileAd, PageSkinAds, InterstitialAd } from "@/components/ads";
 import { AdProvider } from "@/contexts/AdContext";
 import type { Metadata } from 'next';
 
@@ -104,6 +104,9 @@ export default function MainLayout({
         
         {/* Page Skin Ads - Left and right for very wide screens */}
         <PageSkinAds />
+        
+        {/* Interstitial Ad - Out-of-page overlay, no DOM container needed */}
+        <InterstitialAd />
       </div>
     </AdProvider>
   );
