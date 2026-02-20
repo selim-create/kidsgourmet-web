@@ -207,10 +207,13 @@ class AdManager {
 
   /**
    * Define an interstitial (out-of-page) ad slot
-   * Uses googletag.enums.OutOfPageFormat.INTERSTITIAL which tells GPT to:
-   * 1. Create its own full-screen overlay container
-   * 2. Handle display/close lifecycle automatically
-   * 3. Render the creative (including custom HTML) inside the overlay iframe
+   * Uses defineOutOfPageSlot WITHOUT format parameter because our custom creatives
+   * have their own full-screen overlay system (position:fixed background, close button, countdown).
+   * GPT's native OutOfPageFormat.INTERSTITIAL creates a conflicting overlay that restricts
+   * the creative's iframe sizing and blocks parent.document access.
+   *
+   * We manually create a DOM container for the slot before calling display(),
+   * which solves the "div not found in DOM" error.
    */
   defineInterstitialSlot(slotConfig: AdSlot): void {
     if (typeof window === 'undefined' || !window.googletag) {
@@ -226,18 +229,12 @@ class AdManager {
         return;
       }
 
-      // Use OutOfPageFormat.INTERSTITIAL - GPT automatically creates the overlay DOM
-      // This returns null if:
-      // - The interstitial has already been shown (frequency cap)
-      // - The browser/device doesn't support it
-      // - It's the first page view in SPA navigation
-      const slot = window.googletag.defineOutOfPageSlot(
-        adUnitPath,
-        window.googletag.enums.OutOfPageFormat.INTERSTITIAL
-      );
+      // Use defineOutOfPageSlot WITHOUT format parameter
+      // Our custom creative HTML handles its own overlay (position:fixed, close button, countdown)
+      const slot = window.googletag.defineOutOfPageSlot(adUnitPath);
 
       if (!slot) {
-        console.warn(`Interstitial slot could not be defined (may be frequency capped): ${adUnitPath}`);
+        console.warn(`Interstitial slot could not be defined: ${adUnitPath}`);
         return;
       }
 
@@ -260,11 +257,20 @@ class AdManager {
         }
       }
 
-      // For OutOfPageFormat.INTERSTITIAL, GPT manages the DOM element itself.
-      // We just need to call display() with the slot's element ID.
-      // GPT has already created the overlay container in the DOM.
+      // CRITICAL: For out-of-page slots WITHOUT format parameter,
+      // GPT does NOT auto-create a DOM element. We must create it manually
+      // before calling display(), otherwise GPT throws "div not found in DOM" error.
       const slotElementId = slot.getSlotElementId();
       if (slotElementId) {
+        // Check if element already exists (shouldn't, but just in case)
+        if (!document.getElementById(slotElementId)) {
+          const container = document.createElement('div');
+          container.id = slotElementId;
+          // Position the container so the creative's position:fixed overlay works correctly
+          // The creative iframe will break out of this container using position:fixed
+          container.style.cssText = 'position:fixed; top:0; left:0; width:0; height:0; z-index:2147483647; overflow:visible;';
+          document.body.appendChild(container);
+        }
         window.googletag.display(slotElementId);
       }
 
