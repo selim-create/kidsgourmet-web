@@ -14,7 +14,7 @@ export interface GoogleTag {
   cmd: Array<() => void>;
   pubads(): PubAdsService;
   defineSlot(adUnitPath: string, size: GeneralSize, divId: string): Slot | null;
-  defineOutOfPageSlot(adUnitPath: string, format: number): Slot | null;
+  defineOutOfPageSlot(adUnitPath: string, format?: number): Slot | null;
   display(divId: string): void;
   enableServices(): void;
   destroySlots(slots?: Slot[]): boolean;
