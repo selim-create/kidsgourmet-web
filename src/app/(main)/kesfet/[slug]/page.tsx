@@ -318,6 +318,10 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     return slug || 'unknown';
   };
 
+  const getAuthorBio = (post: BlogPost) => {
+    return post._embedded?.author?.[0]?.description || '';
+  };
+
   const getCategoryName = (post: BlogPost) => {
       const cat = post._embedded?.['wp:term']?.[0]?.[0];
       return cat ? cat.name : 'Genel';
@@ -739,7 +743,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                   >
                                     {getAuthorName(post)}
                                   </Link>
-                                  <p className="text-sm text-gray-600 mb-3">Çocuk Sağlığı ve Gelişimi üzerine içerikler üretiyor.</p>
+                                  <p className="text-sm text-gray-600 mb-3">
+                                    {getAuthorBio(post) || 'Çocuk Sağlığı ve Gelişimi üzerine içerikler üretiyor.'}
+                                  </p>
                                   <Link 
                                     href={`/uzman/${getAuthorSlug(post)}`} 
                                     className="text-orange-500 font-bold text-sm hover:underline"

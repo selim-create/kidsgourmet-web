@@ -95,6 +95,7 @@ export interface BlogPost {
       name: string;
       slug?: string;
       id?: number;
+      description?: string;
       avatar_urls?: {
         [key: string]: string;
       };
