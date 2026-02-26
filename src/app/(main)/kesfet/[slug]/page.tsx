@@ -643,6 +643,14 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                         prose-th:bg-gray-100 prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-bold prose-th:text-slate-800
                         prose-td:px-4 prose-td:py-3 prose-td:border-b prose-td:border-gray-100
                         prose-figure:my-8 prose-figcaption:text-center prose-figcaption:text-sm prose-figcaption:text-gray-500 prose-figcaption:mt-2
+                        [&_.wp-block-table]:my-8 [&_.wp-block-table]:rounded-xl [&_.wp-block-table]:overflow-x-auto [&_.wp-block-table]:shadow-sm [&_.wp-block-table]:border [&_.wp-block-table]:border-gray-200
+                        [&_.wp-block-table_table]:w-full [&_.wp-block-table_table]:border-collapse [&_.wp-block-table_table]:text-sm [&_.wp-block-table_table]:text-left
+                        [&_.wp-block-table_thead]:bg-gray-50 [&_.wp-block-table_thead_th]:px-4 [&_.wp-block-table_thead_th]:py-3 [&_.wp-block-table_thead_th]:font-bold [&_.wp-block-table_thead_th]:text-slate-800 [&_.wp-block-table_thead_th]:border-b [&_.wp-block-table_thead_th]:border-gray-200 [&_.wp-block-table_thead_th]:text-left
+                        [&_.wp-block-table_tbody_td]:px-4 [&_.wp-block-table_tbody_td]:py-3 [&_.wp-block-table_tbody_td]:border-b [&_.wp-block-table_tbody_td]:border-gray-100 [&_.wp-block-table_tbody_td]:text-gray-600
+                        [&_.wp-block-table_tfoot]:bg-gray-50 [&_.wp-block-table_tfoot_td]:px-4 [&_.wp-block-table_tfoot_td]:py-3 [&_.wp-block-table_tfoot_td]:font-semibold
+                        [&_.wp-block-table.is-style-stripes_tbody_tr:nth-child(odd)]:bg-gray-50/50
+                        [&_.wp-block-table.has-fixed-layout_table]:table-fixed
+                        [&_.wp-block-table_figcaption]:text-center [&_.wp-block-table_figcaption]:text-sm [&_.wp-block-table_figcaption]:text-gray-500 [&_.wp-block-table_figcaption]:mt-2 [&_.wp-block-table_figcaption]:italic
                         [&_.wp-block-quote]:border-l-4 [&_.wp-block-quote]:border-orange-500 [&_.wp-block-quote]:bg-orange-50/50 [&_.wp-block-quote]:rounded-r-xl [&_.wp-block-quote]:p-6 [&_.wp-block-quote]:my-8
                         [&_.wp-block-image]:my-8 [&_.wp-block-image_img]:rounded-2xl [&_.wp-block-image_img]:shadow-lg
                         [&_.wp-block-gallery]:grid [&_.wp-block-gallery]:gap-4 [&_.wp-block-gallery]:my-8
