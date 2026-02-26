@@ -154,6 +154,113 @@ select:-webkit-autofill:active {
   }
 }
 
+/* ========================================
+   WORDPRESS GUTENBERG TABLE BLOCK STYLES
+   Gutenberg editöründen gelen tablo blokları
+   ======================================== */
+
+/* wp-block-table figure wrapper */
+.wp-block-table {
+  overflow-x: auto;
+  margin: 2rem 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.wp-block-table table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.wp-block-table thead {
+  background-color: #f9fafb;
+}
+
+.wp-block-table thead th {
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: left;
+  border-bottom: 2px solid #e5e7eb;
+  white-space: nowrap;
+}
+
+.wp-block-table tbody td {
+  padding: 0.75rem 1rem;
+  color: #4b5563;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+
+.wp-block-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.wp-block-table tfoot td {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  background-color: #f9fafb;
+  border-top: 2px solid #e5e7eb;
+}
+
+.wp-block-table figcaption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Striped variant */
+.wp-block-table.is-style-stripes tbody tr:nth-child(odd) {
+  background-color: rgba(249, 250, 251, 0.5);
+}
+
+.wp-block-table.is-style-stripes tbody td {
+  border-bottom: none;
+}
+
+/* Fixed layout variant */
+.wp-block-table.has-fixed-layout table {
+  table-layout: fixed;
+}
+
+.wp-block-table.has-fixed-layout table td,
+.wp-block-table.has-fixed-layout table th {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Hover effect on rows */
+.wp-block-table tbody tr:hover {
+  background-color: rgba(249, 250, 251, 0.7);
+}
+
+/* Responsive: small screens */
+@media (max-width: 640px) {
+  .wp-block-table thead th,
+  .wp-block-table tbody td,
+  .wp-block-table tfoot td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Gutenberg text alignment classes for table cells */
+.wp-block-table .has-text-align-center {
+  text-align: center;
+}
+
+.wp-block-table .has-text-align-right {
+  text-align: right;
+}
+
+.wp-block-table .has-text-align-left {
+  text-align: left;
+}
+
 /* Hide ads on print */
 @media print {
   .ad-zone,
