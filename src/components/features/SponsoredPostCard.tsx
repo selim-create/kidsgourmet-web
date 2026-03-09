@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -17,6 +17,17 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   const sponsorData = post.sponsor_data;
   const isSponsored = sponsorData?.is_sponsored ?? false;
   const isFav = isFavorite(post.id, 'post');
+
+  // Fire GAM impression pixel on mount (client-side only, after render)
+  useEffect(() => {
+    if (isSponsored && sponsorData?.gam_impression_url) {
+      const img = new Image();
+      img.src = sponsorData.gam_impression_url.replace(
+        '%%CACHEBUSTER%%',
+        Math.floor(Math.random() * 1000000000).toString()
+      );
+    }
+  }, [isSponsored, sponsorData?.gam_impression_url]);
 
   // Helper functions
   const stripHtml = (html: string) => {
@@ -113,37 +124,36 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
 
     // 2. Build final link with GAM tracking if available
     if (sponsorData.gam_click_url) {
-      return `${sponsorData.gam_click_url}${encodeURIComponent(destination)}`;
+      if (sponsorData.gam_click_url.endsWith('adurl=')) {
+        // Redirect tracker: append destination to GAM URL
+        return `${sponsorData.gam_click_url}${encodeURIComponent(destination)}`;
+      }
+      // Fire-and-forget tracker: navigate to destination directly, tracking done via onClick
+      return destination;
     }
 
     return destination;
   };
 
+  const handleSponsoredClick = () => {
+    // Only fire for fire-and-forget trackers (not redirect trackers ending with 'adurl=')
+    if (!sponsorData?.gam_click_url) return;
+    if (sponsorData.gam_click_url.endsWith('adurl=')) return;
+    const clickUrl = sponsorData.gam_click_url.replace(
+      '%%CACHEBUSTER%%',
+      Math.floor(Math.random() * 1000000000).toString()
+    );
+    // Use sendBeacon when available (reliable during page navigation), otherwise Image fallback
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(clickUrl);
+    } else {
+      new Image().src = clickUrl;
+    }
+  };
+
   const finalUrl = buildLinkUrl();
   const isExternalLink = isSponsored && sponsorData?.direct_redirect;
   const hasGamTracking = isSponsored && !!sponsorData?.gam_click_url;
-
-  // Render impression tracking pixel
-  const renderImpressionPixel = () => {
-    if (!isSponsored || !sponsorData?.gam_impression_url) {
-      return null;
-    }
-
-    return (
-      <img
-        src={sponsorData.gam_impression_url}
-        alt=""
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          width: '1px',
-          height: '1px',
-          opacity: 0,
-          pointerEvents: 'none'
-        }}
-      />
-    );
-  };
 
   // Render sponsored badge
   const renderSponsoredBadge = () => {
@@ -161,6 +171,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
     const anchorProps: React.AnchorHTMLAttributes<HTMLAnchorElement> = {
       href: finalUrl,
       className: "group relative block rounded-[2.5rem] overflow-hidden shadow-xl aspect-[16/9] md:aspect-[21/9]",
+      onClick: handleSponsoredClick,
       ...(isExternalLink && { 
         target: '_blank', 
         rel: 'noopener noreferrer sponsored' 
@@ -245,13 +256,12 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
 
     return (
       <div className="relative">
-        {renderImpressionPixel()}
         {hasGamTracking ? (
           <a {...anchorProps}>
             {heroContent}
           </a>
         ) : (
-          <Link href={finalUrl} className={anchorProps.className}>
+          <Link href={finalUrl} className={anchorProps.className} onClick={handleSponsoredClick}>
             {heroContent}
           </Link>
         )}
@@ -262,7 +272,6 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   // Default card variant
   return (
     <article className="flex flex-col group h-full relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
-      {renderImpressionPixel()}
       
       {/* Image Section */}
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -270,6 +279,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
           <a 
             href={finalUrl}
             className="block w-full h-full"
+            onClick={handleSponsoredClick}
             {...(isExternalLink && { 
               target: '_blank', 
               rel: 'noopener noreferrer sponsored' 
@@ -278,7 +288,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
             <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
           </a>
         ) : (
-          <Link href={finalUrl} className="block w-full h-full">
+          <Link href={finalUrl} className="block w-full h-full" onClick={handleSponsoredClick}>
             <img src={getImageUrl(post)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={post.title.rendered} />
           </Link>
         )}
@@ -357,6 +367,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
             <a 
               href={finalUrl}
               dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
+              onClick={handleSponsoredClick}
               {...(isExternalLink && { 
                 target: '_blank', 
                 rel: 'noopener noreferrer sponsored' 
@@ -366,6 +377,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
             <Link 
               href={finalUrl}
               dangerouslySetInnerHTML={{ __html: decodeEntities(post.title.rendered) }}
+              onClick={handleSponsoredClick}
             />
           )}
         </h3>
@@ -381,6 +393,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
             <a 
               href={finalUrl}
               className="text-xs font-bold text-slate-700 hover:text-orange-500 transition-colors"
+              onClick={handleSponsoredClick}
               {...(isExternalLink && { 
                 target: '_blank', 
                 rel: 'noopener noreferrer sponsored' 
@@ -392,6 +405,7 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
             <Link 
               href={finalUrl}
               className="text-xs font-bold text-slate-700 hover:text-orange-500 transition-colors"
+              onClick={handleSponsoredClick}
             >
               Devamını Oku <i className="fa-solid fa-arrow-right ml-1"></i>
             </Link>

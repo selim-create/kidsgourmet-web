@@ -11,10 +11,18 @@ export default function SponsorCTA({ sponsor }: SponsorCTAProps) {
   if (!sponsor || sponsor.is_sponsored !== true) return null;
 
   const handleClick = () => {
-    // Track GAM click
+    // Track GAM click (fire-and-forget)
     if (sponsor.gam_click_url) {
-      const img = new Image();
-      img.src = sponsor.gam_click_url;
+      const clickUrl = sponsor.gam_click_url.replace(
+        '%%CACHEBUSTER%%',
+        Math.floor(Math.random() * 1000000000).toString()
+      );
+      // Use sendBeacon when available (reliable during page navigation), otherwise Image fallback
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(clickUrl);
+      } else {
+        new Image().src = clickUrl;
+      }
     }
     
     // Navigate to sponsor URL
