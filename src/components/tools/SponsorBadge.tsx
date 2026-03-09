@@ -13,7 +13,10 @@ export default function SponsorBadge({ sponsor, variant = 'header' }: SponsorBad
     // Track GAM impression
     if (sponsor?.gam_impression_url) {
       const img = new Image();
-      img.src = sponsor.gam_impression_url;
+      img.src = sponsor.gam_impression_url.replace(
+        '%%CACHEBUSTER%%',
+        Math.floor(Math.random() * 1000000000).toString()
+      );
     }
   }, [sponsor?.gam_impression_url]);
 
