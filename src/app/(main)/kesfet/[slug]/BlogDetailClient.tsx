@@ -507,6 +507,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   />
                 </div>
                 
+                {/* GAM Native Ad Tracking - sponsorlu içerik için GPT ad request gönderir */}
+                {isSponsored && (
+                  <AdZone placement="native" className="invisible absolute w-0 h-0 overflow-hidden" instanceId={`blog-detail-${post.id}`} />
+                )}
+
                 {/* Sponsored or Normal Meta */}
                 {isSponsored && sponsorData ? (
                   <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm">
