@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { BlogPost } from '@/services/blog-service';
 import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities, stripHtmlAndDecode } from '@/utils/textHelpers';
+import { AdZone } from '@/components/ads';
 
 interface SponsoredPostCardProps {
   post: BlogPost;
@@ -184,6 +185,11 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
         
         {renderSponsoredBadge()}
+
+        {/* GAM Native Ad Tracking */}
+        {isSponsored && (
+          <AdZone placement="native" className="invisible absolute w-0 h-0 overflow-hidden" instanceId={`sponsor-hero-${post.id}`} />
+        )}
         
         {/* Favorite Button - Top Right */}
         <button 
@@ -273,6 +279,11 @@ export default function SponsoredPostCard({ post, categories, variant = 'default
   return (
     <article className="flex flex-col group h-full relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
       
+      {/* GAM Native Ad Tracking */}
+      {isSponsored && (
+        <AdZone placement="native" className="invisible absolute w-0 h-0 overflow-hidden" instanceId={`sponsor-card-${post.id}`} />
+      )}
+
       {/* Image Section */}
       <div className="relative aspect-[4/3] overflow-hidden">
         {hasGamTracking ? (

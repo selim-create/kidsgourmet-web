@@ -6,6 +6,7 @@ import { BlogPost } from '@/services/blog-service';
 import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities, stripHtmlAndDecode } from '@/utils/textHelpers';
 import { EditButton } from '@/components/ui/EditButton';
+import { AdZone } from '@/components/ads';
 
 interface BlogCardProps {
   post: BlogPost;
@@ -240,6 +241,10 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
     return (
       <article className="group relative block rounded-3xl md:rounded-[2.5rem] overflow-hidden shadow-xl aspect-[4/3] md:aspect-[21/9]">
         {renderImpressionPixel()}
+        {/* GAM Native Ad Tracking */}
+        {isSponsored && (
+          <AdZone placement="native" className="invisible absolute w-0 h-0 overflow-hidden" instanceId={`blog-hero-${post.id}`} />
+        )}
         {hasGamTracking ? (
           <a 
             href={finalUrl}
@@ -264,6 +269,10 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
   return (
     <article className="flex flex-col group h-full relative bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden">
       {renderImpressionPixel()}
+      {/* GAM Native Ad Tracking */}
+      {isSponsored && (
+        <AdZone placement="native" className="invisible absolute w-0 h-0 overflow-hidden" instanceId={`blog-card-${post.id}`} />
+      )}
       
       {/* Image Section */}
       <div className="relative aspect-[4/3] overflow-hidden">
