@@ -1,12 +1,13 @@
 import { MetadataRoute } from 'next';
 import { recipeService } from '@/services/recipe-service';
 import { blogService } from '@/services/blog-service';
+import { ingredientService } from '@/services/ingredient-service';
 
 const BASE_URL = 'https://kidsgourmet.com.tr';
 
 // Sitemap configuration
-const SITEMAP_POSTS_PER_PAGE = 50;  // Optimized to keep response under 2MB cache limit
-const MAX_SITEMAP_PAGES = 20;       // 50 posts/page * 20 pages = 1000 posts total
+const SITEMAP_POSTS_PER_PAGE = 100; // 100 posts/page * 20 pages = 2000 posts total
+const MAX_SITEMAP_PAGES = 20;       // Enough for ~2000 blog posts (site has ~1500)
 
 // Static routes that don't change
 const staticRoutes: MetadataRoute.Sitemap = [
@@ -333,6 +334,54 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   } catch (error) {
     console.error('Error fetching categories for sitemap:', error);
+  }
+
+  try {
+    // Fetch all ingredients (beslenme-rehberi) for sitemap
+    const ingredientsPerPage = 100;
+    let currentPage = 1;
+    let hasMoreIngredients = true;
+
+    while (hasMoreIngredients && currentPage <= 10) {
+      try {
+        const ingredientsResponse = await ingredientService.getAll({
+          page: currentPage,
+          perPage: ingredientsPerPage,
+        });
+
+        const ingredientsList = Array.isArray(ingredientsResponse)
+          ? ingredientsResponse
+          : ingredientsResponse.ingredients;
+
+        if (ingredientsList && ingredientsList.length > 0) {
+          ingredientsList.forEach((ingredient) => {
+            if (ingredient.slug) {
+              sitemapEntries.push({
+                url: `${BASE_URL}/beslenme-rehberi/${ingredient.slug}`,
+                lastModified: new Date(),
+                changeFrequency: 'monthly',
+                priority: 0.6,
+              });
+            }
+          });
+
+          // Check if paginated response has more pages
+          if (!Array.isArray(ingredientsResponse) && ingredientsResponse.pages) {
+            hasMoreIngredients = currentPage < ingredientsResponse.pages;
+          } else {
+            hasMoreIngredients = ingredientsList.length === ingredientsPerPage;
+          }
+          currentPage++;
+        } else {
+          hasMoreIngredients = false;
+        }
+      } catch (error) {
+        console.error(`Error fetching ingredients page ${currentPage}:`, error);
+        hasMoreIngredients = false;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching ingredients for sitemap:', error);
   }
 
   return sitemapEntries;
