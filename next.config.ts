@@ -24,6 +24,7 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // ── Mevcut redirect'ler (bozulmamalı) ──────────────────────────────
       {
         source: '/araclar',
         destination: '/akilli-asistan',
@@ -64,6 +65,31 @@ const nextConfig: NextConfig = {
       {
         source: '/kategori/:slug/page/:page',
         destination: '/kesfet/kategori/:slug?page=:page',
+        permanent: true,
+      },
+
+      // ── WordPress legacy URL'leri ───────────────────────────────────────
+      // WordPress İngilizce kategori URL'i → /kesfet/kategori
+      {
+        source: '/category/:slug',
+        destination: '/kesfet/kategori/:slug',
+        permanent: true,
+      },
+      // Yazar sayfaları → uzmanlar
+      {
+        source: '/author/:slug',
+        destination: '/uzmanlar',
+        permanent: true,
+      },
+      {
+        source: '/yazar/:slug',
+        destination: '/uzmanlar',
+        permanent: true,
+      },
+      // Pagination (/page/N) → ana sayfa
+      {
+        source: '/page/:n',
+        destination: '/',
         permanent: true,
       },
     ];

@@ -44,6 +44,64 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-export default function RecipeDetailPageWrapper({ params }: { params: Promise<{ slug: string }> }) {
-  return <RecipeDetailPage params={params} />;
+async function RecipeJsonLd({ slug }: { slug: string }) {
+  try {
+    const recipe = await recipeService.getBySlug(slug);
+    if (!recipe) return null;
+
+    const url = `${SITE_URL}/tarifler/${slug}`;
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Recipe',
+      name: recipe.title,
+      description: (recipe.excerpt || recipe.content).replace(/<[^>]*>/g, '').substring(0, 300),
+      image: recipe.image ? [recipe.image] : [],
+      url,
+      author: recipe.author
+        ? { '@type': 'Person', name: recipe.author.name }
+        : { '@type': 'Organization', name: 'KidsGourmet' },
+      prepTime: recipe.prep_time ? `PT${recipe.prep_time.replace(/[^0-9]/g, '')}M` : undefined,
+      cookTime: recipe.cook_time ? `PT${recipe.cook_time.replace(/[^0-9]/g, '')}M` : undefined,
+      recipeYield: recipe.serving_size || '1 porsiyon',
+      recipeCategory: recipe.meal_type || 'Bebek Yemeği',
+      suitableForDiet: recipe.diet_types?.map((d) => d) || [],
+      recipeIngredient: recipe.ingredients?.map((ing) =>
+        `${ing.amount || ''} ${ing.unit || ''} ${ing.name}`.trim()
+      ) || [],
+      recipeInstructions: recipe.instructions?.map((step) => ({
+        '@type': 'HowToStep',
+        name: step.title,
+        text: step.text.replace(/<[^>]*>/g, ''),
+      })) || [],
+      nutrition: recipe.nutrition
+        ? {
+            '@type': 'NutritionInformation',
+            calories: recipe.nutrition.calories ? `${recipe.nutrition.calories} kcal` : undefined,
+            proteinContent: recipe.nutrition.protein,
+            carbohydrateContent: recipe.nutrition.carbs,
+            fatContent: recipe.nutrition.fat,
+            fiberContent: recipe.nutrition.fiber,
+          }
+        : undefined,
+    };
+
+    return (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    );
+  } catch {
+    return null;
+  }
+}
+
+export default async function RecipeDetailPageWrapper({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return (
+    <>
+      <RecipeJsonLd slug={slug} />
+      <RecipeDetailPage params={params} />
+    </>
+  );
 }

@@ -44,6 +44,60 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
-export default function BlogDetailPageWrapper({ params }: { params: Promise<{ slug: string }> }) {
-  return <BlogDetailPage params={params} />;
+async function BlogJsonLd({ slug }: { slug: string }) {
+  try {
+    const post = await blogService.getBySlug(slug);
+    if (!post) return null;
+
+    const url = `${SITE_URL}/kesfet/${slug}`;
+    const title = post.title.rendered.replace(/<[^>]*>/g, '');
+    const description = post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 300);
+    const ogImage = post._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+    const authorName = post._embedded?.author?.[0]?.name || 'KidsGourmet';
+
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: title,
+      description,
+      image: ogImage ? [ogImage] : [],
+      url,
+      datePublished: post.date,
+      author: {
+        '@type': 'Person',
+        name: authorName,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'KidsGourmet',
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE_URL}/logo.png`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': url,
+      },
+    };
+
+    return (
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+    );
+  } catch {
+    return null;
+  }
+}
+
+export default async function BlogDetailPageWrapper({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return (
+    <>
+      <BlogJsonLd slug={slug} />
+      <BlogDetailPage params={params} />
+    </>
+  );
 }

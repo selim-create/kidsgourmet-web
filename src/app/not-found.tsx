@@ -39,10 +39,10 @@ export default function NotFound() {
             {/* Quick Links */}
             <div className="mt-12 flex flex-wrap justify-center gap-4 text-sm font-bold text-gray-500">
                 <span>Popüler:</span>
-                <Link href="/blog/ek-gida" className="hover:text-orange-500 underline">Ek Gıda</Link>
-                <Link href="/etiket/blw" className="hover:text-orange-500 underline">BLW</Link>
-                <Link href="/tarifler" className="hover:text-orange-500 underline">Pankek</Link>
-                <Link href="/tarifler?kategori=corbalar" className="hover:text-orange-500 underline">Çorbalar</Link>
+                <Link href="/kesfet/kategori/ek-gida" className="hover:text-orange-500 underline">Ek Gıda</Link>
+                <Link href="/arama?q=blw" className="hover:text-orange-500 underline">BLW</Link>
+                <Link href="/tarifler" className="hover:text-orange-500 underline">Tarifler</Link>
+                <Link href="/kesfet/kategori/corbalar" className="hover:text-orange-500 underline">Çorbalar</Link>
             </div>
 
         </main>
