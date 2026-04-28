@@ -93,12 +93,12 @@ export function middleware(request: NextRequest) {
 
   // ── WordPress'e özgü URL'ler: 410 Gone ──────────────────────────────────
   for (const prefix of WP_GONE_PREFIXES) {
-    if (pathname === prefix || pathname.startsWith(prefix + '/') || pathname.startsWith(prefix + '?')) {
+    if (pathname === prefix || pathname.startsWith(prefix + '/')) {
       return new NextResponse(null, { status: 410 });
     }
   }
 
-  // feed ile biten URL'ler de 410
+  // /<slug>/feed ve /<slug>/feed/ gibi trailing feed URL'leri de 410
   if (pathname.endsWith('/feed') || pathname.endsWith('/feed/')) {
     return new NextResponse(null, { status: 410 });
   }

@@ -6,8 +6,8 @@ import { ingredientService } from '@/services/ingredient-service';
 const BASE_URL = 'https://kidsgourmet.com.tr';
 
 // Sitemap configuration
-const SITEMAP_POSTS_PER_PAGE = 100; // 100 posts/page * 20 pages = 2000 posts total
-const MAX_SITEMAP_PAGES = 20;       // Enough for ~2000 blog posts (site has ~1500)
+const SITEMAP_POSTS_PER_PAGE = 100; // 100 posts/page * 20 pages = 2000 posts max (site has ~1500, extra headroom for growth)
+const MAX_SITEMAP_PAGES = 20;
 
 // Static routes that don't change
 const staticRoutes: MetadataRoute.Sitemap = [
