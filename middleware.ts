@@ -11,6 +11,11 @@ const LEGACY_ID_MAP: Readonly<Record<string, string>> = {
   '54278': '/kesfet/evolviadan-gelisimi-destekleyen-yenilikci-formuller',
 };
 
+const LEGACY_PATH_MAP: Readonly<Record<string, string>> = {
+  'sezaryen-dogum-yapan-10-unlu-anne': '/kesfet/sezaryen-dogum-yapan-10-unlu-anne',
+  'evolviadan-gelisimi-destekleyen-yenilikci-formuller': '/kesfet/evolviadan-gelisimi-destekleyen-yenilikci-formuller',
+};
+
 const KNOWN_ROUTES = new Set([
   'tarifler',
   'kesfet',
@@ -109,6 +114,9 @@ export function middleware(request: NextRequest) {
   const dateMatch = DATE_BASED_PATTERN.exec(pathname);
   if (dateMatch) {
     const slug = dateMatch[3];
+    if (LEGACY_PATH_MAP[slug]) {
+      return permanentRedirect(request, LEGACY_PATH_MAP[slug]);
+    }
     if (LEGACY_RECIPE_SLUGS_SET.has(slug)) {
       return permanentRedirect(request, `/tarifler/${slug}`);
     }
@@ -125,6 +133,9 @@ export function middleware(request: NextRequest) {
 
   if (segments.length === 1) {
     const slug = segments[0];
+    if (LEGACY_PATH_MAP[slug]) {
+      return permanentRedirect(request, LEGACY_PATH_MAP[slug]);
+    }
     if (LEGACY_RECIPE_SLUGS_SET.has(slug)) {
       return permanentRedirect(request, `/tarifler/${slug}`);
     }
@@ -135,6 +146,9 @@ export function middleware(request: NextRequest) {
   }
 
   const lastSegment = segments[segments.length - 1];
+  if (LEGACY_PATH_MAP[lastSegment]) {
+    return permanentRedirect(request, LEGACY_PATH_MAP[lastSegment]);
+  }
   if (LEGACY_RECIPE_SLUGS_SET.has(lastSegment)) {
     return permanentRedirect(request, `/tarifler/${lastSegment}`);
   }
