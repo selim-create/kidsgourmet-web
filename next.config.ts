@@ -1,18 +1,11 @@
 import type { NextConfig } from "next";
-import path from "node:path";
-
-const domPurifyShim = path.resolve(process.cwd(), "src/lib/dompurify-shim.ts");
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   turbopack: {
     resolveAlias: {
-      "isomorphic-dompurify": domPurifyShim,
+      "isomorphic-dompurify": "@/lib/dompurify-shim",
     },
-  },
-  webpack(config) {
-    config.resolve.alias["isomorphic-dompurify"] = domPurifyShim;
-    return config;
   },
   images: {
     remotePatterns: [
