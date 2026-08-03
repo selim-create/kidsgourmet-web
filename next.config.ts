@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   reactCompiler: true,
+  turbopack: {
+    resolveAlias: {
+      "isomorphic-dompurify": "@/lib/dompurify-shim",
+    },
+  },
   images: {
     remotePatterns: [
       {
@@ -24,7 +28,6 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      // ── Mevcut redirect'ler (bozulmamalı) ──────────────────────────────
       {
         source: '/araclar',
         destination: '/akilli-asistan',
@@ -55,27 +58,21 @@ const nextConfig: NextConfig = {
         destination: '/beslenme-rehberi/:path*',
         permanent: true,
       },
-      // Eski kategori linkleri
       {
         source: '/kategori/:slug',
         destination: '/kesfet/kategori/:slug',
         permanent: true,
       },
-      // Sayfa numaralı eski kategori linkleri
       {
         source: '/kategori/:slug/page/:page',
         destination: '/kesfet/kategori/:slug?page=:page',
         permanent: true,
       },
-
-      // ── WordPress legacy URL'leri ───────────────────────────────────────
-      // WordPress İngilizce kategori URL'i → /kesfet/kategori
       {
         source: '/category/:slug',
         destination: '/kesfet/kategori/:slug',
         permanent: true,
       },
-      // Yazar sayfaları → uzmanlar
       {
         source: '/author/:slug',
         destination: '/uzmanlar',
@@ -86,7 +83,6 @@ const nextConfig: NextConfig = {
         destination: '/uzmanlar',
         permanent: true,
       },
-      // Pagination (/page/N) → ana sayfa
       {
         source: '/page/:n',
         destination: '/',

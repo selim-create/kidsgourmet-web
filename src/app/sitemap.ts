@@ -1,388 +1,105 @@
 import { MetadataRoute } from 'next';
+import { SITE_URL } from '@/lib/constants';
 import { recipeService } from '@/services/recipe-service';
 import { blogService } from '@/services/blog-service';
 import { ingredientService } from '@/services/ingredient-service';
 
-const BASE_URL = 'https://kidsgourmet.com.tr';
+const staticPaths = [
+  '',
+  '/kesfet',
+  '/kategoriler',
+  '/tarifler',
+  '/beslenme-rehberi',
+  '/akilli-asistan',
+  '/uzmanlar',
+  '/iletisim',
+  '/reklam-verin',
+  '/06-12-ay-yemek',
+  '/1-yas-ustu-yemek',
+  '/1-yas-ustu-yemek/ana-ogun-12-ay-ustu-yemek',
+  '/1-yas-ustu-yemek/ara-ogun-12-ay-ustu-yemek',
+  '/akilli-asistan/blw-testi',
+  '/akilli-asistan/persentil',
+  '/akilli-asistan/su-ihtiyaci',
+  '/akilli-asistan/ek-gida-rehberi',
+  '/akilli-asistan/ek-gidaya-baslama',
+  '/akilli-asistan/bu-gida-verilir-mi',
+  '/akilli-asistan/alerjen-planlayici',
+  '/akilli-asistan/besin-takvimi',
+  '/akilli-asistan/hava-kalitesi',
+  '/akilli-asistan/bez-hesaplayici',
+  '/akilli-asistan/banyo-planlayici',
+  '/akilli-asistan/leke-rehberi',
+  '/beslenme-rehberi/alerji-belirtileri',
+  '/beslenme-rehberi/sunum-onerileri',
+  '/gizlilik-politikasi',
+  '/kullanim-kosullari',
+  '/cerez-politikasi',
+  '/aydinlatma-metni',
+  '/kvkk',
+  '/kunye',
+] as const;
 
-// Sitemap configuration
-const SITEMAP_POSTS_PER_PAGE = 100; // 100 posts/page * 20 pages = 2000 posts max (site has ~1500, extra headroom for growth)
-const MAX_SITEMAP_PAGES = 20;
-
-// Static routes that don't change
-const staticRoutes: MetadataRoute.Sitemap = [
-  // Main pages
-  {
-    url: `${BASE_URL}/`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 1.0,
-  },
-  {
-    url: `${BASE_URL}/kesfet`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 0.9,
-  },
-  {
-    url: `${BASE_URL}/kategoriler`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  },
-  {
-    url: `${BASE_URL}/tarifler`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 0.9,
-  },
-  {
-    url: `${BASE_URL}/beslenme-rehberi`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  },
-  {
-    url: `${BASE_URL}/uzmanlar`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  },
-  {
-    url: `${BASE_URL}/arama`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.5,
-  },
-  {
-    url: `${BASE_URL}/yardim`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/iletisim`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/reklam-verin`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.5,
-  },
-
-  // Age group pages
-  {
-    url: `${BASE_URL}/06-12-ay-yemek`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  },
-  {
-    url: `${BASE_URL}/1-yas-ustu-yemek`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  },
-  {
-    url: `${BASE_URL}/1-yas-ustu-yemek/ana-ogun-12-ay-ustu-yemek`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  },
-  {
-    url: `${BASE_URL}/1-yas-ustu-yemek/ara-ogun-12-ay-ustu-yemek`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  },
-
-  // Smart assistant tools
-  {
-    url: `${BASE_URL}/akilli-asistan/blw-testi`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/persentil`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/su-ihtiyaci`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/ek-gida-rehberi`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/ek-gidaya-baslama`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/bu-gida-verilir-mi`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/alerjen-planlayici`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/besin-takvimi`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/hava-kalitesi`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.5,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/bez-hesaplayici`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.5,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/banyo-planlayici`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.5,
-  },
-  {
-    url: `${BASE_URL}/akilli-asistan/leke-rehberi`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.5,
-  },
-
-  // Nutrition guide sub-pages
-  {
-    url: `${BASE_URL}/beslenme-rehberi/alerji-belirtileri`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  },
-  {
-    url: `${BASE_URL}/beslenme-rehberi/sunum-onerileri`,
-    lastModified: new Date(),
-    changeFrequency: 'monthly',
-    priority: 0.7,
-  },
-
-  // Legal pages
-  {
-    url: `${BASE_URL}/gizlilik-politikasi`,
-    lastModified: new Date(),
-    changeFrequency: 'yearly',
-    priority: 0.3,
-  },
-  {
-    url: `${BASE_URL}/kullanim-kosullari`,
-    lastModified: new Date(),
-    changeFrequency: 'yearly',
-    priority: 0.3,
-  },
-  {
-    url: `${BASE_URL}/cerez-politikasi`,
-    lastModified: new Date(),
-    changeFrequency: 'yearly',
-    priority: 0.3,
-  },
-  {
-    url: `${BASE_URL}/aydinlatma-metni`,
-    lastModified: new Date(),
-    changeFrequency: 'yearly',
-    priority: 0.3,
-  },
-  {
-    url: `${BASE_URL}/kvkk`,
-    lastModified: new Date(),
-    changeFrequency: 'yearly',
-    priority: 0.3,
-  },
-  {
-    url: `${BASE_URL}/kunye`,
-    lastModified: new Date(),
-    changeFrequency: 'yearly',
-    priority: 0.3,
-  },
-];
+function entry(path: string, lastModified: Date = new Date()): MetadataRoute.Sitemap[number] {
+  return {
+    url: `${SITE_URL}${path}`,
+    lastModified,
+    changeFrequency: path === '' || path === '/kesfet' || path === '/tarifler' ? 'daily' : 'weekly',
+    priority: path === '' ? 1 : path === '/kesfet' || path === '/tarifler' ? 0.9 : 0.6,
+  };
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const sitemapEntries: MetadataRoute.Sitemap = [...staticRoutes];
+  const urls: MetadataRoute.Sitemap = staticPaths.map((path) => entry(path));
 
   try {
-    // Fetch dynamic recipes
-    // Get all recipes with pagination (fetch first 1000 recipes maximum)
-    const recipesPerPage = 100;
-    let currentPage = 1;
-    let hasMoreRecipes = true;
-
-    while (hasMoreRecipes && currentPage <= 10) {
-      try {
-        const recipesResponse = await recipeService.getAll({
-          page: currentPage,
-          perPage: recipesPerPage,
-        });
-
-        if (recipesResponse.recipes && recipesResponse.recipes.length > 0) {
-          recipesResponse.recipes.forEach((recipe) => {
-            sitemapEntries.push({
-              url: `${BASE_URL}/tarifler/${recipe.slug}`,
-              lastModified: new Date(),
-              changeFrequency: 'weekly',
-              priority: 0.7,
-            });
-          });
-
-          // Check if there are more pages
-          hasMoreRecipes = currentPage < recipesResponse.total_pages;
-          currentPage++;
-        } else {
-          hasMoreRecipes = false;
-        }
-      } catch (error) {
-        console.error(`Error fetching recipes page ${currentPage}:`, error);
-        hasMoreRecipes = false;
+    for (let page = 1; page <= 20; page++) {
+      const response = await blogService.getSitemapPosts(page, 100);
+      for (const post of response.posts ?? []) {
+        urls.push(entry(`/kesfet/${post.slug}`, post.date ? new Date(post.date) : new Date()));
       }
+      if (page >= response.totalPages || !response.posts?.length) break;
     }
   } catch (error) {
-    console.error('Error fetching recipes for sitemap:', error);
+    console.error('Blog sitemap generation failed:', error);
   }
 
   try {
-    // Fetch dynamic blog posts with lightweight endpoint
-    let currentPage = 1;
-    let hasMorePosts = true;
-
-    while (hasMorePosts && currentPage <= MAX_SITEMAP_PAGES) {
-      try {
-        // Use lightweight endpoint - only fetches id, slug, date
-        const blogResponse = await blogService.getSitemapPosts(currentPage, SITEMAP_POSTS_PER_PAGE);
-
-        if (blogResponse.posts && blogResponse.posts.length > 0) {
-          blogResponse.posts.forEach((post) => {
-            sitemapEntries.push({
-              url: `${BASE_URL}/kesfet/${post.slug}`,
-              lastModified: post.date ? new Date(post.date) : new Date(),
-              changeFrequency: 'weekly',
-              priority: 0.6,
-            });
-          });
-
-          // Check if there are more pages
-          hasMorePosts = currentPage < blogResponse.totalPages;
-          currentPage++;
-        } else {
-          hasMorePosts = false;
-        }
-      } catch (error) {
-        console.error(`Error fetching blog posts page ${currentPage}:`, error);
-        hasMorePosts = false;
+    for (let page = 1; page <= 20; page++) {
+      const response = await recipeService.getAll({ page, perPage: 100 });
+      for (const recipe of response.recipes ?? []) {
+        if (recipe.slug) urls.push(entry(`/tarifler/${recipe.slug}`));
       }
+      if (page >= response.total_pages || !response.recipes?.length) break;
     }
   } catch (error) {
-    console.error('Error fetching blog posts for sitemap:', error);
+    console.error('Recipe sitemap generation failed:', error);
   }
 
   try {
-    // Fetch blog categories
-    interface CategoryType {
-      id: number;
-      slug: string;
-      count: number;
-      name: string;
+    for (let page = 1; page <= 20; page++) {
+      const response = await ingredientService.getAll({ page, perPage: 100 });
+      const ingredients = Array.isArray(response) ? response : response.ingredients ?? [];
+      for (const ingredient of ingredients) {
+        if (ingredient.slug) urls.push(entry(`/beslenme-rehberi/${ingredient.slug}`));
+      }
+      const totalPages = Array.isArray(response) ? (ingredients.length === 100 ? page + 1 : page) : response.pages ?? page;
+      if (page >= totalPages || !ingredients.length) break;
     }
+  } catch (error) {
+    console.error('Ingredient sitemap generation failed:', error);
+  }
 
+  try {
     const categories = await blogService.getCategories();
-    
-    if (categories && categories.length > 0) {
-      categories.forEach((category: CategoryType) => {
-        if (category.slug && category.count > 0) {
-          sitemapEntries.push({
-            url: `${BASE_URL}/kesfet/kategori/${category.slug}`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.5,
-          });
-        }
-      });
-    }
-  } catch (error) {
-    console.error('Error fetching categories for sitemap:', error);
-  }
-
-  try {
-    // Fetch all ingredients (beslenme-rehberi) for sitemap
-    const ingredientsPerPage = 100;
-    let currentPage = 1;
-    let hasMoreIngredients = true;
-
-    while (hasMoreIngredients && currentPage <= 10) {
-      try {
-        const ingredientsResponse = await ingredientService.getAll({
-          page: currentPage,
-          perPage: ingredientsPerPage,
-        });
-
-        const ingredientsList = Array.isArray(ingredientsResponse)
-          ? ingredientsResponse
-          : ingredientsResponse.ingredients;
-
-        if (ingredientsList && ingredientsList.length > 0) {
-          ingredientsList.forEach((ingredient) => {
-            if (ingredient.slug) {
-              sitemapEntries.push({
-                url: `${BASE_URL}/beslenme-rehberi/${ingredient.slug}`,
-                lastModified: new Date(),
-                changeFrequency: 'monthly',
-                priority: 0.6,
-              });
-            }
-          });
-
-          // Check if paginated response has more pages
-          if (!Array.isArray(ingredientsResponse) && ingredientsResponse.pages) {
-            hasMoreIngredients = currentPage < ingredientsResponse.pages;
-          } else {
-            hasMoreIngredients = ingredientsList.length === ingredientsPerPage;
-          }
-          currentPage++;
-        } else {
-          hasMoreIngredients = false;
-        }
-      } catch (error) {
-        console.error(`Error fetching ingredients page ${currentPage}:`, error);
-        hasMoreIngredients = false;
+    for (const category of categories ?? []) {
+      if (category.slug && category.count > 0) {
+        urls.push(entry(`/kesfet/kategori/${category.slug}`));
       }
     }
   } catch (error) {
-    console.error('Error fetching ingredients for sitemap:', error);
+    console.error('Category sitemap generation failed:', error);
   }
 
-  return sitemapEntries;
+  return Array.from(new Map(urls.map((item) => [item.url, item])).values());
 }
