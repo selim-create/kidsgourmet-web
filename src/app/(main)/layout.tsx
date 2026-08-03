@@ -1,8 +1,12 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import AppDownloadFooter from "@/components/app/AppDownloadFooter";
+import MobileAppBanner from "@/components/app/MobileAppBanner";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
 import { HeaderLeaderboardAd, HeaderMobileAd, FooterStickyMobileAd, PageSkinAds, InterstitialAd } from "@/components/ads";
 import { AdProvider } from "@/contexts/AdContext";
+import { APP_DOWNLOAD_URL } from "@/lib/app-links";
+import { SITE_URL } from "@/lib/constants";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -32,14 +36,11 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://kidsgourmet.com.tr'),
-  alternates: {
-    canonical: '/',
-  },
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: 'KidsGourmet - Bebek ve Çocuk Beslenme Rehberi',
     description: 'Bebek ve çocuk beslenmesinde güvenilir rehberiniz. Uzman görüşleri, sağlıklı tarifler ve akıllı araçlarla yanınızdayız.',
-    url: 'https://kidsgourmet.com.tr',
+    url: SITE_URL,
     siteName: 'KidsGourmet',
     locale: 'tr_TR',
     type: 'website',
@@ -73,6 +74,9 @@ export const metadata: Metadata = {
   verification: {
     google: 'your-google-verification-code',
   },
+  other: {
+    'apple-itunes-app': `app-id=6784156670, app-argument=${APP_DOWNLOAD_URL}`,
+  },
 };
 
 export default function MainLayout({
@@ -86,25 +90,30 @@ export default function MainLayout({
       <WebSiteJsonLd />
       <div className="flex flex-col min-h-screen">
         <Header />
-        
+
         {/* Header Ads - Desktop leaderboard, Mobile banner */}
         <div className="w-full mt-[72px] lg:mt-[80px]">
           <HeaderLeaderboardAd />
           <HeaderMobileAd />
         </div>
-        
+
         <main className="flex-grow w-full">
           {children}
         </main>
-        
+
+        {/* App Store and Google Play links in the footer area */}
+        <AppDownloadFooter />
         <Footer />
-        
+
+        {/* Mobile visitors get the correct store link for their platform */}
+        <MobileAppBanner />
+
         {/* Mobile Sticky Footer Ad */}
         <FooterStickyMobileAd />
-        
+
         {/* Page Skin Ads - Left and right for very wide screens */}
         <PageSkinAds />
-        
+
         {/* Interstitial Ad - Out-of-page overlay, no DOM container needed */}
         <InterstitialAd />
       </div>
