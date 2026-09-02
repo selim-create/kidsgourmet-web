@@ -21,6 +21,40 @@ function isIngredientsResponse(response: any): response is IngredientsResponse {
   return response && typeof response === 'object' && 'ingredients' in response && 'total' in response && 'pages' in response;
 }
 
+/**
+ * Normalize season values coming from WordPress/custom API.
+ * The backend can return an array (e.g. ['Sonbahar', 'Kış']) while the
+ * frontend Ingredient type expects a display string. Rendering the raw array
+ * in React makes the values appear glued together (SonbaharKış), so keep a
+ * single readable format everywhere.
+ */
+const formatSeason = (season: unknown): string => {
+  if (Array.isArray(season)) {
+    return season
+      .map(item => String(item).trim())
+      .filter(Boolean)
+      .join(' - ');
+  }
+
+  if (typeof season === 'string') {
+    const value = season.trim();
+    if (!value) return 'Tüm Yıl';
+
+    // Backward compatibility for comma-separated legacy values.
+    if (value.includes(',')) {
+      return value
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+        .join(' - ');
+    }
+
+    return value;
+  }
+
+  return 'Tüm Yıl';
+};
+
 // Transform function for WordPress REST API format to Ingredient - GÜNCELLENMİŞ
 const transformWPIngredient = (wp: any): Ingredient => ({
   id: wp.id,
@@ -35,7 +69,7 @@ const transformWPIngredient = (wp: any): Ingredient => ({
   benefits: wp.meta?._kg_benefits || '',
   prep_methods: wp.meta?._kg_prep_methods || [],
   allergy_risk: wp.meta?._kg_allergy_risk || 'Düşük',
-  season: wp.meta?._kg_season || 'Tüm Yıl',
+  season: formatSeason(wp.meta?._kg_season),
   storage_tips: wp.meta?._kg_storage_tips,
   
   // 🆕 Yeni alanlar
@@ -72,7 +106,7 @@ const transformIngredient = (apiIngredient: any): Ingredient => ({
   benefits: apiIngredient.benefits || '',
   prep_methods: apiIngredient.prep_methods || [],
   allergy_risk: apiIngredient.allergy_risk || 'Düşük',
-  season: apiIngredient.season || 'Tüm Yıl',
+  season: formatSeason(apiIngredient.season),
   storage_tips: apiIngredient.storage_tips,
   
   // 🆕 Yeni alanlar
@@ -159,8 +193,9 @@ export const ingredientService = {
     }
     
     try {
-      // Önce özel kg/v1 endpoint'ini dene
-      return await fetchAPI<Ingredient>(API_ENDPOINTS.INGREDIENT_BY_SLUG(slug));
+      // Önce özel kg/v1 endpoint'ini dene ve liste endpoint'iyle aynı normalizasyonu uygula.
+      const ingredient = await fetchAPI<any>(API_ENDPOINTS.INGREDIENT_BY_SLUG(slug));
+      return ingredient ? transformIngredient(ingredient) : null;
     } catch (error) {
       console.log('Falling back to WP REST API for ingredient slug:', slug);
       try {
