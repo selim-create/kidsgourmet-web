@@ -273,8 +273,12 @@ export default function NewsletterForm({
     ? 'grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]'
     : 'grid grid-cols-1 gap-2';
 
+  const shellClasses = isFooterLayout
+    ? 'w-full min-w-0 lg:w-[680px] xl:w-[720px]'
+    : 'w-full min-w-0';
+
   return (
-    <div className={`min-w-0 ${className}`}>
+    <div className={`${shellClasses} ${className}`}>
       {optionsLoading ? (
         <div className="mb-4 flex items-center gap-2 py-1 text-xs font-medium text-slate-400">
           <i className="fa-solid fa-circle-notch fa-spin" /> Bültenler hazırlanıyor
