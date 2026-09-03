@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { HipostaNewsletterOption } from '@/lib/hiposta-newsletters';
 
 type Props = {
@@ -46,6 +47,12 @@ function cadenceLabel(value: string) {
 export default function HipostaNewsletterModal({ open, options, selected, onClose, onApply }: Props) {
   const [draft, setDraft] = useState<string[]>(selected);
   const [query, setQuery] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -93,7 +100,7 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   }, [options, query]);
 
-  if (!open) return null;
+  if (!open || !mounted || typeof document === 'undefined') return null;
 
   const toggle = (slug: string) => {
     setDraft((current) => current.includes(slug)
@@ -102,11 +109,11 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
     );
   };
 
-  return (
-    <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[6px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Hiposta bültenlerini keşfet">
-      <button className="absolute inset-0 cursor-default" aria-label="Modalı kapat" onClick={onClose} />
+  const modal = (
+    <div className="fixed inset-0 z-[2147483000] flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[6px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Hiposta bültenlerini keşfet">
+      <button className="absolute inset-0 z-0 cursor-default" aria-label="Modalı kapat" onClick={onClose} />
 
-      <div className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-t-[30px] bg-[#f5f3ee] shadow-2xl sm:max-h-[86vh] sm:rounded-[30px]">
+      <div className="relative z-10 flex max-h-[92dvh] w-full max-w-5xl flex-col overflow-hidden rounded-t-[30px] bg-[#f5f3ee] shadow-[0_32px_100px_rgba(15,23,42,0.38)] sm:max-h-[86dvh] sm:rounded-[30px]">
         <div className="flex items-start justify-between gap-4 border-b border-[#ddd9cf] bg-[#fffdf8] px-5 py-5 sm:px-8 sm:py-6">
           <div className="flex min-w-0 items-center gap-5">
             <HipostaWordmark />
@@ -133,7 +140,7 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
           </div>
         </div>
 
-        <div className="overflow-y-auto px-5 py-5 sm:px-8 sm:py-7">
+        <div className="overflow-y-auto overscroll-contain px-5 py-5 sm:px-8 sm:py-7">
           {groups.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[#cbc6bb] bg-white/60 px-6 py-10 text-center text-sm text-slate-500">Aramana uygun aktif bülten bulunamadı.</div>
           ) : (
@@ -197,4 +204,6 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
