@@ -1,3 +1,9 @@
+export const HIPOSTA_CORE_API_URL = (
+  process.env.HIPOSTA_CORE_API_URL || 'https://api.hiposta.com/wp-json/hiposta/v1'
+).replace(/\/+$/, '');
+
+export const KIDSGOURMET_PUBLISHER = 'kidsgourmet';
+
 export const KIDSGOURMET_NEWSLETTER_SLUGS = [
   'ebeveyn-notu',
   'haftalik-cocuk-menusu',
