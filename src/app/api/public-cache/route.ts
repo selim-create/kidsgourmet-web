@@ -1,0 +1,58 @@
+import { NextResponse } from 'next/server';
+import { API_URL } from '@/lib/constants';
+
+const REVALIDATE_SECONDS = 300;
+const STALE_SECONDS = 1800;
+
+const ENDPOINTS: Record<string, string> = {
+  featured: '/kg/v1/featured?limit=5',
+  'home-recipes': '/kg/v1/recipes?page=1&per_page=8&orderby=date&order=desc',
+  'home-posts': '/wp/v2/posts?page=1&per_page=12&_embed',
+};
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const key = searchParams.get('key');
+  const endpoint = key ? ENDPOINTS[key] : undefined;
+
+  if (!endpoint) {
+    return NextResponse.json({ error: 'Unsupported public cache key' }, { status: 404 });
+  }
+
+  try {
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      headers: { Accept: 'application/json' },
+      next: { revalidate: REVALIDATE_SECONDS },
+    });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: 'Upstream request failed' },
+        {
+          status: 502,
+          headers: { 'Cache-Control': 'no-store' },
+        }
+      );
+    }
+
+    const data = await response.json();
+    const headers = new Headers({
+      'Cache-Control': `public, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=${STALE_SECONDS}`,
+    });
+
+    const wpTotal = response.headers.get('x-wp-total');
+    const wpTotalPages = response.headers.get('x-wp-totalpages');
+    if (wpTotal) headers.set('x-wp-total', wpTotal);
+    if (wpTotalPages) headers.set('x-wp-totalpages', wpTotalPages);
+
+    return NextResponse.json(data, { headers });
+  } catch {
+    return NextResponse.json(
+      { error: 'Upstream request failed' },
+      {
+        status: 502,
+        headers: { 'Cache-Control': 'no-store' },
+      }
+    );
+  }
+}
