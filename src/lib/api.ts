@@ -53,6 +53,31 @@ export const removeToken = (): void => {
 // Default silent errors - don't log these to console
 const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoint might not exist yet
 
+const PUBLIC_CACHE_ENDPOINTS: Record<string, string> = {
+  '/kg/v1/featured?limit=5': 'featured',
+  '/kg/v1/recipes?page=1&per_page=8&orderby=date&order=desc': 'home-recipes',
+  '/wp/v2/posts?page=1&per_page=12&_embed': 'home-posts',
+};
+
+/**
+ * Exact high-volume anonymous homepage GETs can be shared safely across users.
+ * Never use this path for authenticated requests, non-GET methods or server-side
+ * calls where Next's own fetch caching already applies.
+ */
+function getPublicCacheUrl(
+  endpoint: string,
+  options: FetchOptions,
+  token: string | null,
+  requireAuth: boolean
+): string | null {
+  if (typeof window === 'undefined' || token || requireAuth) return null;
+  const method = (options.method ?? 'GET').toUpperCase();
+  if (method !== 'GET') return null;
+
+  const key = PUBLIC_CACHE_ENDPOINTS[endpoint];
+  return key ? `/api/public-cache?key=${encodeURIComponent(key)}` : null;
+}
+
 /**
  * Build request headers without forcing JSON Content-Type on public GET/HEAD calls.
  * Non-GET requests keep the existing JSON default unless the caller overrides it.
@@ -210,8 +235,10 @@ export async function fetchAPI<T>(
     throw authError;
   }
 
+  const requestUrl = getPublicCacheUrl(endpoint, options, token, requireAuth) || `${API_URL}${endpoint}`;
+
   try {
-    const res = await fetch(`${API_URL}${endpoint}`, {
+    const res = await fetch(requestUrl, {
       ...options,
       headers,
       next: { revalidate: options.next?.revalidate ?? 60 }
@@ -296,8 +323,10 @@ export async function fetchAPIWithHeaders<T>(
     throw authError;
   }
 
+  const requestUrl = getPublicCacheUrl(endpoint, options, token, requireAuth) || `${API_URL}${endpoint}`;
+
   try {
-    const res = await fetch(`${API_URL}${endpoint}`, {
+    const res = await fetch(requestUrl, {
       ...options,
       headers,
       next: { revalidate: options.next?.revalidate ?? 60 }
