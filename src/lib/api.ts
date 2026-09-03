@@ -59,6 +59,50 @@ const PUBLIC_CACHE_ENDPOINTS: Record<string, string> = {
   '/wp/v2/posts?page=1&per_page=12&_embed': 'home-posts',
 };
 
+type LegacyFallbackGroup = 'recipe' | 'ingredient';
+const LEGACY_FALLBACK_BLOCK_MS = 5000;
+const legacyFallbackBlockedUntil = new Map<LegacyFallbackGroup, number>();
+
+function getCustomFallbackGroup(endpoint: string): LegacyFallbackGroup | null {
+  if (endpoint.startsWith('/kg/v1/recipes')) return 'recipe';
+  if (endpoint.startsWith('/kg/v1/ingredients')) return 'ingredient';
+  return null;
+}
+
+function getLegacyFallbackGroup(endpoint: string): LegacyFallbackGroup | null {
+  if (endpoint.startsWith('/wp/v2/recipe')) return 'recipe';
+  if (endpoint.startsWith('/wp/v2/ingredient')) return 'ingredient';
+  return null;
+}
+
+function blockLegacyFallback(group: LegacyFallbackGroup): void {
+  legacyFallbackBlockedUntil.set(group, Date.now() + LEGACY_FALLBACK_BLOCK_MS);
+}
+
+function clearLegacyFallbackBlock(group: LegacyFallbackGroup): void {
+  legacyFallbackBlockedUntil.delete(group);
+}
+
+function isLegacyFallbackBlocked(group: LegacyFallbackGroup): boolean {
+  const blockedUntil = legacyFallbackBlockedUntil.get(group) || 0;
+  if (blockedUntil <= Date.now()) {
+    legacyFallbackBlockedUntil.delete(group);
+    return false;
+  }
+  return true;
+}
+
+function createSuppressedFallbackError(group: LegacyFallbackGroup): Error {
+  const error = new Error(`Legacy ${group} fallback suppressed after transient upstream failure`);
+  (error as any).errorInfo = {
+    type: 'server',
+    message: error.message,
+    userMessage: 'Sunucu geçici olarak yoğun. Lütfen kısa süre sonra tekrar deneyin.',
+    canRetry: true,
+  } satisfies FetchErrorInfo;
+  return error;
+}
+
 /**
  * Exact high-volume anonymous homepage GETs can be shared safely across users.
  * Never use this path for authenticated requests, non-GET methods or server-side
@@ -235,6 +279,12 @@ export async function fetchAPI<T>(
     throw authError;
   }
 
+  const legacyFallbackGroup = getLegacyFallbackGroup(endpoint);
+  if (legacyFallbackGroup && isLegacyFallbackBlocked(legacyFallbackGroup)) {
+    throw createSuppressedFallbackError(legacyFallbackGroup);
+  }
+
+  const customFallbackGroup = getCustomFallbackGroup(endpoint);
   const requestUrl = getPublicCacheUrl(endpoint, options, token, requireAuth) || `${API_URL}${endpoint}`;
 
   try {
@@ -279,6 +329,10 @@ export async function fetchAPI<T>(
       throw error;
     }
 
+    if (customFallbackGroup) {
+      clearLegacyFallbackBlock(customFallbackGroup);
+    }
+
     return res.json();
   } catch (error) {
     // Network, timeout, CORS errors
@@ -286,6 +340,17 @@ export async function fetchAPI<T>(
       const errorInfo = analyzeError(error);
       (error as any).errorInfo = errorInfo;
     }
+
+    // Legacy WP fallback is only useful when the custom endpoint genuinely does
+    // not exist. On 5xx/508, rate-limit, timeout or network failures, trying a
+    // second endpoint on the same origin amplifies the outage and CPU pressure.
+    if (customFallbackGroup) {
+      const errorInfo = (error as any).errorInfo as FetchErrorInfo | undefined;
+      if (errorInfo?.statusCode !== 404) {
+        blockLegacyFallback(customFallbackGroup);
+      }
+    }
+
     throw error;
   }
 }
@@ -323,6 +388,12 @@ export async function fetchAPIWithHeaders<T>(
     throw authError;
   }
 
+  const legacyFallbackGroup = getLegacyFallbackGroup(endpoint);
+  if (legacyFallbackGroup && isLegacyFallbackBlocked(legacyFallbackGroup)) {
+    throw createSuppressedFallbackError(legacyFallbackGroup);
+  }
+
+  const customFallbackGroup = getCustomFallbackGroup(endpoint);
   const requestUrl = getPublicCacheUrl(endpoint, options, token, requireAuth) || `${API_URL}${endpoint}`;
 
   try {
@@ -367,6 +438,10 @@ export async function fetchAPIWithHeaders<T>(
       throw error;
     }
 
+    if (customFallbackGroup) {
+      clearLegacyFallbackBlock(customFallbackGroup);
+    }
+
     // Extract headers
     const responseHeaders: Record<string, string> = {};
     res.headers.forEach((value, key) => {
@@ -381,6 +456,14 @@ export async function fetchAPIWithHeaders<T>(
       const errorInfo = analyzeError(error);
       (error as any).errorInfo = errorInfo;
     }
+
+    if (customFallbackGroup) {
+      const errorInfo = (error as any).errorInfo as FetchErrorInfo | undefined;
+      if (errorInfo?.statusCode !== 404) {
+        blockLegacyFallback(customFallbackGroup);
+      }
+    }
+
     throw error;
   }
 }
