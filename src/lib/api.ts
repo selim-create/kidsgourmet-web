@@ -36,6 +36,17 @@ export function isRateLimitError(error: unknown): error is RateLimitError {
   );
 }
 
+/**
+ * Legacy WordPress fallbacks are only useful when the preferred endpoint is
+ * genuinely unavailable. Retrying the same origin through a second endpoint
+ * during 5xx/508, rate-limit, network, timeout or CORS failures amplifies load
+ * while the origin is already unhealthy.
+ */
+export function shouldUseLegacyFallback(error: unknown): boolean {
+  const statusCode = (error as { errorInfo?: FetchErrorInfo })?.errorInfo?.statusCode;
+  return statusCode === 404;
+}
+
 // Token yönetimi için yardımcı fonksiyonlar
 export const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
