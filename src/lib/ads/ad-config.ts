@@ -58,7 +58,7 @@ function normalizeSlot(slot: Record<string, unknown>): AdSlot {
   const rawSizes = slot.sizes || [];
   const sizes = normalizeAdSizes(rawSizes);
   
-  // Normalize size_mapping
+  // Normalize size mapping
   const rawSizeMapping = slot.size_mapping || slot.sizeMappings;
   const sizeMapping = normalizeSizeMapping(rawSizeMapping);
   
@@ -117,7 +117,7 @@ function normalizeConfig(data: Record<string, unknown>): AdConfig {
       mobile_scaling: Number(lazyLoad?.mobile_scaling ?? lazyLoadConfig?.mobileScaling ?? 2.0),
     },
     collapse_empty: Boolean(data.collapse_empty ?? data.collapseEmpty ?? true),
-    single_request: Boolean(data.single_request ?? data.singleRequest ?? data.enableSingleRequest ?? true),
+    single_request: Boolean(data.single_request ?? data.singleRequest ?? true),
     enable_services: Boolean(data.enable_services ?? data.enableServices ?? true),
     debug_mode: Boolean(data.debug_mode ?? data.debugMode ?? debug?.enabled ?? false),
     debug: debug as AdConfig['debug'],
@@ -135,9 +135,6 @@ export async function fetchAdConfig(): Promise<AdConfig> {
   try {
     const response = await fetch(`${API_URL}${HIP_ADS_API_NAMESPACE}/config`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       cache: 'default',
     });
 
@@ -200,9 +197,6 @@ export async function fetchAdsTxt(): Promise<string> {
   try {
     const response = await fetch(`${API_URL}${HIP_ADS_API_NAMESPACE}/ads-txt`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
     });
 
     if (!response.ok) {
