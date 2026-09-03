@@ -16,7 +16,7 @@
  *   GET https://api.kidsgourmet.com.tr/wp-json/wp/v2/posts?per_page=100&_fields=slug&page=N
  */
 
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -25,6 +25,49 @@ const OUTPUT_FILE = join(__dirname, '../src/lib/legacy-blog-slugs.ts');
 
 const WP_API_BASE = process.env.NEXT_PUBLIC_WORDPRESS_API_URL || 'https://api.kidsgourmet.com.tr/wp-json';
 const PER_PAGE = 100;
+const MAX_RETRIES = 3;
+const RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504, 508]);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchWithRetry(url) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url);
+
+      if (response.ok) {
+        return response;
+      }
+
+      const error = new Error(`API hatası: ${response.status} ${response.statusText} (${url})`);
+      lastError = error;
+
+      if (!RETRYABLE_STATUSES.has(response.status) || attempt === MAX_RETRIES) {
+        throw error;
+      }
+
+      const delayMs = 500 * 2 ** (attempt - 1);
+      console.warn(`  ⚠️ Geçici API hatası (${response.status}). ${delayMs}ms sonra tekrar deneniyor...`);
+      await sleep(delayMs);
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === MAX_RETRIES) {
+        throw error;
+      }
+
+      const delayMs = 500 * 2 ** (attempt - 1);
+      console.warn(`  ⚠️ API isteği başarısız oldu. ${delayMs}ms sonra tekrar deneniyor...`);
+      await sleep(delayMs);
+    }
+  }
+
+  throw lastError || new Error(`API isteği başarısız oldu (${url})`);
+}
 
 async function fetchSlugs() {
   const slugs = [];
@@ -37,11 +80,7 @@ async function fetchSlugs() {
     const url = `${WP_API_BASE}/wp/v2/posts?per_page=${PER_PAGE}&_fields=slug&page=${page}`;
     console.log(`  Sayfa ${page}/${totalPages}: ${url}`);
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`API hatası: ${response.status} ${response.statusText} (${url})`);
-    }
-
+    const response = await fetchWithRetry(url);
     const posts = await response.json();
     if (!Array.isArray(posts) || posts.length === 0) break;
 
@@ -92,7 +131,14 @@ async function main() {
     console.log(`\n✅ ${OUTPUT_FILE} dosyası güncellendi.`);
     console.log('Lütfen middleware\'in doğru çalıştığından emin olmak için uygulamayı yeniden başlatın.');
   } catch (error) {
-    console.error('Hata:', error.message);
+    console.warn(`\n⚠️ WordPress slug listesi yenilenemedi: ${error.message}`);
+
+    if (existsSync(OUTPUT_FILE)) {
+      console.warn('⚠️ Mevcut legacy-blog-slugs.ts korunuyor; build bu dosyayla devam edecek.');
+      return;
+    }
+
+    console.error('Hata: Mevcut fallback slug dosyası da bulunamadı; build güvenli şekilde devam edemez.');
     process.exit(1);
   }
 }
