@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import {
   HIPOSTA_CORE_API_URL,
   KIDSGOURMET_PUBLISHER,
-  isAllowedNewsletterSlug,
   isNewsletterSourceId,
 } from '@/lib/hiposta-newsletters';
 
@@ -15,12 +14,35 @@ type SubscribeBody = {
   website?: unknown;
 };
 
+type CatalogNewsletter = {
+  slug?: unknown;
+};
+
 function clientIp(request: Request): string | null {
   const forwarded = request.headers.get('x-forwarded-for');
   const candidate = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip')?.trim() || '';
   if (candidate && isIP(candidate)) return candidate;
   if (process.env.NODE_ENV !== 'production') return '127.0.0.1';
   return null;
+}
+
+async function activeNewsletterSlugs(): Promise<Set<string> | null> {
+  try {
+    const response = await fetch(`${HIPOSTA_CORE_API_URL}/newsletters`, {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!response.ok) return null;
+    const payload = (await response.json()) as { data?: CatalogNewsletter[] };
+    const rows = Array.isArray(payload.data) ? payload.data : [];
+    return new Set(
+      rows
+        .map((row) => typeof row.slug === 'string' ? row.slug : '')
+        .filter(Boolean)
+    );
+  } catch {
+    return null;
+  }
 }
 
 export async function POST(request: Request) {
@@ -37,7 +59,7 @@ export async function POST(request: Request) {
   const consent = body.consent === true;
   const honeypot = typeof body.website === 'string' ? body.website.trim() : '';
   const requested = Array.isArray(body.newsletters)
-    ? [...new Set(body.newsletters.filter((value): value is string => typeof value === 'string').map((value) => value.trim()))]
+    ? [...new Set(body.newsletters.filter((value): value is string => typeof value === 'string').map((value) => value.trim()).filter(Boolean))]
     : [];
 
   if (honeypot !== '') {
@@ -56,8 +78,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, code: 'invalid_source' }, { status: 400 });
   }
 
-  if (requested.length === 0 || requested.length > 4 || requested.some((slug) => !isAllowedNewsletterSlug(slug))) {
+  if (requested.length === 0 || requested.length > 25) {
     return NextResponse.json({ success: false, code: 'invalid_newsletters' }, { status: 400 });
+  }
+
+  const activeSlugs = await activeNewsletterSlugs();
+  if (!activeSlugs) {
+    return NextResponse.json(
+      { success: false, code: 'catalog_unavailable', message: 'Bülten seçenekleri şu anda doğrulanamıyor. Lütfen tekrar deneyin.' },
+      { status: 503 }
+    );
+  }
+  if (requested.some((slug) => !activeSlugs.has(slug))) {
+    return NextResponse.json(
+      { success: false, code: 'newsletter_unavailable', message: 'Seçtiğiniz bültenlerden biri şu anda aboneliğe açık değil.' },
+      { status: 400 }
+    );
   }
 
   const token = process.env.HIPOSTA_PUBLISHER_KIDSGOURMET_TOKEN?.trim() || '';
