@@ -31,55 +31,46 @@ function normalizeSource(source: NewsletterFormProps['source']): NewsletterSourc
     : source as NewsletterSourceId;
 }
 
-function ConsentCheckbox({ source, checked, onChange }: { source: string; checked: boolean; onChange: (checked: boolean) => void }) {
-  return (
-    <div className="flex items-start gap-2 mt-3">
-      <input
-        type="checkbox"
-        id={`consent-${source}`}
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="w-4 h-4 mt-0.5 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
-      />
-      <label htmlFor={`consent-${source}`} className="text-xs text-gray-500 cursor-pointer leading-relaxed">
-        Seçtiğim bültenlerin e-posta adresime gönderilmesini kabul ediyorum.{' '}
-        <Link href="/aydinlatma-metni" className="text-orange-500 hover:underline font-medium">
-          Aydınlatma Metni
-        </Link>
-        &apos;ni okudum.
-      </label>
-    </div>
-  );
-}
-
-function NewsletterChoice({
+function NewsletterPill({
   option,
   checked,
   onChange,
+  subtle = false,
 }: {
   option: HipostaNewsletterOption;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  subtle?: boolean;
 }) {
   return (
-    <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white/80 p-3 cursor-pointer hover:border-orange-200 transition-colors">
+    <label
+      className={`inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-2 text-xs font-semibold transition-all cursor-pointer select-none ${
+        checked
+          ? 'border-orange-300 bg-orange-50 text-orange-700 shadow-sm'
+          : subtle
+            ? 'border-gray-200 bg-white text-gray-500 hover:border-gray-300 hover:text-slate-700'
+            : 'border-gray-200 bg-white text-slate-600 hover:border-orange-200 hover:text-slate-800'
+      }`}
+      title={option.description || option.name}
+    >
       <input
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="w-4 h-4 mt-0.5 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+        className="sr-only"
       />
-      <span className="min-w-0">
-        <span className="block text-sm font-bold text-slate-800">{option.name}</span>
-        {!option.isPrimary && option.publicationName && (
-          <span className="block text-[11px] font-semibold uppercase tracking-wide text-orange-500 mt-0.5">
-            {option.publicationName}
-          </span>
-        )}
-        {option.description && (
-          <span className="block text-xs text-gray-500 mt-1 leading-relaxed">{option.description}</span>
-        )}
+      <span
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border text-[8px] ${
+          checked ? 'border-orange-400 bg-orange-500 text-white' : 'border-gray-300 bg-white text-transparent'
+        }`}
+      >
+        <i className="fa-solid fa-check"></i>
       </span>
+      {!option.isPrimary && option.publicationName ? (
+        <span className="truncate">{option.publicationName} · {option.name}</span>
+      ) : (
+        <span className="truncate">{option.name}</span>
+      )}
     </label>
   );
 }
@@ -87,7 +78,7 @@ function NewsletterChoice({
 export default function NewsletterForm({
   source,
   variant = 'default',
-  placeholder = 'Mail Adresiniz',
+  placeholder = 'E-posta adresin',
   buttonText = 'Abone Ol',
   className = '',
   buttonClassName,
@@ -149,13 +140,13 @@ export default function NewsletterForm({
 
     if (selected.length === 0) {
       setStatus('error');
-      setMessage('Abone olmak istediğiniz en az bir bülteni seçin.');
+      setMessage('En az bir bülten seçmelisin.');
       return;
     }
 
     if (!consentChecked) {
       setStatus('error');
-      setMessage('Bülten aboneliği için onay vermelisiniz.');
+      setMessage('Bülten aboneliği için onay vermelisin.');
       return;
     }
 
@@ -182,91 +173,63 @@ export default function NewsletterForm({
       onSuccess?.();
     } else {
       setStatus('error');
-      setMessage(result.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+      setMessage(result.message || 'Bir hata oluştu. Lütfen tekrar dene.');
       onError?.(result.message || 'Bir hata oluştu.');
     }
   };
 
   if (status === 'success') {
     return (
-      <div className={`bg-green-50 border border-green-200 rounded-xl p-4 text-center ${className}`}>
-        <div className="text-green-600 mb-2">
-          <i className="fa-solid fa-check-circle text-2xl"></i>
-        </div>
-        <p className="text-green-700 text-sm font-medium">{message}</p>
+      <div className={`flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50/70 px-4 py-3 ${className}`}>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-green-600 shadow-sm">
+          <i className="fa-solid fa-check text-xs"></i>
+        </span>
+        <p className="text-sm font-medium leading-relaxed text-green-800">{message}</p>
       </div>
     );
   }
 
   const fieldClasses = variant === 'inline'
-    ? 'flex-1 py-3 px-6 rounded-full border border-gray-200 outline-none focus:border-green-500 shadow-sm'
-    : variant === 'compact'
-      ? 'w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors'
-      : 'w-full px-4 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-500';
+    ? 'min-w-0 flex-1 rounded-full border border-gray-200 bg-white px-5 py-3 text-sm outline-none transition focus:border-green-400 focus:ring-4 focus:ring-green-50'
+    : 'min-w-0 flex-1 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-50';
 
   const defaultButtonClasses = variant === 'inline'
-    ? 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors disabled:opacity-50'
-    : variant === 'compact'
-      ? 'bg-slate-800 text-white font-bold py-2.5 px-5 rounded-xl text-sm hover:bg-slate-700 transition-colors disabled:opacity-50'
-      : 'w-full bg-orange-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-orange-600 transition-colors disabled:opacity-50';
+    ? 'shrink-0 rounded-full bg-green-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-40'
+    : 'shrink-0 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40';
 
   return (
     <div className={className}>
-      <div className="space-y-2 mb-3">
-        {optionsLoading && (
-          <div className="text-xs text-gray-500 flex items-center gap-2 py-2">
-            <i className="fa-solid fa-spinner fa-spin"></i>
-            Bültenler yükleniyor...
+      <div className="mb-3">
+        {optionsLoading ? (
+          <div className="flex items-center gap-2 py-1 text-xs text-gray-400">
+            <i className="fa-solid fa-circle-notch fa-spin"></i>
+            Bültenler hazırlanıyor
           </div>
-        )}
-
-        {!optionsLoading && primaryOptions.length === 0 && (
-          <div className="text-xs text-gray-500 rounded-xl bg-gray-50 border border-gray-100 p-3">
-            KidsGourmet bülten abonelikleri şu anda kullanılamıyor.
+        ) : primaryOptions.length === 0 ? (
+          <p className="text-xs text-gray-400">Bülten abonelikleri şu anda kullanılamıyor.</p>
+        ) : (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-400">Bültenini seç</span>
+            {primaryOptions.map((option) => (
+              <NewsletterPill
+                key={option.slug}
+                option={option}
+                checked={selected.includes(option.slug)}
+                onChange={(checked) => toggleNewsletter(option.slug, checked)}
+              />
+            ))}
           </div>
-        )}
-
-        {primaryOptions.length > 0 && (
-          <p className="text-xs font-semibold text-slate-600">Abone olmak istediğin bültenleri seç:</p>
-        )}
-
-        {primaryOptions.map((option) => (
-          <NewsletterChoice
-            key={option.slug}
-            option={option}
-            checked={selected.includes(option.slug)}
-            onChange={(checked) => toggleNewsletter(option.slug, checked)}
-          />
-        ))}
-
-        {relatedOptions.length > 0 && (
-          <details className="group rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-3">
-            <summary className="cursor-pointer list-none text-xs font-bold text-slate-700 flex items-center justify-between gap-3">
-              <span>Hiposta ağından ilgini çekebilecek diğer bültenler</span>
-              <i className="fa-solid fa-chevron-down text-[10px] text-gray-400 group-open:rotate-180 transition-transform"></i>
-            </summary>
-            <div className="space-y-2 mt-3">
-              {relatedOptions.map((option) => (
-                <NewsletterChoice
-                  key={option.slug}
-                  option={option}
-                  checked={selected.includes(option.slug)}
-                  onChange={(checked) => toggleNewsletter(option.slug, checked)}
-                />
-              ))}
-            </div>
-          </details>
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className={variant === 'inline' ? 'flex flex-col gap-3' : ''}>
-        <div className={variant === 'inline' || variant === 'compact' ? 'flex flex-col sm:flex-row gap-2' : ''}>
+      <form onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder={placeholder}
-            className={`${fieldClasses} ${variant === 'default' ? 'mb-2' : ''}`}
+            className={fieldClasses}
             disabled={isLoading || primaryOptions.length === 0}
             required
           />
@@ -276,14 +239,12 @@ export default function NewsletterForm({
             className={buttonClassName || defaultButtonClasses}
           >
             {isLoading ? (
-              <>
-                <i className="fa-solid fa-spinner fa-spin mr-2"></i>
-                Gönderiliyor...
-              </>
-            ) : variant === 'compact' ? (
-              <span className="whitespace-nowrap">{buttonText}</span>
+              <span className="inline-flex items-center gap-2 whitespace-nowrap">
+                <i className="fa-solid fa-circle-notch fa-spin"></i>
+                Kaydediliyor
+              </span>
             ) : (
-              buttonText
+              <span className="whitespace-nowrap">{buttonText}</span>
             )}
           </button>
         </div>
@@ -300,10 +261,46 @@ export default function NewsletterForm({
         />
       </form>
 
-      <ConsentCheckbox source={normalizedSource} checked={consentChecked} onChange={setConsentChecked} />
+      <div className="mt-2.5 flex flex-col gap-2">
+        <label className="flex cursor-pointer items-start gap-2 text-[11px] leading-relaxed text-gray-400">
+          <input
+            type="checkbox"
+            id={`consent-${normalizedSource}`}
+            checked={consentChecked}
+            onChange={(event) => setConsentChecked(event.target.checked)}
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-gray-300 text-orange-500 focus:ring-orange-400"
+          />
+          <span>
+            Seçtiğim bültenleri e-posta ile almak istiyorum.{' '}
+            <Link href="/aydinlatma-metni" className="font-medium text-gray-500 underline decoration-gray-300 underline-offset-2 hover:text-orange-500">
+              Aydınlatma Metni
+            </Link>
+          </span>
+        </label>
+
+        {relatedOptions.length > 0 && (
+          <details className="group">
+            <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-[11px] font-medium text-gray-400 transition hover:text-slate-600">
+              <i className="fa-solid fa-plus text-[8px] transition-transform group-open:rotate-45"></i>
+              Hiposta ağından diğer bültenlere de göz at
+            </summary>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {relatedOptions.map((option) => (
+                <NewsletterPill
+                  key={option.slug}
+                  option={option}
+                  subtle
+                  checked={selected.includes(option.slug)}
+                  onChange={(checked) => toggleNewsletter(option.slug, checked)}
+                />
+              ))}
+            </div>
+          </details>
+        )}
+      </div>
 
       {status === 'error' && (
-        <p className={`text-red-500 mt-2 ${variant === 'inline' ? 'text-sm' : 'text-xs'}`}>{message}</p>
+        <p className="mt-2 text-xs font-medium text-red-500">{message}</p>
       )}
     </div>
   );
