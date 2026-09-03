@@ -1,16 +1,20 @@
 import useSWR from 'swr';
 import { DietType } from '@/types/taxonomy';
-import { API_URL, API_ENDPOINTS } from '@/lib/constants';
 
-// Fetcher function for SWR
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Taxonomy request failed: ${response.status}`);
+  }
+  return response.json();
+};
 
 /**
- * Hook to fetch all diet types from the WordPress API
+ * Hook to fetch all diet types through the same-origin cached taxonomy route.
  */
 export function useDietTypes() {
   const { data, error, isLoading } = useSWR<DietType[]>(
-    `${API_URL}${API_ENDPOINTS.DIET_TYPES}?per_page=100`,
+    '/api/taxonomies?name=diet-type',
     fetcher
   );
   

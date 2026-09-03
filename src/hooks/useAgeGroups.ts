@@ -1,16 +1,20 @@
 import useSWR from 'swr';
 import { AgeGroup } from '@/types/taxonomy';
-import { API_URL, API_ENDPOINTS } from '@/lib/constants';
 
-// Fetcher function for SWR
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Taxonomy request failed: ${response.status}`);
+  }
+  return response.json();
+};
 
 /**
- * Hook to fetch all age groups from the WordPress API
+ * Hook to fetch all age groups through the same-origin cached taxonomy route.
  */
 export function useAgeGroups() {
   const { data, error, isLoading } = useSWR<AgeGroup[]>(
-    `${API_URL}${API_ENDPOINTS.AGE_GROUPS}?per_page=100`,
+    '/api/taxonomies?name=age-group',
     fetcher
   );
   
