@@ -54,6 +54,24 @@ export const removeToken = (): void => {
 const defaultSilentErrors = [401, 404]; // 401: handled by redirect, 404: endpoint might not exist yet
 
 /**
+ * Build request headers without forcing JSON Content-Type on public GET/HEAD calls.
+ * Non-GET requests keep the existing JSON default unless the caller overrides it.
+ */
+function createRequestHeaders(options: FetchOptions): Record<string, string> {
+  const headers: Record<string, string> = { ...options.headers };
+  const method = (options.method ?? 'GET').toUpperCase();
+  const hasContentType = Object.keys(headers).some(
+    (key) => key.toLowerCase() === 'content-type'
+  );
+
+  if (method !== 'GET' && method !== 'HEAD' && !hasContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return headers;
+}
+
+/**
  * Create a rate limit error from response
  */
 function createRateLimitError(res: Response, errorData: { data?: { retry_after?: number } }): RateLimitError {
@@ -180,10 +198,7 @@ export async function fetchAPI<T>(
   requireAuth: boolean = false,
   silentErrors: number[] = [] // Additional silent error codes beyond defaults
 ): Promise<T> {
-  const headers: Record<string, string> = { 
-    'Content-Type': 'application/json', 
-    ...options.headers 
-  };
+  const headers = createRequestHeaders(options);
   
   // Auth token varsa header'a ekle
   const token = getToken();
@@ -269,10 +284,7 @@ export async function fetchAPIWithHeaders<T>(
   requireAuth: boolean = false,
   silentErrors: number[] = []
 ): Promise<{ data: T; headers: Record<string, string> }> {
-  const headers: Record<string, string> = { 
-    'Content-Type': 'application/json', 
-    ...options.headers 
-  };
+  const headers = createRequestHeaders(options);
   
   // Auth token varsa header'a ekle
   const token = getToken();
