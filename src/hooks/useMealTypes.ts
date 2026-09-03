@@ -1,16 +1,20 @@
 import useSWR from 'swr';
 import { MealType } from '@/types/taxonomy';
-import { API_URL, API_ENDPOINTS } from '@/lib/constants';
 
-// Fetcher function for SWR
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Taxonomy request failed: ${response.status}`);
+  }
+  return response.json();
+};
 
 /**
- * Hook to fetch all meal types from the WordPress API
+ * Hook to fetch all meal types through the same-origin cached taxonomy route.
  */
 export function useMealTypes() {
   const { data, error, isLoading } = useSWR<MealType[]>(
-    `${API_URL}${API_ENDPOINTS.MEAL_TYPES}?per_page=100`,
+    '/api/taxonomies?name=meal-type',
     fetcher
   );
   
