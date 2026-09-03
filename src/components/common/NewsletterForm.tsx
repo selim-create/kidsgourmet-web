@@ -6,14 +6,29 @@ import { newsletterService } from '@/services/newsletterService';
 import type { HipostaNewsletterOption, NewsletterSourceId } from '@/lib/hiposta-newsletters';
 
 interface NewsletterFormProps {
-  source: NewsletterSourceId;
+  source: NewsletterSourceId | 'footer' | 'blog' | 'category' | 'tag';
   variant?: 'default' | 'compact' | 'inline';
   placeholder?: string;
   buttonText?: string;
+  showNameField?: boolean;
   className?: string;
   buttonClassName?: string;
+  interests?: string[];
   onSuccess?: () => void;
   onError?: (message: string) => void;
+}
+
+const LEGACY_SOURCE_MAP: Record<'footer' | 'blog' | 'category' | 'tag', NewsletterSourceId> = {
+  footer: 'kidsgourmet_footer',
+  blog: 'kidsgourmet_blog_inline',
+  category: 'kidsgourmet_category_sidebar',
+  tag: 'kidsgourmet_tag_sidebar',
+};
+
+function normalizeSource(source: NewsletterFormProps['source']): NewsletterSourceId {
+  return source in LEGACY_SOURCE_MAP
+    ? LEGACY_SOURCE_MAP[source as keyof typeof LEGACY_SOURCE_MAP]
+    : source as NewsletterSourceId;
 }
 
 function ConsentCheckbox({ source, checked, onChange }: { source: string; checked: boolean; onChange: (checked: boolean) => void }) {
@@ -79,6 +94,7 @@ export default function NewsletterForm({
   onSuccess,
   onError,
 }: NewsletterFormProps) {
+  const normalizedSource = normalizeSource(source);
   const [email, setEmail] = useState('');
   const [consentChecked, setConsentChecked] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
@@ -148,7 +164,7 @@ export default function NewsletterForm({
 
     const result = await newsletterService.subscribe({
       email,
-      source,
+      source: normalizedSource,
       newsletters: selected,
       consent: true,
       website,
@@ -208,6 +224,10 @@ export default function NewsletterForm({
           <div className="text-xs text-gray-500 rounded-xl bg-gray-50 border border-gray-100 p-3">
             KidsGourmet bülten abonelikleri şu anda kullanılamıyor.
           </div>
+        )}
+
+        {primaryOptions.length > 0 && (
+          <p className="text-xs font-semibold text-slate-600">Abone olmak istediğin bültenleri seç:</p>
         )}
 
         {primaryOptions.map((option) => (
@@ -280,7 +300,7 @@ export default function NewsletterForm({
         />
       </form>
 
-      <ConsentCheckbox source={source} checked={consentChecked} onChange={setConsentChecked} />
+      <ConsentCheckbox source={normalizedSource} checked={consentChecked} onChange={setConsentChecked} />
 
       {status === 'error' && (
         <p className={`text-red-500 mt-2 ${variant === 'inline' ? 'text-sm' : 'text-xs'}`}>{message}</p>
