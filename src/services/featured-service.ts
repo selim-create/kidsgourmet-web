@@ -51,15 +51,26 @@ export interface FeaturedItem {
 export const featuredService = {
   getAll: async (limit = 5, type?: string): Promise<FeaturedItem[]> => {
     try {
-      const params = new URLSearchParams({ limit: limit.toString() });
-      if (type && type !== 'all') {
-        params.append('type', type);
+      let response: { success: boolean; data: FeaturedItem[] };
+
+      // The homepage's default public request is shared by every visitor.
+      // Keep filtered/alternate calls on the normal API path, but serve the
+      // exact homepage request through the same-origin Next cache route.
+      if (typeof window !== 'undefined' && limit === 5 && !type) {
+        const res = await fetch('/api/public-cache?key=featured');
+        if (!res.ok) throw new Error(`Featured cache request failed: ${res.status}`);
+        response = await res.json();
+      } else {
+        const params = new URLSearchParams({ limit: limit.toString() });
+        if (type && type !== 'all') {
+          params.append('type', type);
+        }
+
+        response = await fetchAPI<{ success: boolean; data: FeaturedItem[] }>(
+          `${API_ENDPOINTS.FEATURED}?${params.toString()}`
+        );
       }
-      
-      const response = await fetchAPI<{ success: boolean; data: FeaturedItem[] }>(
-        `${API_ENDPOINTS.FEATURED}?${params.toString()}`
-      );
-      
+
       return response?.data || [];
     } catch (error) {
       console.error('Failed to load featured content:', error);
