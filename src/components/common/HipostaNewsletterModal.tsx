@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { HipostaNewsletterOption } from '@/lib/hiposta-newsletters';
 
 type Props = {
@@ -46,6 +47,12 @@ function cadenceLabel(value: string) {
 export default function HipostaNewsletterModal({ open, options, selected, onClose, onApply }: Props) {
   const [draft, setDraft] = useState<string[]>(selected);
   const [query, setQuery] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -93,7 +100,7 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   }, [options, query]);
 
-  if (!open) return null;
+  if (!open || !mounted || typeof document === 'undefined') return null;
 
   const toggle = (slug: string) => {
     setDraft((current) => current.includes(slug)
@@ -102,11 +109,10 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
     );
   };
 
-  return (
-    <div className="fixed inset-0 z-[1000] flex items-end justify-center bg-slate-950/45 p-0 backdrop-blur-[6px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Hiposta bültenlerini keşfet">
-      <button className="absolute inset-0 cursor-default" aria-label="Modalı kapat" onClick={onClose} />
-
-      <div className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-t-[30px] bg-[#f5f3ee] shadow-2xl sm:max-h-[86vh] sm:rounded-[30px]">
+  const modal = (
+    <div className="fixed inset-0 z-[2147483000] flex items-end justify-center bg-slate-950/50 p-0 backdrop-blur-[6px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-label="Hiposta bültenlerini keşfet">
+      <button className="absolute inset-0 z-0 cursor-default" aria-label="Modalı kapat" onClick={onClose} />
+      <div className="relative z-10 flex max-h-[92dvh] w-full max-w-5xl flex-col overflow-hidden rounded-t-[30px] bg-[#f5f3ee] shadow-[0_32px_100px_rgba(15,23,42,0.38)] sm:max-h-[86dvh] sm:rounded-[30px]">
         <div className="flex items-start justify-between gap-4 border-b border-[#ddd9cf] bg-[#fffdf8] px-5 py-5 sm:px-8 sm:py-6">
           <div className="flex min-w-0 items-center gap-5">
             <HipostaWordmark />
@@ -120,20 +126,13 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
             <i className="fa-solid fa-xmark" />
           </button>
         </div>
-
         <div className="border-b border-[#ddd9cf] bg-[#fffdf8] px-5 pb-5 sm:px-8">
           <div className="relative max-w-xl">
             <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-xs text-slate-400" />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Yayın veya bülten ara"
-              className="w-full rounded-full border border-[#ddd9cf] bg-white py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#173bdc] focus:ring-4 focus:ring-blue-100/60"
-            />
+            <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Yayın veya bülten ara" className="w-full rounded-full border border-[#ddd9cf] bg-white py-3 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#173bdc] focus:ring-4 focus:ring-blue-100/60" />
           </div>
         </div>
-
-        <div className="overflow-y-auto px-5 py-5 sm:px-8 sm:py-7">
+        <div className="overflow-y-auto overscroll-contain px-5 py-5 sm:px-8 sm:py-7">
           {groups.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-[#cbc6bb] bg-white/60 px-6 py-10 text-center text-sm text-slate-500">Aramana uygun aktif bülten bulunamadı.</div>
           ) : (
@@ -141,17 +140,7 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
               {groups.map((group) => (
                 <section key={group.slug} className="overflow-hidden rounded-[22px] border border-[#ddd9cf] bg-[#fffdf8] shadow-[0_10px_35px_rgba(17,18,22,0.04)]">
                   <header className="flex items-center gap-3 border-b border-[#e6e2d8] px-4 py-4">
-                    <div
-                      className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl text-xs font-black shadow-sm"
-                      style={{
-                        backgroundColor: group.logoUrl ? '#ffffff' : group.brandColor,
-                        color: group.foregroundColor,
-                        backgroundImage: group.logoUrl ? `url(${group.logoUrl})` : undefined,
-                        backgroundSize: 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                      }}
-                    >
+                    <div className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl text-xs font-black shadow-sm" style={{ backgroundColor: group.logoUrl ? '#ffffff' : group.brandColor, color: group.foregroundColor, backgroundImage: group.logoUrl ? `url(${group.logoUrl})` : undefined, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
                       {!group.logoUrl && group.monogram}
                     </div>
                     <div className="min-w-0">
@@ -159,20 +148,14 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
                       <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">{group.newsletters.length} aktif bülten</p>
                     </div>
                   </header>
-
                   <div className="divide-y divide-[#ece8df]">
                     {group.newsletters.map((option) => {
                       const checked = draft.includes(option.slug);
                       return (
                         <button key={option.slug} type="button" onClick={() => toggle(option.slug)} className="group flex w-full items-start gap-3 px-4 py-4 text-left transition hover:bg-white">
-                          <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border transition ${checked ? 'border-[#173bdc] bg-[#173bdc] text-white' : 'border-slate-300 bg-white text-transparent group-hover:border-[#173bdc]'}`}>
-                            <i className="fa-solid fa-check text-[9px]" />
-                          </span>
+                          <span className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full border transition ${checked ? 'border-[#173bdc] bg-[#173bdc] text-white' : 'border-slate-300 bg-white text-transparent group-hover:border-[#173bdc]'}`}><i className="fa-solid fa-check text-[9px]" /></span>
                           <span className="min-w-0 flex-1">
-                            <span className="flex flex-wrap items-center gap-2">
-                              <span className="text-sm font-bold text-slate-800">{option.name}</span>
-                              {option.cadence && <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500">{cadenceLabel(option.cadence)}</span>}
-                            </span>
+                            <span className="flex flex-wrap items-center gap-2"><span className="text-sm font-bold text-slate-800">{option.name}</span>{option.cadence && <span className="rounded-full bg-slate-100 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.08em] text-slate-500">{cadenceLabel(option.cadence)}</span>}</span>
                             {option.description && <span className="mt-1.5 block text-xs leading-relaxed text-slate-500">{option.description}</span>}
                           </span>
                         </button>
@@ -184,11 +167,8 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
             </div>
           )}
         </div>
-
         <div className="flex flex-col gap-3 border-t border-[#ddd9cf] bg-[#fffdf8] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <p className="text-xs text-slate-500">
-            <strong className="text-[#111216]">{draft.length}</strong> ağ bülteni seçili. Bu seçimler KidsGourmet bültenlerinden bağımsızdır.
-          </p>
+          <p className="text-xs text-slate-500"><strong className="text-[#111216]">{draft.length}</strong> ağ bülteni seçili. Bu seçimler KidsGourmet bültenlerinden bağımsızdır.</p>
           <div className="flex gap-2">
             <button type="button" onClick={onClose} className="rounded-full px-5 py-2.5 text-xs font-bold text-slate-500 transition hover:bg-slate-100 hover:text-slate-800">Vazgeç</button>
             <button type="button" onClick={() => { onApply(draft); onClose(); }} className="rounded-full bg-[#111216] px-6 py-2.5 text-xs font-bold text-white transition hover:bg-[#173bdc]">Seçimleri uygula</button>
@@ -197,4 +177,6 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
       </div>
     </div>
   );
+
+  return createPortal(modal, document.body);
 }
