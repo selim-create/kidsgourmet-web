@@ -1,41 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { newsletterService, NewsletterSubscriptionRequest } from '@/services/newsletterService';
+import { newsletterService } from '@/services/newsletterService';
+import type { HipostaNewsletterOption, NewsletterSourceId } from '@/lib/hiposta-newsletters';
 
 interface NewsletterFormProps {
-  source: string;
+  source: NewsletterSourceId;
   variant?: 'default' | 'compact' | 'inline';
   placeholder?: string;
   buttonText?: string;
-  showNameField?: boolean;
   className?: string;
   buttonClassName?: string;
-  interests?: string[];
   onSuccess?: () => void;
   onError?: (message: string) => void;
 }
 
-// Consent Checkbox Component - defined outside to avoid recreation on render
-function ConsentCheckbox({ source, checked, onChange }: { source: string; checked: boolean; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) {
+function ConsentCheckbox({ source, checked, onChange }: { source: string; checked: boolean; onChange: (checked: boolean) => void }) {
   return (
-    <div className="flex items-center gap-2 mt-3">
+    <div className="flex items-start gap-2 mt-3">
       <input
         type="checkbox"
         id={`consent-${source}`}
         checked={checked}
-        onChange={onChange}
-        className="w-4 h-4 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+        onChange={(event) => onChange(event.target.checked)}
+        className="w-4 h-4 mt-0.5 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
       />
-      <label htmlFor={`consent-${source}`} className="text-xs text-gray-500 cursor-pointer">
-        Bültene üye olarak{' '}
+      <label htmlFor={`consent-${source}`} className="text-xs text-gray-500 cursor-pointer leading-relaxed">
+        Seçtiğim bültenlerin e-posta adresime gönderilmesini kabul ediyorum.{' '}
         <Link href="/aydinlatma-metni" className="text-orange-500 hover:underline font-medium">
           Aydınlatma Metni
         </Link>
-        &apos;ni okuyup anladığımı kabul ediyorum.
+        &apos;ni okudum.
       </label>
     </div>
+  );
+}
+
+function NewsletterChoice({
+  option,
+  checked,
+  onChange,
+}: {
+  option: HipostaNewsletterOption;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  return (
+    <label className="flex items-start gap-3 rounded-xl border border-gray-200 bg-white/80 p-3 cursor-pointer hover:border-orange-200 transition-colors">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="w-4 h-4 mt-0.5 shrink-0 text-orange-500 border-gray-300 rounded focus:ring-orange-500"
+      />
+      <span className="min-w-0">
+        <span className="block text-sm font-bold text-slate-800">{option.name}</span>
+        {!option.isPrimary && option.publicationName && (
+          <span className="block text-[11px] font-semibold uppercase tracking-wide text-orange-500 mt-0.5">
+            {option.publicationName}
+          </span>
+        )}
+        {option.description && (
+          <span className="block text-xs text-gray-500 mt-1 leading-relaxed">{option.description}</span>
+        )}
+      </span>
+    </label>
   );
 }
 
@@ -44,73 +74,103 @@ export default function NewsletterForm({
   variant = 'default',
   placeholder = 'Mail Adresiniz',
   buttonText = 'Abone Ol',
-  showNameField = false,
   className = '',
   buttonClassName,
-  interests = [],
   onSuccess,
   onError,
 }: NewsletterFormProps) {
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
   const [consentChecked, setConsentChecked] = useState(false);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [options, setOptions] = useState<HipostaNewsletterOption[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [website, setWebsite] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  useEffect(() => {
+    let mounted = true;
+
+    fetch('/api/newsletters/options')
+      .then(async (response) => {
+        if (!response.ok) throw new Error('catalog unavailable');
+        return response.json() as Promise<{ options?: HipostaNewsletterOption[] }>;
+      })
+      .then((result) => {
+        if (mounted) setOptions(Array.isArray(result.options) ? result.options : []);
+      })
+      .catch(() => {
+        if (mounted) setOptions([]);
+      })
+      .finally(() => {
+        if (mounted) setOptionsLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const primaryOptions = useMemo(() => options.filter((option) => option.isPrimary), [options]);
+  const relatedOptions = useMemo(() => options.filter((option) => !option.isPrimary), [options]);
+
+  const toggleNewsletter = (slug: string, checked: boolean) => {
+    setSelected((current) => checked
+      ? [...new Set([...current, slug])]
+      : current.filter((item) => item !== slug)
+    );
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (!email || !email.includes('@')) {
       setStatus('error');
       setMessage('Geçerli bir e-posta adresi girin.');
       return;
     }
 
+    if (selected.length === 0) {
+      setStatus('error');
+      setMessage('Abone olmak istediğiniz en az bir bülteni seçin.');
+      return;
+    }
+
     if (!consentChecked) {
       setStatus('error');
-      setMessage('Devam etmek için Aydınlatma Metni&apos;ni kabul etmelisiniz.');
+      setMessage('Bülten aboneliği için onay vermelisiniz.');
       return;
     }
 
     setIsLoading(true);
     setStatus('idle');
 
-    const data: NewsletterSubscriptionRequest = {
+    const result = await newsletterService.subscribe({
       email,
       source,
-      interests: interests.length > 0 ? interests : undefined,
-    };
-
-    if (showNameField && name) {
-      data.name = name;
-    }
-
-    const result = await newsletterService.subscribe(data);
+      newsletters: selected,
+      consent: true,
+      website,
+    });
 
     setIsLoading(false);
 
     if (result.success) {
       setStatus('success');
-      setMessage(result.message || 'Başarıyla abone oldunuz! Onay e-postanızı kontrol edin.');
+      setMessage(result.message || 'Seçimin kaydedildi.');
       setEmail('');
-      setName('');
+      setSelected([]);
       setConsentChecked(false);
+      setWebsite('');
       onSuccess?.();
     } else {
       setStatus('error');
       setMessage(result.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
       onError?.(result.message || 'Bir hata oluştu.');
     }
-
-    // 5 saniye sonra mesajı temizle
-    setTimeout(() => {
-      setStatus('idle');
-      setMessage('');
-    }, 5000);
   };
 
-  // Başarı durumu
   if (status === 'success') {
     return (
       <div className={`bg-green-50 border border-green-200 rounded-xl p-4 text-center ${className}`}>
@@ -122,118 +182,108 @@ export default function NewsletterForm({
     );
   }
 
-  // Compact variant
-  if (variant === 'compact') {
-    return (
-      <div className={className}>
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={placeholder}
-            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors"
-            disabled={isLoading}
-            required
+  const fieldClasses = variant === 'inline'
+    ? 'flex-1 py-3 px-6 rounded-full border border-gray-200 outline-none focus:border-green-500 shadow-sm'
+    : variant === 'compact'
+      ? 'w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-orange-500 bg-gray-50 focus:bg-white transition-colors'
+      : 'w-full px-4 py-2 rounded-xl border border-gray-200 text-sm outline-none focus:border-orange-500';
+
+  const defaultButtonClasses = variant === 'inline'
+    ? 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors disabled:opacity-50'
+    : variant === 'compact'
+      ? 'bg-slate-800 text-white font-bold py-2.5 px-5 rounded-xl text-sm hover:bg-slate-700 transition-colors disabled:opacity-50'
+      : 'w-full bg-orange-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-orange-600 transition-colors disabled:opacity-50';
+
+  return (
+    <div className={className}>
+      <div className="space-y-2 mb-3">
+        {optionsLoading && (
+          <div className="text-xs text-gray-500 flex items-center gap-2 py-2">
+            <i className="fa-solid fa-spinner fa-spin"></i>
+            Bültenler yükleniyor...
+          </div>
+        )}
+
+        {!optionsLoading && primaryOptions.length === 0 && (
+          <div className="text-xs text-gray-500 rounded-xl bg-gray-50 border border-gray-100 p-3">
+            KidsGourmet bülten abonelikleri şu anda kullanılamıyor.
+          </div>
+        )}
+
+        {primaryOptions.map((option) => (
+          <NewsletterChoice
+            key={option.slug}
+            option={option}
+            checked={selected.includes(option.slug)}
+            onChange={(checked) => toggleNewsletter(option.slug, checked)}
           />
-          <button
-            type="submit"
-            disabled={isLoading || !consentChecked}
-            className="bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-sm hover:bg-slate-700 transition-colors disabled:opacity-50"
-          >
-            {isLoading ? (
-              <i className="fa-solid fa-spinner fa-spin"></i>
-            ) : (
-              <i className="fa-solid fa-paper-plane"></i>
-            )}
-          </button>
-        </form>
-        <ConsentCheckbox source={source} checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
-        {status === 'error' && (
-          <p className="text-red-500 text-xs mt-2">{message}</p>
+        ))}
+
+        {relatedOptions.length > 0 && (
+          <details className="group rounded-xl border border-dashed border-gray-200 bg-gray-50/60 p-3">
+            <summary className="cursor-pointer list-none text-xs font-bold text-slate-700 flex items-center justify-between gap-3">
+              <span>Hiposta ağından ilgini çekebilecek diğer bültenler</span>
+              <i className="fa-solid fa-chevron-down text-[10px] text-gray-400 group-open:rotate-180 transition-transform"></i>
+            </summary>
+            <div className="space-y-2 mt-3">
+              {relatedOptions.map((option) => (
+                <NewsletterChoice
+                  key={option.slug}
+                  option={option}
+                  checked={selected.includes(option.slug)}
+                  onChange={(checked) => toggleNewsletter(option.slug, checked)}
+                />
+              ))}
+            </div>
+          </details>
         )}
       </div>
-    );
-  }
 
-  // Inline variant
-  if (variant === 'inline') {
-    return (
-      <div className={className}>
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
+      <form onSubmit={handleSubmit} className={variant === 'inline' ? 'flex flex-col gap-3' : ''}>
+        <div className={variant === 'inline' || variant === 'compact' ? 'flex flex-col sm:flex-row gap-2' : ''}>
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             placeholder={placeholder}
-            className="flex-1 py-3 px-6 rounded-full border border-gray-200 outline-none focus:border-green-500 shadow-sm"
-            disabled={isLoading}
+            className={`${fieldClasses} ${variant === 'default' ? 'mb-2' : ''}`}
+            disabled={isLoading || primaryOptions.length === 0}
             required
           />
           <button
             type="submit"
-            disabled={isLoading || !consentChecked}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-full shadow-md transition-colors disabled:opacity-50"
+            disabled={isLoading || optionsLoading || primaryOptions.length === 0 || selected.length === 0 || !consentChecked}
+            className={buttonClassName || defaultButtonClasses}
           >
             {isLoading ? (
               <>
                 <i className="fa-solid fa-spinner fa-spin mr-2"></i>
                 Gönderiliyor...
               </>
+            ) : variant === 'compact' ? (
+              <span className="whitespace-nowrap">{buttonText}</span>
             ) : (
               buttonText
             )}
           </button>
-        </form>
-        <ConsentCheckbox source={source} checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
-        {status === 'error' && (
-          <p className="text-red-500 text-sm text-center sm:text-left mt-2">{message}</p>
-        )}
-      </div>
-    );
-  }
+        </div>
 
-  // Default variant
-  return (
-    <div className={className}>
-      <form onSubmit={handleSubmit}>
-        {showNameField && (
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Adınız (opsiyonel)"
-            className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-orange-500"
-            disabled={isLoading}
-          />
-        )}
         <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder={placeholder}
-          className="w-full px-4 py-2 rounded-xl border border-gray-200 text-sm mb-2 outline-none focus:border-orange-500"
-          disabled={isLoading}
-          required
+          type="text"
+          name="website"
+          value={website}
+          onChange={(event) => setWebsite(event.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          className="absolute left-[-9999px] h-px w-px opacity-0"
         />
-        <button
-          type="submit"
-          disabled={isLoading || !consentChecked}
-          className={buttonClassName || "w-full bg-orange-500 text-white font-bold py-2 rounded-xl text-sm hover:bg-orange-600 transition-colors disabled:opacity-50"}
-        >
-          {isLoading ? (
-            <>
-              <i className="fa-solid fa-spinner fa-spin mr-2"></i>
-              Gönderiliyor...
-            </>
-          ) : (
-            buttonText
-          )}
-        </button>
       </form>
-      <ConsentCheckbox source={source} checked={consentChecked} onChange={(e) => setConsentChecked(e.target.checked)} />
+
+      <ConsentCheckbox source={source} checked={consentChecked} onChange={setConsentChecked} />
+
       {status === 'error' && (
-        <p className="text-red-500 text-xs mt-2">{message}</p>
+        <p className={`text-red-500 mt-2 ${variant === 'inline' ? 'text-sm' : 'text-xs'}`}>{message}</p>
       )}
     </div>
   );
