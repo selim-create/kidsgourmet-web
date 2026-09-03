@@ -129,11 +129,17 @@ function normalizeConfig(data: Record<string, unknown>): AdConfig {
 }
 
 /**
- * Fetch ad configuration from backend
+ * Fetch ad configuration from backend.
+ * Browser requests use the same-origin cache route so every page view does
+ * not hit WordPress. Server-side callers keep the direct backend path.
  */
 export async function fetchAdConfig(): Promise<AdConfig> {
   try {
-    const response = await fetch(`${API_URL}${HIP_ADS_API_NAMESPACE}/config`, {
+    const url = typeof window !== 'undefined'
+      ? '/api/public-cache?key=ad-config'
+      : `${API_URL}${HIP_ADS_API_NAMESPACE}/config`;
+
+    const response = await fetch(url, {
       method: 'GET',
       cache: 'default',
     });
