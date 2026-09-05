@@ -181,6 +181,10 @@ export default function NewsletterForm({
     return `${selectedNetworkOptions.length} ek bülten seçili · düzenlemek için tıkla`;
   }, [networkOptions.length, selectedNetworkOptions]);
 
+  const sidebarNetworkStatus = selectedNetworkOptions.length > 0
+    ? `${selectedNetworkOptions.length} ek bülten seçili`
+    : `${networkOptions.length} aktif bülten`;
+
   const toggleNewsletter = (slug: string, checked: boolean) => {
     setSelected((current) => checked
       ? [...new Set([...current, slug])]
@@ -309,36 +313,69 @@ export default function NewsletterForm({
 
       {networkOptions.length > 0 && (
         <div className="mb-3.5">
-          <button
-            type="button"
-            onClick={() => setDiscoveryOpen(true)}
-            className={`group flex w-full items-center justify-between border border-blue-100 bg-gradient-to-r from-blue-50/80 via-white to-amber-50/65 text-left transition hover:border-blue-200 hover:shadow-[0_7px_24px_rgba(23,59,220,0.08)] ${
-              isFooterLayout ? 'min-h-[62px] gap-4 rounded-2xl px-4 py-3' : 'min-h-[58px] gap-3 rounded-2xl px-3.5 py-2.5'
-            }`}
-          >
-            <span className="flex min-w-0 items-center gap-3">
-              <span className={`grid shrink-0 place-items-center rounded-xl border border-white bg-white shadow-sm ${isFooterLayout ? 'h-9 w-9' : 'h-8 w-8'}`}>
-                <i className="fa-regular fa-compass text-[#173bdc]" />
+          {isFooterLayout ? (
+            <button
+              type="button"
+              onClick={() => setDiscoveryOpen(true)}
+              className="group flex min-h-[62px] w-full items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50/80 via-white to-amber-50/65 px-4 py-3 text-left transition hover:border-blue-200 hover:shadow-[0_7px_24px_rgba(23,59,220,0.08)]"
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white bg-white shadow-sm">
+                  <i className="fa-regular fa-compass text-[#173bdc]" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex min-w-0 items-center gap-1.5 text-xs font-extrabold text-slate-700">
+                    <HipostaMiniMark />
+                    <span className="min-w-0">ile daha fazlasını keşfet</span>
+                  </span>
+                  <span className="mt-0.5 block truncate text-[10px] font-medium text-slate-400">{networkSubtitle}</span>
+                </span>
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex min-w-0 items-center gap-1.5 text-xs font-extrabold text-slate-700">
+              <span className="flex shrink-0 items-center gap-2">
+                {selectedNetworkOptions.length > 0 && (
+                  <span className="inline-flex rounded-full bg-[#173bdc] px-2 py-1 text-[9px] font-extrabold text-white">
+                    +{selectedNetworkOptions.length}
+                  </span>
+                )}
+                <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-[10px] text-slate-400 shadow-sm transition group-hover:translate-x-0.5 group-hover:text-[#173bdc]">
+                  <i className="fa-solid fa-arrow-right" />
+                </span>
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setDiscoveryOpen(true)}
+              className="group relative w-full overflow-hidden rounded-[22px] border border-blue-100 bg-gradient-to-br from-blue-50/85 via-white to-amber-50/70 p-4 text-left shadow-[0_8px_28px_rgba(23,59,220,0.05)] transition hover:border-blue-200 hover:shadow-[0_12px_34px_rgba(23,59,220,0.09)]"
+            >
+              <span className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-2.5">
+                  <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white bg-white shadow-sm">
+                    <i className="fa-regular fa-compass text-[#173bdc]" />
+                  </span>
                   <HipostaMiniMark />
-                  <span className="min-w-0">ile daha fazlasını keşfet</span>
                 </span>
-                <span className="mt-0.5 block truncate text-[10px] font-medium text-slate-400">{networkSubtitle}</span>
+                {selectedNetworkOptions.length > 0 ? (
+                  <span className="inline-flex shrink-0 rounded-full bg-[#173bdc] px-2.5 py-1 text-[9px] font-extrabold text-white shadow-sm">
+                    +{selectedNetworkOptions.length}
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">Hip Medya</span>
+                )}
               </span>
-            </span>
-            <span className="flex shrink-0 items-center gap-2">
-              {selectedNetworkOptions.length > 0 && (
-                <span className="hidden rounded-full bg-[#173bdc] px-2 py-1 text-[9px] font-extrabold text-white min-[430px]:inline-flex">
-                  +{selectedNetworkOptions.length}
+
+              <span className="mt-3 block pr-10">
+                <span className="block text-[13px] font-extrabold leading-snug text-slate-700">Daha fazlasını keşfet</span>
+                <span className="mt-1 block text-[10px] font-medium leading-relaxed text-slate-400">
+                  {sidebarNetworkStatus} · Hiposta yayın ağı
                 </span>
-              )}
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-[10px] text-slate-400 shadow-sm transition group-hover:translate-x-0.5 group-hover:text-[#173bdc]">
+              </span>
+
+              <span className="absolute bottom-4 right-4 grid h-8 w-8 place-items-center rounded-full bg-white text-[10px] text-slate-400 shadow-sm transition group-hover:translate-x-0.5 group-hover:text-[#173bdc]">
                 <i className="fa-solid fa-arrow-right" />
               </span>
-            </span>
-          </button>
+            </button>
+          )}
         </div>
       )}
 
