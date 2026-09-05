@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { authService } from '@/services/auth-service';
+import type { AuthResponse } from '@/lib/types';
 
 declare global {
   interface Window {
@@ -41,10 +42,8 @@ export function useGoogleAuth() {
   const [error, setError] = useState<string | null>(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
-  // Google Client ID - environment variable'dan al
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
-  // Warn if Google Client ID is not configured
   useEffect(() => {
     if (!clientId && typeof window !== 'undefined') {
       console.warn(
@@ -55,7 +54,6 @@ export function useGoogleAuth() {
   }, [clientId]);
 
   useEffect(() => {
-    // Google Sign-In script'ini yükle
     if (typeof window !== 'undefined' && !window.google) {
       const script = document.createElement('script');
       script.src = 'https://accounts.google.com/gsi/client';
@@ -71,10 +69,9 @@ export function useGoogleAuth() {
   const handleGoogleResponse = useCallback(async (response: GoogleCredentialResponse) => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const authResponse = await authService.googleLogin(response.credential);
-      return authResponse;
+      return await authService.googleLogin(response.credential);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Google ile giriş başarısız';
       setError(errorMessage);
@@ -84,7 +81,7 @@ export function useGoogleAuth() {
     }
   }, []);
 
-  const initializeGoogleButton = useCallback((elementId: string, onSuccess: () => void) => {
+  const initializeGoogleButton = useCallback((elementId: string, onSuccess: (response: AuthResponse) => void | Promise<void>) => {
     if (!isScriptLoaded || !window.google || !clientId) {
       console.warn('Google Sign-In henüz yüklenmedi veya Client ID eksik');
       return;
@@ -100,8 +97,8 @@ export function useGoogleAuth() {
       client_id: clientId,
       callback: async (response) => {
         try {
-          await handleGoogleResponse(response);
-          onSuccess();
+          const authResponse = await handleGoogleResponse(response);
+          await onSuccess(authResponse);
         } catch {
           // Error already handled in handleGoogleResponse
         }
