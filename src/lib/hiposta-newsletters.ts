@@ -14,6 +14,7 @@ export const NEWSLETTER_SOURCE_IDS = [
   'kidsgourmet_blog_inline',
   'kidsgourmet_category_sidebar',
   'kidsgourmet_tag_sidebar',
+  'kidsgourmet_registration',
 ] as const;
 
 export type NewsletterSourceId = (typeof NEWSLETTER_SOURCE_IDS)[number];
@@ -39,6 +40,7 @@ export const DEFAULT_NEWSLETTER_BY_SOURCE: Record<NewsletterSourceId, Kidsgourme
   kidsgourmet_blog_inline: 'ebeveyn-notu',
   kidsgourmet_category_sidebar: 'ebeveyn-notu',
   kidsgourmet_tag_sidebar: 'ebeveyn-notu',
+  kidsgourmet_registration: 'ebeveyn-notu',
 };
 
 export function isNewsletterSourceId(value: string): value is NewsletterSourceId {
