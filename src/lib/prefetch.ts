@@ -3,25 +3,22 @@ import { recipeService } from '@/services/recipe-service';
 import { ingredientService } from '@/services/ingredient-service';
 
 /**
- * Popüler verileri önceden cache'e yükle
- * Layout veya sayfa component'lerinde kullanılabilir
+ * Popüler verileri önceden cache'e yükle.
+ * Bu fonksiyon açıkça çağrıldığında çalışır; hover bazlı origin istekleri üretmez.
  */
 export async function prefetchPopularData() {
-  // Featured recipes
   mutate(
     ['recipes', 'featured', 5],
     recipeService.getFeatured(5),
     { revalidate: false }
   );
 
-  // Ingredient categories (nadiren değişir)
   mutate(
     ['ingredient-categories'],
     ingredientService.getCategories(),
     { revalidate: false }
   );
 
-  // İlk sayfa tarifleri
   mutate(
     ['recipes', JSON.stringify({ page: 1, perPage: 12 })],
     recipeService.getAll({ page: 1, perPage: 12 }),
@@ -30,23 +27,16 @@ export async function prefetchPopularData() {
 }
 
 /**
- * Belirli bir tarifi prefetch et (hover'da kullanılabilir)
+ * Detay sayfası hover prefetch'i bilinçli olarak devre dışı.
+ * Kart üzerinde fare gezdirmenin WordPress origin'ine istek üretmesini engeller.
  */
-export function prefetchRecipe(slug: string) {
-  mutate(
-    ['recipe', slug],
-    recipeService.getBySlug(slug),
-    { revalidate: false }
-  );
+export function prefetchRecipe(_slug: string) {
+  return;
 }
 
 /**
- * Belirli bir malzemeyi prefetch et
+ * Detay sayfası hover prefetch'i bilinçli olarak devre dışı.
  */
-export function prefetchIngredient(slug: string) {
-  mutate(
-    ['ingredient', slug],
-    ingredientService.getBySlug(slug),
-    { revalidate: false }
-  );
+export function prefetchIngredient(_slug: string) {
+  return;
 }
