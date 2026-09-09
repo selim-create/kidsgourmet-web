@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import IngredientDetailPage from './IngredientDetailClient';
-import { ingredientService } from '@/services/ingredient-service';
+import { getCachedIngredient } from '@/lib/server/content-cache';
 import { SITE_URL } from '@/lib/constants';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
   try {
-    const ingredient = await ingredientService.getBySlug(slug);
+    const ingredient = await getCachedIngredient(slug);
     if (!ingredient) return {};
 
     const title = ingredient.seo?.title || `${ingredient.name} - Malzeme Rehberi - KidsGourmet`;
