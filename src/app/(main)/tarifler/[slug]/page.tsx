@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import RecipeDetailPage from './RecipeDetailClient';
-import { recipeService } from '@/services/recipe-service';
+import { getCachedRecipe } from '@/lib/server/content-cache';
 import { SITE_URL } from '@/lib/constants';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
   try {
-    const recipe = await recipeService.getBySlug(slug);
+    const recipe = await getCachedRecipe(slug);
     if (!recipe) return {};
 
     const title = recipe.seo?.title || `${recipe.title} - KidsGourmet`;
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 async function RecipeJsonLd({ slug }: { slug: string }) {
   try {
-    const recipe = await recipeService.getBySlug(slug);
+    const recipe = await getCachedRecipe(slug);
     if (!recipe) return null;
 
     const url = `${SITE_URL}/tarifler/${slug}`;

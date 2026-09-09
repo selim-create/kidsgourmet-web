@@ -1,13 +1,13 @@
 import { Metadata } from 'next';
 import BlogDetailPage from './BlogDetailClient';
-import { blogService } from '@/services/blog-service';
+import { getCachedBlogPost } from '@/lib/server/content-cache';
 import { SITE_URL } from '@/lib/constants';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
   try {
-    const post = await blogService.getBySlug(slug);
+    const post = await getCachedBlogPost(slug);
     if (!post) return {};
 
     const title = post.seo?.title || `${post.title.rendered.replace(/<[^>]*>/g, '')} | KidsGourmet`;
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 async function BlogJsonLd({ slug }: { slug: string }) {
   try {
-    const post = await blogService.getBySlug(slug);
+    const post = await getCachedBlogPost(slug);
     if (!post) return null;
 
     const url = `${SITE_URL}/kesfet/${slug}`;
