@@ -17,6 +17,26 @@ export interface RecipeFilters {
   expertApproved?: boolean;    // YENİ
 }
 
+/** WordPress embeds return taxonomy terms grouped by taxonomy. */
+interface WordPressRecipeTerm {
+  taxonomy: string;
+  name: string;
+  age_group_meta?: { color_code?: string };
+}
+
+/** Shape of the two list-style custom API responses; raw entries are normalized below. */
+type RawRecipeEntry = Record<string, unknown>;
+type RecipeCollectionResponse =
+  | RawRecipeEntry[]
+  | {
+      data?: RawRecipeEntry[];
+      recipes?: RawRecipeEntry[];
+      total?: number;
+      page?: number;
+      per_page?: number;
+      total_pages?: number;
+    };
+
 // Transform function for WordPress REST API format to RecipeCard
 const transformWPRecipeToCard = (wp: any): RecipeCard => ({
   id: wp.id,
@@ -26,16 +46,16 @@ const transformWPRecipeToCard = (wp: any): RecipeCard => ({
          wp.featured_media_url || 
          'https://placehold.co/600x400/FFF8E1/FF8A65?text=Tarif',
   age_group: wp._embedded?.['wp:term']?.flat()
-    ?.find((t: any) => t.taxonomy === 'age-group')?.name || '+6 Ay',
+    ?.find((t: WordPressRecipeTerm) => t.taxonomy === 'age-group')?.name || '+6 Ay',
   age_group_color: wp._embedded?.['wp:term']?.flat()
-    ?.find((t: any) => t.taxonomy === 'age-group')?.age_group_meta?.color_code || '',
+    ?.find((t: WordPressRecipeTerm) => t.taxonomy === 'age-group')?.age_group_meta?.color_code || '',
   prep_time: wp.meta?._kg_prep_time || '15 dk',
   // NEW FIELDS: Additional recipe metadata
   meal_type: wp._embedded?.['wp:term']?.flat()
-    ?.find((t: any) => t.taxonomy === 'meal-type')?.name || '',
+    ?.find((t: WordPressRecipeTerm) => t.taxonomy === 'meal-type')?.name || '',
   diet_types: wp._embedded?.['wp:term']?.flat()
-    ?.filter((t: any) => t.taxonomy === 'diet-type')
-    ?.map((t: any) => t.name) || [],
+    ?.filter((t: WordPressRecipeTerm) => t.taxonomy === 'diet-type')
+    ?.map((t: WordPressRecipeTerm) => t.name) || [],
   author: wp._embedded?.author?.[0] ? {
     id: wp._embedded.author[0].id,
     name: wp._embedded.author[0].name,
@@ -117,14 +137,14 @@ const transformWPRecipeToFull = (wp: any): Recipe => {
       vitamins: wp.nutrition?.vitamins || wp.meta?._kg_vitamins || '',
     },
     allergens: wp.allergens || wp._embedded?.['wp:term']?.flat()
-      ?.filter((t: any) => t.taxonomy === 'allergen')
-      ?.map((t: any) => t.name) || [],
+      ?.filter((t: WordPressRecipeTerm) => t.taxonomy === 'allergen')
+      ?.map((t: WordPressRecipeTerm) => t.name) || [],
     age_groups: wp.age_groups || wp._embedded?.['wp:term']?.flat()
-      ?.filter((t: any) => t.taxonomy === 'age-group')
-      ?.map((t: any) => t.name) || [],
+      ?.filter((t: WordPressRecipeTerm) => t.taxonomy === 'age-group')
+      ?.map((t: WordPressRecipeTerm) => t.name) || [],
     diet_types: wp.diet_types || wp._embedded?.['wp:term']?.flat()
-      ?.filter((t: any) => t.taxonomy === 'diet-type')
-      ?.map((t: any) => t.name) || [],
+      ?.filter((t: WordPressRecipeTerm) => t.taxonomy === 'diet-type')
+      ?.map((t: WordPressRecipeTerm) => t.name) || [],
     video_url: wp.video_url || wp.meta?._kg_video_url || '',
     substitutes: wp.substitutes || wp.meta?._kg_substitutes || [],
     is_featured: wp.is_featured || wp.meta?._kg_is_featured === '1',
@@ -211,7 +231,7 @@ export const recipeService = {
     
     try {
       // Önce özel kg/v1 endpoint'ini dene
-      const response = await fetchAPI<any>(`${API_ENDPOINTS.RECIPES}?${params.toString()}`);
+      const response = await fetchAPI<RecipeCollectionResponse>(`${API_ENDPOINTS.RECIPES}?${params.toString()}`);
       
       // Response format kontrolü
       if (Array.isArray(response)) {
@@ -252,7 +272,7 @@ export const recipeService = {
       console.log('Falling back to WP REST API for recipes');
       try {
         // Fallback: Standart WP REST API
-        const response = await fetchAPI<any[]>(
+        const response = await fetchAPI<RawRecipeEntry[]>(
           `${WP_API_NAMESPACE}/recipe?page=${page}&per_page=${perPage}&_embed`
         );
         return {
@@ -292,7 +312,7 @@ export const recipeService = {
       console.log('Falling back to WP REST API for slug:', slug);
       try {
         // Fallback: Standart WP REST API
-        const recipes = await fetchAPI<any[]>(
+        const recipes = await fetchAPI<RawRecipeEntry[]>(
           `${WP_API_NAMESPACE}/recipe?slug=${slug}&_embed`
         );
         if (recipes && recipes.length > 0) {
@@ -312,7 +332,7 @@ export const recipeService = {
   getFeatured: async (limit: number = 5): Promise<RecipeCard[]> => {
     try {
       // Önce özel endpoint'i dene
-      const response = await fetchAPI<any>(`${API_ENDPOINTS.RECIPES_FEATURED}?limit=${limit}`);
+      const response = await fetchAPI<RecipeCollectionResponse>(`${API_ENDPOINTS.RECIPES_FEATURED}?limit=${limit}`);
       
       // Response format kontrolü
       if (Array.isArray(response)) {
@@ -329,7 +349,7 @@ export const recipeService = {
       console.log('Falling back to WP REST API for featured recipes');
       try {
         // Fallback: WP REST API ile featured meta query
-        const response = await fetchAPI<any[]>(
+        const response = await fetchAPI<RawRecipeEntry[]>(
           `${WP_API_NAMESPACE}/recipe?per_page=${limit}&_embed&orderby=date&order=desc`
         );
         return (response || []).map(transformWPRecipeToCard);
