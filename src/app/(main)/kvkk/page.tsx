@@ -87,7 +87,7 @@ export default function KVKKPage() {
                   </tr>
                   <tr>
                     <td className="px-4 py-3 font-semibold text-slate-700">Görsel ve İşitsel Kayıtlar</td>
-                    <td className=&quot;px-4 py-3 text-gray-600&quot;>Platforma yüklediğiniz profil fotoğrafları, yarışma veya &quot;Sizden Gelenler&quot; köşesi için gönderilen çocuk fotoğrafları/videoları.</td>
+                    <td className="px-4 py-3 text-gray-600">Platforma yüklediğiniz profil fotoğrafları, yarışma veya &quot;Sizden Gelenler&quot; köşesi için gönderilen çocuk fotoğrafları/videoları.</td>
                   </tr>
                   <tr>
                     <td className="px-4 py-3 font-semibold text-slate-700">Pazarlama Bilgileri</td>
