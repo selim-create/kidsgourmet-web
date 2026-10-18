@@ -35,9 +35,7 @@ export function useRecommendations(childId: string | undefined, options?: Person
         const data = await recommendationService.getPersonalizedRecipes(childId, options);
         
         // Normalize API response structure - can be array or {recommendations: []}
-        const recipes = Array.isArray(data) 
-          ? data 
-          : (data as any)?.recommendations || (data as any)?.data || [];
+        const recipes = Array.isArray(data) ? data : [];
         
         setRecommendations(recipes);
       } catch (err) {

@@ -86,9 +86,9 @@ export default function FoodIntroductionCard({ childId }: FoodIntroductionCardPr
                 Tarifler:
               </p>
               <div className="flex flex-wrap gap-2">
-                {recipes.slice(0, 3).map((recipe) => (
+                {recipes.slice(0, 3).map((recipe, index) => (
                   <Link
-                    key={recipe?.id || Math.random()}
+                    key={recipe?.id ?? recipe?.slug ?? `recipe-${index}`}
                     href={`/tarifler/${recipe?.slug || ''}`}
                     className="inline-flex items-center px-3 py-1 rounded-full bg-white border border-gray-200 hover:border-green-500 hover:bg-green-50 transition-colors text-xs font-medium text-gray-700 hover:text-green-700"
                   >

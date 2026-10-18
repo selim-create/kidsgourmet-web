@@ -494,13 +494,13 @@ export default function Home() {
                         </p>
                       ) : (
                         <p className="text-lg text-gray-600">
-                            Bebeğine sağlıklı tarifler hazırlarken kendini de unutma! Lezzetli tarifler için Tariften.com'u keşfet.
+                            Bebeğine sağlıklı tarifler hazırlarken kendini de unutma! Lezzetli tarifler için Tariften.com&apos;u keşfet.
                         </p>
                       )}
                   </div>
                   <div className="relative z-10 flex-shrink-0">
                       <Link href="https://tariften.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center bg-purple-500 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-purple-600 transition-all hover:-translate-y-1">
-                          Tariften.com'da Keşfet
+                          Tariften.com&apos;da Keşfet
                           <i className="fa-solid fa-arrow-up-right-from-square ml-3"></i>
                       </Link>
                   </div>
@@ -590,7 +590,7 @@ export default function Home() {
                   </div>
                   <div className="relative z-10 flex-shrink-0">
                       <Link href="https://rejimde.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center bg-green-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-green-700 transition-all hover:-translate-y-1">
-                          Rejimde.com'da Keşfet
+                          Rejimde.com&apos;da Keşfet
                           <i className="fa-solid fa-arrow-up-right-from-square ml-3"></i>
                       </Link>
                   </div>

@@ -2,6 +2,7 @@
 
 import { useDashboardRecommendations } from '@/hooks/useDashboardRecommendations';
 import { useUser } from '@/hooks/use-user';
+import type { Recipe } from '@/lib/types';
 
 interface PersonalizedRecipePoolProps {
   childId: string;
@@ -72,12 +73,12 @@ export default function PersonalizedRecipePool({
         Kişisel Öneriler
       </h4>
       
-      {recipeList.slice(0, limit).map((recipe) => {
-        const recipeId = (recipe as any)?.recipe_id || recipe?.id;
+      {recipeList.slice(0, limit).map((recipe, index) => {
+        const recipeId = (recipe as Recipe & { recipe_id?: number }).recipe_id ?? recipe?.id;
         
         return (
           <div
-            key={recipeId || Math.random()}
+            key={recipeId ?? recipe?.slug ?? `recipe-${index}`}
             onClick={() => isSelectable && recipeId && onSelectRecipe?.(recipeId)}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
               isSelectable 

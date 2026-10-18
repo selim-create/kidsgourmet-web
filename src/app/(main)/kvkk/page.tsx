@@ -33,10 +33,10 @@ export default function KVKKPage() {
             <h2 className="text-2xl font-bold text-slate-800 mb-4">1. Veri Sorumlusunun Kimliği</h2>
             <div className="space-y-4 text-gray-600 leading-relaxed">
               <p>
-                6698 sayılı Kişisel Verilerin Korunması Kanunu ("Kanun" veya "KVKK") madde 10 kapsamında; www.kidsgourmet.com.tr alan adlı internet sitesinin ("Platform") işleticisi ve içerik sağlayıcısı olan HİP Medya (bundan sonra "Şirket" olarak anılacaktır), kişisel verilerinizin işlenmesi süreçlerinde "Veri Sorumlusu" sıfatını haizdir.
+                6698 sayılı Kişisel Verilerin Korunması Kanunu (&quot;Kanun&quot; veya &quot;KVKK&quot;) madde 10 kapsamında; www.kidsgourmet.com.tr alan adlı internet sitesinin (&quot;Platform&quot;) işleticisi ve içerik sağlayıcısı olan HİP Medya (bundan sonra &quot;Şirket&quot; olarak anılacaktır), kişisel verilerinizin işlenmesi süreçlerinde &quot;Veri Sorumlusu&quot; sıfatını haizdir.
               </p>
               <p>
-                Şirketimiz, ebeveynlik, çocuk sağlığı, beslenme ve gelişimi konularında dijital yayıncılık faaliyeti yürütmekte olup; tarafınıza ait verilerin güvenliğini, Anayasa'nın 20. maddesi ve KVKK hükümleri ışığında en üst düzeyde temin etmeyi taahhüt eder.
+                Şirketimiz, ebeveynlik, çocuk sağlığı, beslenme ve gelişimi konularında dijital yayıncılık faaliyeti yürütmekte olup; tarafınıza ait verilerin güvenliğini, Anayasa&apos;nın 20. maddesi ve KVKK hükümleri ışığında en üst düzeyde temin etmeyi taahhüt eder.
               </p>
               
               <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -87,7 +87,7 @@ export default function KVKKPage() {
                   </tr>
                   <tr>
                     <td className="px-4 py-3 font-semibold text-slate-700">Görsel ve İşitsel Kayıtlar</td>
-                    <td className="px-4 py-3 text-gray-600">Platforma yüklediğiniz profil fotoğrafları, yarışma veya "Sizden Gelenler" köşesi için gönderilen çocuk fotoğrafları/videoları.</td>
+                    <td className="px-4 py-3 text-gray-600">Platforma yüklediğiniz profil fotoğrafları, yarışma veya &quot;Sizden Gelenler&quot; köşesi için gönderilen çocuk fotoğrafları/videoları.</td>
                   </tr>
                   <tr>
                     <td className="px-4 py-3 font-semibold text-slate-700">Pazarlama Bilgileri</td>
@@ -108,14 +108,14 @@ export default function KVKKPage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-4">3. Kişisel Verilerin İşlenme Amaçları</h2>
             <p className="text-gray-600 mb-6">
-              Kişisel verileriniz, Kanun’un 4. maddesinde belirtilen "hukuka ve dürüstlük kurallarına uygun olma", "doğru ve gerektiğinde güncel olma", "belirli, açık ve meşru amaçlar için işlenme" ilkelerine bağlı kalınarak aşağıdaki amaçlarla işlenmektedir:
+              Kişisel verileriniz, Kanun’un 4. maddesinde belirtilen &quot;hukuka ve dürüstlük kurallarına uygun olma&quot;, &quot;doğru ve gerektiğinde güncel olma&quot;, &quot;belirli, açık ve meşru amaçlar için işlenme&quot; ilkelerine bağlı kalınarak aşağıdaki amaçlarla işlenmektedir:
             </p>
 
             <div className="space-y-6">
               <div>
                 <h3 className="font-bold text-slate-800 mb-2">3.1. Hizmetlerin Sunulması ve Operasyonel Süreçler</h3>
                 <ul className="list-disc list-inside text-gray-600 space-y-1 ml-2">
-                  <li>Kullanıcı Sözleşmesi'nin ifası, üyelik kaydının oluşturulması ve yönetilmesi.</li>
+                  <li>Kullanıcı Sözleşmesi&apos;nin ifası, üyelik kaydının oluşturulması ve yönetilmesi.</li>
                   <li>Platform üzerinden sunulan içeriklerin (makale, video, tarif) erişilebilirliğinin sağlanması.</li>
                   <li>Kullanıcıların ilgi alanlarına göre içerik akışının kişiselleştirilmesi.</li>
                   <li>İletişim formları veya e-posta yoluyla iletilen soru, talep ve şikayetlerin yanıtlanması.</li>
@@ -151,7 +151,7 @@ export default function KVKKPage() {
               <p>
                 Kişisel verileriniz, Platforma giriş yapmanız, üyelik formunu doldurmanız, çerezleri kabul etmeniz ve bizimle iletişime geçmeniz suretiyle otomatik veya kısmen otomatik yöntemlerle dijital ortamda toplanmaktadır.
               </p>
-              <p>Bu işleme faaliyetleri, KVKK'nın 5. ve 6. maddelerinde düzenlenen aşağıdaki hukuki sebeplere dayanmaktadır:</p>
+              <p>Bu işleme faaliyetleri, KVKK&apos;nın 5. ve 6. maddelerinde düzenlenen aşağıdaki hukuki sebeplere dayanmaktadır:</p>
               
               <ol className="list-decimal list-inside space-y-4 ml-2">
                 <li>
@@ -191,7 +191,7 @@ export default function KVKKPage() {
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-4">5. Kişisel Verilerin Aktarılması</h2>
             <p className="text-gray-600 mb-4">
-              Kişisel verileriniz, Kanun'un 8. ve 9. maddelerine uygun olarak, sadece işleme amaçlarının gerektirdiği ölçüde aşağıdaki alıcı gruplarına aktarılabilmektedir:
+              Kişisel verileriniz, Kanun&apos;un 8. ve 9. maddelerine uygun olarak, sadece işleme amaçlarının gerektirdiği ölçüde aşağıdaki alıcı gruplarına aktarılabilmektedir:
             </p>
             <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6 ml-2">
               <li><span className="font-bold text-slate-700">Yetkili Kamu Kurum ve Kuruluşları:</span> Hukuki yükümlülüklerimizin yerine getirilmesi amacıyla, talep halinde Emniyet, Savcılık, Mahkemeler ve Bilgi Teknolojileri ve İletişim Kurumu (BTK).</li>
@@ -203,7 +203,7 @@ export default function KVKKPage() {
             <div className="text-gray-600 space-y-2">
               <p>Platformumuzun kullandığı bazı sunucu altyapıları, e-posta gönderim servisleri (örn. bülten altyapısı) veya analitik araçları (Google Analytics vb.) sunucularını yurt dışında barındırıyor olabilir. Bu kapsamda kişisel verileriniz;</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>KVKK'nın 9. maddesinde 2024 yılında yapılan değişiklik uyarınca; Kurul tarafından ilan edilen Standart Sözleşme metinlerinin imzalanarak Kuruma bildirilmesi güvencesine dayalı olarak, veya;</li>
+                <li>KVKK&apos;nın 9. maddesinde 2024 yılında yapılan değişiklik uyarınca; Kurul tarafından ilan edilen Standart Sözleşme metinlerinin imzalanarak Kuruma bildirilmesi güvencesine dayalı olarak, veya;</li>
                 <li>İlgili ülkenin Kişisel Verileri Koruma Kurulu tarafından ilan edilen Yeterli Koruma sağlayan ülkeler listesinde yer alması halinde, veya;</li>
                 <li>Bu şartların sağlanamadığı hallerde, Açık Rızanıza istinaden yurt dışına aktarılmaktadır.</li>
               </ul>
@@ -215,7 +215,7 @@ export default function KVKKPage() {
           {/* 6. Haklarınız */}
           <div>
             <h2 className="text-2xl font-bold text-slate-800 mb-4">6. Veri Sahibi Olarak Haklarınız (Madde 11)</h2>
-            <p className="text-gray-600 mb-4">Kanun'un 11. maddesi uyarınca, veri sorumlusu olan Şirketimize başvurarak aşağıdaki haklarınızı kullanabilirsiniz:</p>
+            <p className="text-gray-600 mb-4">Kanun&apos;un 11. maddesi uyarınca, veri sorumlusu olan Şirketimize başvurarak aşağıdaki haklarınızı kullanabilirsiniz:</p>
             <ol className="list-decimal list-inside space-y-2 text-gray-600 mb-8 ml-2">
               <li>Kişisel verilerinizin işlenip işlenmediğini öğrenme,</li>
               <li>Kişisel verileriniz işlenmişse buna ilişkin bilgi talep etme,</li>
