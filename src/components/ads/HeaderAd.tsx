@@ -19,7 +19,7 @@ export function HeaderAd({ className = '' }: HeaderAdProps) {
   // Mobile: header-mobile (320x100)
   const placement = deviceType === 'mobile' ? 'header-mobile' : 'header-leaderboard';
   
-  let slots = getSlotsByPlacement(placement);
+  const slots = getSlotsByPlacement(placement);
 
   // Filter by device
   const compatibleSlot = slots.find((slot) => {
