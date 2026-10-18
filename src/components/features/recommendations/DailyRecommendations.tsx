@@ -3,6 +3,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useDashboardRecommendations } from '@/hooks/useDashboardRecommendations';
+import type { Recipe } from '@/lib/types';
+
+type RecommendationRecipe = Recipe & {
+  recipe_id?: number;
+  age_group?: string;
+  age_group_color?: string;
+  score?: number;
+};
 
 interface DailyRecommendationsProps {
   childId: string;
@@ -26,7 +34,7 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
   }
   
   // recommendations artık doğru şekilde today array'inden geliyor
-  const recipeList = Array.isArray(recommendations) ? recommendations : [];
+  const recipeList: RecommendationRecipe[] = Array.isArray(recommendations) ? recommendations : [];
   
   if (recipeList.length === 0) {
     return null;
@@ -43,7 +51,7 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {recipeList.slice(0, 6).map((recipe) => (
           <Link 
-            key={(recipe as any)?.recipe_id || recipe?.id || Math.random()}
+            key={recipe.recipe_id ?? recipe.id ?? recipe.slug}
             href={`/tarifler/${recipe?.slug || ''}`}
             className="group block bg-stone-50 rounded-2xl overflow-hidden hover:shadow-md transition-all border border-stone-100 hover:border-orange-200"
           >
@@ -57,12 +65,12 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                 />
               )}
-              {(recipe as any)?.age_group && (
+              {recipe.age_group && (
                 <div 
                   className="absolute top-2 left-2 px-3 py-1 rounded-full text-white text-xs font-bold shadow-sm"
-                  style={{ backgroundColor: (recipe as any).age_group_color || '#FF8A65' }}
+                  style={{ backgroundColor: recipe.age_group_color || '#FF8A65' }}
                 >
-                  {(recipe as any).age_group}
+                  {recipe.age_group}
                 </div>
               )}
             </div>
@@ -71,23 +79,23 @@ export default function DailyRecommendations({ childId }: DailyRecommendationsPr
                 {recipe?.title || 'Tarif'}
               </h3>
               <div className="flex flex-wrap items-center gap-3 text-xs text-stone-600">
-                {(recipe as any)?.prep_time && (
+                {recipe.prep_time && (
                   <span className="flex items-center gap-1">
                     <i className="fa-regular fa-clock text-orange-500"></i>
-                    {(recipe as any).prep_time}
+                    {recipe.prep_time}
                   </span>
                 )}
-                {(recipe as any)?.meal_type && (
+                {recipe.meal_type && (
                   <span className="flex items-center gap-1">
                     <i className="fa-solid fa-utensils text-green-500"></i>
-                    {(recipe as any).meal_type}
+                    {recipe.meal_type}
                   </span>
                 )}
               </div>
-              {(recipe as any)?.score && (
+              {recipe.score && (
                 <div className="mt-2 inline-flex items-center gap-1 bg-purple-50 px-2 py-1 rounded-full">
                   <span className="text-xs text-purple-600 font-bold">
-                    %{Math.round((recipe as any).score)} uyumlu
+                    %{Math.round(recipe.score)} uyumlu
                   </span>
                 </div>
               )}
