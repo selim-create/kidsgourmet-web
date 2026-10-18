@@ -76,7 +76,7 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
       try {
         // 1. Kategorileri çek
         const allCategories = await blogService.getCategories();
-        const currentCategory = allCategories.find((c: any) => c.slug === slug);
+        const currentCategory = allCategories.find((c) => c.slug === slug);
 
         if (!currentCategory) {
           setError(true);

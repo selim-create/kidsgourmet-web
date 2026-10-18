@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from "next/link";
-import { ingredientService, IngredientsResponse } from '@/services/ingredient-service';
+import { ingredientService, type IngredientFilters, type IngredientsResponse } from '@/services/ingredient-service';
 import { Ingredient } from '@/lib/types';
 import { AdZone } from '@/components/ads';
 import { useAds } from '@/contexts/AdContext';
@@ -122,7 +122,7 @@ export default function IngredientsGuidePage() {
       }
 
       // API Parametrelerini Hazırla
-      const params: any = {
+      const params: IngredientFilters & { category?: string } = {
         page: currentPage,
         perPage: ITEMS_PER_PAGE,
       };

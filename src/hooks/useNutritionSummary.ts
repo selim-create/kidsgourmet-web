@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { nutritionService } from '@/services/nutrition-service';
+import { nutritionService, type VarietyAnalysis } from '@/services/nutrition-service';
 import { recommendationService } from '@/services/recommendation-service';
 
 interface WeeklyNutritionSummary {
@@ -102,7 +102,7 @@ export function useNutritionSummary(childId: string | undefined) {
  * Beslenme çeşitlilik analizi için hook
  */
 export function useVarietyAnalysis(childId: string | undefined, days?: number) {
-  const [analysis, setAnalysis] = useState<any | null>(null);
+  const [analysis, setAnalysis] = useState<VarietyAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   

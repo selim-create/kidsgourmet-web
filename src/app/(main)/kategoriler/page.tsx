@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { blogService } from '@/services/blog-service';
+import { blogService, type BlogCategory } from '@/services/blog-service';
 
 export const metadata: Metadata = {
   title: 'Tüm Kategoriler | KidsGourmet',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default async function CategoriesPage() {
   // Fetch all categories
-  let categories = [];
+  let categories: BlogCategory[] = [];
   try {
     categories = await blogService.getCategories();
   } catch (error) {
@@ -130,7 +130,7 @@ export default async function CategoriesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categories.map((category: any) => {
+              {categories.map((category) => {
                 const meta = getCategoryMeta(category.slug);
                 return (
                   <Link
