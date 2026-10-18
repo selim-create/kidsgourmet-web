@@ -3,6 +3,14 @@ import RecipeDetailPage from './RecipeDetailClient';
 import { getCachedRecipe } from '@/lib/server/content-cache';
 import { SITE_URL } from '@/lib/constants';
 
+// Recipes are public and can be cached independently of client-only user state.
+// Populate individual slugs on demand; refresh their server HTML/metadata every 5 minutes.
+export const revalidate = 300;
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
