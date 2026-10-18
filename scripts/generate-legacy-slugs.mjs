@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 /**
- * WordPress blog slug listesi üretici
- *
- * Bu script, WordPress API'den tüm blog yazısı slug'larını çekerek
- * src/lib/legacy-blog-slugs.ts dosyasını günceller.
+ * WordPress blog slug listesi üretici.
+ * Bu komut yalnızca bilerek çalıştırıldığında takip edilen SEO snapshot'ını yeniler.
+ * Production build kaynak dosyalarını değiştirmez.
  *
  * Kullanım:
- *   node scripts/generate-legacy-slugs.mjs
+ *   npm run refresh:legacy-slugs
  *
  * Gereksinimler:
  *   - Node.js 18+ (fetch dahili olarak gelir)
@@ -16,8 +15,8 @@
  *   GET https://api.kidsgourmet.com.tr/wp-json/wp/v2/posts?per_page=100&_fields=slug&page=N
  */
 
-import { existsSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -82,33 +81,43 @@ async function fetchSlugs() {
 
     const response = await fetchWithRetry(url);
     const posts = await response.json();
-    if (!Array.isArray(posts) || posts.length === 0) break;
+    if (!Array.isArray(posts) || posts.length === 0 || posts.some((p) => typeof p?.slug !== 'string' || !p.slug.trim())) {
+      throw new Error(`Geçersiz veya eksik WordPress slug verisi (sayfa ${page}). Snapshot korunuyor.`);
+    }
 
-    slugs.push(...posts.map((p) => p.slug).filter(Boolean));
+    slugs.push(...posts.map((post) => post.slug));
 
     const wpTotalPages = response.headers.get('x-wp-totalpages');
     if (wpTotalPages) {
-      totalPages = parseInt(wpTotalPages, 10);
+      const parsed = Number.parseInt(wpTotalPages, 10);
+      if (!Number.isSafeInteger(parsed) || parsed < page || parsed > 1000) {
+        throw new Error(`WordPress sayfalama bilgisi geçersiz: ${wpTotalPages}`);
+      }
+      totalPages = parsed;
     }
 
     page++;
   }
 
+  if (slugs.length === 0) throw new Error('Boş WordPress slug listesi reddedildi.');
   return slugs;
 }
 
-function generateFileContent(slugs) {
-  const now = new Date().toISOString();
-  const slugLines = slugs.map((slug) => `  '${slug}',`).join('\n');
+export function generateFileContent(slugs) {
+  if (!Array.isArray(slugs) || slugs.some((slug) => typeof slug !== 'string' || !slug.trim())) {
+    throw new Error('Geçersiz WordPress slug listesi.');
+  }
+  const sortedSlugs = [...new Set(slugs)].sort();
+  if (sortedSlugs.length === 0) throw new Error('Boş slug listesi kaydedilemez.');
+  const slugLines = sortedSlugs.map((slug) => `  ${JSON.stringify(slug)},`).join('\n');
 
   return `/**
  * WordPress'ten taşınan blog yazılarının slug listesi.
  *
  * Bu dosya otomatik olarak üretilmiştir.
- * Son güncelleme: ${now}
- * Toplam slug sayısı: ${slugs.length}
+ * Toplam slug sayısı: ${sortedSlugs.length}
  *
- * Yenilemek için: node scripts/generate-legacy-slugs.mjs
+ * Yenilemek için: npm run refresh:legacy-slugs
  *
  * Bu liste, middleware'in eski WordPress URL'lerini doğru şekilde yönlendirebilmesi
  * için gereklidir. Listede olmayan slug'lar artık /kesfet/'e yönlendirilmez; bunun
@@ -120,21 +129,30 @@ ${slugLines}
 `;
 }
 
+export function saveGeneratedFile(content, outputFile = OUTPUT_FILE) {
+  if (existsSync(outputFile) && readFileSync(outputFile, 'utf8') === content) {
+    return false;
+  }
+  writeFileSync(outputFile, content, 'utf8');
+  return true;
+}
+
 async function main() {
   try {
     const slugs = await fetchSlugs();
     console.log(`\nToplam ${slugs.length} slug bulundu.`);
 
     const content = generateFileContent(slugs);
-    writeFileSync(OUTPUT_FILE, content, 'utf-8');
-
-    console.log(`\n✅ ${OUTPUT_FILE} dosyası güncellendi.`);
-    console.log('Lütfen middleware\'in doğru çalıştığından emin olmak için uygulamayı yeniden başlatın.');
+    const changed = saveGeneratedFile(content);
+    console.log(changed
+      ? `\n✅ ${OUTPUT_FILE} güncellendi. SEO snapshot değişikliğini Git'e commit edin.`
+      : `\n✅ ${OUTPUT_FILE} zaten güncel; dosyaya dokunulmadı.`);
   } catch (error) {
     console.warn(`\n⚠️ WordPress slug listesi yenilenemedi: ${error.message}`);
 
     if (existsSync(OUTPUT_FILE)) {
-      console.warn('⚠️ Mevcut legacy-blog-slugs.ts korunuyor; build bu dosyayla devam edecek.');
+      console.error('⚠️ Mevcut SEO snapshot korundu; güncelleme başarısız.');
+      process.exitCode = 1;
       return;
     }
 
@@ -143,4 +161,6 @@ async function main() {
   }
 }
 
-main();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main();
+}

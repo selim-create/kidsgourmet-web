@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0",
-    "prebuild": "node scripts/generate-legacy-slugs.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "refresh:legacy-slugs": "node scripts/generate-legacy-slugs.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
