@@ -108,7 +108,7 @@ export default function OverdueVaccineBanner({ childId, childName }: OverdueVacc
                 className="inline-flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition-colors shadow-sm"
               >
                 <i className="fa-solid fa-phone"></i>
-                ALO 182 SABİM'i Ara
+                ALO 182 SABİM&apos;i Ara
               </a>
             </div>
           </div>
