@@ -5,10 +5,6 @@ export function formatAge(birthDate: string | Date): string {
   const birth = typeof birthDate === 'string' ? new Date(birthDate) : birthDate;
   const today = new Date();
   
-  // Calculate the difference in days
-  const diffTime = Math.abs(today.getTime() - birth.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
   // Calculate years, months, and days
   let years = today.getFullYear() - birth.getFullYear();
   let months = today.getMonth() - birth.getMonth();
