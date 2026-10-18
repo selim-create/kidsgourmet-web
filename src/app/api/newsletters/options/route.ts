@@ -28,7 +28,7 @@ export async function GET() {
   try {
     const response = await fetch(`${HIPOSTA_CORE_API_URL}/catalog`, {
       headers: { Accept: 'application/json' },
-      next: { revalidate: 60 },
+      next: { revalidate: 300 },
     });
 
     if (!response.ok) {
@@ -80,7 +80,7 @@ export async function GET() {
 
     return NextResponse.json(
       { success: true, options },
-      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120' } }
+      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
     );
   } catch {
     return NextResponse.json(
