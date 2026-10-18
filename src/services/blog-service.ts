@@ -3,6 +3,15 @@ import { WP_API_NAMESPACE } from '@/lib/constants';
 import { SponsorData, SEOData } from '@/lib/types';
 import { sanitizeAndTransformContent, transformContentLinks } from '@/lib/content-transformer';
 
+// WordPress /wp/v2/categories fields consumed by the category list and sitemap.
+export interface BlogCategory {
+  id: number;
+  slug: string;
+  name: string;
+  count: number;
+  description?: string;
+}
+
 // Embed Item Types
 export interface BaseEmbedItem {
   id: number;
@@ -162,7 +171,7 @@ export const blogService = {
 
   // Kategorileri getir
   getCategories: async () => {
-    return await fetchAPI<any[]>(`${WP_API_NAMESPACE}/categories?per_page=100&hide_empty=true`);
+    return await fetchAPI<BlogCategory[]>(`${WP_API_NAMESPACE}/categories?per_page=100&hide_empty=true`);
   },
 
   /**

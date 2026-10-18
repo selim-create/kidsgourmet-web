@@ -8,6 +8,14 @@ import {
   SkipReason
 } from '@/lib/types';
 
+// API failures can be Error instances or structured objects carrying a message.
+function getErrorMessage(error: unknown): string | undefined {
+  if (error !== null && typeof error === 'object' && 'message' in error) {
+    return typeof error.message === 'string' ? error.message : undefined;
+  }
+  return undefined;
+}
+
 export const mealPlanService = {
   /**
    * Yeni haftalık plan oluştur (AI)
@@ -31,13 +39,14 @@ export const mealPlanService = {
         [404] // 404 is expected when no plan exists - don't log to console
       );
       return response?.plan || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       // 404 = No plan, this is expected
-      if (error?.message?.includes('404') || error?.message?.includes('No active plan')) {
+      if (message?.includes('404') || message?.includes('No active plan')) {
         return null;
       }
       // Log other errors but still return null
-      console.warn('Active plan fetch warning:', error?.message);
+      console.warn('Active plan fetch warning:', message);
       return null;
     }
   },
@@ -54,12 +63,13 @@ export const mealPlanService = {
         [404] // 404'ü sessizce handle et
       );
       return response?.plan || null;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
       // 404 = Plan yok, beklenen durum
-      if (error?.message?.includes('404') || error?.message?.includes('No active plan')) {
+      if (message?.includes('404') || message?.includes('No active plan')) {
         return null;
       }
-      console.warn('Plan fetch warning:', error?.message);
+      console.warn('Plan fetch warning:', message);
       return null;
     }
   },
