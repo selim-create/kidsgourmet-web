@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { recommendationService, DashboardRecommendationsResponse } from '@/services/recommendation-service';
-import { Recipe } from '@/lib/types';
 
 const DEFAULT_DATA: DashboardRecommendationsResponse = {
   today: [],

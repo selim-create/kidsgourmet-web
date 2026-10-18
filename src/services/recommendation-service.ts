@@ -21,7 +21,7 @@ export interface DashboardRecommendationsResponse {
     new_foods_introduced: string[];
     allergen_exposures: string[];
   } | null;
-  alerts: any[];
+  alerts: unknown[];
 }
 
 export interface PersonalizedRecipesOptions {
@@ -36,6 +36,18 @@ export interface PersonalizedRecipe extends Recipe {
   recipe_id?: number; // Some API responses use recipe_id instead of id
 }
 
+type PersonalizedRecipesApiResponse = PersonalizedRecipe[] | {
+  recommendations?: PersonalizedRecipe[];
+  today?: PersonalizedRecipe[];
+  recipes?: PersonalizedRecipe[];
+};
+
+type SimilarRecipesApiResponse = Recipe[] | {
+  alternatives?: Recipe[];
+  recipes?: Recipe[];
+  similar?: Recipe[];
+};
+
 export const recommendationService = {
   /**
    * Dashboard önerileri - NEW API format with 'today' field
@@ -46,7 +58,7 @@ export const recommendationService = {
         return { today: [], weekly_plan_status: null, nutrition_summary: null, alerts: [] };
       }
       
-      const response = await fetchAuthAPI<any>(
+      const response = await fetchAuthAPI<Partial<DashboardRecommendationsResponse>>(
         `${API_ENDPOINTS.RECOMMENDATIONS_DASHBOARD}?child_id=${childId}`
       );
       
@@ -85,7 +97,7 @@ export const recommendationService = {
         params.append('include_scores', options.include_scores.toString());
       }
       
-      const response = await fetchAuthAPI<any>(
+      const response = await fetchAuthAPI<PersonalizedRecipesApiResponse>(
         `${API_ENDPOINTS.RECOMMENDATIONS_RECIPES}?${params.toString()}`
       );
       
@@ -110,7 +122,7 @@ export const recommendationService = {
       if (!recipeId || !childId) return [];
       
       // Endpoint'in doğru olduğundan emin ol
-      const response = await fetchAuthAPI<any>(
+      const response = await fetchAuthAPI<SimilarRecipesApiResponse>(
         `${API_ENDPOINTS.RECOMMENDATIONS_SIMILAR(recipeId)}?child_id=${childId}`
       );
       

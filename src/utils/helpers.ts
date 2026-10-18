@@ -172,7 +172,6 @@ export function formatDate(dateStr: string): string {
  * Users with these roles or is_expert flag are considered experts
  */
 const EXPERT_ROLES = ['administrator', 'editor', 'author', 'kg_expert'] as const;
-type ExpertRole = typeof EXPERT_ROLES[number];
 
 /**
  * Check if a user has expert role
