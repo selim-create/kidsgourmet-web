@@ -72,19 +72,19 @@ export default function ShareDropdown({ url, title }: ShareDropdownProps) {
             onClick={shareToTwitter} 
             className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors"
           >
-            <i className="fa-brands fa-x-twitter"></i> X'te Paylaş
+            <i className="fa-brands fa-x-twitter"></i> X&apos;te Paylaş
           </button>
           <button 
             onClick={shareToFacebook} 
             className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors"
           >
-            <i className="fa-brands fa-facebook"></i> Facebook'ta Paylaş
+            <i className="fa-brands fa-facebook"></i> Facebook&apos;ta Paylaş
           </button>
           <button 
             onClick={shareToWhatsApp} 
             className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors"
           >
-            <i className="fa-brands fa-whatsapp"></i> WhatsApp'ta Paylaş
+            <i className="fa-brands fa-whatsapp"></i> WhatsApp&apos;ta Paylaş
           </button>
           <button 
             onClick={copyLink} 
