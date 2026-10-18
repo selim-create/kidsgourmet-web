@@ -26,6 +26,7 @@ export default function RecipeCard({ item }: RecipeCardProps) {
 
   return (
     <Link
+      prefetch={false}
       href={`/tarifler/${item.slug}`}
       data-type="recipe"
       className="featured-card flex-shrink-0 w-[85vw] md:w-[420px] snap-center bg-white rounded-4xl shadow-md hover:shadow-xl overflow-hidden relative flex flex-col group cursor-pointer border border-gray-100 transition-all duration-300 hover:-translate-y-1"

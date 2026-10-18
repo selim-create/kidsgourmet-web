@@ -4,7 +4,6 @@ import AppDownloadFooter from "@/components/app/AppDownloadFooter";
 import MobileAppBanner from "@/components/app/MobileAppBanner";
 import { OrganizationJsonLd, WebSiteJsonLd } from "@/components/seo/JsonLd";
 import { HeaderLeaderboardAd, HeaderMobileAd, FooterStickyMobileAd, PageSkinAds, InterstitialAd } from "@/components/ads";
-import { AdProvider } from "@/contexts/AdContext";
 import { APP_DOWNLOAD_URL } from "@/lib/app-links";
 import { SITE_URL } from "@/lib/constants";
 import type { Metadata } from 'next';
@@ -85,7 +84,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AdProvider>
+    <>
       <OrganizationJsonLd />
       <WebSiteJsonLd />
       <div className="flex flex-col min-h-screen">
@@ -117,6 +116,6 @@ export default function MainLayout({
         {/* Interstitial Ad - Out-of-page overlay, no DOM container needed */}
         <InterstitialAd />
       </div>
-    </AdProvider>
+    </>
   );
 }

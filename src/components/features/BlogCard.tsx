@@ -257,7 +257,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             {heroContent}
           </a>
         ) : (
-          <Link href={finalUrl} className="absolute inset-0">
+          <Link prefetch={false} href={finalUrl} className="absolute inset-0">
             {heroContent}
           </Link>
         )}
@@ -288,7 +288,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             <img src={imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={title} />
           </a>
         ) : (
-          <Link href={finalUrl} className="block w-full h-full">
+          <Link prefetch={false} href={finalUrl} className="block w-full h-full">
             <img src={imageUrl} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={title} />
           </Link>
         )}
@@ -396,6 +396,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             />
           ) : (
             <Link 
+              prefetch={false} 
               href={finalUrl}
               dangerouslySetInnerHTML={{ __html: title }}
             />
@@ -422,6 +423,7 @@ export default function BlogCard({ post, categories, variant = 'default' }: Blog
             </a>
           ) : (
             <Link 
+              prefetch={false} 
               href={finalUrl}
               className="text-xs font-bold text-slate-700 hover:text-orange-500 transition-colors"
             >

@@ -152,6 +152,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
   return (
     <Link 
+      prefetch={false}
       href={`/tarifler/${recipe.slug}`} 
       className="group relative bg-white border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300 overflow-visible flex flex-col"
       style={{
