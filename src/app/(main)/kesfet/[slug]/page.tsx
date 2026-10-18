@@ -3,6 +3,14 @@ import BlogDetailPage from './BlogDetailClient';
 import { getCachedBlogPost } from '@/lib/server/content-cache';
 import { SITE_URL } from '@/lib/constants';
 
+// Blog detail is public; render on first visit and reuse the result for 5 minutes.
+// An empty parameter list avoids fetching the entire WordPress catalog at build time.
+export const revalidate = 300;
+
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
+  return [];
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
 
