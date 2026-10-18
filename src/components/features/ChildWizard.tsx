@@ -492,7 +492,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
                         >
                           Açık Rıza Metni
                         </Link>
-                        'nde belirtilen şartlarla onay veriyorum.
+                        &apos;nde belirtilen şartlarla onay veriyorum.
                         <span className="block text-xs text-gray-500 mt-1">
                           Bu onay opsiyoneldir ve istediğiniz zaman geri çekebilirsiniz.
                         </span>
@@ -512,7 +512,7 @@ export default function ChildWizard({ isOpen, onClose, onSave, child }: ChildWiz
                       >
                         KVKK Aydınlatma Metni
                       </Link>
-                      'ni inceleyebilirsiniz.
+                      &apos;ni inceleyebilirsiniz.
                     </p>
                   </div>
                 </div>
