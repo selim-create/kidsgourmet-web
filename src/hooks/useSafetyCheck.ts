@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { safetyService, SafetyCheckResult, BatchSafetyResult } from '@/services/safety-service';
-import { FetchErrorInfo } from '@/lib/api';
+import { FetchErrorInfo, getApiErrorMessage, getFetchErrorInfo } from '@/lib/api';
 
 const SAFE_RESULT: SafetyCheckResult = {
   is_safe: true,
@@ -59,13 +59,13 @@ export function useSafetyCheck(recipeId: number | undefined, childId: string | u
         setIsApiError(true);
         setSafetyResult(SAFE_RESULT);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to check recipe safety:', err);
-      
+
       // Extract error info if available
-      const errInfo: FetchErrorInfo | undefined = err?.errorInfo;
-      
-      setError(errInfo?.userMessage || err?.message || 'Failed to check safety');
+      const errInfo = getFetchErrorInfo(err);
+
+      setError(errInfo?.userMessage || getApiErrorMessage(err) || 'Failed to check safety');
       setErrorInfo(errInfo || null);
       setIsApiError(true);
       setSafetyResult(SAFE_RESULT);
