@@ -169,9 +169,9 @@ export interface Ingredient {
   image_credit?: string;
   
   // 🆕 Yeni backend alanları (konsolidasyon sonrası)
-  allergen_info?: AllergenInfo;
+  allergen_info?: AllergenInfo | null;
   allergens?: string[];  // Taxonomy'den gelen alerjen isimleri
-  nutrition_per_100g?: NutritionPer100g;
+  nutrition_per_100g?: NutritionPer100g | null;
   prep_methods_list?: string[];
   seo?: SEOData;  // 🆕 RankMath SEO data
   expert?: ExpertInfo;  // 🆕 Uzman notu
