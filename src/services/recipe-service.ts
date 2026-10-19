@@ -25,7 +25,76 @@ interface WordPressRecipeTerm {
 }
 
 /** Shape of the two list-style custom API responses; raw entries are normalized below. */
-type RawRecipeEntry = Record<string, unknown>;
+/** Shared wire shape for KG custom API and WordPress REST recipe payloads.
+ * Legacy ingredient/instruction entries remain unknown; their existing runtime
+ * normalization is intentionally not changed in this PR.
+ */
+type RenderedRecipeText = string | { rendered: string };
+type RawCrossSell = Partial<CrossSellInfo>;
+
+interface RawRecipeEntry {
+  id: number;
+  title: RenderedRecipeText;
+  slug: string;
+  content?: RenderedRecipeText;
+  excerpt?: RenderedRecipeText;
+  image?: string;
+  featured_media_url?: string;
+  _embedded?: {
+    'wp:featuredmedia'?: { source_url?: string }[];
+    'wp:term'?: WordPressRecipeTerm[][];
+    author?: {
+      id: number;
+      name: string;
+      avatar_urls?: Record<string, string>;
+    }[];
+  };
+  age_group?: string;
+  age_groups?: string[];
+  age_group_color?: string;
+  prep_time?: string;
+  meal_type?: string;
+  meal_types?: string[];
+  diet_types?: string[];
+  author?: {
+    id?: number;
+    name?: string;
+    avatar?: string;
+    avatar_url?: string;
+  };
+  author_id?: number;
+  author_name?: string;
+  author_avatar?: string;
+  author_avatar_url?: string;
+  expert?: Partial<Recipe['expert']>;
+  is_featured?: boolean;
+  ingredients?: unknown[];
+  instructions?: unknown[];
+  nutrition?: Recipe['nutrition'];
+  allergens?: string[];
+  video_url?: string;
+  substitutes?: Recipe['substitutes'];
+  related_recipes?: RecipeCard[];
+  cross_sell?: RawCrossSell | string;
+  meta?: {
+    _kg_prep_time?: string;
+    _kg_ingredients?: unknown[];
+    _kg_instructions?: unknown[];
+    _kg_expert_name?: string;
+    _kg_expert_title?: string;
+    _kg_expert_approved?: string;
+    _kg_is_featured?: string;
+    _kg_cross_sell?: RawCrossSell | string;
+    _kg_cross_sell_url?: string;
+    _kg_cross_sell_title?: string;
+    _kg_calories?: string;
+    _kg_protein?: string;
+    _kg_fiber?: string;
+    _kg_vitamins?: string;
+    _kg_video_url?: string;
+    _kg_substitutes?: Recipe['substitutes'];
+  };
+}
 type RecipeCollectionResponse =
   | RawRecipeEntry[]
   | {
@@ -38,7 +107,7 @@ type RecipeCollectionResponse =
     };
 
 // Transform function for WordPress REST API format to RecipeCard
-const transformWPRecipeToCard = (wp: any): RecipeCard => ({
+const transformWPRecipeToCard = (wp: RawRecipeEntry): RecipeCard => ({
   id: wp.id,
   title: typeof wp.title === 'object' ? wp.title.rendered : (wp.title || ''),
   slug: wp.slug || '',
@@ -70,7 +139,7 @@ const transformWPRecipeToCard = (wp: any): RecipeCard => ({
 });
 
 // Transform function for WordPress REST API format to full Recipe
-const transformWPRecipeToFull = (wp: any): Recipe => {
+const transformWPRecipeToFull = (wp: RawRecipeEntry): Recipe => {
   // Ingredients transform - yeni format desteği
   const rawIngredients = wp.ingredients || wp.meta?._kg_ingredients || [];
   const ingredients = Array.isArray(rawIngredients) 
@@ -159,7 +228,7 @@ const transformWPRecipeToFull = (wp: any): Recipe => {
 };
 
 // Transform function for custom API format
-const transformRecipe = (wpRecipe: any): RecipeCard => ({
+const transformRecipe = (wpRecipe: RawRecipeEntry): RecipeCard => ({
   id: wpRecipe.id,
   title: typeof wpRecipe.title === 'object' ? wpRecipe.title.rendered : wpRecipe.title,
   slug: wpRecipe.slug,
