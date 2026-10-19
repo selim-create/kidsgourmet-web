@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from "next/link";
 import { blogService, BlogPost } from '@/services/blog-service';
 import { recipeService } from '@/services/recipe-service';
@@ -59,7 +59,6 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
     image: string;
     start_age: string;
   }>>([]);
-  const [headings, setHeadings] = useState<{ level: number; id: string; text: string }[]>([]);
   const [activeHeading, setActiveHeading] = useState<string>('');
   
   // Sidebar Tools State - Hydration safe random selection
@@ -140,8 +139,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }, []);
 
   // Extract headings from content
-  useEffect(() => {
-    if (!post?.content?.rendered) return;
+  const headings = useMemo(() => {
+    const renderedContent = post?.content?.rendered;
+    if (!renderedContent) return [];
     
     const extractHeadings = (content: string) => {
       // Match H2 and H3 tags with optional id attribute
@@ -166,9 +166,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       return headings;
     };
 
-    const extracted = extractHeadings(post.content.rendered);
-    setHeadings(extracted);
-  }, [post]);
+    return extractHeadings(renderedContent);
+  }, [post?.content?.rendered]);
 
   // Inject heading IDs directly into DOM for reliable TOC navigation
   useEffect(() => {
