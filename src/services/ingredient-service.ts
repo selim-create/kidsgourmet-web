@@ -16,9 +16,58 @@ export interface IngredientsResponse {
   pages: number;
 }
 
-// Typed transport shapes only: values are still normalized by the existing
-// WordPress/custom-API transformer functions below.
-type RawIngredientEntry = Record<string, unknown>;
+// Shape of the custom KG API payload; older WordPress payloads are typed
+// separately because their content and metadata live in different fields.
+type WordPressText = string | { rendered: string };
+type WordPressMedia = {
+  'wp:featuredmedia'?: { source_url?: string }[];
+};
+
+type RawIngredientEntry =
+  Omit<Partial<Ingredient>, 'name' | 'description' | 'season'> & {
+    id: number;
+    name: WordPressText;
+    slug: string;
+    description: WordPressText;
+    season?: unknown;
+    _embedded?: WordPressMedia;
+  };
+
+type RawWordPressIngredient = {
+  id: number;
+  name?: WordPressText;
+  title?: { rendered: string };
+  slug?: string;
+  description?: WordPressText;
+  excerpt?: { rendered: string };
+  featured_media_url?: string;
+  _embedded?: WordPressMedia;
+  meta?: {
+    _kg_category?: Ingredient['category'];
+    _kg_start_age?: Ingredient['start_age'];
+    _kg_benefits?: Ingredient['benefits'];
+    _kg_prep_methods?: Ingredient['prep_methods'];
+    _kg_allergy_risk?: Ingredient['allergy_risk'];
+    _kg_season?: unknown;
+    _kg_storage_tips?: Ingredient['storage_tips'];
+    _kg_prep_by_age?: Ingredient['prep_by_age'];
+    _kg_selection_tips?: Ingredient['selection_tips'];
+    _kg_pro_tips?: Ingredient['pro_tips'];
+    _kg_pairings?: Ingredient['pairings'];
+    _kg_nutrition?: Ingredient['nutrition'];
+    _kg_related_recipes?: Ingredient['related_recipes'];
+    _kg_faq?: Ingredient['faq'];
+    _kg_ai_generated?: Ingredient['ai_generated'];
+    _kg_image_source?: Ingredient['image_source'];
+    _kg_allergen_info?: Ingredient['allergen_info'];
+    _kg_allergens?: Ingredient['allergens'];
+    _kg_nutrition_per_100g?: Ingredient['nutrition_per_100g'];
+    _kg_prep_methods_list?: Ingredient['prep_methods_list'];
+    _kg_image_credit?: Ingredient['image_credit'];
+    _kg_seo?: Ingredient['seo'];
+  };
+};
+
 type IngredientCollectionResponse =
   | RawIngredientEntry[]
   | {
@@ -63,7 +112,7 @@ const formatSeason = (season: unknown): string => {
 };
 
 // Transform function for WordPress REST API format to Ingredient - GÜNCELLENMİŞ
-const transformWPIngredient = (wp: any): Ingredient => ({
+const transformWPIngredient = (wp: RawWordPressIngredient): Ingredient => ({
   id: wp.id,
   name: typeof wp.name === 'object' ? wp.name.rendered : (wp.name || wp.title?.rendered || ''),
   slug: wp.slug || '',
@@ -102,7 +151,7 @@ const transformWPIngredient = (wp: any): Ingredient => ({
 });
 
 // Transform function for API response format - GÜNCELLENMİŞ
-const transformIngredient = (apiIngredient: any): Ingredient => ({
+const transformIngredient = (apiIngredient: RawIngredientEntry): Ingredient => ({
   id: apiIngredient.id,
   name: typeof apiIngredient.name === 'object' ? apiIngredient.name.rendered : apiIngredient.name,
   slug: apiIngredient.slug,
@@ -178,7 +227,7 @@ export const ingredientService = {
       console.log('Falling back to WP REST API for ingredients');
       try {
         // Fallback: Standart WP REST API
-        const response = await fetchAPI<RawIngredientEntry[]>(
+        const response = await fetchAPI<RawWordPressIngredient[]>(
           `${WP_API_NAMESPACE}/ingredient?page=${page}&per_page=${perPage}&_embed`
         );
         return (response || []).map(transformWPIngredient);
@@ -207,7 +256,7 @@ export const ingredientService = {
       console.log('Falling back to WP REST API for ingredient slug:', slug);
       try {
         // Fallback: Standart WP REST API
-        const ingredients = await fetchAPI<RawIngredientEntry[]>(
+        const ingredients = await fetchAPI<RawWordPressIngredient[]>(
           `${WP_API_NAMESPACE}/ingredient?slug=${slug}&_embed`
         );
         if (ingredients && ingredients.length > 0) {
