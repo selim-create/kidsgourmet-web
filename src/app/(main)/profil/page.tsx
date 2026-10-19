@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useUser } from "@/hooks/use-user";
 import { userService } from "@/services/user-service";
-import { Child, SocialLinks } from "@/lib/types";
+import { Child, SocialLinks, User } from "@/lib/types";
 import ChildWizard from "@/components/features/ChildWizard";
 import ChildAvatarUpload from "@/components/features/ChildAvatarUpload";
 import { toast } from "sonner";
@@ -267,7 +267,7 @@ export default function ProfileSettingsPage() {
     setExpertise(expertise.filter((_, i) => i !== index));
   };
 
-  const isExpertUser = (user: any) => {
+  const isExpertUser = (user: User | null) => {
     return user?.is_expert || user?.role === 'kg_expert' || user?.role === 'editor' || user?.role === 'administrator';
   };
 

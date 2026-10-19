@@ -723,7 +723,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                 <i className="fa-solid fa-tags mr-2 text-orange-500"></i>Etiketler
                               </h4>
                               <div className="flex flex-wrap gap-2">
-                                {post._embedded['wp:term'][1].map((tag: any) => (
+                                {post._embedded['wp:term'][1].map((tag) => (
                                   <Link 
                                     key={tag.id} 
                                     href={`/kesfet?etiket=${tag.slug}`} 
