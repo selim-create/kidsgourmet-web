@@ -19,7 +19,7 @@ interface IngredientSafetyAlertProps {
     allergen_info?: {
       is_allergen: boolean;
       allergen_type?: string;
-    };
+    } | null;
     name?: string;
   };
 }
