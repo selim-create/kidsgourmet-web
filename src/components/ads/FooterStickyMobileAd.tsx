@@ -5,7 +5,6 @@
  * Mobile only, sticky at bottom
  */
 
-import React from 'react';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAds } from '@/contexts/AdContext';
 import { AdSlot } from './AdSlot';

@@ -4,7 +4,6 @@
  * Debug Ad Slot Component - For testing and debugging
  */
 
-import React from 'react';
 import type { AdSlot } from '@/lib/ads/types';
 
 interface DebugAdSlotProps {
