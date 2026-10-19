@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { fetchAuthAPI } from '@/lib/api';
+import { fetchAuthAPI, getFetchErrorInfo } from '@/lib/api';
 import { API_ENDPOINTS } from '@/lib/constants';
 
 // API'den gelen consent record tipi
@@ -102,7 +102,7 @@ export default function ConsentManagementPage() {
       setConsents(transformedConsents);
     } catch (error) {
       // 404 hatası sessizce ele alınacak - yeni kullanıcılarda normal
-      if ((error as any)?.errorInfo?.statusCode !== 404) {
+      if (getFetchErrorInfo(error)?.statusCode !== 404) {
         console.error('Error fetching consents:', error);
         toast.error('Rıza bilgileri yüklenirken hata oluştu');
       }

@@ -5,6 +5,7 @@ import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { recipeService } from '@/services/recipe-service';
+import { getFetchErrorInfo } from '@/lib/api';
 
 interface RecipeRatingProps {
   recipeId: number;
@@ -79,11 +80,11 @@ export default function RecipeRating({
       } else {
         toast.error('Puan kaydedilirken bir hata oluştu');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Rating error:', error);
       
       // Use errorInfo from API library for robust error handling
-      const errorInfo = error.errorInfo;
+      const errorInfo = getFetchErrorInfo(error);
       
       if (errorInfo?.type === 'auth') {
         // Authentication error - session expired

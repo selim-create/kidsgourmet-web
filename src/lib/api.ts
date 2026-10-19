@@ -18,6 +18,22 @@ export interface FetchErrorInfo {
 // Keep this typed extension local to the transport layer.
 type FetchErrorWithInfo = Error & { errorInfo?: FetchErrorInfo };
 
+// Error payloads come from JavaScript exceptions and the HTTP client.
+export function getApiErrorMessage(error: unknown): string | undefined {
+  if (error !== null && typeof error === 'object' && 'message' in error) {
+    return typeof error.message === 'string' ? error.message : undefined;
+  }
+  return undefined;
+}
+
+export function getFetchErrorInfo(error: unknown): FetchErrorInfo | undefined {
+  if (error !== null && typeof error === 'object' && 'errorInfo' in error) {
+    const info = error.errorInfo;
+    return info !== null && typeof info === 'object' ? info as FetchErrorInfo : undefined;
+  }
+  return undefined;
+}
+
 // Rate limit error type
 export interface RateLimitError {
   code: 'rate_limit_exceeded';
@@ -177,32 +193,36 @@ function handle401Error(token: string | null): void {
  * Hata tipini belirle ve kullanıcı dostu mesaj oluştur
  * Determine error type and create user-friendly message
  */
-export function analyzeError(error: any, statusCode?: number): FetchErrorInfo {
+export function analyzeError(error: unknown, statusCode?: number): FetchErrorInfo {
+  const message = getApiErrorMessage(error) || '';
+  const errorName = error !== null && typeof error === 'object' && 'name' in error
+    ? error.name
+    : undefined;
   // Network/connection errors
-  if (error instanceof TypeError && error.message.includes('fetch')) {
+  if (error instanceof TypeError && message.includes('fetch')) {
     return {
       type: 'network',
-      message: error.message,
+      message: message,
       userMessage: 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.',
       canRetry: true,
     };
   }
   
   // Timeout errors
-  if (error.name === 'AbortError' || error.message?.includes('timeout')) {
+  if (errorName === 'AbortError' || message?.includes('timeout')) {
     return {
       type: 'timeout',
-      message: error.message,
+      message: message,
       userMessage: 'İstek zaman aşımına uğradı. Lütfen tekrar deneyin.',
       canRetry: true,
     };
   }
   
   // CORS errors
-  if (error.message?.includes('CORS') || error.message?.includes('cross-origin')) {
+  if (message?.includes('CORS') || message?.includes('cross-origin')) {
     return {
       type: 'cors',
-      message: error.message,
+      message: message,
       userMessage: 'Bağlantı hatası oluştu. Lütfen sayfayı yenileyip tekrar deneyin.',
       canRetry: true,
     };
@@ -234,7 +254,7 @@ export function analyzeError(error: any, statusCode?: number): FetchErrorInfo {
   if (statusCode && statusCode >= 500) {
     return {
       type: 'server',
-      message: error.message || 'Server error',
+      message: message || 'Server error',
       userMessage: 'Sunucu hatası oluştu. Lütfen birkaç dakika sonra tekrar deneyin.',
       canRetry: true,
       statusCode,
@@ -245,8 +265,8 @@ export function analyzeError(error: any, statusCode?: number): FetchErrorInfo {
   if (statusCode && statusCode >= 400) {
     return {
       type: 'server',
-      message: error.message || 'API error',
-      userMessage: error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.',
+      message: message || 'API error',
+      userMessage: message || 'Bir hata oluştu. Lütfen tekrar deneyin.',
       canRetry: false,
       statusCode,
     };
@@ -255,7 +275,7 @@ export function analyzeError(error: any, statusCode?: number): FetchErrorInfo {
   // Unknown errors
   return {
     type: 'unknown',
-    message: error.message || 'Unknown error',
+    message: message || 'Unknown error',
     userMessage: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
     canRetry: true,
   };
