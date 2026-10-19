@@ -14,6 +14,10 @@ export interface FetchErrorInfo {
   statusCode?: number;
 }
 
+// The API client attaches structured metadata to ordinary Error objects.
+// Keep this typed extension local to the transport layer.
+type FetchErrorWithInfo = Error & { errorInfo?: FetchErrorInfo };
+
 // Rate limit error type
 export interface RateLimitError {
   code: 'rate_limit_exceeded';
@@ -94,7 +98,7 @@ function isLegacyFallbackBlocked(group: LegacyFallbackGroup): boolean {
 
 function createSuppressedFallbackError(group: LegacyFallbackGroup): Error {
   const error = new Error(`Legacy ${group} fallback suppressed after transient upstream failure`);
-  (error as any).errorInfo = {
+  (error as FetchErrorWithInfo).errorInfo = {
     type: 'server',
     message: error.message,
     userMessage: 'Sunucu geçici olarak yoğun. Lütfen kısa süre sonra tekrar deneyin.',
@@ -275,7 +279,7 @@ export async function fetchAPI<T>(
     headers['Authorization'] = `Bearer ${token}`;
   } else if (requireAuth) {
     const authError = new Error('Authentication required');
-    (authError as any).errorInfo = analyzeError(authError, 401);
+    (authError as FetchErrorWithInfo).errorInfo = analyzeError(authError, 401);
     throw authError;
   }
 
@@ -300,7 +304,7 @@ export async function fetchAPI<T>(
       const text = await res.text();
       console.error('API returned non-JSON response:', text.substring(0, 200));
       const error = new Error(`API returned ${contentType || 'unknown'} instead of JSON. Status: ${res.status}`);
-      (error as any).errorInfo = analyzeError(error, res.status);
+      (error as FetchErrorWithInfo).errorInfo = analyzeError(error, res.status);
       throw error;
     }
 
@@ -325,7 +329,7 @@ export async function fetchAPI<T>(
       }
       
       const error = new Error(errorData.message || 'API isteği başarısız oldu');
-      (error as any).errorInfo = analyzeError(error, res.status);
+      (error as FetchErrorWithInfo).errorInfo = analyzeError(error, res.status);
       throw error;
     }
 
@@ -336,16 +340,16 @@ export async function fetchAPI<T>(
     return res.json();
   } catch (error) {
     // Network, timeout, CORS errors
-    if (!(error as any).errorInfo) {
+    if (!(error as FetchErrorWithInfo).errorInfo) {
       const errorInfo = analyzeError(error);
-      (error as any).errorInfo = errorInfo;
+      (error as FetchErrorWithInfo).errorInfo = errorInfo;
     }
 
     // Legacy WP fallback is only useful when the custom endpoint genuinely does
     // not exist. On 5xx/508, rate-limit, timeout or network failures, trying a
     // second endpoint on the same origin amplifies the outage and CPU pressure.
     if (customFallbackGroup) {
-      const errorInfo = (error as any).errorInfo as FetchErrorInfo | undefined;
+      const errorInfo = (error as FetchErrorWithInfo).errorInfo as FetchErrorInfo | undefined;
       if (errorInfo?.statusCode !== 404) {
         blockLegacyFallback(customFallbackGroup);
       }
@@ -384,7 +388,7 @@ export async function fetchAPIWithHeaders<T>(
     headers['Authorization'] = `Bearer ${token}`;
   } else if (requireAuth) {
     const authError = new Error('Authentication required');
-    (authError as any).errorInfo = analyzeError(authError, 401);
+    (authError as FetchErrorWithInfo).errorInfo = analyzeError(authError, 401);
     throw authError;
   }
 
@@ -409,7 +413,7 @@ export async function fetchAPIWithHeaders<T>(
       const text = await res.text();
       console.error('API returned non-JSON response:', text.substring(0, 200));
       const error = new Error(`API returned ${contentType || 'unknown'} instead of JSON. Status: ${res.status}`);
-      (error as any).errorInfo = analyzeError(error, res.status);
+      (error as FetchErrorWithInfo).errorInfo = analyzeError(error, res.status);
       throw error;
     }
 
@@ -434,7 +438,7 @@ export async function fetchAPIWithHeaders<T>(
       }
       
       const error = new Error(errorData.message || 'API isteği başarısız oldu');
-      (error as any).errorInfo = analyzeError(error, res.status);
+      (error as FetchErrorWithInfo).errorInfo = analyzeError(error, res.status);
       throw error;
     }
 
@@ -452,13 +456,13 @@ export async function fetchAPIWithHeaders<T>(
     return { data, headers: responseHeaders };
   } catch (error) {
     // Network, timeout, CORS errors
-    if (!(error as any).errorInfo) {
+    if (!(error as FetchErrorWithInfo).errorInfo) {
       const errorInfo = analyzeError(error);
-      (error as any).errorInfo = errorInfo;
+      (error as FetchErrorWithInfo).errorInfo = errorInfo;
     }
 
     if (customFallbackGroup) {
-      const errorInfo = (error as any).errorInfo as FetchErrorInfo | undefined;
+      const errorInfo = (error as FetchErrorWithInfo).errorInfo as FetchErrorInfo | undefined;
       if (errorInfo?.statusCode !== 404) {
         blockLegacyFallback(customFallbackGroup);
       }

@@ -131,7 +131,7 @@ export async function getDiscussionComments(discussionId: number): Promise<Discu
       { cache: 'no-store' }
     );
     return normalizeCommentResponse(response);
-  } catch (error) {
+  } catch {
     // If auth fails (user not logged in), try without auth
     try {
       const response = await fetchAPI<DiscussionComment[] | { comments: DiscussionComment[] }>(

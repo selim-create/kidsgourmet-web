@@ -29,7 +29,7 @@ export const contactService = {
       
       const result = await response.json();
       return result;
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Bir hata oluştu. Lütfen tekrar deneyin.',

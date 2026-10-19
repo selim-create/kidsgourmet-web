@@ -174,7 +174,7 @@ export const authService = {
         children: [],
         created_at: new Date().toISOString(),
       };
-    } catch (error) {
+    } catch {
       return null;
     }
   },
