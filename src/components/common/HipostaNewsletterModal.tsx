@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import type { HipostaNewsletterOption } from '@/lib/hiposta-newsletters';
 
@@ -44,15 +44,15 @@ function cadenceLabel(value: string) {
   return value;
 }
 
+// Keep the portal absent during server rendering and the hydration pass.
+const subscribeNoop = () => () => {};
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+
 export default function HipostaNewsletterModal({ open, options, selected, onClose, onApply }: Props) {
   const [draft, setDraft] = useState<string[]>(selected);
   const [query, setQuery] = useState('');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    return () => setMounted(false);
-  }, []);
+  const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
 
   useEffect(() => {
     if (open) {
