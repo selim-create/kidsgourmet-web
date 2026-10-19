@@ -7,7 +7,7 @@ import { useUser } from "@/hooks/use-user";
 import { useActiveChild } from "@/contexts/ActiveChildContext";
 import { userService } from "@/services/user-service";
 import { toolService } from "@/services/tool-service";
-import { BLWTestResult, PercentileResult, SolidFoodReadinessResult } from "@/lib/types";
+import { BLWTestResult, PercentileResult, SolidFoodReadinessResult, Child } from "@/lib/types";
 import AllergyBanner from "@/components/features/AllergyBanner";
 import DashboardVaccineWidget from "@/components/features/vaccine/DashboardVaccineWidget";
 import OverdueVaccineBanner from "@/components/features/vaccine/OverdueVaccineBanner";
@@ -107,7 +107,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isChildModalOpen, setIsChildModalOpen] = useState(false);
-  const [editingChild, setEditingChild] = useState<any>(null);
+  const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(() => {
     // Initialize with today's date
     return new Date().toISOString().split('T')[0];
