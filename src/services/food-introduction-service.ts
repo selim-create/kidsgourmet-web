@@ -23,6 +23,18 @@ export interface NextFoodSuggestion {
   recipes: RecipeCard[];
 }
 
+type NextFoodResponseEnvelope = {
+  suggestion?: NextFoodSuggestion;
+  data?: NextFoodSuggestion;
+};
+
+// Distinguish the direct result from the API's optional response wrapper.
+function isDirectSuggestion(
+  value: NextFoodSuggestion | NextFoodResponseEnvelope
+): value is NextFoodSuggestion {
+  return 'ingredient_name' in value;
+}
+
 export const foodIntroductionService = {
   /**
    * Önerilen besinler listesi
@@ -53,13 +65,16 @@ export const foodIntroductionService = {
     try {
       if (!childId) return null;
       
-      const response = await fetchAuthAPI<NextFoodSuggestion | { suggestion?: NextFoodSuggestion; data?: NextFoodSuggestion } | null>(
+      const response = await fetchAuthAPI<NextFoodSuggestion | NextFoodResponseEnvelope | null>(
         `${API_ENDPOINTS.FOOD_INTRODUCTION_NEXT}?child_id=${childId}`
       );
       
-      // Normalize response structure
-      const data = response as any;
-      const suggestion = data?.suggestion || data?.data || data || null;
+      // Accept both API formats without treating an empty wrapper as a suggestion.
+      const suggestion = response
+        ? isDirectSuggestion(response)
+          ? response
+          : response.suggestion || response.data || null
+        : null;
       
       // Ensure preparation_tips is always an array
       if (suggestion && !Array.isArray(suggestion.preparation_tips)) {

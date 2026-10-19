@@ -4,6 +4,7 @@ import React from 'react';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAds } from '@/contexts/AdContext';
 import { AdSlot } from './AdSlot';
+import type { AdPlacement } from '@/lib/ads/types';
 
 type ContentPlacement = 
   | 'content-top'
@@ -16,7 +17,7 @@ type ContentPlacement =
 interface ContentAdProps {
   placement: ContentPlacement;
   className?: string;
-  fallbackPlacement?: string;
+  fallbackPlacement?: AdPlacement;
 }
 
 export function ContentAd({ placement, className = '', fallbackPlacement = 'content-middle' }: ContentAdProps) {
@@ -29,7 +30,7 @@ export function ContentAd({ placement, className = '', fallbackPlacement = 'cont
   
   // Fallback to legacy placement
   if (slots.length === 0 && fallbackPlacement) {
-    slots = getSlotsByPlacement(fallbackPlacement as any);
+    slots = getSlotsByPlacement(fallbackPlacement);
   }
 
   // Filter by device
