@@ -268,7 +268,7 @@ export default function IngredientsGuidePage() {
             Beslenme Rehberi
           </h1>
           <p className="text-gray-500 text-lg mb-8 max-w-2xl mx-auto">
-           "Bebeğim neyi, ne zaman yiyebilir?" sorusunun cevabını uzman görüşleri eşliğinde sözlüğümüzde arayın. Bebeğinizin ayına uygun besinleri, alerjen risklerini ve mevsimsel önerileri rehberimizde keşfedin.
+           &quot;Bebeğim neyi, ne zaman yiyebilir?&quot; sorusunun cevabını uzman görüşleri eşliğinde sözlüğümüzde arayın. Bebeğinizin ayına uygun besinleri, alerjen risklerini ve mevsimsel önerileri rehberimizde keşfedin.
           </p>
 
           {/* Search Bar */}

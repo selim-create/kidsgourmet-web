@@ -185,10 +185,10 @@ export default function AlerjiBelirtileriPage() {
             <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-8">
               <div className="mb-6">
                 <h3 className="font-bold text-2xl text-red-900 mb-3 flex items-center gap-2">
-                  ACİL DURUM - HEMEN 112'Yİ ARAYIN!
+                  ACİL DURUM - HEMEN 112&apos;Yİ ARAYIN!
                 </h3>
                 <p className="text-red-800 leading-relaxed font-bold text-lg">
-                  Aşağıdaki belirtilerden herhangi birini görürseniz, zaman kaybetmeden 112'yi 
+                  Aşağıdaki belirtilerden herhangi birini görürseniz, zaman kaybetmeden 112&apos;yi
                   arayın veya en yakın acil servise gidin. Anafilaksi (şiddetli alerjik reaksiyon) 
                   hayati tehlike oluşturabilir!
                 </p>
@@ -322,7 +322,7 @@ export default function AlerjiBelirtileriPage() {
                   {/* DÜZELTME: text-lg kaldırıldı, leading-6 eklendi */}
                   <li className="flex items-start gap-2 leading-6">
                     <span className="font-bold text-red-600 min-w-[20px]">1.</span>
-                    <span className="font-bold">HEMEN 112'yi arayın</span>
+                    <span className="font-bold">HEMEN 112&apos;yi arayın</span>
                   </li>
                   <li className="flex items-start gap-2 leading-6">
                     <span className="font-bold text-red-600 min-w-[20px]">2.</span>
@@ -407,7 +407,7 @@ export default function AlerjiBelirtileriPage() {
                   <strong>Önemli Uyarı:</strong> Bu içerik bilgilendirme amaçlıdır ve tıbbi tanı 
                   veya tedavi yerine geçmez. Bebeğinizde herhangi bir alerjik reaksiyon belirtisi 
                   görürseniz mutlaka bir sağlık uzmanına danışın. Şiddetli reaksiyon durumunda 
-                  hemen 112'yi arayın veya en yakın acil servise başvurun. Her bebek farklıdır ve 
+                  hemen 112&apos;yi arayın veya en yakın acil servise başvurun. Her bebek farklıdır ve
                   alerji belirtileri değişkenlik gösterebilir.
                 </p>
               </div>

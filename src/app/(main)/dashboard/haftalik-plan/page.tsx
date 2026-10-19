@@ -298,7 +298,7 @@ export default function WeeklyPlanPage() {
               </details>
               <details className="bg-white rounded-xl p-4 shadow-sm">
                 <summary className="font-bold text-slate-800 cursor-pointer">Planı değiştirebilir miyim?</summary>
-                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya 'dışarıda yiyoruz' olarak işaretleyebilirsiniz.</p>
+                <p className="mt-3 text-gray-600">Evet, dilediğiniz öğünü değiştirebilir, farklı tarif seçebilir veya &apos;dışarıda yiyoruz&apos; olarak işaretleyebilirsiniz.</p>
               </details>
             </div>
           </div>
@@ -650,7 +650,7 @@ export default function WeeklyPlanPage() {
                     </div>
                   ) : (
                     <p className="text-xs text-stone-400 text-center italic bg-stone-50 p-2 rounded-lg border border-stone-100">
-                      Önce takvimden bir öğün seçin veya kart menüsünden "Listeden Seç"e tıklayın.
+                      Önce takvimden bir öğün seçin veya kart menüsünden &quot;Listeden Seç&quot;e tıklayın.
                     </p>
                   )}
                   

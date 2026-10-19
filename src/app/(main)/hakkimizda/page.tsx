@@ -63,7 +63,7 @@ export default function HakkimizdaPage() {
             </div>
             <h3 className="text-xl font-bold text-slate-800 mb-3">Vizyonumuz</h3>
             <p className="text-gray-600 leading-relaxed">
-              Türkiye'nin en güvenilir bebek ve çocuk beslenmesi platformu olmak amacıyla, her ailenin sağlıklı beslenme yolculuğuna eşlik etmek istiyoruz.
+              Türkiye&apos;nin en güvenilir bebek ve çocuk beslenmesi platformu olmak amacıyla, her ailenin sağlıklı beslenme yolculuğuna eşlik etmek istiyoruz.
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function HakkimizdaPage() {
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-sm border border-green-100 p-8 md:p-12 mb-8">
           <h2 className="text-2xl font-bold text-slate-800 mb-4">Uzmanlarımız</h2>
           <p className="text-gray-600 leading-relaxed mb-6">
-            KidsGourmet'deki tarifler, beslenme içerikleri ve araçlar ulusal ve uluslararası sağlık oterite kaynaklarından yararlanır. Uzmanlarımız, çocuğunuzun sağlıklı büyümesi için bilimsel ve güncel bilgileri sizlere ulaştırır.
+            KidsGourmet&apos;deki tarifler, beslenme içerikleri ve araçlar ulusal ve uluslararası sağlık oterite kaynaklarından yararlanır. Uzmanlarımız, çocuğunuzun sağlıklı büyümesi için bilimsel ve güncel bilgileri sizlere ulaştırır.
           </p>
           <Link 
             href="/uzmanlar"
