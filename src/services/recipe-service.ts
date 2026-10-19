@@ -268,7 +268,7 @@ export const recipeService = {
         per_page: perPage,
         total_pages: 0,
       };
-    } catch (error) {
+    } catch {
       console.log('Falling back to WP REST API for recipes');
       try {
         // Fallback: Standart WP REST API
@@ -308,7 +308,7 @@ export const recipeService = {
     try {
       // Önce özel kg/v1 endpoint'ini dene
       return await fetchAPI<Recipe>(API_ENDPOINTS.RECIPE_BY_SLUG(slug));
-    } catch (error) {
+    } catch {
       console.log('Falling back to WP REST API for slug:', slug);
       try {
         // Fallback: Standart WP REST API
@@ -345,7 +345,7 @@ export const recipeService = {
       
       console.warn('Unexpected API response format:', response);
       return [];
-    } catch (error) {
+    } catch {
       console.log('Falling back to WP REST API for featured recipes');
       try {
         // Fallback: WP REST API ile featured meta query

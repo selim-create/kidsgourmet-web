@@ -9,7 +9,7 @@ import {
 } from '@/lib/types';
 
 // API failures can be Error instances or structured objects carrying a message.
-function getErrorMessage(error: unknown): string | undefined {
+export function getErrorMessage(error: unknown): string | undefined {
   if (error !== null && typeof error === 'object' && 'message' in error) {
     return typeof error.message === 'string' ? error.message : undefined;
   }

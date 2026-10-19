@@ -174,7 +174,7 @@ export const ingredientService = {
       
       console.warn('Unexpected API response format:', response);
       return [];
-    } catch (error) {
+    } catch {
       console.log('Falling back to WP REST API for ingredients');
       try {
         // Fallback: Standart WP REST API
@@ -203,7 +203,7 @@ export const ingredientService = {
       // Önce özel kg/v1 endpoint'ini dene ve liste endpoint'iyle aynı normalizasyonu uygula.
       const ingredient = await fetchAPI<RawIngredientEntry | null>(API_ENDPOINTS.INGREDIENT_BY_SLUG(slug));
       return ingredient ? transformIngredient(ingredient) : null;
-    } catch (error) {
+    } catch {
       console.log('Falling back to WP REST API for ingredient slug:', slug);
       try {
         // Fallback: Standart WP REST API
@@ -263,7 +263,7 @@ export const ingredientService = {
       if (response?.terms) {
         return response.terms.map(t => t.name);
       }
-    } catch (error) {
+    } catch {
       console.log('Categories endpoint failed, extracting from ingredients');
     }
     
@@ -295,7 +295,7 @@ export const ingredientService = {
         return response.ingredients.map(transformIngredient);
       }
       return [];
-    } catch (error) {
+    } catch {
       // Fallback: tüm ingredients'tan filtrele
       const response = await ingredientService.getAll({ perPage: 100 });
       const all = Array.isArray(response) ? response : response.ingredients;

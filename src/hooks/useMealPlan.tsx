@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useActiveChild } from '@/contexts/ActiveChildContext';
-import { mealPlanService } from '@/services/meal-plan-service';
+import { mealPlanService, getErrorMessage } from '@/services/meal-plan-service';
 import { MealPlan, SkipReason } from '@/lib/types';
 import { toast } from 'sonner';
 
@@ -45,10 +45,11 @@ export function useMealPlan() {
       }
       
       setPlan(activePlan);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Plan yüklenemedi:', err);
+      const message = getErrorMessage(err);
       // 404 = O hafta için plan yok - hata değil
-      if (!err?.message?.includes('404') && !err?.message?.includes('No active plan')) {
+      if (!message?.includes('404') && !message?.includes('No active plan')) {
         setError('Plan yüklenirken bir hata oluştu');
       }
       setPlan(null);
@@ -88,9 +89,9 @@ export function useMealPlan() {
         console.error('Invalid plan response:', response);
         toast.error('Plan oluşturuldu ancak format hatalı');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Plan oluşturma hatası:', err);
-      toast.error(err?.message || 'Plan oluşturulurken bir hata oluştu');
+      toast.error(getErrorMessage(err) || 'Plan oluşturulurken bir hata oluştu');
     } finally {
       setIsGenerating(false);
     }
