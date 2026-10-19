@@ -200,7 +200,7 @@ export default function TagPage({ params }: { params: Promise<{ slug: string }> 
                             <div className="w-16 h-16 bg-white text-blue-500 rounded-full flex items-center justify-center mb-4 shadow-sm text-2xl">
                                 <i className="fa-solid fa-check-double"></i>
                             </div>
-                            <h3 className="font-bold text-slate-800 text-lg mb-2">BLW'ye Hazır mı?</h3>
+                            <h3 className="font-bold text-slate-800 text-lg mb-2">BLW&apos;ye Hazır mı?</h3>
                             <p className="text-sm text-gray-600 mb-4">Bebeğinizin fiziksel işaretlerini test edin.</p>
                             <button className="bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-blue-600 transition-colors">
                                 Testi Başlat

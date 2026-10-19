@@ -338,7 +338,7 @@ export default function ConsentManagementPage() {
                   <Link href="/acik-riza-metni" className="text-orange-500 hover:underline font-medium">
                     Açık Rıza Metni
                   </Link>
-                  'ne bakabilirsiniz.
+                  &apos;ne bakabilirsiniz.
                 </p>
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
@@ -437,7 +437,7 @@ export default function ConsentManagementPage() {
               <Link href="/kvkk" className="font-bold hover:underline">
                 KVKK Aydınlatma Metni
               </Link>
-              'ni inceleyebilirsiniz.
+              &apos;ni inceleyebilirsiniz.
             </p>
             <p>
               Verilerinizin silinmesi, düzeltilmesi veya diğer haklarınızı kullanmak için{' '}

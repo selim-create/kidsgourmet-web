@@ -208,7 +208,7 @@ export default function ThreeDayRulePage() {
                     Ciddi Tepkiler (ACİL)
                   </h3>
                   <p className="text-red-800 mb-4 font-bold">
-                    Bu belirtilerden herhangi birini görürseniz HEMEN 112'yi arayın veya 
+                    Bu belirtilerden herhangi birini görürseniz HEMEN 112&apos;yi arayın veya
                     en yakın acil servise başvurun!
                   </p>
                 </div>
@@ -382,7 +382,7 @@ export default function ThreeDayRulePage() {
                 Alerjen Deneme Sürecinizi Planlayın
               </h3>
               <p className="text-gray-700 leading-relaxed max-w-2xl mx-auto">
-                3 gün kuralını doğru uygulamak için Alerjen Deneme Planlayıcı'mızı kullanabilir, 
+                3 gün kuralını doğru uygulamak için Alerjen Deneme Planlayıcı&apos;mızı kullanabilir,
                 hangi besini ne zaman ve nasıl deneyeceğinize dair kişiselleştirilmiş plan alabilirsiniz.
               </p>
             </div>
@@ -412,7 +412,7 @@ export default function ThreeDayRulePage() {
               <div>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   <strong>Önemli Uyarı:</strong> Bu içerik bilgilendirme amaçlıdır ve tıbbi tanı 
-                  yerine geçmez. Bebeğinizde şiddetli bir alerjik reaksiyon durumunda hemen 112'yi 
+                  yerine geçmez. Bebeğinizde şiddetli bir alerjik reaksiyon durumunda hemen 112&apos;yi
                   arayın veya en yakın sağlık kuruluşuna başvurunuz. Aile geçmişinizde alerji varsa 
                   veya bebeğinizin özel bir sağlık durumu bulunuyorsa, yeni besinleri tanıtmadan önce 
                   mutlaka doktorunuza danışın.

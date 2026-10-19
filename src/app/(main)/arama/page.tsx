@@ -186,7 +186,7 @@ function SearchContent() {
             {/* SEARCH META */}
             <div className="mb-8">
                 <h1 className="font-display font-bold text-2xl text-slate-800">
-                    "<span className="text-orange-500">{query}</span>" için sonuçlar
+                    &quot;<span className="text-orange-500">{query}</span>&quot; için sonuçlar
                 </h1>
                 {loading ? (
                   <p className="text-sm text-gray-500">Aranıyor...</p>
@@ -213,7 +213,7 @@ function SearchContent() {
                 <div className="text-center">
                   <i className="fa-solid fa-search text-6xl text-gray-300 mb-4"></i>
                   <h2 className="font-bold text-xl text-slate-800 mb-2">Sonuç bulunamadı</h2>
-                  <p className="text-gray-500 mb-6">"{query}" için sonuç bulunamadı. Başka bir terim deneyin.</p>
+                  <p className="text-gray-500 mb-6">&quot;{query}&quot; için sonuç bulunamadı. Başka bir terim deneyin.</p>
                   <Link 
                     href="/tarifler"
                     className="inline-block px-6 py-3 bg-orange-500 text-white rounded-full font-bold hover:bg-orange-600 transition-colors"

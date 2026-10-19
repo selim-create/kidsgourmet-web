@@ -505,7 +505,7 @@ export default function AlerjenPlanlayiciPage() {
                   <div>
                     <h3 className="font-bold text-amber-900 mb-2">Acil Durum</h3>
                     <p className="text-amber-800 text-sm mb-3">
-                      Şiddetli reaksiyon belirtileri (şişlik, nefes darlığı, bayılma) görürseniz <strong>hemen 112'yi arayın</strong>.
+                      Şiddetli reaksiyon belirtileri (şişlik, nefes darlığı, bayılma) görürseniz <strong>hemen 112&apos;yi arayın</strong>.
                     </p>
                     <p className="text-amber-800 text-sm">
                       Hafif belirtilerde (döküntü, hafif kusma) bebeğinizi rahatlatın ve doktorunuzu arayın.

@@ -137,7 +137,7 @@ export default function SunumOnerileriPage() {
               </p>
               <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-sm text-gray-700">
-                  <strong>Öneri:</strong> Smoothie bowl'lar üzerine meyve dilimleri ve fındık ezmesiyle 
+                  <strong>Öneri:</strong> Smoothie bowl&apos;lar üzerine meyve dilimleri ve fındık ezmesiyle
                   desenler yapabilirsiniz.
                 </p>
               </div>

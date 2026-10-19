@@ -62,12 +62,12 @@ export default function BasvuruFormuPage() {
               <div className="grid grid-cols-3 border-b border-black">
                 <div className="p-2 border-r border-black font-semibold">Yazılı Başvuru</div>
                 <div className="p-2 border-r border-black">Fatih Mah. Çapraz Sok. No:11/2 K.Çekmece-İstanbul</div>
-                <div className="p-2">Zarfın üzerine "Kişisel Verilerin Korunması Kanunu Bilgi Talebi" yazınız.</div>
+                <div className="p-2">Zarfın üzerine &quot;Kişisel Verilerin Korunması Kanunu Bilgi Talebi&quot; yazınız.</div>
               </div>
               <div className="grid grid-cols-3 border-b border-black">
                 <div className="p-2 border-r border-black font-semibold">E-Posta Yoluyla Başvuru</div>
                 <div className="p-2 border-r border-black">iletisim@kidsgourmet.com.tr</div>
-                <div className="p-2">E-posta konu kısmına "Kişisel Verilerin Korunması Kanunu Bilgi Talebi" yazınız.</div>
+                <div className="p-2">E-posta konu kısmına &quot;Kişisel Verilerin Korunması Kanunu Bilgi Talebi&quot; yazınız.</div>
               </div>
               <div className="grid grid-cols-3">
                 <div className="p-2 border-r border-black font-semibold">Telefon</div>
@@ -146,7 +146,7 @@ export default function BasvuruFormuPage() {
           <div className="break-inside-avoid">
             <h3 className="font-bold text-black uppercase mb-2 border-b border-gray-300">5. Beyan ve İmza</h3>
             <p className="text-xs text-justify mb-4">
-              İşbu başvuruda tarafınıza sağlamış olduğum bilgi ve belgelerimin doğru ve güncel olduğunu, HİP Medya'nın başvurumu sonuçlandırabilmek adına ilave bilgi talep edebileceğini ve ayrıca bir maliyet gerektirmesi halinde KVK Kurulu tarafından belirlenen ücreti ödemem gerekebileceği hususunda aydınlatıldığımı beyan ve taahhüt ederim.
+              İşbu başvuruda tarafınıza sağlamış olduğum bilgi ve belgelerimin doğru ve güncel olduğunu, HİP Medya&apos;nın başvurumu sonuçlandırabilmek adına ilave bilgi talep edebileceğini ve ayrıca bir maliyet gerektirmesi halinde KVK Kurulu tarafından belirlenen ücreti ödemem gerekebileceği hususunda aydınlatıldığımı beyan ve taahhüt ederim.
             </p>
             
             <div className="mb-4">
