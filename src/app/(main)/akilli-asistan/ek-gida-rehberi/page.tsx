@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/hooks/use-user';
@@ -31,11 +31,10 @@ export default function EkGidaRehberiPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAge, setSelectedAge] = useState<number | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [filteredIngredients, setFilteredIngredients] = useState<Ingredient[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
   
   const debouncedSearch = useDebounce(searchQuery, 500);
+  const isSearching = searchQuery !== debouncedSearch;
 
   // Auto-fill age from active child
   useEffect(() => {
@@ -55,7 +54,6 @@ export default function EkGidaRehberiPage() {
         const response = await ingredientService.getAll({ perPage: 100 });
         const data = Array.isArray(response) ? response : response.ingredients;
         setIngredients(data);
-        setFilteredIngredients(data);
       } catch (error) {
         console.error('Error loading ingredients:', error);
       } finally {
@@ -66,14 +64,11 @@ export default function EkGidaRehberiPage() {
   }, []);
 
   // Filter ingredients based on search and age
-  useEffect(() => {
+  const filteredIngredients = useMemo(() => {
     if (!debouncedSearch && !selectedAge) {
-      setFilteredIngredients(ingredients);
-      return;
+      return ingredients;
     }
 
-    setIsSearching(true);
-    
     let filtered = ingredients;
 
     // Filter by search query
@@ -102,8 +97,7 @@ export default function EkGidaRehberiPage() {
       });
     }
 
-    setFilteredIngredients(filtered);
-    setIsSearching(false);
+    return filtered;
   }, [debouncedSearch, selectedAge, ingredients]);
 
   const parseAgeMonths = (startAge: string): number => {
