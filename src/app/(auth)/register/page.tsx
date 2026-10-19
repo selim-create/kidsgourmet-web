@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/use-user";
 import { useGoogleAuth } from "@/hooks/use-google-auth";
 import { authService } from "@/services/auth-service";
+import type { RegisterData } from "@/lib/types";
 import { newsletterService } from "@/services/newsletterService";
 import { KIDSGOURMET_NEWSLETTER_SLUGS } from "@/lib/hiposta-newsletters";
 
@@ -83,7 +84,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const registerData: any = {
+      const registerData: RegisterData = {
         email,
         password,
         name,

@@ -4,6 +4,7 @@ import React from 'react';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import { useAds } from '@/contexts/AdContext';
 import { AdSlot } from './AdSlot';
+import type { AdSize } from '@/lib/ads/types';
 
 interface InFeedAdProps {
   className?: string;
@@ -29,7 +30,9 @@ export function InFeedAd({ className = '' }: InFeedAdProps) {
     
     // Prefer 300x250 for in-feed
     const hasCorrectSize = slot.sizes?.some(
-      (s: any) => (s.width === 300 && s.height === 250) || (Array.isArray(s) && s[0] === 300 && s[1] === 250)
+      (s: AdSize | [number, number]) =>
+        (!Array.isArray(s) && s.width === 300 && s.height === 250) ||
+        (Array.isArray(s) && s[0] === 300 && s[1] === 250)
     );
     
     return deviceMatch && hasCorrectSize;
