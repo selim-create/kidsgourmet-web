@@ -4,7 +4,6 @@
  * Ad Placeholder Component - Prevents CLS (Cumulative Layout Shift)
  */
 
-import React from 'react';
 import { AD_TEXT } from '@/lib/ads/constants';
 
 interface AdPlaceholderProps {

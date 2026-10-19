@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAds } from '@/contexts/AdContext';
 import { useDeviceType } from '@/hooks/useDeviceType';
 import adManager from '@/lib/ads/ad-manager';
