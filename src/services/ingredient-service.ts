@@ -16,10 +16,17 @@ export interface IngredientsResponse {
   pages: number;
 }
 
-// Type guard to check if response is paginated
-function isIngredientsResponse(response: any): response is IngredientsResponse {
-  return response && typeof response === 'object' && 'ingredients' in response && 'total' in response && 'pages' in response;
-}
+// Typed transport shapes only: values are still normalized by the existing
+// WordPress/custom-API transformer functions below.
+type RawIngredientEntry = Record<string, unknown>;
+type IngredientCollectionResponse =
+  | RawIngredientEntry[]
+  | {
+      data?: RawIngredientEntry[];
+      ingredients?: RawIngredientEntry[];
+      total?: number;
+      pages?: number;
+    };
 
 /**
  * Normalize season values coming from WordPress/custom API.
@@ -149,7 +156,7 @@ export const ingredientService = {
     
     try {
       // Önce özel kg/v1 endpoint'ini dene
-      const response = await fetchAPI<any>(`${API_ENDPOINTS.INGREDIENTS}?${params.toString()}`);
+      const response = await fetchAPI<IngredientCollectionResponse>(`${API_ENDPOINTS.INGREDIENTS}?${params.toString()}`);
       
       // Response format kontrolü
       if (Array.isArray(response)) {
@@ -171,7 +178,7 @@ export const ingredientService = {
       console.log('Falling back to WP REST API for ingredients');
       try {
         // Fallback: Standart WP REST API
-        const response = await fetchAPI<any[]>(
+        const response = await fetchAPI<RawIngredientEntry[]>(
           `${WP_API_NAMESPACE}/ingredient?page=${page}&per_page=${perPage}&_embed`
         );
         return (response || []).map(transformWPIngredient);
@@ -194,13 +201,13 @@ export const ingredientService = {
     
     try {
       // Önce özel kg/v1 endpoint'ini dene ve liste endpoint'iyle aynı normalizasyonu uygula.
-      const ingredient = await fetchAPI<any>(API_ENDPOINTS.INGREDIENT_BY_SLUG(slug));
+      const ingredient = await fetchAPI<RawIngredientEntry | null>(API_ENDPOINTS.INGREDIENT_BY_SLUG(slug));
       return ingredient ? transformIngredient(ingredient) : null;
     } catch (error) {
       console.log('Falling back to WP REST API for ingredient slug:', slug);
       try {
         // Fallback: Standart WP REST API
-        const ingredients = await fetchAPI<any[]>(
+        const ingredients = await fetchAPI<RawIngredientEntry[]>(
           `${WP_API_NAMESPACE}/ingredient?slug=${slug}&_embed`
         );
         if (ingredients && ingredients.length > 0) {
@@ -281,7 +288,7 @@ export const ingredientService = {
    */
   getBySeason: async (season: string): Promise<Ingredient[]> => {
     try {
-      const response = await fetchAPI<any>(`${API_ENDPOINTS.INGREDIENTS_BY_SEASON(season)}&per_page=10`);
+      const response = await fetchAPI<IngredientCollectionResponse>(`${API_ENDPOINTS.INGREDIENTS_BY_SEASON(season)}&per_page=10`);
       if (Array.isArray(response)) {
         return response.map(transformIngredient);
       } else if (response?.ingredients) {
