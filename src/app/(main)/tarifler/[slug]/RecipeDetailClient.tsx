@@ -117,7 +117,7 @@ const getMealTypeSlug = (mealTypeName: string): string => {
 };
 
 // Get author avatar with fallback
-const getAuthorAvatar = (author: any): string | null => {
+const getAuthorAvatar = (author: Recipe['author']): string | null => {
   if (!author) return null;
   
   // Try multiple possible avatar fields

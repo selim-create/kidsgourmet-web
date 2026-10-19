@@ -111,7 +111,11 @@ export const safetyService = {
       }
     );
     
-    const data = response as any;
-    return data?.results || data || {};
+    // API supports both a direct ID-keyed result and a wrapped { results } object.
+    const data = response;
+    if (data && typeof data === 'object' && 'results' in data && data.results) {
+      return data.results;
+    }
+    return data || {};
   }
 };
