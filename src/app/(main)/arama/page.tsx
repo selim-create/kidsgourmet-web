@@ -34,9 +34,18 @@ function SearchContent() {
   
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(query);
   const [activeTab, setActiveTab] = useState("all");
-  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>(
+    () => ageParam ? [ageParam] : []
+  );
+  const [previousAgeParam, setPreviousAgeParam] = useState(ageParam);
+
+  // URL changes should update the filter before displaying or fetching results.
+  // User-selected checkbox values remain untouched while the URL is unchanged.
+  if (ageParam !== previousAgeParam) {
+    setPreviousAgeParam(ageParam);
+    setSelectedAgeGroups(ageParam ? [ageParam] : []);
+  }
   
   // Select three distinct tools from the query, consistently across SSR and hydration.
   const toolOffset = Array.from(query).reduce(
@@ -49,13 +58,6 @@ function SearchContent() {
   );
   
   const { ageGroups } = useAgeGroups();
-
-  // Initialize age groups from URL parameter
-  useEffect(() => {
-    if (ageParam) {
-      setSelectedAgeGroups([ageParam]);
-    }
-  }, [ageParam]);
 
   // Perform search
   const performSearch = useCallback(async (searchQuery: string, ageGroup?: string) => {
@@ -80,26 +82,15 @@ function SearchContent() {
     }
   }, []);
 
-  // Effect to perform search when URL or age groups change
+  // Fetch only for the current URL/query and active age filter.
   useEffect(() => {
     if (query) {
-      setSearchTerm(query);
-      performSearch(query, selectedAgeGroups.length > 0 ? selectedAgeGroups.join(',') : undefined);
+      void performSearch(
+        query,
+        selectedAgeGroups.length > 0 ? selectedAgeGroups.join(',') : undefined
+      );
     }
   }, [query, selectedAgeGroups, performSearch]);
-
-  // Debounced search handler
-  useEffect(() => {
-    if (!searchTerm) return;
-    
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams();
-      params.set('q', searchTerm);
-      router.push(`/arama?${params.toString()}`);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, router]);
 
   // Dynamic tabs based on counts
   const tabs = searchData ? [
