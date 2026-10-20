@@ -23,9 +23,15 @@ export default function ExpertPublicProfilePage() {
   const params = useParams();
   const username = params.username as string;
   
-  const [profile, setProfile] = useState<ExpertPublicProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [profileResult, setProfileResult] = useState<{
+    username: string;
+    profile: ExpertPublicProfile | null;
+    error: string | null;
+  } | null>(null);
+  const currentResult = profileResult?.username === username ? profileResult : null;
+  const profile = currentResult?.profile ?? null;
+  const error = currentResult?.error ?? null;
+  const isLoading = currentResult === null;
   const [activeTab, setActiveTab] = useState<TabType>('recipes');
   // Pagination state'leri
   const [recipesLimit, setRecipesLimit] = useState(6);
@@ -33,21 +39,29 @@ export default function ExpertPublicProfilePage() {
   const [answersLimit, setAnswersLimit] = useState(6);
   const [questionsLimit, setQuestionsLimit] = useState(6);
 
+  // A username switch must not display the previous expert's public data.
+  // The effect only subscribes to an asynchronous response; no synchronous
+  // state reset is needed.
   useEffect(() => {
-    fetchProfile();
-  }, [username]);
+    let active = true;
 
-  const fetchProfile = async () => {
-    try {
-      setIsLoading(true);
-      const data = await userService.getExpertPublicProfile(username);
-      setProfile(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Profil yüklenemedi');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    void userService.getExpertPublicProfile(username).then(
+      (data) => {
+        if (active) setProfileResult({ username, profile: data, error: null });
+      },
+      (err) => {
+        if (active) {
+          setProfileResult({
+            username,
+            profile: null,
+            error: err instanceof Error ? err.message : 'Profil yüklenemedi',
+          });
+        }
+      }
+    );
+
+    return () => { active = false; };
+  }, [username]);
 
   if (isLoading) {
     return (
