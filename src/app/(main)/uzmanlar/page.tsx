@@ -15,7 +15,7 @@ export default function ExpertsListPage() {
   useEffect(() => {
     async function fetchExperts() {
       try {
-        setLoading(true);
+        // Initial loading state is already true; avoid an effect-driven reset.
         const data = await userService.getExperts();
         setExperts(Array.isArray(data) ? data : []);
       } catch (err) {

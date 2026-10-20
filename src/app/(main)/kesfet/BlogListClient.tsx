@@ -7,14 +7,17 @@ import { AdZone } from '@/components/ads';
 import { useAds } from '@/contexts/AdContext';
 import { useDeviceType } from '@/hooks/useDeviceType';
 
+const EMPTY_POSTS: BlogPost[] = [];
+
 export default function BlogListClient() {
   const [activeCategory, setActiveCategory] = useState<number | "Tümü">("Tümü");
-  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<Array<{ id: number; name: string; slug: string }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
+  const [postsResult, setPostsResult] = useState<{
+    key: string;
+    posts: BlogPost[];
+    totalPages: number;
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   
   const { hasSlotForPlacement } = useAds();
   const deviceType = useDeviceType();
@@ -24,54 +27,58 @@ export default function BlogListClient() {
   const hasMobileAd = hasSlotForPlacement('content-in-feed');
   const hasAnyAd = deviceType === 'mobile' ? hasMobileAd : hasDesktopAd;
   
-  // Reklam varsa grid'de 8, yoksa 9 gösterilecek
-  const getPostsPerPage = (page: number) => {
-    if (page === 1) {
-      // Hero (1) + Grid (8 veya 9) = 9 veya 10
-      return hasAnyAd ? 9 : 10;
-    }
-    // Diğer sayfalar: 8 veya 9
-    return hasAnyAd ? 8 : 9;
-  };
+  // Hero + grid size remains responsive to the active ad placement.
+  const postsPerPage = currentPage === 1
+    ? (hasAnyAd ? 9 : 10)
+    : (hasAnyAd ? 8 : 9);
+  const requestKey = JSON.stringify([currentPage, activeCategory, postsPerPage]);
+  const currentResult = postsResult?.key === requestKey ? postsResult : null;
+  const posts = currentResult?.posts ?? EMPTY_POSTS;
+  const totalPages = currentResult?.totalPages ?? 1;
+  const loading = currentResult === null;
+  const featuredPost = activeCategory === "Tümü" && currentPage === 1
+    ? posts[0] ?? null
+    : null;
 
-  // Verileri çek
+  // Categories are independent of the selected blog page and fetched once.
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        
-        // Kategorileri çek (sadece ilk yüklemede)
-        if (categories.length === 0) {
-          const cats = await blogService.getCategories();
-          setCategories(cats);
-        }
-
-        // Yazıları çek - Dinamik limit ile
-        const response = await blogService.getAll(
-          currentPage, 
-          getPostsPerPage(currentPage), 
-          activeCategory !== "Tümü" ? activeCategory : undefined
-        );
-        
-        setPosts(response.posts);
-        setTotalPages(response.totalPages);
-
-        // Öne çıkan yazı (ilk yazı, sadece "Tümü" sekmesinde ve ilk sayfada)
-        if (activeCategory === "Tümü" && currentPage === 1 && response.posts.length > 0) {
-          setFeaturedPost(response.posts[0]);
-        } else {
-          setFeaturedPost(null);
-        }
-
-      } catch (error) {
-        console.error("Blog verileri çekilemedi:", error);
-      } finally {
-        setLoading(false);
+    let active = true;
+    void blogService.getCategories().then(
+      (cats) => {
+        if (active) setCategories(cats);
+      },
+      (error) => {
+        console.error("Blog kategorileri çekilemedi:", error);
       }
-    }
+    );
+    return () => { active = false; };
+  }, []);
 
-    fetchData();
-  }, [activeCategory, currentPage, hasAnyAd]);
+  // Only asynchronous responses update React state. Older requests cannot
+  // overwrite the current category/page when users navigate quickly.
+  useEffect(() => {
+    let active = true;
+    void blogService.getAll(
+      currentPage,
+      postsPerPage,
+      activeCategory !== "Tümü" ? activeCategory : undefined
+    ).then(
+      (response) => {
+        if (active) {
+          setPostsResult({
+            key: requestKey,
+            posts: response.posts,
+            totalPages: response.totalPages,
+          });
+        }
+      },
+      (error) => {
+        console.error("Blog verileri çekilemedi:", error);
+        if (active) setPostsResult({ key: requestKey, posts: EMPTY_POSTS, totalPages: 1 });
+      }
+    );
+    return () => { active = false; };
+  }, [currentPage, postsPerPage, activeCategory, requestKey]);
 
   // Kategori değiştiğinde sayfayı sıfırla ve scroll to top
   const handleCategoryChange = (category: number | "Tümü") => {

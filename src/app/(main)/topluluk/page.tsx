@@ -218,9 +218,7 @@ export default function CommunityPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true);
-        setError(null);
-        
+        // Initial loading/error state already represents the fetch in progress.
         const [circlesData, discussionsData, contributorsData] = await Promise.all([
           getCircles(),
           getDiscussions({ per_page: 20 }),
