@@ -25,7 +25,9 @@ function AskQuestionForm() {
   const [submitting, setSubmitting] = useState(false);
   
   const [selectedCircleId, setSelectedCircleId] = useState<number | null>(null);
-  const [title, setTitle] = useState('');
+  const konu = searchParams.get('konu');
+  const [previousKonu, setPreviousKonu] = useState(konu);
+  const [title, setTitle] = useState(konu ?? '');
   const [content, setContent] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -46,13 +48,12 @@ function AskQuestionForm() {
     },
   });
 
-  // Initialize title from query parameter
-  useEffect(() => {
-    const konu = searchParams.get('konu');
-    if (konu) {
-      setTitle(konu);
-    }
-  }, [searchParams]);
+  // Keep the title in sync when the URL's konu parameter changes.
+  // Guarded render-time adjustment avoids an extra effect-driven render.
+  if (konu !== previousKonu) {
+    setPreviousKonu(konu);
+    if (konu) setTitle(konu);
+  }
 
   useEffect(() => {
     async function fetchCircles() {
