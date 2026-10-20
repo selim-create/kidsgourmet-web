@@ -1,31 +1,38 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import AppStoreButtons from '@/components/app/AppStoreButtons';
 import {
   APP_STORE_URL,
   GOOGLE_PLAY_URL,
-  detectMobilePlatform,
   getStoreUrl,
 } from '@/lib/app-links';
+import {
+  getBrowserMobilePlatform,
+  getServerMobilePlatform,
+  subscribeToStaticPlatform,
+} from '@/lib/app-platform-store';
 
 export default function DownloadAppPage() {
-  const [redirecting, setRedirecting] = useState(false);
+  // User agent is stable during this page visit; SSR/hydration initially show
+  // the fallback, then the matching store URL becomes available on the client.
+  const platform = useSyncExternalStore(
+    subscribeToStaticPlatform,
+    getBrowserMobilePlatform,
+    getServerMobilePlatform
+  );
+  const storeUrl = getStoreUrl(platform);
 
   useEffect(() => {
-    const platform = detectMobilePlatform(window.navigator.userAgent);
-    const storeUrl = getStoreUrl(platform);
-
     if (!storeUrl) return;
 
-    setRedirecting(true);
     const timeout = window.setTimeout(() => {
       window.location.replace(storeUrl);
     }, 350);
 
     return () => window.clearTimeout(timeout);
-  }, []);
+  }, [storeUrl]);
 
   return (
     <section className="min-h-[70vh] bg-gradient-to-br from-orange-50 via-white to-yellow-50 px-4 py-16 sm:px-6 lg:px-8">
@@ -49,7 +56,7 @@ export default function DownloadAppPage() {
               Sağlıklı tariflere, beslenme rehberlerine ve akıllı araçlara tek uygulamadan ulaş.
             </p>
 
-            {redirecting && (
+            {storeUrl && (
               <p className="mt-5 text-sm font-semibold text-orange-600" role="status">
                 Seni uygun uygulama mağazasına yönlendiriyoruz…
               </p>
