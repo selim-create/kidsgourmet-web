@@ -1,45 +1,36 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
+import { APP_DOWNLOAD_PATH, getStoreUrl } from '@/lib/app-links';
 import {
-  APP_DOWNLOAD_PATH,
-  detectMobilePlatform,
-  getStoreUrl,
-  type MobilePlatform,
-} from '@/lib/app-links';
-
-const DISMISS_KEY = 'kg_app_banner_dismissed_at';
-const DISMISS_DURATION_MS = 14 * 24 * 60 * 60 * 1000;
+  BANNER_DISMISS_KEY,
+  getBannerPlatform,
+  getServerMobilePlatform,
+  subscribeToBannerEligibility,
+} from '@/lib/app-platform-store';
 
 export default function MobileAppBanner() {
   const pathname = usePathname();
-  const [platform, setPlatform] = useState<MobilePlatform>('other');
-  const [visible, setVisible] = useState(false);
+  // Browser-only eligibility is an external snapshot, not effect-owned React state.
+  // The server snapshot stays hidden until the client has hydrated.
+  const platform = useSyncExternalStore(
+    subscribeToBannerEligibility,
+    getBannerPlatform,
+    getServerMobilePlatform
+  );
+  const [dismissedHere, setDismissedHere] = useState(false);
+  const storeUrl = getStoreUrl(platform);
 
-  useEffect(() => {
-    if (pathname === APP_DOWNLOAD_PATH) return;
-    if (!window.matchMedia('(max-width: 767px)').matches) return;
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-
-    const detectedPlatform = detectMobilePlatform(window.navigator.userAgent);
-    if (detectedPlatform === 'other') return;
-
-    const dismissedAt = Number(window.localStorage.getItem(DISMISS_KEY) || 0);
-    if (dismissedAt && Date.now() - dismissedAt < DISMISS_DURATION_MS) return;
-
-    setPlatform(detectedPlatform);
-    setVisible(true);
-  }, [pathname]);
-
-  const storeUrl = useMemo(() => getStoreUrl(platform), [platform]);
-
-  if (!visible || !storeUrl) return null;
+  if (pathname === APP_DOWNLOAD_PATH || dismissedHere || !storeUrl) return null;
 
   const handleDismiss = () => {
-    window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
-    setVisible(false);
+    try {
+      window.localStorage.setItem(BANNER_DISMISS_KEY, String(Date.now()));
+    } finally {
+      setDismissedHere(true);
+    }
   };
 
   return (
