@@ -48,9 +48,15 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
   const sponsorName = sponsorMeta.sponsor_name || 'Sponsor';
   const sponsorLogo = sponsorMeta.sponsor_logo || '';
 
-  useEffect(() => {
-    // Reset to first item when filter changes
+  const handleFilterChange = (nextFilter: FeaturedContentType | 'all') => {
+    if (nextFilter === filter) return;
+
     setCurrentIndex(0);
+    setFilter(nextFilter);
+  };
+
+  useEffect(() => {
+    // Scroll to the first card after the filtered cards have rendered.
     if (sliderRef.current) {
       sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
     }
@@ -121,7 +127,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
             {/* Filter Chips - Mobilde yatay scroll */}
             <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide md:flex-wrap md:overflow-visible">
               <button
-                onClick={() => setFilter('all')}
+                onClick={() => handleFilterChange('all')}
                 className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                   filter === 'all'
                     ? 'border-orange-500 bg-white text-orange-500'
@@ -133,7 +139,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               
               {typeCounts.recipe > 0 && (
                 <button
-                  onClick={() => setFilter('recipe')}
+                  onClick={() => handleFilterChange('recipe')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'recipe'
                       ? 'border-orange-500 bg-orange-500 text-white'
@@ -146,7 +152,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               
               {typeCounts.blog > 0 && (
                 <button
-                  onClick={() => setFilter('blog')}
+                  onClick={() => handleFilterChange('blog')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'blog'
                       ? 'border-blue-200 bg-blue-50 text-blue-600'
@@ -159,7 +165,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               
               {typeCounts.question > 0 && (
                 <button
-                  onClick={() => setFilter('question')}
+                  onClick={() => handleFilterChange('question')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'question'
                       ? 'border-purple-200 bg-purple-50 text-purple-500'
@@ -172,7 +178,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               
               {typeCounts.sponsored > 0 && (
                 <button
-                  onClick={() => setFilter('sponsored')}
+                  onClick={() => handleFilterChange('sponsored')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all flex items-center gap-2 whitespace-nowrap ${
                     filter === 'sponsored'
                       ? 'bg-slate-700 text-white border-slate-700'
@@ -190,7 +196,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               
               {typeCounts.ingredient > 0 && (
                 <button
-                  onClick={() => setFilter('ingredient')}
+                  onClick={() => handleFilterChange('ingredient')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'ingredient'
                       ? 'border-green-200 bg-green-50 text-green-600'
@@ -203,7 +209,7 @@ export default function FeaturedSlider({ items }: FeaturedSliderProps) {
               
               {typeCounts.tool > 0 && (
                 <button
-                  onClick={() => setFilter('tool')}
+                  onClick={() => handleFilterChange('tool')}
                   className={`featured-filter px-4 py-2 rounded-full text-sm font-bold border transition-all whitespace-nowrap ${
                     filter === 'tool'
                       ? 'border-indigo-200 bg-indigo-50 text-indigo-600'
