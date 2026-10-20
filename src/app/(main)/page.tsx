@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, FormEvent } from 'react';
+import { selectStablePromoTools } from '@/lib/stable-promo-tools';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { recipeService } from '@/services/recipe-service';
@@ -52,8 +53,8 @@ export default function Home() {
   const [tariftenRecipe, setTariftenRecipe] = useState<TariftenRecipe | null>(null);
   const [rejimdeContent, setRejimdeContent] = useState<RejimdeContent | null>(null);
   
-  // Random tools state - Hydration safe
-  const [randomTools, setRandomTools] = useState<typeof ALL_TOOLS>([]);
+  // Stable home recommendations, without an extra hydration render.
+  const randomTools = selectStablePromoTools(ALL_TOOLS, 'home');
   
   // Age dropdown state
   const [isAgeDropdownOpen, setIsAgeDropdownOpen] = useState(false);
@@ -161,17 +162,7 @@ export default function Home() {
     fetchData();
   }, []);
   
-  // Random tools selection - Client Side Only to prevent hydration error
-  useEffect(() => {
-    // Fisher-Yates shuffle algorithm for proper randomization
-    const shuffled = [...ALL_TOOLS];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    setRandomTools(shuffled.slice(0, 4));
-  }, []);
-  
+
   // Click outside handler for age dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -518,8 +509,8 @@ export default function Home() {
 
               {/* Mobil için yatay scroll */}
               <div className="lg:hidden flex overflow-x-auto pb-6 -mx-4 px-4 gap-4 snap-x snap-mandatory scrollbar-hide">
-                  {randomTools.map((tool, index) => (
-                      <div key={index} className="flex-none snap-center w-[260px] bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg transition-all flex flex-col">
+                  {randomTools.map((tool) => (
+                       <div key={tool.path} className="flex-none snap-center w-[260px] bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg transition-all flex flex-col">
                         <div className={`w-16 h-16 ${tool.bg} ${tool.color} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
                           <i className={`${tool.icon}`}></i>
                         </div>
@@ -535,8 +526,8 @@ export default function Home() {
 
               {/* Desktop için grid */}
               <div className="hidden lg:grid grid-cols-4 gap-6">
-                {randomTools.map((tool, index) => (
-                    <div key={index} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col">
+                {randomTools.map((tool) => (
+                       <div key={tool.path} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-2 transition-all duration-300 flex flex-col">
                       <div className={`w-16 h-16 ${tool.bg} ${tool.color} rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-sm`}>
                         <i className={`${tool.icon}`}></i>
                       </div>
