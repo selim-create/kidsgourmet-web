@@ -38,8 +38,15 @@ function SearchContent() {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
   
-  // Sidebar Tools State
-  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+  // Select three distinct tools from the query, consistently across SSR and hydration.
+  const toolOffset = Array.from(query).reduce(
+    (hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0,
+    0
+  ) % ALL_TOOLS.length;
+  const sidebarTools = Array.from(
+    { length: 3 },
+    (_, index) => ALL_TOOLS[(toolOffset + index * 5) % ALL_TOOLS.length]
+  );
   
   const { ageGroups } = useAgeGroups();
 
@@ -49,12 +56,6 @@ function SearchContent() {
       setSelectedAgeGroups([ageParam]);
     }
   }, [ageParam]);
-
-  // Initialize Random Tools (3 adet)
-  useEffect(() => {
-    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
-    setSidebarTools(shuffled.slice(0, 3));
-  }, []);
 
   // Perform search
   const performSearch = useCallback(async (searchQuery: string, ageGroup?: string) => {
@@ -470,19 +471,10 @@ function SearchContent() {
                     {/* Faydalı Araçlar (Random Tool Cards) */}
                     <div className="space-y-4">
                         <h3 className="font-bold text-slate-800 px-1">Faydalı Araçlar</h3>
-                        {/* Rastgele seçilen 3 araç gösterilir.
-                          Hydration Error'ı önlemek için useEffect içinde seçim yapılır.
-                          Loading state sırasında placeholder gösterilir.
-                        */}
-                        {sidebarTools.length === 0 ? (
-                            // Loading Skeleton
-                            [1, 2, 3].map((i) => (
-                                <div key={i} className="bg-gray-100 p-4 rounded-2xl h-24 animate-pulse"></div>
-                            ))
-                        ) : (
-                            sidebarTools.map((tool, index) => (
+                        {/* Three stable, query-specific tools with no post-mount flicker. */}
+                        {sidebarTools.map((tool) => (
                                 <Link 
-                                  key={index}
+                                  key={tool.path}
                                   href={tool.path}
                                   className={`block bg-gradient-to-br ${tool.color} p-4 rounded-2xl text-white hover:shadow-lg transition-all group relative overflow-hidden`}
                                 >
@@ -502,8 +494,7 @@ function SearchContent() {
                                       </div>
                                   </div>
                                 </Link>
-                            ))
-                        )}
+                            ))}
                     </div>
 
                 </aside>
