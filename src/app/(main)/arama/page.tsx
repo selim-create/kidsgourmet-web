@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useEffect, useCallback } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link'; 
 import { searchService, SearchResponse } from '@/services/search-service';
@@ -32,8 +32,11 @@ function SearchContent() {
   const query = searchParams.get('q') || "";
   const ageParam = searchParams.get('age') || "";
   
-  const [searchData, setSearchData] = useState<SearchResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Keep each response paired with the URL and filter used to fetch it.
+  const [searchResult, setSearchResult] = useState<{
+    key: string;
+    data: SearchResponse | null;
+  }>({ key: '', data: null });
   const [activeTab, setActiveTab] = useState("all");
   const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>(
     () => ageParam ? [ageParam] : []
@@ -59,38 +62,36 @@ function SearchContent() {
   
   const { ageGroups } = useAgeGroups();
 
-  // Perform search
-  const performSearch = useCallback(async (searchQuery: string, ageGroup?: string) => {
-    if (!searchQuery.trim()) {
-      setSearchData(null);
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const result = await searchService.search({
-        q: searchQuery,
-        type: 'all',
-        age_group: ageGroup,
-        per_page: 50,
-      });
-      setSearchData(result);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const ageGroupKey = selectedAgeGroups.join(',');
+  const requestKey = JSON.stringify([query, ageGroupKey]);
+  const searchData = searchResult.key === requestKey ? searchResult.data : null;
+  const loading = Boolean(query.trim()) && searchResult.key !== requestKey;
 
-  // Fetch only for the current URL/query and active age filter.
+  // React state only changes when a network request settles, not synchronously
+  // from this effect. Outdated responses cannot replace newer search results.
   useEffect(() => {
-    if (query) {
-      void performSearch(
-        query,
-        selectedAgeGroups.length > 0 ? selectedAgeGroups.join(',') : undefined
-      );
-    }
-  }, [query, selectedAgeGroups, performSearch]);
+    if (!query.trim()) return;
+
+    let cancelled = false;
+    void searchService.search({
+      q: query,
+      type: 'all',
+      age_group: ageGroupKey || undefined,
+      per_page: 50,
+    }).then(
+      (result) => {
+        if (!cancelled) setSearchResult({ key: requestKey, data: result });
+      },
+      (error) => {
+        console.error('Search error:', error);
+        if (!cancelled) setSearchResult({ key: requestKey, data: null });
+      }
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [query, ageGroupKey, requestKey]);
 
   // Dynamic tabs based on counts
   const tabs = searchData ? [
@@ -436,9 +437,6 @@ function SearchContent() {
                             <button
                                 onClick={() => {
                                     setSelectedAgeGroups([]);
-                                    if (query) {
-                                        performSearch(query);
-                                    }
                                 }}
                                 className="text-xs text-orange-500 hover:text-orange-600 font-bold"
                             >
