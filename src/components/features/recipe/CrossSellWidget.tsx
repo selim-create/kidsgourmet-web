@@ -11,44 +11,46 @@ interface CrossSellWidgetProps {
   recipeTitle: string;
 }
 
-export default function CrossSellWidget({ crossSell, ingredients, recipeTitle }: CrossSellWidgetProps) {
-  const [suggestion, setSuggestion] = useState<TariftenRecipe | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [usedIngredient, setUsedIngredient] = useState<string>('');
+export default function CrossSellWidget({ crossSell, ingredients }: CrossSellWidgetProps) {
+  const names = [
+    ingredients?.[0]?.name || ingredients?.[0]?.text || '',
+    ingredients?.[1]?.name || ingredients?.[1]?.text || '',
+    ingredients?.[2]?.name || ingredients?.[2]?.text || '',
+  ];
+  const [firstName, secondName, thirdName] = names;
+  const key = JSON.stringify(names);
+  const hasManual = Boolean(crossSell?.url);
+  const [result, setResult] = useState<{
+    key: string;
+    suggestion: TariftenRecipe | null;
+    usedIngredient: string;
+  } | null>(null);
+  const current = result?.key === key ? result : null;
+  const suggestion = current?.suggestion ?? null;
+  const usedIngredient = current?.usedIngredient ?? '';
+  const loading = !hasManual && names.some(Boolean) && current === null;
 
   useEffect(() => {
-    // Eğer manuel cross-sell varsa, onu kullan
-    if (crossSell?.url) {
-      return;
-    }
-
-    // Yoksa otomatik öneri getir
-    const fetchSuggestion = async () => {
-      if (!ingredients || ingredients.length === 0) return;
-      
-      // İlk 3 malzemeden birini dene
-      const mainIngredients = ingredients.slice(0, 3);
-      
-      for (const ing of mainIngredients) {
-        const ingredientName = ing.name || ing.text || '';
+    if (hasManual || !(firstName || secondName || thirdName)) return;
+    let active = true;
+    const load = async () => {
+      for (const ingredientName of [firstName, secondName, thirdName]) {
         if (!ingredientName) continue;
-        
-        setLoading(true);
         const suggestions = await tariftenService.getByIngredient(ingredientName, 1);
-        
-        if (suggestions.length > 0) {
-          setSuggestion(suggestions[0]);
-          setUsedIngredient(ingredientName);
-          setLoading(false);
+        if (!active) return;
+        if (suggestions.length) {
+          setResult({ key, suggestion: suggestions[0], usedIngredient: ingredientName });
           return;
         }
       }
-      
-      setLoading(false);
+      if (active) setResult({ key, suggestion: null, usedIngredient: '' });
     };
-
-    fetchSuggestion();
-  }, [crossSell, ingredients]);
+    void load().catch((error) => {
+      console.error('Automatic cross-sell suggestion failed:', error);
+      if (active) setResult({ key, suggestion: null, usedIngredient: '' });
+    });
+    return () => { active = false; };
+  }, [hasManual, firstName, secondName, thirdName, key]);
 
   // Hiçbir öneri yoksa widget'ı gösterme
   if (!crossSell?.url && !suggestion && !loading) {
