@@ -5,7 +5,6 @@ import { commentService, Comment } from '@/services/comment-service';
 import { useUser } from '@/hooks/use-user';
 import { toast } from 'sonner';
 import { formatRelativeTime, sanitizeHTML } from '@/utils/helpers';
-import { useRouter } from 'next/navigation';
 import AuthRequiredBanner from '@/components/ui/AuthRequiredBanner';
 
 interface CommentSectionProps {
@@ -15,26 +14,32 @@ interface CommentSectionProps {
 }
 
 export default function CommentSection({ postId, postType, initialCommentCount = 0 }: CommentSectionProps) {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<{ postId: number; comments: Comment[] } | null>(null);
+  const comments = result?.postId === postId ? result.comments : [];
+  const loading = result?.postId !== postId;
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { user, isAuthenticated } = useUser();
-  const router = useRouter();
 
   useEffect(() => {
-    async function fetchComments() {
-      try {
-        setLoading(true);
-        const data = await commentService.getComments(postId);
-        setComments(data);
-      } catch (error) {
+    let active = true;
+    void commentService.getComments(postId).then(
+      (data) => {
+        if (active) setResult((previous) => {
+          const added = previous?.postId === postId
+            ? previous.comments.filter(comment => !data.some(item => item.id === comment.id))
+            : [];
+          return { postId, comments: [...data, ...added] };
+        });
+      },
+      (error) => {
         console.error('Yorumlar yüklenirken hata:', error);
-      } finally {
-        setLoading(false);
+        if (active) setResult((previous) =>
+          previous?.postId === postId ? previous : { postId, comments: [] }
+        );
       }
-    }
-    fetchComments();
+    );
+    return () => { active = false; };
   }, [postId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +57,10 @@ export default function CommentSection({ postId, postType, initialCommentCount =
         post_id: postId,
         content: commentText.trim(),
       });
-      setComments(prev => [...prev, newComment]);
+      setResult((previous) => ({
+        postId,
+        comments: [...(previous?.postId === postId ? previous.comments : []), newComment],
+      }));
       setCommentText('');
       toast.success('Yorumunuz eklendi!');
     } catch (error) {
