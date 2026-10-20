@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, use } from 'react';
+import { selectStablePromoTools } from '@/lib/stable-promo-tools';
 import Link from "next/link";
 import { notFound, useRouter } from 'next/navigation';
 import { ingredientService } from '@/services/ingredient-service';
@@ -38,14 +39,9 @@ const ALL_TOOLS = [
 export default function IngredientDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
 
-  // 2. ADIM: Hooks (useState, useEffect) BURADA, fonksiyonun EN BAŞINDA olmalı
-  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+  // Same article / recipe / ingredient always shows the same four tools.
+  const sidebarTools = selectStablePromoTools(ALL_TOOLS, slug);
 
-  useEffect(() => {
-    // Sayfa yüklendiğinde 16 araçtan rastgele 4 tanesini seç
-    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
-    setSidebarTools(shuffled.slice(0, 4));
-  }, []);
 
   const [ingredient, setIngredient] = useState<Ingredient | null>(null);
   const [loading, setLoading] = useState(true);
@@ -727,24 +723,14 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                         {/* 3. Sidebar - Middle (300x600) */}
                         <AdZone placement="sidebar-middle" />
 
-                        {/* 4. SIDEBAR ARAÇLAR - Rastgele 4 Faydalı Araç */}
+                        {/* 4. SIDEBAR ARAÇLAR - Faydalı Araçlar */}
                         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5">
                           <h3 className="font-bold text-slate-800 mb-4 flex items-center">
                             <i className="fa-solid fa-wand-magic-sparkles text-green-500 mr-2"></i> 
                             Faydalı Araçlar
                           </h3>
                           <div className="space-y-2">
-                            {/* Loading State veya Araç Listesi */}
-                            {sidebarTools.length === 0 ? (
-                              // Yüklenirken gösterilecek skeleton (titreme efekti)
-                              [1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 animate-pulse">
-                                  <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
-                                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                                </div>
-                              ))
-                            ) : (
-                              sidebarTools.map((tool) => (
+                            {sidebarTools.map((tool) => (
                                 <Link
                                   key={tool.path}
                                   href={tool.path}
@@ -758,8 +744,7 @@ export default function IngredientDetailPage({ params }: { params: Promise<{ slu
                                   </span>
                                   <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
                                 </Link>
-                              ))
-                            )}
+                              ))}
                           </div>
                         </div>
                         
