@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import { selectStablePromoTools } from '@/lib/stable-promo-tools';
 import Link from "next/link";
 import { notFound, useRouter } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
@@ -189,14 +190,9 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
   const { slug } = use(params);
   const router = useRouter();
   
-  // Sidebar Tools State - EN ÜSTTE
-  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+  // Same article / recipe / ingredient always shows the same four tools.
+  const sidebarTools = selectStablePromoTools(ALL_TOOLS, slug);
 
-  useEffect(() => {
-    // Sayfa yüklendiğinde 16 araçtan rastgele 4 tanesini seç
-    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
-    setSidebarTools(shuffled.slice(0, 4));
-  }, []);
   
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1025,17 +1021,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                         Faydalı Araçlar
                       </h3>
                       <div className="space-y-2">
-                        {/* Loading State veya Araç Listesi */}
-                        {sidebarTools.length === 0 ? (
-                          // Yüklenirken gösterilecek skeleton
-                          [1, 2, 3, 4].map((i) => (
-                            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 animate-pulse">
-                              <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
-                              <div className="h-4 bg-gray-200 rounded w-24"></div>
-                            </div>
-                          ))
-                        ) : (
-                          sidebarTools.map((tool) => (
+                        {sidebarTools.map((tool) => (
                             <Link
                               key={tool.path}
                               href={tool.path}
@@ -1049,8 +1035,7 @@ export default function RecipeDetailPage({ params }: { params: Promise<{ slug: s
                               </span>
                               <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
                             </Link>
-                          ))
-                        )}
+                          ))}
                       </div>
                     </div>
                     
