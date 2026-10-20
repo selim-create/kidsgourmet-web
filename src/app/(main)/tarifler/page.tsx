@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
-import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { recipeService } from '@/services/recipe-service';
 import { RecipeCard as RecipeCardType } from '@/lib/types';
@@ -9,13 +8,11 @@ import { useChildProfile } from '@/contexts/ChildProfileContext';
 import { useAgeGroups } from '@/hooks/useAgeGroups';
 import { useMealTypes } from '@/hooks/useMealTypes';
 import { useDietTypes } from '@/hooks/useDietTypes';
-import { useFavorites } from '@/hooks/use-favorites';
 import { decodeEntities } from '@/utils/textHelpers';
 import ClientHead from '@/components/seo/ClientHead';
-import { useActiveChild } from '@/contexts/ActiveChildContext';
 import RecipeCard from '@/components/ui/RecipeCard';
 import { useAds } from '@/contexts/AdContext';
-import { InContentAd, InFeedAdWrapper, FooterBannerAd, AdZone } from '@/components/ads';
+import { FooterBannerAd, AdZone } from '@/components/ads';
 
 // Yaş Grubu Sıralaması
 const AGE_GROUPS_ORDER = [
@@ -64,6 +61,16 @@ function filtersFromUrl(params: { get: (name: string) => string | null }): Filte
 }
 
 // Age Group with Display Label
+interface RecipeListResult {
+  key: string;
+  recipes: RecipeCardType[];
+  total: number;
+  totalPages: number;
+}
+
+const RECIPES_PER_PAGE = 12;
+const EMPTY_RECIPE_CARDS: RecipeCardType[] = [];
+
 interface AgeGroupWithLabel {
   id: number;
   name: string;
@@ -84,21 +91,16 @@ interface AgeGroupWithLabel {
 
 function RecipesPageContent() {
   const searchParams = useSearchParams();
-  const [recipes, setRecipes] = useState<RecipeCardType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [recipeResult, setRecipeResult] = useState<RecipeListResult | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalRecipes, setTotalRecipes] = useState(0);
   const [sortBy, setSortBy] = useState<'date' | 'popular' | 'prep_time'>('date');
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   
-  const RECIPES_PER_PAGE = 12;
   
   const { profile } = useChildProfile();
   const { ageGroups } = useAgeGroups();
   const { mealTypes } = useMealTypes();
   const { dietTypes } = useDietTypes();
-  const { activeChild } = useActiveChild();
   const { hasSlotForPlacement } = useAds(); // Bu satırı ekleyin
 
   // Reklam kontrolü için
@@ -121,55 +123,79 @@ function RecipesPageContent() {
     }
   }
   
-  // Tarifleri getir
-  const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, orderBy: string) => {
-    try {
-      setLoading(true);
-      
-      // prep_time için özel order değeri
-      const orderValue = orderBy === 'prep_time' ? 'asc' : 'desc';
-      
-      const data = await recipeService.getAll({
-        page,
-        perPage: RECIPES_PER_PAGE,
-        ageGroup: currentFilters.ageGroups.join(','),
-        mealType: currentFilters.mealTypes.join(','),
-        dietType: currentFilters.dietTypes.join(','),
-        specialCondition: currentFilters.specialConditions.join(','),
-        ingredient: currentFilters.ingredientSearch,
-        orderBy: orderBy as 'date' | 'popular' | 'prep_time',
-        order: orderValue,
-        expertApproved: currentFilters.expertApproved,
-      });
-      
-      // Response kontrolü
-      if (data && data.recipes) {
-        setRecipes(data.recipes);
-        setTotalRecipes(data.total || 0);
-        // API total_pages düzgün dönmezse hesapla
-        const calculatedTotalPages = data.total_pages > 1 
-          ? data.total_pages 
-          : Math.ceil((data.total || data.recipes.length) / RECIPES_PER_PAGE);
-        setTotalPages(calculatedTotalPages);
-      } else {
-        setRecipes([]);
-        setTotalRecipes(0);
-        setTotalPages(1);
-      }
-    } catch (error) {
-      console.error("Tarifler yüklenirken hata oluştu:", error);
-      setRecipes([]);
-      setTotalRecipes(0);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Stable request identity prevents results from an older page or filter from
+  // appearing after navigation. Loading is derived instead of set in an effect.
+  const ageGroup = filters.ageGroups.join(',');
+  const mealType = filters.mealTypes.join(',');
+  const dietType = filters.dietTypes.join(',');
+  const specialCondition = filters.specialConditions.join(',');
+  const ingredient = filters.ingredientSearch;
+  const expertApproved = filters.expertApproved;
+  const requestKey = JSON.stringify([
+    currentPage, sortBy, ageGroup, mealType, dietType,
+    specialCondition, ingredient, expertApproved,
+  ]);
+  const currentResult = recipeResult?.key === requestKey ? recipeResult : null;
+  const recipes = currentResult?.recipes ?? EMPTY_RECIPE_CARDS;
+  const totalRecipes = currentResult?.total ?? 0;
+  const totalPages = currentResult?.totalPages ?? 1;
+  const loading = currentResult === null;
 
-  // İlk yükleme ve filtre/sıralama değişimlerinde fetch
   useEffect(() => {
-    fetchRecipes(currentPage, filters, sortBy);
-  }, [currentPage, filters, sortBy, fetchRecipes]);
+    let active = true;
+
+    void recipeService.getAll({
+      page: currentPage,
+      perPage: RECIPES_PER_PAGE,
+      ageGroup,
+      mealType,
+      dietType,
+      specialCondition,
+      ingredient,
+      orderBy: sortBy,
+      order: sortBy === 'prep_time' ? 'asc' : 'desc',
+      expertApproved,
+    }).then(
+      (data) => {
+        if (!active) return;
+        if (data && data.recipes) {
+          const total = data.total || 0;
+          setRecipeResult({
+            key: requestKey,
+            recipes: data.recipes,
+            total,
+            totalPages: data.total_pages > 1
+              ? data.total_pages
+              : Math.ceil((total || data.recipes.length) / RECIPES_PER_PAGE),
+          });
+        } else {
+          setRecipeResult({
+            key: requestKey,
+            recipes: EMPTY_RECIPE_CARDS,
+            total: 0,
+            totalPages: 1,
+          });
+        }
+      },
+      (error) => {
+        if (!active) return;
+        console.error('Tarifler yüklenirken hata oluştu:', error);
+        setRecipeResult({
+          key: requestKey,
+          recipes: EMPTY_RECIPE_CARDS,
+          total: 0,
+          totalPages: 1,
+        });
+      },
+    );
+
+    return () => {
+      active = false;
+    };
+  }, [
+    requestKey, currentPage, sortBy, ageGroup, mealType,
+    dietType, specialCondition, ingredient, expertApproved,
+  ]);
 
   // Filtre değiştir
   const handleFilterChange = (filterType: keyof FilterState, value: string) => {
