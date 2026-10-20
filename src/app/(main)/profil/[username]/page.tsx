@@ -9,32 +9,41 @@ import { PublicProfile } from '@/lib/types';
 export default function PublicProfilePage() {
   const params = useParams();
   const username = params.username as string;
-  const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Bind public profile results to the route so a previous user's profile
+  // cannot be displayed after navigating to a different username.
+  const [profileResult, setProfileResult] = useState<{
+    username: string;
+    profile: PublicProfile | null;
+    error: string | null;
+  } | null>(null);
+  const currentResult = profileResult?.username === username ? profileResult : null;
+  const profile = currentResult?.profile ?? null;
+  const error = currentResult?.error ?? null;
+  const isLoading = currentResult === null;
 
   useEffect(() => {
-    if (username) {
-      fetchPublicProfile();
-    }
-  }, [username]);
+    if (!username) return;
+    let active = true;
+    const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
 
-  const fetchPublicProfile = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      // Remove @ symbol if present
-      const cleanUsername = username.startsWith('@') ? username.slice(1) : username;
-      const data = await userService.getPublicProfile(cleanUsername);
-      setProfile(data);
-    } catch (err) {
-      console.error('Public profile fetch error:', err);
-      setError(err instanceof Error ? err.message : 'Profil yüklenirken hata oluştu');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    void userService.getPublicProfile(cleanUsername).then(
+      (data) => {
+        if (active) setProfileResult({ username, profile: data, error: null });
+      },
+      (err) => {
+        console.error('Public profile fetch error:', err);
+        if (active) {
+          setProfileResult({
+            username,
+            profile: null,
+            error: err instanceof Error ? err.message : 'Profil yüklenirken hata oluştu',
+          });
+        }
+      }
+    );
+
+    return () => { active = false; };
+  }, [username]);
 
   // Loading state
   if (isLoading) {
