@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import Link from 'next/link';
 import { FeaturedItem } from '@/services/featured-service';
 
@@ -29,10 +28,13 @@ const SMART_TOOLS = [
 ];
 
 export default function ToolCard({ item }: ToolCardProps) {
-  // Pick a random tool - use useState to ensure it stays consistent across renders
-  const [randomTool] = React.useState(() => {
-    return SMART_TOOLS[Math.floor(Math.random() * SMART_TOOLS.length)];
-  });
+  // A stable tool per featured item avoids random values during SSR and hydration.
+  const seed = `${item.id}:${item.slug}`;
+  const toolIndex = Array.from(seed).reduce(
+    (hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0,
+    0
+  ) % SMART_TOOLS.length;
+  const randomTool = SMART_TOOLS[toolIndex];
 
   return (
     <Link
