@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CollectionInput, Collection } from '@/lib/types';
 
 interface CreateCollectionModalProps {
@@ -44,41 +44,56 @@ const colorOptions = [
   { value: 'teal', hex: '#4DB6AC', label: 'Turkuaz' },
 ];
 
-export default function CreateCollectionModal({ 
-  isOpen, 
-  onClose, 
-  onSubmit, 
-  editMode = false, 
-  initialData 
+type InitialCollectionData = CreateCollectionModalProps['initialData'];
+type CollectionFormProps = Omit<CreateCollectionModalProps, 'isOpen'>;
+
+const initialIcon = (data?: InitialCollectionData): string => {
+  const cleanIcon = data?.icon.replace('fa-solid fa-', '').replace('fa-', '');
+  return iconOptions.find(option => option.value === cleanIcon)?.value || iconOptions[0].value;
+};
+
+const initialColor = (data?: InitialCollectionData): string => {
+  return colorOptions.find(option => option.value === data?.color)?.value
+    || colorOptions.find(option => option.hex === data?.color)?.value
+    || colorOptions[0].value;
+};
+
+export default function CreateCollectionModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  editMode = false,
+  initialData,
 }: CreateCollectionModalProps) {
-  const [name, setName] = useState('');
-  const [selectedIcon, setSelectedIcon] = useState(iconOptions[0].value);
-  const [selectedColor, setSelectedColor] = useState(colorOptions[0].value);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Edit modu verilerini yükle veya formu sıfırla
-  useEffect(() => {
-    if (isOpen) {
-      if (editMode && initialData) {
-        setName(initialData.name);
-        // İkon ismini temizle (örn: 'fa-solid fa-star' -> 'star')
-        const cleanIcon = initialData.icon.replace('fa-solid fa-', '').replace('fa-', '');
-        const matchedIcon = iconOptions.find(opt => opt.value === cleanIcon);
-        setSelectedIcon(matchedIcon ? matchedIcon.value : iconOptions[0].value);
-
-        // Renk eşleştirmesi - Backend renk ismi ('orange') veya HEX döndürebilir
-        const matchedColorByName = colorOptions.find(opt => opt.value === initialData.color);
-        const matchedColorByHex = colorOptions.find(opt => opt.hex === initialData.color);
-        setSelectedColor(matchedColorByName?.value || matchedColorByHex?.value || colorOptions[0].value);
-      } else {
-        setName('');
-        setSelectedIcon(iconOptions[0].value);
-        setSelectedColor(colorOptions[0].value);
-      }
-    }
-  }, [isOpen, editMode, initialData]);
-
+  // Closing unmounts the form; changing edit data starts a fresh draft.
   if (!isOpen) return null;
+
+  const formKey = editMode && initialData
+    ? JSON.stringify([initialData.name, initialData.icon, initialData.color])
+    : 'new-collection';
+
+  return (
+    <CollectionForm
+      key={formKey}
+      onClose={onClose}
+      onSubmit={onSubmit}
+      editMode={editMode}
+      initialData={initialData}
+    />
+  );
+}
+
+function CollectionForm({
+  onClose,
+  onSubmit,
+  editMode = false,
+  initialData,
+}: CollectionFormProps) {
+  const editingData = editMode ? initialData : undefined;
+  const [name, setName] = useState(() => editingData?.name ?? '');
+  const [selectedIcon, setSelectedIcon] = useState(() => initialIcon(editingData));
+  const [selectedColor, setSelectedColor] = useState(() => initialColor(editingData));
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
