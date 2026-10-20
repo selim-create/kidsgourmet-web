@@ -21,8 +21,8 @@ export default function ProfileSettingsPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [parentRole, setParentRole] = useState<string>("");
-  const [gender, setGender] = useState<string>("");
+  const [parentRole, setParentRole] = useState<NonNullable<User['parent_role']> | ''>('');
+  const [gender, setGender] = useState<NonNullable<User['gender']> | ''>('');
   const [birthDate, setBirthDate] = useState("");
   const [avatarId, setAvatarId] = useState<number | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string>("");
@@ -183,8 +183,8 @@ export default function ProfileSettingsPage() {
         name: string;
         email: string;
         password?: string;
-        parent_role?: string;
-        gender?: string;
+        parent_role?: User['parent_role'];
+        gender?: User['gender'];
         birth_date?: string;
         avatar_id?: number;
       }
@@ -200,8 +200,7 @@ export default function ProfileSettingsPage() {
       if (birthDate) updateData.birth_date = birthDate;
       if (avatarId) updateData.avatar_id = avatarId;
 
-      // Cast to the service's expected type
-      await userService.updateProfile(updateData as any);
+      await userService.updateProfile(updateData);
       toast.success('Profil bilgileri güncellendi');
       await refreshUser();
       setPassword(''); // Clear password field
@@ -468,7 +467,7 @@ export default function ProfileSettingsPage() {
                             <div>
                               <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Ebeveyn Rolü</label>
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                {['Anne', 'Baba', 'Bakıcı', 'Diğer'].map((role) => (
+                                {(['Anne', 'Baba', 'Bakıcı', 'Diğer'] as const).map((role) => (
                                   <button
                                     key={role}
                                     type="button"
@@ -491,7 +490,7 @@ export default function ProfileSettingsPage() {
                                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Cinsiyet</label>
                                 <select
                                   value={gender}
-                                  onChange={(e) => setGender(e.target.value)}
+                                  onChange={(e) => setGender(e.target.value as NonNullable<User['gender']> | '')}
                                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-slate-800 font-medium focus:outline-none focus:border-orange-500 transition-colors"
                                 >
                                   <option value="">Seçiniz</option>
