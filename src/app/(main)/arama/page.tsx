@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense, useEffect, useCallback } from 'react';
+import React, { useState, Suspense, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link'; 
 import { searchService, SearchResponse } from '@/services/search-service';
@@ -32,11 +32,23 @@ function SearchContent() {
   const query = searchParams.get('q') || "";
   const ageParam = searchParams.get('age') || "";
   
-  const [searchData, setSearchData] = useState<SearchResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(query);
+  // Keep each response paired with the URL and filter used to fetch it.
+  const [searchResult, setSearchResult] = useState<{
+    key: string;
+    data: SearchResponse | null;
+  }>({ key: '', data: null });
   const [activeTab, setActiveTab] = useState("all");
-  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>([]);
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState<string[]>(
+    () => ageParam ? [ageParam] : []
+  );
+  const [previousAgeParam, setPreviousAgeParam] = useState(ageParam);
+
+  // URL changes should update the filter before displaying or fetching results.
+  // User-selected checkbox values remain untouched while the URL is unchanged.
+  if (ageParam !== previousAgeParam) {
+    setPreviousAgeParam(ageParam);
+    setSelectedAgeGroups(ageParam ? [ageParam] : []);
+  }
   
   // Select three distinct tools from the query, consistently across SSR and hydration.
   const toolOffset = Array.from(query).reduce(
@@ -50,56 +62,36 @@ function SearchContent() {
   
   const { ageGroups } = useAgeGroups();
 
-  // Initialize age groups from URL parameter
+  const ageGroupKey = selectedAgeGroups.join(',');
+  const requestKey = JSON.stringify([query, ageGroupKey]);
+  const searchData = searchResult.key === requestKey ? searchResult.data : null;
+  const loading = Boolean(query.trim()) && searchResult.key !== requestKey;
+
+  // React state only changes when a network request settles, not synchronously
+  // from this effect. Outdated responses cannot replace newer search results.
   useEffect(() => {
-    if (ageParam) {
-      setSelectedAgeGroups([ageParam]);
-    }
-  }, [ageParam]);
+    if (!query.trim()) return;
 
-  // Perform search
-  const performSearch = useCallback(async (searchQuery: string, ageGroup?: string) => {
-    if (!searchQuery.trim()) {
-      setSearchData(null);
-      return;
-    }
-    
-    setLoading(true);
-    try {
-      const result = await searchService.search({
-        q: searchQuery,
-        type: 'all',
-        age_group: ageGroup,
-        per_page: 50,
-      });
-      setSearchData(result);
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    let cancelled = false;
+    void searchService.search({
+      q: query,
+      type: 'all',
+      age_group: ageGroupKey || undefined,
+      per_page: 50,
+    }).then(
+      (result) => {
+        if (!cancelled) setSearchResult({ key: requestKey, data: result });
+      },
+      (error) => {
+        console.error('Search error:', error);
+        if (!cancelled) setSearchResult({ key: requestKey, data: null });
+      }
+    );
 
-  // Effect to perform search when URL or age groups change
-  useEffect(() => {
-    if (query) {
-      setSearchTerm(query);
-      performSearch(query, selectedAgeGroups.length > 0 ? selectedAgeGroups.join(',') : undefined);
-    }
-  }, [query, selectedAgeGroups, performSearch]);
-
-  // Debounced search handler
-  useEffect(() => {
-    if (!searchTerm) return;
-    
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams();
-      params.set('q', searchTerm);
-      router.push(`/arama?${params.toString()}`);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm, router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [query, ageGroupKey, requestKey]);
 
   // Dynamic tabs based on counts
   const tabs = searchData ? [
@@ -445,9 +437,6 @@ function SearchContent() {
                             <button
                                 onClick={() => {
                                     setSelectedAgeGroups([]);
-                                    if (query) {
-                                        performSearch(query);
-                                    }
                                 }}
                                 className="text-xs text-orange-500 hover:text-orange-600 font-bold"
                             >
