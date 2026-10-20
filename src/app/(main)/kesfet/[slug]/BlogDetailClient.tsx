@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { selectStablePromoTools } from '@/lib/stable-promo-tools';
 import Link from "next/link";
 import { blogService, BlogPost } from '@/services/blog-service';
 import { recipeService } from '@/services/recipe-service';
@@ -61,14 +62,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   }>>([]);
   const [activeHeading, setActiveHeading] = useState<string>('');
   
-  // Sidebar Tools State - Hydration safe random selection
-  const [sidebarTools, setSidebarTools] = useState<typeof ALL_TOOLS>([]);
+  // Same article / recipe / ingredient always shows the same four tools.
+  const sidebarTools = selectStablePromoTools(ALL_TOOLS, slug);
 
-  useEffect(() => {
-    // Sayfa yüklendiğinde 16 araçtan rastgele 4 tanesini seç
-    const shuffled = [...ALL_TOOLS].sort(() => 0.5 - Math.random());
-    setSidebarTools(shuffled.slice(0, 4));
-  }, []);
 
   // Favorites hook
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -963,17 +959,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                             Faydalı Araçlar
                           </h3>
                           <div className="space-y-2">
-                            {/* Loading State veya Araç Listesi */}
-                            {sidebarTools.length === 0 ? (
-                              // Skeleton Loading
-                              [1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 animate-pulse">
-                                  <div className="w-10 h-10 bg-gray-200 rounded-xl"></div>
-                                  <div className="h-4 bg-gray-200 rounded w-24"></div>
-                                </div>
-                              ))
-                            ) : (
-                              sidebarTools.map((tool) => (
+                            {sidebarTools.map((tool) => (
                                 <Link
                                   key={tool.path}
                                   href={tool.path}
@@ -987,8 +973,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                                   </span>
                                   <i className="fa-solid fa-chevron-right text-gray-300 ml-auto text-xs"></i>
                                 </Link>
-                              ))
-                            )}
+                              ))}
                           </div>
                         </div>
                         
