@@ -24,10 +24,8 @@ interface WordPressRecipeTerm {
   age_group_meta?: { color_code?: string };
 }
 
-/** Shape of the two list-style custom API responses; raw entries are normalized below. */
 /** Shared wire shape for KG custom API and WordPress REST recipe payloads.
- * Legacy ingredient/instruction entries remain unknown; their existing runtime
- * normalization is intentionally not changed in this PR.
+ * Legacy ingredient/instruction entries remain unknown until checked at runtime.
  */
 type RenderedRecipeText = string | { rendered: string };
 type RawCrossSell = Partial<CrossSellInfo>;
@@ -138,30 +136,54 @@ const transformWPRecipeToCard = (wp: RawRecipeEntry): RecipeCard => ({
   is_featured: wp.meta?._kg_is_featured === '1',
 });
 
+// Legacy WP meta may contain objects or plain-text entries.
+// Narrow unknown fields before reading them, and preserve both accepted formats.
+const isRecipeFieldRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const recipeFieldText = (value: unknown): string =>
+  typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+
+const normalizeWPIngredient = (value: unknown, index: number): Recipe['ingredients'][number] => {
+  const fields: Record<string, unknown> = isRecipeFieldRecord(value) ? value : {};
+  const name = recipeFieldText(fields.name);
+  const text = recipeFieldText(fields.text);
+  const fallback = recipeFieldText(value);
+
+  return {
+    id: typeof fields.id === 'number' ? fields.id : index,
+    name: name || text || fallback,
+    amount: recipeFieldText(fields.amount),
+    unit: recipeFieldText(fields.unit),
+    ingredient_id: typeof fields.ingredient_id === 'number' && fields.ingredient_id !== 0
+      ? fields.ingredient_id
+      : null,
+    text: text || name || fallback,
+  };
+};
+
+const normalizeWPInstruction = (value: unknown, index: number): Recipe['instructions'][number] => {
+  const fields: Record<string, unknown> = isRecipeFieldRecord(value) ? value : {};
+  return {
+    id: typeof fields.id === 'number' ? fields.id : index + 1,
+    title: recipeFieldText(fields.title) || `Adım ${index + 1}`,
+    text: recipeFieldText(fields.text) || recipeFieldText(value),
+    tip: recipeFieldText(fields.tip),
+  };
+};
+
 // Transform function for WordPress REST API format to full Recipe
 const transformWPRecipeToFull = (wp: RawRecipeEntry): Recipe => {
   // Ingredients transform - yeni format desteği
   const rawIngredients = wp.ingredients || wp.meta?._kg_ingredients || [];
-  const ingredients = Array.isArray(rawIngredients) 
-    ? rawIngredients.map((ing: any, index: number) => ({
-        id: ing.id ?? index,
-        name: ing.name || ing.text || ing,
-        amount: ing.amount || '',
-        unit: ing.unit || '',
-        ingredient_id: ing.ingredient_id || null,
-        text: ing.text || ing.name || ing, // Backward compatibility
-      }))
+  const ingredients = Array.isArray(rawIngredients)
+    ? rawIngredients.map(normalizeWPIngredient)
     : [];
 
   // Instructions transform - yeni format desteği
   const rawInstructions = wp.instructions || wp.meta?._kg_instructions || [];
   const instructions = Array.isArray(rawInstructions)
-    ? rawInstructions.map((inst: any, index: number) => ({
-        id: inst.id ?? index + 1,
-        title: inst.title || `Adım ${index + 1}`,
-        text: inst.text || inst,
-        tip: inst.tip || '',
-      }))
+    ? rawInstructions.map(normalizeWPInstruction)
     : [];
 
   // Cross-sell transform - hibrit sistem desteği
