@@ -50,19 +50,28 @@ const getClientSnapshot = () => true;
 const getServerSnapshot = () => false;
 
 export default function HipostaNewsletterModal({ open, options, selected, onClose, onApply }: Props) {
-  const [draft, setDraft] = useState<string[]>(selected);
-  const [query, setQuery] = useState('');
   const mounted = useSyncExternalStore(subscribeNoop, getClientSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    if (open) {
-      setDraft(selected);
-      setQuery('');
-    }
-  }, [open, selected]);
+  // Unmounting resets draft and search when the modal closes. A changed set of
+  // selected newsletters also starts a fresh draft while the modal is open.
+  if (!open || !mounted || typeof document === 'undefined') return null;
+
+  return (
+    <HipostaNewsletterDialog
+      key={JSON.stringify(selected)}
+      options={options}
+      selected={selected}
+      onClose={onClose}
+      onApply={onApply}
+    />
+  );
+}
+
+function HipostaNewsletterDialog({ options, selected, onClose, onApply }: Omit<Props, 'open'>) {
+  const [draft, setDraft] = useState<string[]>(() => [...selected]);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
-    if (!open) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     const handleKey = (event: KeyboardEvent) => {
@@ -73,7 +82,7 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKey);
     };
-  }, [open, onClose]);
+  }, [onClose]);
 
   const groups = useMemo<PublicationGroup[]>(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase('tr-TR');
@@ -99,8 +108,6 @@ export default function HipostaNewsletterModal({ open, options, selected, onClos
 
     return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'tr'));
   }, [options, query]);
-
-  if (!open || !mounted || typeof document === 'undefined') return null;
 
   const toggle = (slug: string) => {
     setDraft((current) => current.includes(slug)
