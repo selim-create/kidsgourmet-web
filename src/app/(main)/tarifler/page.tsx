@@ -44,6 +44,25 @@ interface FilterState {
   expertApproved: boolean;
 }
 
+const URL_FILTER_KEYS = ['category', 'diet-type', 'meal-type', 'age-group', 'ingredient'] as const;
+
+function filtersFromUrl(params: { get: (name: string) => string | null }): FilterState {
+  const category = params.get('category');
+  const dietType = params.get('diet-type');
+  const mealType = params.get('meal-type');
+  const ageGroup = params.get('age-group');
+  const ingredient = params.get('ingredient');
+
+  return {
+    ageGroups: ageGroup ? [ageGroup] : [],
+    mealTypes: mealType ? [mealType] : [],
+    dietTypes: dietType ? [dietType] : [],
+    specialConditions: category ? [category] : [],
+    ingredientSearch: ingredient || '',
+    expertApproved: false,
+  };
+}
+
 // Age Group with Display Label
 interface AgeGroupWithLabel {
   id: number;
@@ -86,39 +105,21 @@ function RecipesPageContent() {
   const hasFirstAd = hasSlotForPlacement('sidebar-top');
   const hasSecondAd = hasSlotForPlacement('content-in-feed');
   
-  // Filtre state
-  const [filters, setFilters] = useState<FilterState>({
-    ageGroups: [],
-    mealTypes: [],
-    dietTypes: [],
-    specialConditions: [],
-    ingredientSearch: '',
-    expertApproved: false,
-  });
+  // Initialize URL filters before the first fetch, without a hydration-time effect.
+  const urlFilterValues = URL_FILTER_KEYS.map(key => searchParams.get(key) || '');
+  const urlFilterKey = JSON.stringify(urlFilterValues);
+  const [previousUrlFilterKey, setPreviousUrlFilterKey] = useState(urlFilterKey);
+  const [filters, setFilters] = useState<FilterState>(() => filtersFromUrl(searchParams));
 
-  // Initialize filters from URL parameters
-  useEffect(() => {
-    const category = searchParams.get('category');
-    const dietType = searchParams.get('diet-type');
-    const mealType = searchParams.get('meal-type');
-    const ageGroup = searchParams.get('age-group');
-    const ingredient = searchParams.get('ingredient');
-
-    const newFilters: FilterState = {
-      ageGroups: ageGroup ? [ageGroup] : [],
-      mealTypes: mealType ? [mealType] : [],
-      dietTypes: dietType ? [dietType] : [],
-      specialConditions: category ? [category] : [],
-      ingredientSearch: ingredient || '',
-      expertApproved: false,
-    };
-
-    // URL parametreleri varsa filtreleri güncelle ve fetch tetikle
-    if (category || dietType || mealType || ageGroup || ingredient) {
-      setFilters(newFilters);
-      setCurrentPage(1); // Sayfa 1'e reset et
+  // Keep URL-driven navigation in sync without overwriting locally selected filters.
+  // As before, removing every URL filter leaves user-selected filters untouched.
+  if (previousUrlFilterKey !== urlFilterKey) {
+    setPreviousUrlFilterKey(urlFilterKey);
+    if (urlFilterValues.some(Boolean)) {
+      setFilters(filtersFromUrl(searchParams));
+      setCurrentPage(1);
     }
-  }, [searchParams]);
+  }
   
   // Tarifleri getir
   const fetchRecipes = useCallback(async (page: number, currentFilters: FilterState, orderBy: string) => {
