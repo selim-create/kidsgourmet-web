@@ -58,17 +58,15 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
   
   const [categoryInfo, setCategoryInfo] = useState<{ id: number, name: string, slug: string, description?: string } | null>(null);
   
-  // Random tool state (Hydration safe)
-  const [randomTool, setRandomTool] = useState<typeof ALL_TOOLS[0] | null>(null);
-  
+  // Stable category-specific tool selection avoids effect-driven state and hydration differences.
+  const toolIndex = Array.from(slug).reduce(
+    (hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0,
+    0
+  ) % ALL_TOOLS.length;
+  const categoryTool = ALL_TOOLS[toolIndex];
+
   // Random expert selection
   const [randomExpert, setRandomExpert] = useState<ExpertPublicProfile | null>(null);
-
-  useEffect(() => {
-    // Sayfa yüklendiğinde rastgele bir araç seç
-    const randomIndex = Math.floor(Math.random() * ALL_TOOLS.length);
-    setRandomTool(ALL_TOOLS[randomIndex]);
-  }, []);
 
   useEffect(() => {
     async function fetchData() {
@@ -195,19 +193,17 @@ export default function BlogCategoryPage({ params }: { params: Promise<{ slug: s
                         </p>
                     </div>
 
-                    {/* Category Specific Tool Promo (Dynamic Random Tool) */}
-                    {randomTool && (
-                        <Link href={randomTool.path} className="hidden md:block w-80 bg-white p-5 rounded-3xl shadow-lg border border-green-100 transform rotate-2 hover:rotate-0 transition-transform duration-300 cursor-pointer group">
+                    {/* Category-specific tool promo */}
+                    <Link href={categoryTool.path} className="hidden md:block w-80 bg-white p-5 rounded-3xl shadow-lg border border-green-100 transform rotate-2 hover:rotate-0 transition-transform duration-300 cursor-pointer group">
                             <div className="flex items-start justify-between mb-3">
-                                <div className={`w-10 h-10 ${randomTool.bg} ${randomTool.color} rounded-full flex items-center justify-center`}>
-                                    <i className={randomTool.icon}></i>
+                                <div className={`w-10 h-10 ${categoryTool.bg} ${categoryTool.color} rounded-full flex items-center justify-center`}>
+                                    <i className={categoryTool.icon}></i>
                                 </div>
                                 <i className="fa-solid fa-arrow-right text-gray-300 group-hover:text-orange-500 transition-colors"></i>
                             </div>
-                            <h3 className="font-bold text-slate-800 text-lg mb-1">{randomTool.name}</h3>
+                            <h3 className="font-bold text-slate-800 text-lg mb-1">{categoryTool.name}</h3>
                             <p className="text-sm text-gray-500">Bebeğinizin sağlığı ve gelişimi için kişiselleştirilmiş öneriler ve hesaplamalar.</p>
                         </Link>
-                    )}
 
                 </div>
             </div>
