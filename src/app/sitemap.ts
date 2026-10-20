@@ -49,9 +49,11 @@ function entry(path: string, lastModified: Date = new Date()): MetadataRoute.Sit
   };
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const urls: MetadataRoute.Sitemap = staticPaths.map((path) => entry(path));
-
+// Keep the existing source-specific error handling, but collect in independent
+// groups so an upstream delay does not stall every other sitemap source.
+// Only two paginated collectors run at once to limit WordPress origin pressure.
+async function collectBlogEntries(): Promise<MetadataRoute.Sitemap> {
+  const urls: MetadataRoute.Sitemap = [];
   try {
     for (let page = 1; page <= 20; page++) {
       const response = await blogService.getSitemapPosts(page, 100);
@@ -63,7 +65,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     console.error('Blog sitemap generation failed:', error);
   }
+  return urls;
+}
 
+async function collectRecipeEntries(): Promise<MetadataRoute.Sitemap> {
+  const urls: MetadataRoute.Sitemap = [];
   try {
     for (let page = 1; page <= 20; page++) {
       const response = await recipeService.getAll({ page, perPage: 100 });
@@ -75,7 +81,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     console.error('Recipe sitemap generation failed:', error);
   }
+  return urls;
+}
 
+async function collectIngredientEntries(): Promise<MetadataRoute.Sitemap> {
+  const urls: MetadataRoute.Sitemap = [];
   try {
     for (let page = 1; page <= 20; page++) {
       const response = await ingredientService.getAll({ page, perPage: 100 });
@@ -89,7 +99,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     console.error('Ingredient sitemap generation failed:', error);
   }
+  return urls;
+}
 
+async function collectCategoryEntries(): Promise<MetadataRoute.Sitemap> {
+  const urls: MetadataRoute.Sitemap = [];
   try {
     const categories = await blogService.getCategories();
     for (const category of categories ?? []) {
@@ -100,6 +114,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch (error) {
     console.error('Category sitemap generation failed:', error);
   }
+  return urls;
+}
+
+async function measureSitemapSource(
+  source: string,
+  loader: () => Promise<MetadataRoute.Sitemap>
+): Promise<MetadataRoute.Sitemap> {
+  const started = Date.now();
+  const urls = await loader();
+  console.info(`[sitemap] ${source}: ${urls.length} URLs, ${Date.now() - started} ms`);
+  return urls;
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Two collectors run concurrently; the output ordering remains unchanged.
+  const [blogs, recipes] = await Promise.all([
+    measureSitemapSource('blog', collectBlogEntries),
+    measureSitemapSource('recipe', collectRecipeEntries),
+  ]);
+  const [ingredients, categories] = await Promise.all([
+    measureSitemapSource('ingredient', collectIngredientEntries),
+    measureSitemapSource('category', collectCategoryEntries),
+  ]);
+
+  const urls: MetadataRoute.Sitemap = [
+    ...staticPaths.map((path) => entry(path)),
+    ...blogs,
+    ...recipes,
+    ...ingredients,
+    ...categories,
+  ];
 
   return Array.from(new Map(urls.map((item) => [item.url, item])).values());
 }
